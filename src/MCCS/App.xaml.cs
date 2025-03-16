@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
-using OpenTK;
-using System.Configuration;
-using System.Data;
+﻿using MCCS.ViewModels.Pages;
+using MCCS.Views;
+using MCCS.Views.Pages;
+using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Windows;
 
@@ -28,6 +28,7 @@ namespace MCCS
 
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
+            containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
         }
 
         protected override void OnStartup(StartupEventArgs e)
