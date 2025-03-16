@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:MCCS.Languages"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <!--  App  -->
+    <system:String x:Key="AppName">基于分布式多通道控制系统</system:String>
+</ResourceDictionary>
