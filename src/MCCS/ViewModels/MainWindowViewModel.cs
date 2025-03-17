@@ -1,7 +1,8 @@
 ﻿using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
+using MCCS.Core.Repositories;
 using MCCS.Events;
-using MCCS.ViewModels.Pages;
+using MCCS.ViewModels.Others;
 using System.Windows.Controls;
 
 namespace MCCS.ViewModels
@@ -9,8 +10,22 @@ namespace MCCS.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly IRegionManager _regionManager;
+        private readonly ISystemMenuRepository _systemMenuRepository;
 
         #region 页面属性
+        private List<MainTabsViewModel> _tabs;
+        public List<MainTabsViewModel> Tabs { get => _tabs; set { SetProperty(ref _tabs, value); } }
+
+        private HamburgerMenuItem _selectedMenuItem;
+        public HamburgerMenuItem SelectedMenuItem
+        {
+            get => _selectedMenuItem;
+            set 
+            {
+                SetProperty(ref _selectedMenuItem, value);
+            }
+        }
+
         private List<HamburgerMenuIconItem> _menus;
         public List<HamburgerMenuIconItem> Menus
         {
@@ -40,30 +55,29 @@ namespace MCCS.ViewModels
         }
         #endregion
 
-        #region 命令声明 
-
-        public DelegateCommand<object> HomePageLoadedCommand => new(ExcuateHomePageLoadedCommand);
+        #region 命令声明
+        public DelegateCommand<object> MainRegionLoadedCommand => new(ExcuateMainRegionLoadedCommand);
+        public DelegateCommand<object> JumpChildTabCommand => new(ExcuateJumpChildTabCommand);
         public DelegateCommand<object> JumpToCommand => new(ExecuteJumpToCommand);
-
         public DelegateCommand<Flyout> OpenTestFlyoutCommand => new(f => f!.SetCurrentValue(Flyout.IsOpenProperty, true), f => f is not null);
         #endregion
-        private void ExcuateHomePageLoadedCommand(object parameter) 
+
+        #region 命令执行
+        private void ExcuateMainRegionLoadedCommand(object parameter) 
         {
-            var contentControl = parameter as ContentControl;
-            string regionName = contentControl.GetValue(RegionManager.RegionNameProperty) as string;
-            if (!string.IsNullOrEmpty(regionName))
+            if (SelectedMenuItem != null)
             {
-                if (_regionManager.Regions.ContainsRegionWithName(regionName) == false)
-                {
-                    RegionManager.SetRegionManager(contentControl, _regionManager);
-                }
+                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
             }
+        }
+        private void ExcuateJumpChildTabCommand(object parameter)
+        {
+
         }
         private void ExecuteJumpToCommand(object parameter)
         {
             if (parameter is not HamburgerMenuIconItem) return;
             var item = parameter as HamburgerMenuIconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
-            var i = _regionManager.Regions[GlobalConstant.MainContentRegionNam];
             _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
         }
 
@@ -89,51 +103,34 @@ namespace MCCS.ViewModels
                 //    break;
             }
         }
+        #endregion
 
-        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator) : base(eventAggregator)
+
+
+        public MainWindowViewModel(
+            ISystemMenuRepository systemMenuRepository,
+            IRegionManager regionManager, 
+            IEventAggregator eventAggregator) : base(eventAggregator)
         {
             eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             _regionManager = regionManager;
-            _menus =
-            [
-                new HamburgerMenuIconItem()
+            var menus = systemMenuRepository.GetChildMenusById(0);
+            _menus = menus.Select(s =>
+            {
+                if (!Enum.TryParse(s.Icon, out PackIconKind result))
                 {
-                    Icon = new PackIcon () { Kind = PackIconKind.Home },
-                    Label = "主页",
-                    Tag = HomePageViewModel.Tag
-                },
-                //new HamburgerMenuIconItem()
-                //{
-                //    Icon = new PackIconLucide () { Kind = PackIconLucideKind.Shield },
-                //    Label = "保护",
-                //    Tag = ViewMonitorViewModel.Tag
-                //},
-                //new HamburgerMenuIconItem()
-                //{
-                //    Icon = new PackIconFontAwesome () { Kind = PackIconFontAwesomeKind.DesktopSolid },
-                //    Label = "监控",
-                //    Tag = ViewMonitorViewModel.Tag
-                //},
-                //new HamburgerMenuIconItem()
-                //{
-                //    Icon = new PackIconFontAwesome() { Kind = PackIconFontAwesomeKind.DatabaseSolid },
-                //    Label = "数据",
-                //    Tag = ViewDataViewModel.Tag
-                //},
-                //new HamburgerMenuIconItem()
-                //{
-                //    Icon = new PackIconFontAwesome () { Kind = PackIconFontAwesomeKind.FlaskVialSolid },
-                //    Label = "试验",
-                //    Tag = ViewTestViewModel.Tag
-                //}
-            ];
-            _optionsMenus = [
-                //new HamburgerMenuIconItem()
-                //{
-                //    Icon = new PackIconCircumIcons() { Kind = PackIconCircumIconsKind.Settings},
-                //    Label = "设置"
-                //}
-            ];
+                    result = PackIconKind.Home;
+                }
+                return new HamburgerMenuIconItem
+                {
+                    Icon = new PackIcon() { Kind = result },
+                    Label = s.Name,
+                    Tag = s.Key
+                };
+            }).ToList();
+            // 默认选中第一个项，并执行导航
+            SelectedMenuItem = _menus.FirstOrDefault(); 
+            _optionsMenus = [];
         }
     }
 }

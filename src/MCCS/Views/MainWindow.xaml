@@ -111,69 +111,75 @@
             </mah:Flyout>
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
-    <mah:HamburgerMenu x:Name="HamburgerMenuControl"  
-          DisplayMode="CompactInline"
-          IsPaneOpen="False"
-          ItemCommand="{Binding JumpToCommand}"
-          ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
-          ItemTemplate="{StaticResource MenuItemTemplate}"
-          ItemsSource="{Binding Menus}"
-          OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-          OptionsItemsSource="{Binding OptionsMenus}">
-        <!--<ContentControl prism:RegionManager.RegionName="ContentRegion" />--> 
-        <mah:HamburgerMenu.ContentTemplate>
-            <DataTemplate>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="80" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TabControl
-                        Grid.Row="0"
-                        HorizontalContentAlignment="Left"
-                        ItemsSource="{Binding CustomTabs}"
-                        SelectedItem="{Binding SelectedTab}">
-                        <TabControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding CustomHeader}" />
-                                    <Button Command="{Binding CloseCommand}" CommandParameter="{Binding}">
-                                        <Button.Template>
-                                            <ControlTemplate>
-                                                <materialDesign:PackIcon
-                                                    Kind="Close"
-                                                    Foreground="Red"
-                                                    Background="Transparent" />
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
-                                </StackPanel>
-                            </DataTemplate>
-                        </TabControl.ItemTemplate>
-                        <TabControl.ContentTemplate>
-                            <DataTemplate DataType="domain:CustomTab">
-                                <TextBlock
-                                    Margin="10"
-                                    FontSize="18"
-                                    Text="{Binding CustomContent}" />
-                            </DataTemplate>
-                        </TabControl.ContentTemplate>
-                    </TabControl>
-                    <mah:TransitioningContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionNam}">
-                        <mah:TransitioningContentControl.Resources>
-                            <DataTemplate DataType="{x:Type mah:HamburgerMenuGlyphItem}">
-                            </DataTemplate>
-                            <DataTemplate DataType="{x:Type mah:HamburgerMenuIconItem}">
-                                <ContentControl 
-                                        
-                                        Focusable="True"
-                                        IsTabStop="False" />
-                            </DataTemplate>
-                        </mah:TransitioningContentControl.Resources>
-                    </mah:TransitioningContentControl>
-                </Grid>
-            </DataTemplate>
-        </mah:HamburgerMenu.ContentTemplate>
-        
-    </mah:HamburgerMenu>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <mah:MetroContentControl />
+        <mah:HamburgerMenu 
+              Grid.Row="0"
+              Grid.Column="0" 
+              x:Name="HamburgerMenuControl" 
+              DisplayMode="CompactInline"
+              HamburgerButtonClick="HamburgerMenuControl_HamburgerButtonClick"
+              IsPaneOpen="False"
+              SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
+              ItemCommand="{Binding JumpToCommand}"
+              ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
+              ItemTemplate="{StaticResource MenuItemTemplate}"
+              ItemsSource="{Binding Menus}"
+              OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+              OptionsItemsSource="{Binding OptionsMenus}">
+        </mah:HamburgerMenu>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <materialDesign:ColorZone
+                Grid.Row="0"
+                Mode="PrimaryMid">
+                <ItemsControl Margin="2" ItemsSource="{Binding Tabs}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton 
+                                Margin="4"
+                                IsEnabled="{Binding IsEnable, Mode=OneWay}" 
+                                Style="{StaticResource MaterialDesignTabRadioButton}"
+                                Content="{Binding Content, Mode=OneWay}"
+                                Tag="{Binding Id, Mode=OneWay}"
+                                Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding Id}">
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel VerticalAlignment="Center"  Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </materialDesign:ColorZone>
+            <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionNam}" 
+                Focusable="True" IsTabStop="False">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="Loaded">
+                        <i:InvokeCommandAction Command="{Binding MainRegionLoadedCommand}" CommandParameter="{Binding ElementName=TestDesignCanvas}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </ContentControl>
+        </Grid>
+        <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <StatusBarItem>Application</StatusBarItem>
+            <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
+            <StatusBarItem>Time: 2025-02-26</StatusBarItem>
+            <StatusBarItem Content="{DynamicResource Company}" />
+        </StatusBar>
+    </Grid>
 </mah:MetroWindow>
