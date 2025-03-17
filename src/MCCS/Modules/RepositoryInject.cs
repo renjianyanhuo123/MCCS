@@ -19,6 +19,7 @@ namespace MCCS.Modules
                 .Build();
             containerRegistry.RegisterInstance(freesql);
             containerRegistry.Register<ISystemMenuRepository, SystemMenuRepository>();
+            containerRegistry.Register<ITestInfoRepository, TestInfoRepository>();
             SeedData.InitialData(freesql);
         }
     }

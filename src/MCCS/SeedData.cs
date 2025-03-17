@@ -1,6 +1,7 @@
 ﻿using MCCS.Core.Models.SystemSetting;
+using MCCS.Core.Models.TestInfo;
+using MCCS.Models;
 using MCCS.ViewModels.Pages;
-using System.Diagnostics;
 
 namespace MCCS
 {
@@ -21,8 +22,37 @@ namespace MCCS
                     }
                 };
                 freeSql.Insert(entities).ExecuteAffrows();
-                Debug.WriteLine("初始化数据已插入");
+            }
+            if (!freeSql.Select<Test>().Any())
+            {
+                var entities = new List<Test>
+                {
+                    new()
+                    { 
+                        Code = "T00001",
+                        Name = "试验1",
+                        Person="张三",
+                        Standard = "ASTM",
+                        FilePath = "C:/1.db",
+                        Status = TestStatus.Success,
+                        StartTime = DateTime.Now,
+                        EndTime = DateTime.Now,
+                    },
+                    new()
+                    {
+                        Code = "T00002",
+                        Name = "试验2",
+                        Person="张三11",
+                        Standard = "ASTM",
+                        FilePath = "C:/1.db",
+                        Status = TestStatus.Processing,
+                        StartTime = DateTime.Now,
+                        EndTime = DateTime.Now,
+                    }
+                };
+                freeSql.Insert(entities).ExecuteAffrows();
             }
         }
+
     }
 }
