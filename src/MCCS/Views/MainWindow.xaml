@@ -148,7 +148,7 @@
                 <ItemsControl Margin="2" ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <StackPanel Orientation="Horizontal">
                                 <RadioButton 
                                     Margin="4"
                                     IsEnabled="{Binding IsEnable, Mode=OneWay}" 
@@ -171,7 +171,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                            </Grid>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemsPanel>
