@@ -27,6 +27,20 @@ namespace MCCS.ViewModels
                 SetProperty(ref _selectedMenuItem, value);
             }
         }
+        private MainTabsViewModel _selectedTabItem;
+        public MainTabsViewModel SelectedTabItem 
+        {
+            get => _selectedTabItem;
+            set 
+            {
+                if (value != _selectedTabItem) 
+                {
+                    foreach (var tab in _tabs) tab.IsChecked = tab.Id == value.Id;
+                    _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(value.Id, UriKind.Relative), NavigationCompleted);
+                    SetProperty(ref _selectedTabItem, value);
+                }
+            }
+        }
 
         private List<HamburgerMenuIconItem> _menus;
         public List<HamburgerMenuIconItem> Menus
@@ -62,9 +76,21 @@ namespace MCCS.ViewModels
         public DelegateCommand<object> JumpChildTabCommand => new(ExcuateJumpChildTabCommand);
         public DelegateCommand<object> JumpToCommand => new(ExecuteJumpToCommand);
         public DelegateCommand<Flyout> OpenTestFlyoutCommand => new(f => f!.SetCurrentValue(Flyout.IsOpenProperty, true), f => f is not null);
+        public DelegateCommand<string> CloseTabCommand => new(ExcuateCloseTabCommand);
         #endregion
 
         #region 命令执行
+        private void ExcuateCloseTabCommand(string id) 
+        {
+            var delItem = _tabs.First(x => x.Id == id);
+            if (SelectedTabItem.Id == id)
+            {
+                // 默认跳转首页
+                SelectedTabItem = _tabs.First(c => c.Id == HomePageViewModel.Tag);
+            }
+            _tabs.Remove(delItem); 
+        }
+
         private void ExcuateMainRegionLoadedCommand(object parameter) 
         {
             if (SelectedMenuItem != null)
@@ -72,9 +98,9 @@ namespace MCCS.ViewModels
                 _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
             }
         }
-        private void ExcuateJumpChildTabCommand(object parameter)
+        private void ExcuateJumpChildTabCommand(object param)
         {
-
+            SelectedTabItem = _tabs.First(c => c.Id == param.ToString());
         }
         private void ExecuteJumpToCommand(object parameter)
         {
@@ -85,11 +111,6 @@ namespace MCCS.ViewModels
 
         private void NavigationCompleted(NavigationResult result)
         {
-            _tabs.Clear();
-            _tabs.Add(new MainTabsViewModel 
-            {
-
-            });
         }
 
         /// <summary>
@@ -113,13 +134,19 @@ namespace MCCS.ViewModels
 
         private void OnOpenTabPage(OpenTestOperationEventParam param) 
         {
-            Tabs.Add(new MainTabsViewModel 
+            MainTabsViewModel? addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
+            if (addItem == null) 
             {
-                Id = param.TabId,
-                Content = param.TestName,
-                IsEnableClose = Visibility.Visible,
-                IsEnable = true
-            });
+                addItem = new MainTabsViewModel
+                {
+                    Id = param.TabId,
+                    Content = param.TestName,
+                    IsEnableClose = Visibility.Visible,
+                    IsEnable = true
+                };
+                _tabs.Add(addItem);
+            }
+            SelectedTabItem = addItem;
         }
         #endregion
 
@@ -153,10 +180,12 @@ namespace MCCS.ViewModels
                     Id = HomePageViewModel.Tag,
                     Content = "主页",
                     IsEnable = true,
+                    IsChecked = true,
                     IsEnableClose = Visibility.Collapsed,
                 }
             ];
             // 默认选中第一个项，并执行导航
+            SelectedTabItem = _tabs.FirstOrDefault();
             SelectedMenuItem = _menus.FirstOrDefault(); 
             _optionsMenus = [];
         }

@@ -142,45 +142,60 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <materialDesign:ColorZone
-                Grid.Row="0"
-                Mode="PrimaryMid">
-                <ItemsControl Margin="2" ItemsSource="{Binding Tabs}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton 
-                                    Margin="4"
-                                    IsEnabled="{Binding IsEnable, Mode=OneWay}" 
-                                    Style="{StaticResource MaterialDesignTabRadioButton}"
-                                    Content="{Binding Content, Mode=OneWay}"
-                                    Tag="{Binding Id, Mode=OneWay}"
-                                    Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+            <ListBox Grid.Row="0" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTabItem}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border Name="Border" Background="Transparent" Padding="10">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <!-- 这里去除了 IsSelected 触发的背景变化 -->
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                            <RadioButton
+                                GroupName="TabChange"
+                                IsChecked="{Binding IsChecked}"
+                                IsEnabled="{Binding IsEnable}" 
+                                Style="{StaticResource MaterialDesignTabRadioButton}"
+                                Content="{Binding Content}"
+                                Tag="{Binding Id}"
+                                Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding Id}">
+                            </RadioButton>
+                            <Button Visibility="{Binding IsEnableClose}"
+                                    Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding Id}">
-                                </RadioButton>
-                                <Button
-                                    Visibility="{Binding IsEnableClose}"
-                                    Command="{Binding CloseCommand}"
-                                    CommandParameter="{Binding}">
-                                    <Button.Template>
-                                        <ControlTemplate>
-                                            <materialDesign:PackIcon
-                                                Kind="Close"
-                                                Foreground="Red"
-                                                Background="Transparent" />
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel VerticalAlignment="Center"  Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </materialDesign:ColorZone>
+                                <Button.Template>
+                                    <ControlTemplate>
+                                        <materialDesign:PackIcon
+                                            VerticalAlignment="Center"
+                                            Kind="Close"
+                                            Foreground="Red"
+                                            Background="Transparent" /> 
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel VerticalAlignment="Center"  Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
             <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionNam}" 
                 Focusable="True" IsTabStop="False">
                 <i:Interaction.Triggers>
