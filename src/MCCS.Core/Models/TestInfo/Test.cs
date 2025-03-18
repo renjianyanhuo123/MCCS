@@ -1,9 +1,6 @@
 ﻿using FreeSql.DataAnnotations;
 using MCCS.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
 
 namespace MCCS.Core.Models.TestInfo
 {
@@ -69,6 +66,7 @@ namespace MCCS.Core.Models.TestInfo
         /// <summary>
         /// 开始时间
         /// </summary>
+        [Column(IsNullable = true, MapType = typeof(string))]
         public DateTimeOffset? StartTime
         {
             get;
@@ -77,6 +75,7 @@ namespace MCCS.Core.Models.TestInfo
         /// <summary>
         /// 结束时间
         /// </summary>
+        [Column(IsNullable = true, MapType = typeof(string))]
         public DateTimeOffset? EndTime
         {
             get;

@@ -4,4 +4,19 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <!--  App  -->
     <system:String x:Key="AppName">基于分布式多通道控制系统</system:String>
+
+    <!--  HomePage  -->
+    <system:String x:Key="SearchName">请输入查询名称</system:String>
+    <system:String x:Key="TestCode">编号</system:String>
+    <system:String x:Key="TestName">名称</system:String>
+    <system:String x:Key="TestStandard">试样标准</system:String>
+    <system:String x:Key="TestPerson">操作人员</system:String>
+    <system:String x:Key="TestRemark">备注</system:String>
+    <system:String x:Key="TestFilePath">文件路径</system:String>
+    <system:String x:Key="TestStatus">试验状态</system:String>
+    <system:String x:Key="TestOperation">操作</system:String>
+    <system:String x:Key="TestStartTime">开始时间</system:String>
+    <system:String x:Key="TestEndTime">结束时间</system:String>
+    <system:String x:Key="TestProcessing">累计时长</system:String>
+    <system:String x:Key="TestCreateTime">创建时间</system:String>
 </ResourceDictionary>

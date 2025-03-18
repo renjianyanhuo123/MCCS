@@ -3,7 +3,9 @@ using MaterialDesignThemes.Wpf;
 using MCCS.Core.Repositories;
 using MCCS.Events;
 using MCCS.ViewModels.Others;
-using System.Windows.Controls;
+using MCCS.ViewModels.Pages;
+using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace MCCS.ViewModels
 {
@@ -13,8 +15,8 @@ namespace MCCS.ViewModels
         private readonly ISystemMenuRepository _systemMenuRepository;
 
         #region 页面属性
-        private List<MainTabsViewModel> _tabs;
-        public List<MainTabsViewModel> Tabs { get => _tabs; set { SetProperty(ref _tabs, value); } }
+        private ObservableCollection<MainTabsViewModel> _tabs;
+        public ObservableCollection<MainTabsViewModel> Tabs { get => _tabs; set { SetProperty(ref _tabs, value); } }
 
         private HamburgerMenuItem _selectedMenuItem;
         public HamburgerMenuItem SelectedMenuItem
@@ -83,6 +85,11 @@ namespace MCCS.ViewModels
 
         private void NavigationCompleted(NavigationResult result)
         {
+            _tabs.Clear();
+            _tabs.Add(new MainTabsViewModel 
+            {
+
+            });
         }
 
         /// <summary>
@@ -103,6 +110,17 @@ namespace MCCS.ViewModels
                 //    break;
             }
         }
+
+        private void OnOpenTabPage(OpenTestOperationEventParam param) 
+        {
+            Tabs.Add(new MainTabsViewModel 
+            {
+                Id = param.TabId,
+                Content = param.TestName,
+                IsEnableClose = Visibility.Visible,
+                IsEnable = true
+            });
+        }
         #endregion
 
 
@@ -113,6 +131,7 @@ namespace MCCS.ViewModels
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
             eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
+            eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
             _regionManager = regionManager;
             var menus = systemMenuRepository.GetChildMenusById(0);
             _menus = menus.Select(s =>
@@ -128,6 +147,15 @@ namespace MCCS.ViewModels
                     Tag = s.Key
                 };
             }).ToList();
+            _tabs = [
+                new()
+                {
+                    Id = HomePageViewModel.Tag,
+                    Content = "主页",
+                    IsEnable = true,
+                    IsEnableClose = Visibility.Collapsed,
+                }
+            ];
             // 默认选中第一个项，并执行导航
             SelectedMenuItem = _menus.FirstOrDefault(); 
             _optionsMenus = [];

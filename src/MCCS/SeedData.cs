@@ -34,9 +34,7 @@ namespace MCCS
                         Person="张三",
                         Standard = "ASTM",
                         FilePath = "C:/1.db",
-                        Status = TestStatus.Success,
-                        StartTime = DateTime.Now,
-                        EndTime = DateTime.Now,
+                        Status = TestStatus.Success
                     },
                     new()
                     {
@@ -45,9 +43,16 @@ namespace MCCS
                         Person="张三11",
                         Standard = "ASTM",
                         FilePath = "C:/1.db",
-                        Status = TestStatus.Processing,
-                        StartTime = DateTime.Now,
-                        EndTime = DateTime.Now,
+                        Status = TestStatus.Failed
+                    },
+                    new()
+                    {
+                        Code = "T00003",
+                        Name = "试验3",
+                        Person="张三11",
+                        Standard = "ASTM",
+                        FilePath = "C:/2.db",
+                        Status = TestStatus.Processing
                     }
                 };
                 freeSql.Insert(entities).ExecuteAffrows();

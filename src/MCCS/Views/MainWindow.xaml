@@ -148,15 +148,30 @@
                 <ItemsControl Margin="2" ItemsSource="{Binding Tabs}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <RadioButton 
-                                Margin="4"
-                                IsEnabled="{Binding IsEnable, Mode=OneWay}" 
-                                Style="{StaticResource MaterialDesignTabRadioButton}"
-                                Content="{Binding Content, Mode=OneWay}"
-                                Tag="{Binding Id, Mode=OneWay}"
-                                Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding Id}">
-                            </RadioButton>
+                            <Grid>
+                                <RadioButton 
+                                    Margin="4"
+                                    IsEnabled="{Binding IsEnable, Mode=OneWay}" 
+                                    Style="{StaticResource MaterialDesignTabRadioButton}"
+                                    Content="{Binding Content, Mode=OneWay}"
+                                    Tag="{Binding Id, Mode=OneWay}"
+                                    Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding Id}">
+                                </RadioButton>
+                                <Button
+                                    Visibility="{Binding IsEnableClose}"
+                                    Command="{Binding CloseCommand}"
+                                    CommandParameter="{Binding}">
+                                    <Button.Template>
+                                        <ControlTemplate>
+                                            <materialDesign:PackIcon
+                                                Kind="Close"
+                                                Foreground="Red"
+                                                Background="Transparent" />
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemsPanel>

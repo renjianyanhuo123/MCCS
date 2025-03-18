@@ -4,7 +4,7 @@ namespace MCCS.ViewModels.Others
 {
     public class TestViewModel : BindableBase
     {
-        private int _id;
+        private long _id;
         private string _code;
         private string _name;
         private string _stanard;
@@ -14,9 +14,10 @@ namespace MCCS.ViewModels.Others
         private TestStatus _status;
         private DateTime? _startTime;
         private DateTime? _endTime;
+        private string _processingStr;
+        private DateTime? _createtime;
 
-
-        public int Id
+        public long Id
         {
             get => _id;
             set => SetProperty(ref _id, value);
@@ -83,7 +84,14 @@ namespace MCCS.ViewModels.Others
         public DateTime? StartTime
         {
             get => _startTime;
-            set => SetProperty(ref _startTime, value);
+            set 
+            {
+                if (_startTime != value) 
+                {
+                    ProcessingStr = CaluateProcessingStr(value, EndTime);
+                    SetProperty(ref _startTime, value);
+                }
+            }
         }
         /// <summary>
         /// 结束时间
@@ -91,7 +99,53 @@ namespace MCCS.ViewModels.Others
         public DateTime? EndTime
         {
             get => _endTime;
-            set => SetProperty(ref _endTime, value);
+            set 
+            {
+                if (value != _endTime) 
+                {
+                    ProcessingStr = CaluateProcessingStr(StartTime, value);
+                    SetProperty(ref _endTime, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 累计时长, 以,区分 3个则为时,分,秒  2个则为分和秒 
+        /// </summary>
+        public string ProcessingStr 
+        {
+            get => _processingStr;
+            set 
+            {
+                SetProperty(ref _processingStr, value);
+            }
+        }
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime? CreateTime
+        {
+            get => _createtime;
+            set => SetProperty(ref _createtime, value);
+        }
+
+        /// <summary>
+        /// 计算时间差
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        private string CaluateProcessingStr(DateTime? start, DateTime? end) 
+        {
+            if(start == null) return string.Empty;
+            if (end == null) end = DateTime.Now;
+            var timeDiff = end - start;
+            if (timeDiff.Value.TotalSeconds < 0) return string.Empty;
+            int hours = timeDiff.Value.Hours;
+            int minutes = timeDiff.Value.Minutes;
+            int seconds = timeDiff.Value.Seconds;
+            if (hours > 0) return $"{hours:D2}时{minutes:D2}分{seconds:D2}秒";
+            return $"{minutes:D2}分{seconds:D2}秒";
         }
     }
 }

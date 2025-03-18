@@ -5,74 +5,74 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
              xmlns:localComponent="clr-namespace:MCCS.Components"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
+             xmlns:convert="clr-namespace:MCCS.Converters"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="AliceBlue">
-        <!-- 作动器控件 -->
-        <UserControl HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid>
-                <!-- 主体框架 -->
-                <Path Stroke="#404040" StrokeThickness="2">
-                    <Path.Data>
-                        <PathGeometry>
-                            <PathFigure StartPoint="0,30" IsClosed="True">
-                                <LineSegment Point="0,70"/>
-                                <ArcSegment Point="200,70" Size="100,20" SweepDirection="Clockwise"/>
-                                <LineSegment Point="200,30"/>
-                                <ArcSegment Point="0,30" Size="100,20" SweepDirection="Clockwise"/>
-                            </PathFigure>
-                        </PathGeometry>
-                    </Path.Data>
-                    <Path.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                            <GradientStop Color="#505050" Offset="0"/>
-                            <GradientStop Color="#303030" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Path.Fill>
-                </Path>
-
-                <!-- 活塞杆 -->
-                <Rectangle x:Name="PistonRod" Width="160" Height="12" 
-                         RenderTransformOrigin="0.5,0.5" Canvas.Left="20" Canvas.Top="44">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#C0C0C0" Offset="0"/>
-                            <GradientStop Color="#808080" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                    <Rectangle.RenderTransform>
-                        <TranslateTransform X="{Binding ElementName=slPosition, Path=Value}"/>
-                    </Rectangle.RenderTransform>
-                </Rectangle>
-
-                <!-- 状态指示灯 -->
-                <Ellipse Width="12" Height="12" Margin="10" HorizontalAlignment="Left" VerticalAlignment="Top">
-                    <Ellipse.Fill>
-                        <SolidColorBrush x:Name="statusLight" Color="Gray"/>
-                    </Ellipse.Fill>
-                    <Ellipse.Effect>
-                        <DropShadowEffect BlurRadius="8" Color="#AAFF00"/>
-                    </Ellipse.Effect>
-                </Ellipse>
-
-                <!-- 压力表 -->
-                <Border Width="60" Height="60" CornerRadius="30" Background="#202020" 
-                       HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10">
-                    <TextBlock Text="{Binding ElementName=slPosition, Path=Value, StringFormat={}{0}%}" 
-                             Foreground="White" FontSize="14" HorizontalAlignment="Center" 
-                             VerticalAlignment="Center"/>
-                </Border>
-            </Grid>
-        </UserControl>
-
-        <!-- 控制面板 -->
-        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20">
-            <Slider x:Name="slPosition" Minimum="0" Maximum="100" Width="200" 
-                    />
-            <Button Content="紧急停止" Width="100" Margin="0 10"  
-                   Background="#FF4040" Foreground="White"/>
-        </StackPanel>
-    </Grid>
+    <UserControl.Resources>
+        <!-- TestOperationConverter-->
+        <convert:TestStatusConverter x:Key="TestStatusConverter"/>
+        <convert:TestOperationConverter x:Key="TestOperationConverter"/>
+    </UserControl.Resources>
+    <GroupBox
+        Width="Auto"
+        materialDesign:ColorZoneAssist.Mode="Light"
+        Style="{StaticResource MaterialDesignCardGroupBox}">
+        <GroupBox.HeaderTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox
+                        Height="Auto"
+                        VerticalAlignment="Top"
+                        materialDesign:HintAssist.Hint="{DynamicResource SearchName}"
+                        AcceptsReturn="True" 
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
+                </StackPanel>
+            </DataTemplate>
+        </GroupBox.HeaderTemplate>
+        <DataGrid x:Name="AzureDataGrid"
+                  HeadersVisibility="All"
+                 AutoGenerateColumns="False"
+                 Height="Auto"
+                 CanUserAddRows="False"
+                 ItemsSource="{Binding TestList}"
+                 HorizontalScrollBarVisibility="Auto"
+                 VerticalScrollBarVisibility="Auto"
+                 RowHeaderWidth="0" >
+            <DataGrid.Columns>
+                <!--Binding="{Binding Title}"-->
+                <DataGridTextColumn Binding="{Binding Code}" Header="{DynamicResource TestCode}" />
+                <DataGridTextColumn Binding="{Binding Name}" Header="{DynamicResource TestName}" />
+                <DataGridTextColumn Binding="{Binding Standard}" Header="{DynamicResource TestStandard}" />
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding Person}" Header="{DynamicResource TestPerson}" />
+                <DataGridTextColumn Binding="{Binding Remark}" Header="{DynamicResource TestRemark}" />
+                <DataGridTextColumn Binding="{Binding FilePath}" Header="{DynamicResource TestFilePath}" />
+                <DataGridTemplateColumn IsReadOnly="True" Header="{DynamicResource TestStatus}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button
+                                ToolTip="{Binding Status}"
+                                Background="{Binding Status, Converter={StaticResource TestStatusConverter}}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}"
+                                Command="{Binding DataContext.TestOperationCommand, RelativeSource={RelativeSource AncestorType=local:HomePage}}"
+                                CommandParameter="{Binding}">
+                                <materialDesign:PackIcon Kind="{Binding Status, Converter={StaticResource TestOperationConverter}}" />
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding StartTime}" Header="{DynamicResource TestStartTime}" />
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding EndTime}" Header="{DynamicResource TestEndTime}" />
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding ProcessingStr}" Header="{DynamicResource TestProcessing}" >
+                </DataGridTextColumn>
+                <DataGridTextColumn IsReadOnly="True" Binding="{Binding CreateTime}" Header="{DynamicResource TestCreateTime}" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </GroupBox>
 </UserControl>

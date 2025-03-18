@@ -46,6 +46,7 @@ namespace MCCS
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.AddRepository(configuration);
         }
 

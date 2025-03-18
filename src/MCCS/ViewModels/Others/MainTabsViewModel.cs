@@ -10,6 +10,9 @@ namespace MCCS.ViewModels.Others
         private string _content;
         public string Content { get => _content; set { SetProperty(ref _content, value); } }
 
+        private Visibility _isEnableClose;
+        public Visibility IsEnableClose { get => _isEnableClose; set { SetProperty(ref _isEnableClose, value); } }
+
         private bool _isEnable;
         public bool IsEnable { get => _isEnable; set { SetProperty(ref _isEnable, value); } }
     }

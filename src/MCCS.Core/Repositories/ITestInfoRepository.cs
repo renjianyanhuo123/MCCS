@@ -8,5 +8,7 @@ namespace MCCS.Core.Repositories
         ValueTask<int> AddEntities(IEnumerable<Test> testInfos, CancellationToken cancellationToken);
 
         Task<List<Test>> GetTestsAsync(Expression<Func<Test, bool>> expression, CancellationToken cancellationToken);
+
+        List<Test> GetTests(Expression<Func<Test, bool>> expression);
     }
 }
