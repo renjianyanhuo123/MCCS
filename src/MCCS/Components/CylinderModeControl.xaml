@@ -5,23 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Components"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Canvas x:Name="MyCanvas" Width="400" Height="300" Background="White">
-
-        <!-- 圆柱体底部（原来的顶部，现在变到底部） -->
-        <Ellipse Canvas.Left="100" Canvas.Top="175" Width="200" Height="50"
-                 Stroke="Black" StrokeThickness="2">
+             d:DesignHeight="500" d:DesignWidth="200">
+    <Canvas x:Name="MyCanvas" Width="Auto" Height="Auto" Background="Transparent">
+        <!--(1)圆柱体顶部 -->
+        <Ellipse Width="200" Height="20"
+                 Canvas.Left="0" Canvas.Top="0"
+         Stroke="Black" StrokeThickness="0.5">
             <Ellipse.Fill>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Offset="0.0" Color="#CCCCCC" />
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0.0" Color="#999999" />
                     <GradientStop Offset="0.5" Color="#FFFFFF" />
-                    <GradientStop Offset="1.0" Color="#AAAAAA" />
+                    <GradientStop Offset="1.0" Color="#888888" />
                 </LinearGradientBrush>
             </Ellipse.Fill>
         </Ellipse>
-
-        <!-- 圆柱体侧面（翻转后，顶点位置调整） -->
-        <Path Stroke="Black" StrokeThickness="2">
+        <!-- (2)圆柱体侧面 -->
+        <Path Stroke="Black" StrokeThickness="0.5">
             <Path.Fill>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                     <GradientStop Offset="0.00" Color="#BBBBBB"/>
@@ -33,38 +32,58 @@
             </Path.Fill>
             <Path.Data>
                 <PathGeometry>
-                    <PathFigure StartPoint="100,200">
+                    <PathFigure StartPoint="0,25">
                         <!-- 下弧（原来的顶部，现在变成底部） -->
-                        <ArcSegment Point="300,200" 
-                                    Size="100,25" 
+                        <ArcSegment
+                                    Point="200,25" 
+                                    Size="100,10" 
                                     IsLargeArc="False" 
-                                    SweepDirection="Clockwise" />
+                                    SweepDirection="Counterclockwise" />
                         <!-- 右边竖线 -->
-                        <LineSegment Point="300,75" />
+                        <LineSegment Point="200,10" />
                         <!-- 上弧（原来的底部，现在变成顶部） -->
-                        <ArcSegment Point="100,75" 
-                                    Size="100,25" 
+                        <ArcSegment Point="0,10" 
+                                    Size="100,10"
                                     IsLargeArc="False" 
                                     SweepDirection="Clockwise" />
                         <!-- 左边竖线 -->
-                        <LineSegment Point="100,200" />
+                        <LineSegment Point="0,25" />
                     </PathFigure>
                 </PathGeometry>
             </Path.Data>
         </Path>
-
-        <!-- 圆柱体顶部（原来的底部，现在变成顶部） -->
-        <Ellipse Canvas.Left="100" Canvas.Top="50" Width="200" Height="50"
-                 Stroke="Black" StrokeThickness="2">
-            <Ellipse.Fill>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                    <GradientStop Offset="0.0" Color="#999999" />
-                    <GradientStop Offset="0.5" Color="#FFFFFF" />
-                    <GradientStop Offset="1.0" Color="#888888" />
+        <!-- 第二部分 -->
+        <Path Stroke="Black" StrokeThickness="0.5">
+            <Path.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0.00" Color="#BBBBBB"/>
+                    <GradientStop Offset="0.20" Color="#FFFFFF"/>
+                    <GradientStop Offset="0.40" Color="#AAAAAA"/>
+                    <GradientStop Offset="0.60" Color="#FFFFFF"/>
+                    <GradientStop Offset="1.00" Color="#BBBBBB"/>
                 </LinearGradientBrush>
-            </Ellipse.Fill>
-        </Ellipse>
-
-
+            </Path.Fill>
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="0,25">
+                        <!-- 下弧（原来的顶部，现在变成底部） -->
+                        <ArcSegment
+                            Point="200,25" 
+                            Size="100,10" 
+                            IsLargeArc="False" 
+                            SweepDirection="Counterclockwise" />
+                        <!-- 右边竖线 -->
+                        <LineSegment Point="200,10" />
+                        <!-- 上弧（原来的底部，现在变成顶部） -->
+                        <ArcSegment Point="0,10" 
+                            Size="100,10"
+                            IsLargeArc="False" 
+                            SweepDirection="Clockwise" />
+                        <!-- 左边竖线 -->
+                        <LineSegment Point="0,25" />
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+        </Path>
     </Canvas>
 </UserControl>
