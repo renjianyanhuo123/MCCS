@@ -9,25 +9,22 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Canvas x:Name="ExternalContainer">
+    <Canvas x:Name="ExternalContainer" ClipToBounds="True">
         <i:Interaction.Triggers>
             <i:EventTrigger EventName="MouseRightButtonDown">
-                <i:InvokeCommandAction Command="{Binding MouseRightButtonDownCommand}" />
+                <i:InvokeCommandAction Command="{Binding MouseRightButtonDownCommand}"
+                                       CommandParameter="{Binding ElementName=ExternalContainer}"/>
             </i:EventTrigger>
             <i:EventTrigger EventName="MouseMove">
-                <i:InvokeCommandAction Command="{Binding MouseMoveCommand}" />
+                <i:InvokeCommandAction Command="{Binding MouseMoveCommand}"
+                                       CommandParameter="{Binding ElementName=WidgetCanvas}" />
             </i:EventTrigger>
-            <i:EventTrigger EventName="MouseRightButtonDown">
-                <i:InvokeCommandAction Command="{Binding MouseRightButtonUpCommand}" />
-            </i:EventTrigger>
-            <i:EventTrigger EventName="MouseRightButtonDown">
-                <i:InvokeCommandAction Command="{Binding MouseRightButtonUpCommand}" />
-            </i:EventTrigger>
-            <i:EventTrigger EventName="MouseWheel">
-                <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" />
+            <i:EventTrigger EventName="MouseRightButtonUp">
+                <i:InvokeCommandAction Command="{Binding MouseRightButtonUpCommand}"
+                                       />
             </i:EventTrigger>
             <i:EventTrigger EventName="MouseWheel">
-                <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" />
+                <i:InvokeCommandAction Command="{Binding MouseWheelCommand}" PassEventArgsToCommand="True"/>
             </i:EventTrigger>
         </i:Interaction.Triggers>
         <Canvas x:Name="WidgetCanvas" 
@@ -36,7 +33,9 @@
                 Canvas.Left="50"
                 Canvas.Top="50"
                 Background="AliceBlue">
-            
+            <Canvas.RenderTransform>
+                <MatrixTransform x:Name="OperationTransform" />
+            </Canvas.RenderTransform>
         </Canvas>
     </Canvas>
 </UserControl>
