@@ -12,19 +12,17 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 
-namespace MCCS.Views.Pages
+namespace MCCS.Components
 {
     /// <summary>
-    /// HomePage.xaml 的交互逻辑
+    /// UserControl2.xaml 的交互逻辑
     /// </summary>
-    public partial class HomePage : UserControl
+    public partial class UserControl2 : UserControl
     {
-        public HomePage()
+        public UserControl2()
         {
             InitializeComponent();
-            
         }
     }
 }

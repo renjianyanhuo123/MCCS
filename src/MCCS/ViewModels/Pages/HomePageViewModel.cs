@@ -1,6 +1,4 @@
-﻿
-using MCCS.Core.Models.TestInfo;
-using MCCS.Core.Repositories;
+﻿using MCCS.Core.Repositories;
 using MCCS.Events;
 using MCCS.ViewModels.Others;
 
@@ -40,11 +38,11 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region 命令
-        public DelegateCommand<TestViewModel> TestOperationCommand => new(ExcuateTestOperationCommand);
+        public DelegateCommand<TestViewModel> TestOperationCommand => new(ExecuteTestOperationCommand);
         #endregion
 
         #region 私有方法
-        private void ExcuateTestOperationCommand(TestViewModel param) 
+        private void ExecuteTestOperationCommand(TestViewModel param) 
         {
             _eventAggregator.GetEvent<OpenTestOperationEvent>().Publish(new OpenTestOperationEventParam 
             {

@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS", "src\MCCS\MCCS.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Core", "src\MCCS.Core\MCCS.Core.csproj", "{CEB22083-9425-43D4-A114-D2B7CD76D482}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.UserControl", "src\MCCS.UserControl\MCCS.UserControl.csproj", "{CF32C9D0-42FC-4FD5-A43E-FAF787AE8161}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Example", "src\MCCS.Example\MCCS.Example.csproj", "{36C51B27-1393-4F64-AB78-A8F3843B67CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{CEB22083-9425-43D4-A114-D2B7CD76D482}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEB22083-9425-43D4-A114-D2B7CD76D482}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEB22083-9425-43D4-A114-D2B7CD76D482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF32C9D0-42FC-4FD5-A43E-FAF787AE8161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF32C9D0-42FC-4FD5-A43E-FAF787AE8161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF32C9D0-42FC-4FD5-A43E-FAF787AE8161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF32C9D0-42FC-4FD5-A43E-FAF787AE8161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36C51B27-1393-4F64-AB78-A8F3843B67CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36C51B27-1393-4F64-AB78-A8F3843B67CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36C51B27-1393-4F64-AB78-A8F3843B67CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36C51B27-1393-4F64-AB78-A8F3843B67CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

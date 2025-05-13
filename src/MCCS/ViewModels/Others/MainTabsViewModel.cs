@@ -7,19 +7,18 @@ namespace MCCS.ViewModels.Others
         private string _id;
         public string Id {
             get => _id; 
-            set { SetProperty(ref _id, value); 
-            } 
+            set => SetProperty(ref _id, value);
         }
 
         private string _content;
         public string Content 
         { 
             get => _content; 
-            set { SetProperty(ref _content, value); } 
+            set => SetProperty(ref _content, value);
         }
 
         private Visibility _isEnableClose;
-        public Visibility IsEnableClose { get => _isEnableClose; set { SetProperty(ref _isEnableClose, value); } }
+        public Visibility IsEnableClose { get => _isEnableClose; set => SetProperty(ref _isEnableClose, value); }
 
         private bool _isChecked;
         public bool IsChecked 
@@ -29,6 +28,6 @@ namespace MCCS.ViewModels.Others
         }
 
         private bool _isEnable;
-        public bool IsEnable { get => _isEnable; set { SetProperty(ref _isEnable, value); } }
+        public bool IsEnable { get => _isEnable; set => SetProperty(ref _isEnable, value); }
     }
 }
