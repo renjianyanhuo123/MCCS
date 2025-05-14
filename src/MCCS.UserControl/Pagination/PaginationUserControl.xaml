@@ -5,10 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.UserControl.Pagination"
              xmlns:assert="clr-namespace:MCCS.UserControl.Assert"
+             xmlns:customComboBox="clr-namespace:MCCS.UserControl.ComboBox"
              mc:Ignorable="d" 
              d:DesignHeight="60" d:DesignWidth="800">
     <UserControl.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MCCS.UserControl;component/Styles/CustomComboBoxStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
             <!-- Border Style -->
             <Style x:Key="PageBorderStyle" TargetType="Border">
                 <Setter Property="Height" Value="28" />
@@ -38,13 +42,14 @@
                 </Style.Triggers>
             </Style>
 
-            </ResourceDictionary>
+        </ResourceDictionary>
         
     </UserControl.Resources>
     <Grid>
         <StackPanel 
             Orientation="Horizontal" 
             VerticalAlignment="Center"
+            Background="Transparent"
             Width="{Binding ActualWidth, ElementName=root}"
             Height="{Binding ActualHeight, ElementName=root}">
             <Border Style="{StaticResource PageBorderStyle}">
@@ -104,30 +109,16 @@
             <Border Style="{StaticResource PageBorderStyle}">
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/right_32.png" />
             </Border>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock 
-                    Height="Auto" 
-                    Text="每页" 
-                    Margin="0 0 8 0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center" />
-                <ComboBox 
-                    
-                    Width="50" 
-                    Height="28" 
-                    Margin="0 0 8 0">
-                    <ComboBoxItem Content="10" />
-                    <ComboBoxItem Content="20" />
-                    <ComboBoxItem Content="30" />
-                    <ComboBoxItem Content="40" />
-                    <ComboBoxItem Content="50" />
-                </ComboBox>
-                <TextBlock 
-                    Text="条"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    />
-            </StackPanel>
+            <ComboBox 
+                Style="{StaticResource CustomComboBoxWithItemStyle}"
+                Width="78" 
+                Height="28" 
+                Margin="5 0 8 0">
+                <ComboBoxItem>1</ComboBoxItem>
+                <ComboBoxItem>2</ComboBoxItem>
+                <ComboBoxItem>3</ComboBoxItem>
+                <ComboBoxItem>4</ComboBoxItem>
+            </ComboBox>
         </StackPanel>
     </Grid>
 </UserControl>
