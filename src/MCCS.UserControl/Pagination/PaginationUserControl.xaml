@@ -1,17 +1,24 @@
 ﻿<UserControl x:Class="MCCS.UserControl.Pagination.PaginationUserControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:MCCS.UserControl.Pagination"
              xmlns:assert="clr-namespace:MCCS.UserControl.Assert"
              xmlns:customComboBox="clr-namespace:MCCS.UserControl.ComboBox"
-             mc:Ignorable="d" 
-             d:DesignHeight="60" d:DesignWidth="800">
+             mc:Ignorable="d"
+             d:DesignHeight="60" d:DesignWidth="1000">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MCCS.UserControl;component/Styles/CustomComboBoxStyle.xaml"/>
+                <ResourceDictionary Source="/MCCS.UserControl;component/Styles/CustomTextBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <!-- Border Style -->
             <Style x:Key="PageBorderStyle" TargetType="Border">
@@ -40,18 +47,37 @@
                         <Setter Property="Foreground" Value="#2DB7F5" />
                     </DataTrigger>
                 </Style.Triggers>
-            </Style>
 
+            </Style>
+            <!-- Normal TextBox Style -->
+            <Style x:Key="PageNormalTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Arial"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#666666"/>
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
         </ResourceDictionary>
-        
     </UserControl.Resources>
-    <Grid>
+    <Grid Background="Transparent">
+        
         <StackPanel 
             Orientation="Horizontal" 
             VerticalAlignment="Center"
             Background="Transparent"
             Width="{Binding ActualWidth, ElementName=root}"
             Height="{Binding ActualHeight, ElementName=root}">
+            <StackPanel x:Name="TotalStackPanel"
+                        Orientation="Horizontal" 
+                        Margin="8 0 8 0">
+                <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="共" />
+                <TextBlock 
+                    x:Name="TotalPageText"
+                    Style="{StaticResource PageNormalTextStyle}" 
+                    Margin="5 0 5 0" 
+                    FontWeight="Bold" />
+                <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="条" />
+            </StackPanel>
             <Border Style="{StaticResource PageBorderStyle}">
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/left_32.png" />
             </Border>
@@ -113,12 +139,31 @@
                 Style="{StaticResource CustomComboBoxWithItemStyle}"
                 Width="78" 
                 Height="28" 
-                Margin="5 0 8 0">
+                Margin="5 0 15 0">
                 <ComboBoxItem>1</ComboBoxItem>
                 <ComboBoxItem>2</ComboBoxItem>
                 <ComboBoxItem>3</ComboBoxItem>
                 <ComboBoxItem>4</ComboBoxItem>
             </ComboBox>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock 
+                    Width="Auto" 
+                    Height="Auto" 
+                    Margin="0 0 8 0"
+                    Style="{StaticResource PageNormalTextStyle}" 
+                    Text="跳转"></TextBlock>
+                <TextBox 
+                    Width="50" 
+                    Height="30"
+                    VerticalContentAlignment="Center"
+                    Margin="0 0 8 0"
+                    ></TextBox>
+                <TextBlock Text="页"
+                           Width="Auto" 
+                           Height="Auto" 
+                           Margin="0 0 8 0"
+                           Style="{StaticResource PageNormalTextStyle}"></TextBlock>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>

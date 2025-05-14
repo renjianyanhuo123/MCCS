@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- TextBox样式定义 57C5F7-->
+    <Style TargetType="{x:Type TextBox}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="#D9D9D9"/>
+        <Setter Property="Padding" Value="3"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Grid>
+                        <!-- 外层边框，当获取焦点时显示 -->
+                        <Border x:Name="PART_OuterBorder" 
+                                    BorderThickness="3" 
+                                    BorderBrush="Transparent" 
+                                    CornerRadius="4"
+                                    Opacity="0.8"
+                                    Margin="-3"/>
+
+                        <!-- 内层边框，始终显示 -->
+                        <Border x:Name="PART_InnerBorder" 
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                             Focusable="false" 
+                                             HorizontalScrollBarVisibility="Hidden" 
+                                             VerticalScrollBarVisibility="Hidden"/>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="PART_InnerBorder" Property="BorderBrush" Value="#57C5F7"></Setter>
+                        </Trigger>
+                        <!-- 当TextBox获取焦点时，显示外层边框 -->
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="PART_OuterBorder" Property="BorderBrush" Value="#D5F1FD"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

@@ -6,8 +6,15 @@
         xmlns:local="clr-namespace:MCCS.Example"
         xmlns:customPagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <customPagination:PaginationUserControl x:Name="MyUserControl" Width="800" Height="30" Background="LightGray"/>
+        Title="MainWindow" Height="450" Width="1000">
+    <Grid Background="Transparent">
+        <customPagination:PaginationUserControl 
+            x:Name="MyUserControl" 
+            ShowTotal="True"
+            Width="1000" 
+            Height="30" 
+            Total="40000"
+            PageSize="10"
+            Background="LightGray"/>
     </Grid>
 </Window>

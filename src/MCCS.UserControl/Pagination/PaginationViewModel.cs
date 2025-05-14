@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Windows;
+using System.Windows.Input;
 
 namespace MCCS.UserControl.Pagination
 {
@@ -9,6 +10,11 @@ namespace MCCS.UserControl.Pagination
         private int _totalPages = 1;
         private int _targetPage = 1;
         #endregion
+
+        public PaginationViewModel()
+        {
+
+        }
 
         #region Properties
         public int CurrentPage
@@ -31,6 +37,8 @@ namespace MCCS.UserControl.Pagination
         #endregion
 
         #region Commands
+
+        public ICommand InitialCommand { get; private set; } = new RelayCommand( param => { });
         public ICommand PreviousPageCommand { get; private set; }
         public ICommand NextPageCommand { get; private set; }
         public ICommand JumpToPageCommand { get; private set; }

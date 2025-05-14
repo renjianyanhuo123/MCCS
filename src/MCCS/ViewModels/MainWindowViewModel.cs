@@ -91,12 +91,9 @@ namespace MCCS.ViewModels
             _tabs.Remove(delItem); 
         }
 
-        private void ExcuateMainRegionLoadedCommand(object parameter) 
+        private void ExcuateMainRegionLoadedCommand(object parameter)
         {
-            if (SelectedMenuItem != null)
-            {
-                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
-            }
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
         }
         private void ExcuateJumpChildTabCommand(object param)
         {
