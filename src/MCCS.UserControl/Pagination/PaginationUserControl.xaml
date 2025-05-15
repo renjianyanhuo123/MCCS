@@ -7,6 +7,7 @@
              xmlns:local="clr-namespace:MCCS.UserControl.Pagination"
              xmlns:assert="clr-namespace:MCCS.UserControl.Assert"
              xmlns:customComboBox="clr-namespace:MCCS.UserControl.ComboBox"
+             xmlns:localAttached="clr-namespace:MCCS.UserControl.AttachedAttributes"
              mc:Ignorable="d"
              d:DesignHeight="60" d:DesignWidth="1000">
     <i:Interaction.Triggers>
@@ -78,6 +79,28 @@
                     FontWeight="Bold" />
                 <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="条" />
             </StackPanel>
+            <!-- 前5个 -->
+            <ItemsControl ItemsSource="{Binding PageItems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource PageBorderStyle}" 
+                                Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonDown">
+                                    <i:InvokeCommandAction Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=UserControl}}"
+                                                           CommandParameter="{Binding PageNumber}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <TextBlock Text="{Binding PageNumber}" Style="{StaticResource PageTextBlockStyle}"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
             <Border Style="{StaticResource PageBorderStyle}">
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/left_32.png" />
             </Border>
@@ -136,14 +159,16 @@
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/right_32.png" />
             </Border>
             <ComboBox 
+                localAttached:ComboBoxSuffix.Suffix="条/页"
                 Style="{StaticResource CustomComboBoxWithItemStyle}"
                 Width="78" 
                 Height="28" 
                 Margin="5 0 15 0">
-                <ComboBoxItem>1</ComboBoxItem>
-                <ComboBoxItem>2</ComboBoxItem>
-                <ComboBoxItem>3</ComboBoxItem>
-                <ComboBoxItem>4</ComboBoxItem>
+                <ComboBoxItem>10</ComboBoxItem>
+                <ComboBoxItem>20</ComboBoxItem>
+                <ComboBoxItem>30</ComboBoxItem>
+                <ComboBoxItem>40</ComboBoxItem>
+                <ComboBoxItem>50</ComboBoxItem>
             </ComboBox>
             <StackPanel Orientation="Horizontal">
                 <TextBlock 

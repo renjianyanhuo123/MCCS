@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assert\ChevronDown_32.png" />
+    <None Remove="Assert\ChevronDown_16.png" />
     <None Remove="Assert\omitPoint_16.png" />
     <None Remove="Assert\omitPoint_32.png" />
     <None Remove="Assert\right_32.png" />
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assert\ChevronDown_32.png">
+    <Resource Include="Assert\ChevronDown_16.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assert\left_32.png">

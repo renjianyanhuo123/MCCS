@@ -12,12 +12,22 @@ namespace MCCS.UserControl.ComboBox
             InitializeComponent();
         }
 
+        /// <summary>
+        /// 后缀文本 依赖属性
+        /// </summary>
+        //public string SuffixText
+        //{
+        //    get => (string)GetValue(SuffixTextProperty);
+        //    set => SetValue(SuffixTextProperty, value);
+        //}
+
         #region Dependency Properties
-        //public static readonly DependencyProperty ItemsSourceProperty =
-        //    DependencyProperty.Register(nameof(ItemsSource),
-        //        typeof(IEnumerable<object>),
+        //public static readonly DependencyProperty SuffixTextProperty =
+        //    DependencyProperty.Register(nameof(SuffixText),
+        //        typeof(string),
         //        typeof(CustomComboBox),
-        //        new PropertyMetadata(null));
+        //        new PropertyMetadata(string.Empty, OnSuffixTextPropertyChangedCallback));
         #endregion
+
     }
 }

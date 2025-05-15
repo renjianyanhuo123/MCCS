@@ -10,7 +10,7 @@
     <Grid Background="Transparent">
         <customPagination:PaginationUserControl 
             x:Name="MyUserControl" 
-            ShowTotal="True"
+            ShowTotal="False"
             Width="1000" 
             Height="30" 
             Total="40000"

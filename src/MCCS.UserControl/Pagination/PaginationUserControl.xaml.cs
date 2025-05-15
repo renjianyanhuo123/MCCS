@@ -32,10 +32,10 @@ namespace MCCS.UserControl.Pagination
             set => SetValue(TotalProperty, value);
         }
 
-        public int CurrentPage
+        public int DefaultCurrentPage
         {
-            get => (int)GetValue(CurrentPageProperty);
-            set => SetValue(CurrentPageProperty, value);
+            get => (int)GetValue(DefaultCurrentPageProperty);
+            set => SetValue(DefaultCurrentPageProperty, value);
         }
 
         public int PageSize
@@ -44,8 +44,8 @@ namespace MCCS.UserControl.Pagination
             set => SetValue(PageSizeProperty, value);
         }
 
-        public static readonly DependencyProperty CurrentPageProperty =
-            DependencyProperty.Register(nameof(CurrentPage),
+        public static readonly DependencyProperty DefaultCurrentPageProperty =
+            DependencyProperty.Register(nameof(DefaultCurrentPage),
                 typeof(int),
                 typeof(PaginationUserControl),
                 new PropertyMetadata(1, OnCurrentPageChanged));
@@ -77,7 +77,7 @@ namespace MCCS.UserControl.Pagination
             if (e.NewValue is bool showTotal) control.UpdateShowTotalUi(showTotal);
         }
 
-        private static void OnCurrentPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDefaultCurrentPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             //if (d is not PaginationUserControl control) return;
             //if (e.NewValue is int total) control.UpdateTotalUi(total);

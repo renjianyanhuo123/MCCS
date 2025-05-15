@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MCCS.UserControl.Pagination
@@ -17,6 +18,7 @@ namespace MCCS.UserControl.Pagination
         }
 
         #region Properties
+
         public int CurrentPage
         {
             get => _currentPage;

@@ -71,18 +71,49 @@
                                                         HorizontalAlignment="Left"
                                                         VerticalAlignment="Center"/>
                                             <!-- Dropdown arrow -->
-                                            <Image Grid.Column="1"
-                                               Width="10"
-                                            Margin="0,0,5,0"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            Stretch="Uniform" 
-                                            Source="/MCCS.UserControl;component/Assert/ChevronDown_32.png"/>
+                                            <Image x:Name="DropdownArrow"
+                                                   Grid.Column="1" 
+                                                   Width="10"
+                                                   Height="10"
+                                                   Stretch="Uniform"
+                                                   Margin="0,0,5,0"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center" 
+                                                   Source="/MCCS.UserControl;component/Assert/ChevronDown_16.png">
+                                                <Image.RenderTransform>
+                                                    <RotateTransform x:Name="ArrowRotation" Angle="0" CenterX="5" CenterY="5"/>
+                                                </Image.RenderTransform>
+                                            </Image>
                                         </Grid>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter Property="BorderBrush" Value="#2DB7F5" TargetName="SelectorBorder"/>
+                                        </Trigger>
+                                        <!-- 添加触发器 - 当下拉框打开时，旋转箭头180度 -->
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation 
+                                                            Storyboard.TargetName="ArrowRotation" 
+                                                            Storyboard.TargetProperty="Angle"
+                                                            To="180" 
+                                                            Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation 
+                                                            Storyboard.TargetName="ArrowRotation" 
+                                                            Storyboard.TargetProperty="Angle"
+                                                            To="0" 
+                                                            Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -93,7 +124,7 @@
                                     Content="{TemplateBinding SelectionBoxItem}"
                                     ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                     ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                    Margin="10,3,30,3"
+                                    Margin="10,3,18,3"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Left"/>
                         <Popup Name="Popup"
