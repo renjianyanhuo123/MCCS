@@ -18,6 +18,7 @@ namespace MCCS.UserControl.Pagination
             this.DataContext = _viewModel;
             UpdateShowTotalUi(ShowTotal);
             UpdateTotalUi(Total);
+            UpdatePageSizeUi(DefaultPageSize);
         }
 
         public bool ShowTotal
@@ -38,17 +39,17 @@ namespace MCCS.UserControl.Pagination
             set => SetValue(DefaultCurrentPageProperty, value);
         }
 
-        public int PageSize
+        public int DefaultPageSize
         {
-            get => (int)GetValue(PageSizeProperty);
-            set => SetValue(PageSizeProperty, value);
+            get => (int)GetValue(DefaultPageSizeProperty);
+            set => SetValue(DefaultPageSizeProperty, value);
         }
 
         public static readonly DependencyProperty DefaultCurrentPageProperty =
             DependencyProperty.Register(nameof(DefaultCurrentPage),
                 typeof(int),
                 typeof(PaginationUserControl),
-                new PropertyMetadata(1, OnCurrentPageChanged));
+                new PropertyMetadata(1, OnDefaultCurrentPageChanged));
 
         public static readonly DependencyProperty TotalProperty =
             DependencyProperty.Register(nameof(Total),
@@ -64,11 +65,11 @@ namespace MCCS.UserControl.Pagination
                     FrameworkPropertyMetadataOptions.AffectsRender, 
                     OnShowTotalChanged));
 
-        public static DependencyProperty PageSizeProperty =
-            DependencyProperty.Register(nameof(PageSize),
+        public static DependencyProperty DefaultPageSizeProperty =
+            DependencyProperty.Register(nameof(DefaultPageSize),
                 typeof(int),
                 typeof(PaginationUserControl),
-                new PropertyMetadata(10));
+                new PropertyMetadata(10, OnDefaultPageSizeChanged));
 
         #region CallBack
         private static void OnShowTotalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -83,10 +84,19 @@ namespace MCCS.UserControl.Pagination
             //if (e.NewValue is int total) control.UpdateTotalUi(total);
         }
 
+        private static void OnDefaultPageSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not PaginationUserControl control) return;
+            if (e.NewValue is not int defaultPageSize) return;
+            control.UpdatePageSizeUi(defaultPageSize);
+        }
+
         private static void OnTotalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not PaginationUserControl control) return;
-            if (e.NewValue is int total) control.UpdateTotalUi(total);
+            if (e.NewValue is not int total) return;
+            control.UpdateTotalUi(total);
+            // var viewModel = control.DataContext as PaginationViewModel;
         }
         #endregion
          
@@ -99,6 +109,11 @@ namespace MCCS.UserControl.Pagination
         private void UpdateTotalUi(int total)
         {
             TotalPageText.Text = total.ToString();
+        }
+
+        private void UpdatePageSizeUi(int pageSize)
+        {
+            SelectPageSize.SelectedIndex = pageSize / 10 - 1;
         }
 
         #endregion

@@ -8,21 +8,26 @@
              xmlns:assert="clr-namespace:MCCS.UserControl.Assert"
              xmlns:customComboBox="clr-namespace:MCCS.UserControl.ComboBox"
              xmlns:localAttached="clr-namespace:MCCS.UserControl.AttachedAttributes"
+             xmlns:converters="clr-namespace:MCCS.UserControl.Converters"
              mc:Ignorable="d"
+             x:Name="PaginationControl"
              d:DesignHeight="60" d:DesignWidth="1000">
-    <i:Interaction.Triggers>
+    <!--<i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding WindowLoadedCommand}"/>
         </i:EventTrigger>
-    </i:Interaction.Triggers>
+    </i:Interaction.Triggers>-->
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MCCS.UserControl;component/Styles/CustomComboBoxStyle.xaml"/>
                 <ResourceDictionary Source="/MCCS.UserControl;component/Styles/CustomTextBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!-- Border Style -->
-            <Style x:Key="PageBorderStyle" TargetType="Border">
+            <!-- 定义转换器 -->
+            <converters:PropertyToResourceConverter x:Key="PropertyToResourceConverter" />
+
+            <!-- Base Border Style -->
+            <Style x:Key="BasePageBorderStyle" TargetType="Border">
                 <Setter Property="Height" Value="28" />
                 <Setter Property="Width" Value="28" />
                 <Setter Property="Background" Value="#FFFFFF"/>
@@ -30,6 +35,18 @@
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="CornerRadius" Value="5"/>
                 <Setter Property="Margin" Value="0 0 8 0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+            <!-- Base TextBlock Style -->
+            <Style x:Key="BaseTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontFamily" Value="Arial"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#666666"/>
+            </Style>
+            <!-- Border Style -->
+            <Style x:Key="PageBorderStyle" TargetType="Border" BasedOn="{StaticResource BasePageBorderStyle}">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="BorderBrush" Value="#2DB7F5" />
@@ -37,18 +54,21 @@
                 </Style.Triggers>
             </Style>
             <!-- TextBlock Style -->
-            <Style x:Key="PageTextBlockStyle" TargetType="TextBlock">
-                <Setter Property="HorizontalAlignment" Value="Center" />
-                <Setter Property="VerticalAlignment" Value="Center" />
-                <Setter Property="FontFamily" Value="Arial"/>
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="Foreground" Value="#666666"/>
+            <Style x:Key="PageTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource FindAncestor, AncestorType=Border}}" Value="True">
                         <Setter Property="Foreground" Value="#2DB7F5" />
                     </DataTrigger>
                 </Style.Triggers>
-
+            </Style>
+            <!-- Selected TextBlock Style -->
+            <Style x:Key="SelectedPageTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+            </Style>
+            <!-- Selected Border Style -->
+            <Style x:Key="SelectedBorderStyle" TargetType="Border" BasedOn="{StaticResource BasePageBorderStyle}">
+                <Setter Property="Background" Value="#2DB7F5"/>
+                <Setter Property="BorderThickness" Value="0"/>
             </Style>
             <!-- Normal TextBox Style -->
             <Style x:Key="PageNormalTextStyle" TargetType="TextBlock">
@@ -58,16 +78,49 @@
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
             </Style>
+            <!-- Template Selector -->
+            <local:PaginationTemplateSelector x:Key="PaginationTemplateSelector">
+                <!-- Image Template -->
+                <local:PaginationTemplateSelector.ImageDataTemplate>
+                    <DataTemplate>
+                        <Border Width="16" Height="Auto" Margin="0 0 8 0">
+                            <Image Source="/MCCS.UserControl;component/Assert/omitPoint_16.png" />
+                        </Border>
+                    </DataTemplate>
+                </local:PaginationTemplateSelector.ImageDataTemplate>
+                <!-- TextBlock Template -->
+                <local:PaginationTemplateSelector.TextBlockTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Border.Style>
+                                <MultiBinding Converter="{StaticResource PropertyToResourceConverter}" ConverterParameter="PageBorder">
+                                    <Binding Path="IsSelected"/>
+                                    <Binding ElementName="PaginationControl"/>
+                                </MultiBinding>
+                            </Border.Style>
+                            <TextBlock Text="{Binding Num}">
+                                <TextBlock.Style>
+                                    <MultiBinding Converter="{StaticResource PropertyToResourceConverter}"
+                                                  ConverterParameter="PageTextBlock">
+                                        <Binding Path="IsSelected"/>
+                                        <Binding ElementName="PaginationControl"/>
+                                    </MultiBinding>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </DataTemplate>
+                </local:PaginationTemplateSelector.TextBlockTemplate>
+            </local:PaginationTemplateSelector>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Background="Transparent">
-        
         <StackPanel 
             Orientation="Horizontal" 
             VerticalAlignment="Center"
             Background="Transparent"
             Width="{Binding ActualWidth, ElementName=root}"
             Height="{Binding ActualHeight, ElementName=root}">
+            <!-- Total Page Text Area -->
             <StackPanel x:Name="TotalStackPanel"
                         Orientation="Horizontal" 
                         Margin="8 0 8 0">
@@ -76,89 +129,29 @@
                     x:Name="TotalPageText"
                     Style="{StaticResource PageNormalTextStyle}" 
                     Margin="5 0 5 0" 
+                    Text="{Binding Total, Mode=TwoWay}"
                     FontWeight="Bold" />
                 <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="条" />
             </StackPanel>
-            <!-- 前5个 -->
-            <ItemsControl ItemsSource="{Binding PageItems}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{StaticResource PageBorderStyle}" 
-                                Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="MouseLeftButtonDown">
-                                    <i:InvokeCommandAction Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=UserControl}}"
-                                                           CommandParameter="{Binding PageNumber}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                            <TextBlock Text="{Binding PageNumber}" Style="{StaticResource PageTextBlockStyle}"/>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- Last Page Btn -->
             <Border Style="{StaticResource PageBorderStyle}">
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/left_32.png" />
             </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="1" Style="{StaticResource PageTextBlockStyle}" />
-            </Border> 
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="2" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="3" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="4" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="5" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Width="16" Height="Auto" Margin="0 0 8 0">
-                <Image Source="/MCCS.UserControl;component/Assert/omitPoint_16.png" />
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="6" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="7" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="8" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="9" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="10" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Width="16" Height="Auto" Margin="0 0 8 0">
-                <Image Source="/MCCS.UserControl;component/Assert/omitPoint_16.png" />
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="11" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="12" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="13" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}" Visibility="Collapsed">
-                <TextBlock Text="14" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
-            <Border Style="{StaticResource PageBorderStyle}">
-                <TextBlock Text="15" Style="{StaticResource PageTextBlockStyle}"/>
-            </Border>
+            <!-- Page Items -->
+            <ItemsControl ItemsSource="{Binding SelectorUnits}" 
+                          ItemTemplateSelector="{StaticResource PaginationTemplateSelector}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <!-- Next Page Btn -->
             <Border Style="{StaticResource PageBorderStyle}">
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/right_32.png" />
             </Border>
             <ComboBox 
+                x:Name="SelectPageSize"
                 localAttached:ComboBoxSuffix.Suffix="条/页"
                 Style="{StaticResource CustomComboBoxWithItemStyle}"
                 Width="78" 
@@ -176,18 +169,17 @@
                     Height="Auto" 
                     Margin="0 0 8 0"
                     Style="{StaticResource PageNormalTextStyle}" 
-                    Text="跳转"></TextBlock>
+                    Text="跳转" />
                 <TextBox 
                     Width="50" 
                     Height="30"
                     VerticalContentAlignment="Center"
-                    Margin="0 0 8 0"
-                    ></TextBox>
+                    Margin="0 0 8 0" />
                 <TextBlock Text="页"
                            Width="Auto" 
                            Height="Auto" 
                            Margin="0 0 8 0"
-                           Style="{StaticResource PageNormalTextStyle}"></TextBlock>
+                           Style="{StaticResource PageNormalTextStyle}" />
             </StackPanel>
         </StackPanel>
     </Grid>

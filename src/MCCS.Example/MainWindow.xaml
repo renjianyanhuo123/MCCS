@@ -14,7 +14,7 @@
             Width="1000" 
             Height="30" 
             Total="40000"
-            PageSize="10"
+            DefaultPageSize="50"
             Background="LightGray"/>
     </Grid>
 </Window>

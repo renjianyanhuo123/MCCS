@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.UserControl.Pagination
+﻿namespace MCCS.UserControl.Pagination
 {
+    public enum UnitTypeEnum
+    {
+        Image = 1,
+        TextBlock = 2
+    }
+
     public class SelectorUnitViewModel:BindingBase
     {
         #region private field
         private bool _isSelected = false;
-        private bool _isVisible = true;
         private int _num = 1;
+        private UnitTypeEnum _type = UnitTypeEnum.Image;
         #endregion
 
         public bool IsSelected
@@ -19,17 +19,17 @@ namespace MCCS.UserControl.Pagination
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
         }
-
-        public bool IsVisible
-        {
-            get => _isVisible;
-            set => SetProperty(ref _isVisible, value);
-        }
-
+        
         public int Num
         {
             get => _num;
             set => SetProperty(ref _num, value);
+        }
+
+        public UnitTypeEnum Type
+        {
+            get => _type;
+            set => SetProperty(ref _type, value);
         }
     }
 }
