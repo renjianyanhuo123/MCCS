@@ -36,4 +36,8 @@
     </Resource>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Params\" />
+  </ItemGroup>
+
 </Project>

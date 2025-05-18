@@ -6,9 +6,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:MCCS.UserControl.Pagination"
              xmlns:assert="clr-namespace:MCCS.UserControl.Assert"
-             xmlns:customComboBox="clr-namespace:MCCS.UserControl.ComboBox"
              xmlns:localAttached="clr-namespace:MCCS.UserControl.AttachedAttributes"
              xmlns:converters="clr-namespace:MCCS.UserControl.Converters"
+             xmlns:localBehavior="clr-namespace:MCCS.UserControl.Behaviors"
              mc:Ignorable="d"
              x:Name="PaginationControl"
              d:DesignHeight="60" d:DesignWidth="1000">
@@ -25,7 +25,7 @@
             </ResourceDictionary.MergedDictionaries>
             <!-- 定义转换器 -->
             <converters:PropertyToResourceConverter x:Key="PropertyToResourceConverter" />
-
+            <converters:ComboBoxItemToIntConverter x:Key="ComboBoxItemToIntConverter" />
             <!-- Base Border Style -->
             <Style x:Key="BasePageBorderStyle" TargetType="Border">
                 <Setter Property="Height" Value="28" />
@@ -92,6 +92,12 @@
                 <local:PaginationTemplateSelector.TextBlockTemplate>
                     <DataTemplate>
                         <Border>
+                            <!-- 点击事件行为 -->
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseLeftButtonUp">
+                                    <i:InvokeCommandAction Command="{Binding DataContext.JumpToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding Num}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                             <Border.Style>
                                 <MultiBinding Converter="{StaticResource PropertyToResourceConverter}" ConverterParameter="PageBorder">
                                     <Binding Path="IsSelected"/>
@@ -126,15 +132,20 @@
                         Margin="8 0 8 0">
                 <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="共" />
                 <TextBlock 
-                    x:Name="TotalPageText"
+                    x:Name="TotalText"
                     Style="{StaticResource PageNormalTextStyle}" 
                     Margin="5 0 5 0" 
-                    Text="{Binding Total, Mode=TwoWay}"
+                    Text="{Binding Total}"
                     FontWeight="Bold" />
                 <TextBlock Style="{StaticResource PageNormalTextStyle}" Text="条" />
             </StackPanel>
             <!-- Last Page Btn -->
             <Border Style="{StaticResource PageBorderStyle}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                        <i:InvokeCommandAction Command="{Binding PreviousPageCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/left_32.png" />
             </Border>
             <!-- Page Items -->
@@ -148,20 +159,31 @@
             </ItemsControl>
             <!-- Next Page Btn -->
             <Border Style="{StaticResource PageBorderStyle}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                        <i:InvokeCommandAction Command="{Binding NextPageCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                 <Image Width="16" Height="16" Source="/MCCS.UserControl;component/Assert/right_32.png" />
             </Border>
             <ComboBox 
                 x:Name="SelectPageSize"
-                localAttached:ComboBoxSuffix.Suffix="条/页"
+                Tag="条/页"
+                SelectedItem="{Binding PageSize, Mode=TwoWay, Converter={StaticResource ComboBoxItemToIntConverter},ConverterParameter=条/页}"
                 Style="{StaticResource CustomComboBoxWithItemStyle}"
                 Width="78" 
                 Height="28" 
                 Margin="5 0 15 0">
-                <ComboBoxItem>10</ComboBoxItem>
-                <ComboBoxItem>20</ComboBoxItem>
-                <ComboBoxItem>30</ComboBoxItem>
-                <ComboBoxItem>40</ComboBoxItem>
-                <ComboBoxItem>50</ComboBoxItem>
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding SelectedChangedCommand}" CommandParameter="{Binding ElementName=SelectPageSize, Path=SelectedItem}"   />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <ComboBoxItem>10条/页</ComboBoxItem>
+                <ComboBoxItem>20条/页</ComboBoxItem>
+                <ComboBoxItem>30条/页</ComboBoxItem>
+                <ComboBoxItem>40条/页</ComboBoxItem>
+                <ComboBoxItem>50条/页</ComboBoxItem>
             </ComboBox>
             <StackPanel Orientation="Horizontal">
                 <TextBlock 
@@ -174,7 +196,12 @@
                     Width="50" 
                     Height="30"
                     VerticalContentAlignment="Center"
-                    Margin="0 0 8 0" />
+                    Margin="0 0 8 0" 
+                    Text="{Binding TargetPage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <i:Interaction.Behaviors>
+                        <localBehavior:EnterKeyCommandBehavior Command="{Binding JumpToPageCommand}" CommandParameter="{Binding TargetPage}"/>
+                    </i:Interaction.Behaviors>
+                </TextBox>
                 <TextBlock Text="页"
                            Width="Auto" 
                            Height="Auto" 

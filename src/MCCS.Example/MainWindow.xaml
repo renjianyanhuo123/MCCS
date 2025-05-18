@@ -10,11 +10,12 @@
     <Grid Background="Transparent">
         <customPagination:PaginationUserControl 
             x:Name="MyUserControl" 
-            ShowTotal="False"
+            ShowTotal="True"
             Width="1000" 
             Height="30" 
-            Total="40000"
-            DefaultPageSize="50"
+            Total="117"
+            DefaultPageSize="10"
+            DefaultCurrentPage="6"
             Background="LightGray"/>
     </Grid>
 </Window>

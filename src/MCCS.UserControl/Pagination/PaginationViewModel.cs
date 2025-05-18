@@ -9,32 +9,22 @@ namespace MCCS.UserControl.Pagination
         private int _currentPage = 1;
         private int _total = 1;
         private int _targetPage = 1;
+        private int _pageSize = 10;
+        private int _totalPages = 1;
         private ObservableCollection<SelectorUnitViewModel> _selectorUnits;
         #endregion
 
         public PaginationViewModel()
         {
-            _selectorUnits = 
-                [
-                    new SelectorUnitViewModel
-                    {
-                        IsSelected = true,
-                        Num = 1,
-                        Type = UnitTypeEnum.TextBlock
-                    },
-                    new SelectorUnitViewModel
-                    {
-                        IsSelected = false,
-                        Num = 2,
-                        Type = UnitTypeEnum.TextBlock
-                    },
-                    new SelectorUnitViewModel
-                    {
-                        IsSelected = false,
-                        Num = 3,
-                        Type = UnitTypeEnum.TextBlock
-                    }
-                ];
+            _selectorUnits = [];
+        }
+
+        public void UpdateFields(int total, int pageSize, int currentPage)
+        {
+            _total = total;
+            _pageSize = pageSize;
+            _currentPage = currentPage;
+            UpdateSelectorUnits();
         }
 
         #region Properties
@@ -45,8 +35,19 @@ namespace MCCS.UserControl.Pagination
         }
         public int CurrentPage
         {
-            get => _currentPage;
-            set => SetProperty(ref _currentPage, value);
+            get;
+            set;
+        }
+
+        public int PageSize
+        {
+            get => _pageSize;
+            set
+            {
+                if (_pageSize == value) return;
+                SetProperty(ref _pageSize, value);
+                // UpdateSelectorUnits();
+            }
         }
 
         public int Total
@@ -55,9 +56,15 @@ namespace MCCS.UserControl.Pagination
             set
             {
                 if (_total == value) return;
-                UpdateSelectorUnits(value);
                 SetProperty(ref _total, value);
+                // UpdateSelectorUnits();
             }
+        }
+
+        public int TotalPages
+        {
+            get => _totalPages;
+            set => SetProperty(ref _totalPages, value);
         }
 
         public int TargetPage
@@ -70,32 +77,140 @@ namespace MCCS.UserControl.Pagination
         #region Commands
 
         public ICommand InitialCommand { get; private set; } = new RelayCommand( param => { });
-        public ICommand PreviousPageCommand { get; private set; }
-        public ICommand NextPageCommand { get; private set; }
-        public ICommand JumpToPageCommand { get; private set; }
+        public ICommand PreviousPageCommand => new RelayCommand(PreviousPage, _ => true);
+        public ICommand NextPageCommand => new RelayCommand(NextPage, _ => true);
+        public ICommand JumpToPageCommand => new RelayCommand(JumpToPage, _ => true);
+
+        public ICommand SelectedChangedCommand => new RelayCommand(SelectedChanged, 
+            param => param is string { Length: >= 2 });
+
         #endregion
 
         #region private method
-        private void UpdateSelectorUnits(int total)
+        private void JumpToPage(object? param)
         {
-            if (total <= 5)
-            {
-                for (var i = 1; i <= total; i++)
-                {
-                    _selectorUnits.Add(new SelectorUnitViewModel
-                    {
-                        IsSelected = true,
-                        Num = i,
-                        Type = UnitTypeEnum.TextBlock
-                    });
-                }
-            }
-            //else if ()
-            //{
-
-            //}
+            if (param is not int p || p > TotalPages || p < 1) return;
+            CurrentPage = p;
+            UpdateSelectorUnits();
         }
 
+        private void PreviousPage(object? param)
+        {
+            if (CurrentPage > 1)
+            {
+                CurrentPage--;
+                UpdateSelectorUnits();
+            }
+        }
+        private void NextPage(object? param)
+        {
+            if (CurrentPage < TotalPages)
+            {
+                CurrentPage++;
+                UpdateSelectorUnits();
+            }
+        }
+        private void SelectedChanged(object? param)
+        {
+            if (param is not string s) return;
+            var t = s.Remove(2, s.Length - 2);
+            if (!int.TryParse(t, out var pageSize)) return;
+            PageSize = pageSize;
+            UpdateSelectorUnits();
+        }
+
+        private void UpdateSelectorUnits()
+        {
+            TotalPages = _total / _pageSize + 1;
+            if (TotalPages < CurrentPage)
+            {
+                CurrentPage = 1;
+            }
+            _selectorUnits.Clear();
+            for (var i = 1; i <= TotalPages; i++)
+            {
+                // 以当前页为中心，前后各显示2页;总共为5页
+                if (i <= CurrentPage)
+                {
+                    if (CurrentPage <= 4)
+                    {
+                        for (var j = i; j <= CurrentPage; j++)
+                        {
+                            _selectorUnits.Add(new SelectorUnitViewModel
+                            {
+                                IsSelected = j == CurrentPage,
+                                Num = j,
+                                Type = UnitTypeEnum.TextBlock
+                            });
+                        }
+                    }
+                    else
+                    {
+                        _selectorUnits.Add(new SelectorUnitViewModel
+                        {
+                            IsSelected = i == CurrentPage,
+                            Num = 1,
+                            Type = UnitTypeEnum.TextBlock
+                        });
+                        _selectorUnits.Add(new SelectorUnitViewModel
+                        {
+                            IsSelected = false,
+                            Type = UnitTypeEnum.Image
+                        });
+                        for (var j = CurrentPage - 2; j <= CurrentPage; j++)
+                        {
+                            _selectorUnits.Add(new SelectorUnitViewModel
+                            {
+                                IsSelected = j == CurrentPage,
+                                Num = j,
+                                Type = UnitTypeEnum.TextBlock
+                            });
+                        }
+                    }
+                    i = CurrentPage;
+                }
+                else
+                {
+                    if (_totalPages - CurrentPage > 3)
+                    {
+                        for (var j = i; j <= CurrentPage + 2; j++)
+                        {
+                            _selectorUnits.Add(new SelectorUnitViewModel
+                            {
+                                IsSelected = i == CurrentPage,
+                                Num = j,
+                                Type = UnitTypeEnum.TextBlock
+                            });
+                        }
+                        _selectorUnits.Add(new SelectorUnitViewModel
+                        {
+                            IsSelected = false,
+                            Num = i,
+                            Type = UnitTypeEnum.Image
+                        });
+                        _selectorUnits.Add(new SelectorUnitViewModel
+                        {
+                            IsSelected = false,
+                            Num = _totalPages,
+                            Type = UnitTypeEnum.TextBlock
+                        });
+                    }
+                    else
+                    {
+                        for (var j = i; j <= _totalPages; j++)
+                        {
+                            _selectorUnits.Add(new SelectorUnitViewModel
+                            {
+                                IsSelected = j == CurrentPage,
+                                Num = j,
+                                Type = UnitTypeEnum.TextBlock
+                            });
+                        }
+                    }
+                    i = _totalPages;
+                }
+            }
+        }
         #endregion
     }
 }

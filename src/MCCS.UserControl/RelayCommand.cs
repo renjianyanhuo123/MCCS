@@ -33,8 +33,7 @@ namespace MCCS.UserControl
         /// <returns>命令是否可执行</returns>
         public bool CanExecute(object? parameter)
         {
-            if(_canExecute != null) return _canExecute(parameter);
-            return false;
+            return _canExecute != null && _canExecute(parameter);
         }
 
         /// <summary>
