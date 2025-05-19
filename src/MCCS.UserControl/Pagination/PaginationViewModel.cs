@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using MCCS.UserControl.Params;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 
 namespace MCCS.UserControl.Pagination
@@ -11,13 +12,8 @@ namespace MCCS.UserControl.Pagination
         private int _targetPage = 1;
         private int _pageSize = 10;
         private int _totalPages = 1;
-        private ObservableCollection<SelectorUnitViewModel> _selectorUnits;
+        private ObservableCollection<SelectorUnitViewModel> _selectorUnits = [];
         #endregion
-
-        public PaginationViewModel()
-        {
-            _selectorUnits = [];
-        }
 
         public void UpdateFields(int total, int pageSize, int currentPage)
         {
@@ -75,7 +71,6 @@ namespace MCCS.UserControl.Pagination
         #endregion
 
         #region Commands
-
         public ICommand InitialCommand { get; private set; } = new RelayCommand( param => { });
         public ICommand PreviousPageCommand => new RelayCommand(PreviousPage, _ => true);
         public ICommand NextPageCommand => new RelayCommand(NextPage, _ => true);
@@ -86,12 +81,17 @@ namespace MCCS.UserControl.Pagination
 
         #endregion
 
+        #region Events
+        public event Action<PageChangedParam> PageChanged;
+        #endregion
+
         #region private method
         private void JumpToPage(object? param)
         {
             if (param is not int p || p > TotalPages || p < 1) return;
             CurrentPage = p;
             UpdateSelectorUnits();
+            PageChanged(new PageChangedParam(PageSize, CurrentPage));
         }
 
         private void PreviousPage(object? param)
@@ -100,6 +100,7 @@ namespace MCCS.UserControl.Pagination
             {
                 CurrentPage--;
                 UpdateSelectorUnits();
+                PageChanged(new PageChangedParam(PageSize, CurrentPage));
             }
         }
         private void NextPage(object? param)
@@ -108,6 +109,7 @@ namespace MCCS.UserControl.Pagination
             {
                 CurrentPage++;
                 UpdateSelectorUnits();
+                PageChanged(new PageChangedParam(PageSize, CurrentPage));
             }
         }
         private void SelectedChanged(object? param)
@@ -117,6 +119,7 @@ namespace MCCS.UserControl.Pagination
             if (!int.TryParse(t, out var pageSize)) return;
             PageSize = pageSize;
             UpdateSelectorUnits();
+            PageChanged(new PageChangedParam(PageSize, CurrentPage));
         }
 
         private void UpdateSelectorUnits()

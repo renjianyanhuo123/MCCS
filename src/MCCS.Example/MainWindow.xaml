@@ -7,15 +7,28 @@
         xmlns:customPagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="1000">
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
     <Grid Background="Transparent">
+        <!--
+        使用示例:
+        Total: 总页数
+        DefaultPageSize: 默认每页显示条数
+        DefaultCurrentPage: 默认当前页
+        PageChangedCommand: 页码改变时触发的命令
+        注意: 因为是自定义控件, 所以需要在使用的地方添加xmlns:customPagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
+        1. ShowTotal: 是否显示总页数
+        2. 一定要写明使用的哪一个DataContext,不然会默认使用控件自身的DataContext
+        -->
         <customPagination:PaginationUserControl 
-            x:Name="MyUserControl" 
+            x:Name="PaginationUserControl" 
             ShowTotal="True"
             Width="1000" 
             Height="30" 
-            Total="117"
+            Total="{Binding DataContext.Total, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
             DefaultPageSize="10"
             DefaultCurrentPage="6"
-            Background="LightGray"/>
+            PageChangedCommand="{Binding DataContext.OnPageChanged, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" />
     </Grid>
 </Window>

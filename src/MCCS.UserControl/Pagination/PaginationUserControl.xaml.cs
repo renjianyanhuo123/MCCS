@@ -1,6 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using MCCS.UserControl.Params;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace MCCS.UserControl.Pagination
@@ -17,35 +16,21 @@ namespace MCCS.UserControl.Pagination
             InitializeComponent();
             _viewModel = new PaginationViewModel();
             DataContext = _viewModel;
-            this.Loaded += PaginationUserControl_Loaded;
+            Loaded += PaginationUserControl_Loaded;
         }
 
         #region 回调Command
-        public static readonly DependencyProperty CurrentPageChangedCommandProperty =
+        public static readonly DependencyProperty PageChangedCommandProperty =
             DependencyProperty.Register(
-                nameof(CurrentPageChangedCommandProperty), 
+                nameof(PageChangedCommand), 
                 typeof(ICommand), 
                 typeof(PaginationUserControl), 
-                new PropertyMetadata(null));
+                new PropertyMetadata(null, OnPageChangedCommandChanged));
 
-        // 回调命令：PageSize变化
-        public static readonly DependencyProperty PageSizeChangedCommandProperty =
-            DependencyProperty.Register(
-                nameof(PageSizeChangedCommand), 
-                typeof(ICommand), 
-                typeof(PaginationUserControl), 
-                new PropertyMetadata(null));
-
-        public ICommand PageSizeChangedCommand
+        public ICommand PageChangedCommand
         {
-            get => (ICommand)GetValue(PageSizeChangedCommandProperty);
-            set => SetValue(PageSizeChangedCommandProperty, value);
-        }
-
-        public ICommand CurrentPageChangedCommand
-        {
-            get => (ICommand)GetValue(CurrentPageChangedCommandProperty);
-            set => SetValue(CurrentPageChangedCommandProperty, value);
+            get => (ICommand)GetValue(PageChangedCommandProperty);
+            set => SetValue(PageChangedCommandProperty, value);
         }
         #endregion
 
@@ -136,13 +121,20 @@ namespace MCCS.UserControl.Pagination
                 new PropertyMetadata(10, OnDefaultPageSizeChanged));
 
         #region CallBack
+        private static void OnPageChangedCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not PaginationUserControl control || e.NewValue is not ICommand pageChangedCommand) return;
+            // 重新绑定 ViewModel 的回调
+            control._viewModel.PageChanged -= control.BindingPageChanged;
+            control._viewModel.PageChanged += control.BindingPageChanged;
+        }
+
         private static void OnPageSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int pageSize) return;
             var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.PageSize = pageSize;
-            control.PageSizeChangedCommand.Execute(pageSize);
+            viewModel.PageSize = pageSize; 
         }
 
         private static void OnCurrentPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -150,8 +142,7 @@ namespace MCCS.UserControl.Pagination
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int currentPage) return;
             var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.CurrentPage = currentPage;
-            control.CurrentPageChangedCommand.Execute(currentPage);
+            viewModel.CurrentPage = currentPage; 
         }
 
         private static void OnShowTotalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -188,6 +179,14 @@ namespace MCCS.UserControl.Pagination
         #endregion
          
         #region Private Method
+        private void BindingPageChanged(PageChangedParam param)
+        {
+            if (PageChangedCommand != null && PageChangedCommand.CanExecute(param))
+            {
+                PageChangedCommand.Execute(param);
+            }
+        }
+
         private void UpdateShowTotalUi(bool showTotal)
         {
             TotalStackPanel.Visibility = showTotal ? Visibility.Visible : Visibility.Collapsed;

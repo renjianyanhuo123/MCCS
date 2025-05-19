@@ -6,9 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCCS"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
-        xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
@@ -99,7 +97,7 @@
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <mah:MetroWindow.Flyouts>
-        <mah:FlyoutsControl x:Name="flyoutsControl">
+        <mah:FlyoutsControl>
             <mah:Flyout x:Name="TestCommandFlyout"
             IsOpen="{Binding IsOpenFlyout}"
             Header="{Binding RightFlyoutName, Mode=OneWay}"
@@ -196,7 +194,7 @@
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
             </ListBox>
-            <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionNam}" 
+            <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionName}" 
                 Focusable="True" IsTabStop="False">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Loaded">

@@ -47,6 +47,7 @@ namespace MCCS
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
             containerRegistry.AddRepository(configuration);
         }
 

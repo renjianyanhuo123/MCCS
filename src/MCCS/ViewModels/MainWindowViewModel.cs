@@ -6,6 +6,7 @@ using MCCS.ViewModels.Others;
 using MCCS.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
+using MCCS.Common;
 
 namespace MCCS.ViewModels
 {
@@ -16,29 +17,25 @@ namespace MCCS.ViewModels
 
         #region 页面属性
         private ObservableCollection<MainTabsViewModel> _tabs;
-        public ObservableCollection<MainTabsViewModel> Tabs { get => _tabs; set { SetProperty(ref _tabs, value); } }
+        public ObservableCollection<MainTabsViewModel> Tabs { get => _tabs; set => SetProperty(ref _tabs, value);
+        }
 
         private HamburgerMenuItem _selectedMenuItem;
         public HamburgerMenuItem SelectedMenuItem
         {
             get => _selectedMenuItem;
-            set 
-            {
-                SetProperty(ref _selectedMenuItem, value);
-            }
+            set => SetProperty(ref _selectedMenuItem, value);
         }
         private MainTabsViewModel _selectedTabItem;
         public MainTabsViewModel SelectedTabItem 
         {
             get => _selectedTabItem;
-            set 
+            set
             {
-                if (value != _selectedTabItem) 
-                {
-                    foreach (var tab in _tabs) tab.IsChecked = tab.Id == value.Id;
-                    _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(value.Id, UriKind.Relative), NavigationCompleted);
-                    SetProperty(ref _selectedTabItem, value);
-                }
+                if (value == _selectedTabItem) return;
+                foreach (var tab in _tabs) tab.IsChecked = tab.Id == value.Id;
+                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(value.Id, UriKind.Relative), NavigationCompleted);
+                SetProperty(ref _selectedTabItem, value);
             }
         }
 
@@ -72,15 +69,14 @@ namespace MCCS.ViewModels
         #endregion
 
         #region 命令声明
-        public DelegateCommand<object> MainRegionLoadedCommand => new(ExcuateMainRegionLoadedCommand);
-        public DelegateCommand<object> JumpChildTabCommand => new(ExcuateJumpChildTabCommand);
+        public DelegateCommand<object> MainRegionLoadedCommand => new(ExecuteMainRegionLoadedCommand);
+        public DelegateCommand<object> JumpChildTabCommand => new(ExecuteJumpChildTabCommand);
         public DelegateCommand<object> JumpToCommand => new(ExecuteJumpToCommand);
-        public DelegateCommand<Flyout> OpenTestFlyoutCommand => new(f => f!.SetCurrentValue(Flyout.IsOpenProperty, true), f => f is not null);
-        public DelegateCommand<string> CloseTabCommand => new(ExcuateCloseTabCommand);
+        public DelegateCommand<string> CloseTabCommand => new(ExecuteCloseTabCommand);
         #endregion
 
         #region 命令执行
-        private void ExcuateCloseTabCommand(string id) 
+        private void ExecuteCloseTabCommand(string id) 
         {
             var delItem = _tabs.First(x => x.Id == id);
             if (SelectedTabItem.Id == id)
@@ -91,19 +87,19 @@ namespace MCCS.ViewModels
             _tabs.Remove(delItem); 
         }
 
-        private void ExcuateMainRegionLoadedCommand(object parameter)
+        private void ExecuteMainRegionLoadedCommand(object parameter)
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
         }
-        private void ExcuateJumpChildTabCommand(object param)
+        private void ExecuteJumpChildTabCommand(object param)
         {
             SelectedTabItem = _tabs.First(c => c.Id == param.ToString());
         }
         private void ExecuteJumpToCommand(object parameter)
         {
-            if (parameter is not HamburgerMenuIconItem) return;
-            var item = parameter as HamburgerMenuIconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionNam, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
+            if (parameter is not HamburgerMenuIconItem iconItem) return;
+            var item = iconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
         }
 
         private void NavigationCompleted(NavigationResult result)
@@ -131,7 +127,7 @@ namespace MCCS.ViewModels
 
         private void OnOpenTabPage(OpenTestOperationEventParam param) 
         {
-            MainTabsViewModel? addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
+            var addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
             if (addItem == null) 
             {
                 addItem = new MainTabsViewModel
@@ -152,27 +148,23 @@ namespace MCCS.ViewModels
         public MainWindowViewModel(
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager, 
-            IEventAggregator eventAggregator) : base(eventAggregator)
+            IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
         {
             eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
+            _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
+            _selectedMenuItem = selectedMenuItem;
+            _selectedTabItem = selectedTabItem;
             var menus = systemMenuRepository.GetChildMenusById(0);
-            _menus = menus.Select(s =>
+            _menus = menus.Select(s => new HamburgerMenuIconItem
             {
-                if (!Enum.TryParse(s.Icon, out PackIconKind result))
-                {
-                    result = PackIconKind.Home;
-                }
-                return new HamburgerMenuIconItem
-                {
-                    Icon = new PackIcon() { Kind = result },
-                    Label = s.Name,
-                    Tag = s.Key
-                };
+                Icon = StringToIcon.ConvertToIcon(s.Icon),
+                Label = s.Name,
+                Tag = s.Key
             }).ToList();
             _tabs = [
-                new()
+                new MainTabsViewModel
                 {
                     Id = HomePageViewModel.Tag,
                     Content = "主页",

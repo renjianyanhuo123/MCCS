@@ -1,5 +1,6 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Windows;
 
 namespace MCCS.Example
@@ -9,6 +10,10 @@ namespace MCCS.Example
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Critical;
+        }
     }
 
 }
