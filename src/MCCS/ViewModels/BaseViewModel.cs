@@ -2,21 +2,15 @@
 
 namespace MCCS.ViewModels;
 
-public class BaseViewModel : BindableBase, INavigationAware
+public class BaseViewModel(IEventAggregator eventAggregator, IDialogService dialogService)
+    : BindableBase, INavigationAware
 {
-    protected readonly IEventAggregator _eventAggregator;
-    protected IDialogService _dialogService;
+    protected readonly IEventAggregator _eventAggregator = eventAggregator;
+    protected IDialogService _dialogService = dialogService;
     protected string _parentView = string.Empty;
 
-    public BaseViewModel(IEventAggregator eventAggregator)
+    public BaseViewModel(IEventAggregator eventAggregator) : this(eventAggregator, null)
     {
-        this._eventAggregator = eventAggregator;
-    }
-
-    public BaseViewModel(IEventAggregator eventAggregator, IDialogService dialogService)
-    {
-        this._eventAggregator = eventAggregator;
-        this._dialogService = dialogService;
     }
 
     public bool IsNavigationTarget(NavigationContext navigationContext)

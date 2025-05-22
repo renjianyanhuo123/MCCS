@@ -1,19 +1,9 @@
 ﻿using HelixToolkit.Wpf;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MCCS.Views.Pages
 {
@@ -32,13 +22,10 @@ namespace MCCS.Views.Pages
         public TestStartingPage()
         {
             InitializeComponent();
-            Loaded += TestStartingPage_Loaded;
-        }
-        private void TestStartingPage_Loaded(object sender, RoutedEventArgs e)
-        {
+            // Loaded += TestStartingPage_Loaded;
             // 创建一个BillboardTextGroupVisual3D用于显示模型数据
             billboardTextGroup = new BillboardTextGroupVisual3D
-            { 
+            {
                 Background = new SolidColorBrush(Colors.White),
                 BorderBrush = new SolidColorBrush(Colors.Black),
                 Foreground = new SolidColorBrush(Colors.Black),
@@ -54,14 +41,10 @@ namespace MCCS.Views.Pages
 
         private void LoadModels()
         {
-            // 创建三个不同的模型并设置在不同的空间位置
-            //CreateCubeModel("立方体", new Point3D(0, 0, 0), Colors.Blue);
-            //CreateSphereModel("球体", new Point3D(3, 1, 0), Colors.Red);
-            //CreateCylinderModel("圆柱体", new Point3D(-2, 2, 0), Colors.Green);
-
             // 还可以导入外部模型，例如OBJ、STL等
             ImportExternalModel("model1", @"F:\models\others\model1.stl", new Point3D(-5, 0, 0), Colors.Green);
             ImportExternalModel("model2", @"F:\models\others\model2.stl", new Point3D(0, 0, 0), Colors.Green);
+            ImportExternalModel("model3", @"F:\models\others\model2.stl", new Point3D(5, 0, 0), Colors.Green);
         }
         // 可选：导入外部3D模型
         private void ImportExternalModel(string name, string filePath, Point3D position, Color color)
@@ -268,7 +251,7 @@ namespace MCCS.Views.Pages
              
 
             // 添加从模型到标签的连接线
-            AddConnectingLine(position, textPosition, name);
+            //AddConnectingLine(position, textPosition, name);
             //billboardTextGroup.Items.Add(new BillboardTextItem()
             //{
             //    Text = title,

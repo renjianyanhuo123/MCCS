@@ -32,8 +32,6 @@
             </h:HelixViewport3D.Camera>
             <h:SunLight/>
             <ModelVisual3D x:Name="modelsGroup"/>
-            <h:BillboardTextGroupVisual3D Background="red" BorderBrush="Black" Foreground="Black" BorderThickness="1" FontSize="18" Padding="2" 
-                                          Offset="20,20" PinBrush="Gray" Items="{Binding TextItems3}" IsEnabled="True"/>
         </h:HelixViewport3D>
     </Grid>
 </UserControl>

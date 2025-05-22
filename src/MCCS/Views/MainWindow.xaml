@@ -140,7 +140,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <ListBox Grid.Row="0" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTabItem}">
+            <!--<ListBox Grid.Row="0" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTabItem}">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Background" Value="Transparent"/>
@@ -152,7 +152,7 @@
                                         <ContentPresenter />
                                     </Border>
                                     <ControlTemplate.Triggers>
-                                        <!-- 这里去除了 IsSelected 触发的背景变化 -->
+                                       
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -193,7 +193,7 @@
                         <StackPanel VerticalAlignment="Center"  Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
-            </ListBox>
+            </ListBox>-->
             <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionName}" 
                 Focusable="True" IsTabStop="False">
                 <i:Interaction.Triggers>

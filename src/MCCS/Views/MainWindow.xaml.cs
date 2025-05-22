@@ -1,4 +1,5 @@
 ﻿using MahApps.Metro.Controls;
+using Serilog;
 
 namespace MCCS.Views
 {

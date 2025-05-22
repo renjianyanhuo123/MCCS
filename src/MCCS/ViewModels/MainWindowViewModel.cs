@@ -17,7 +17,9 @@ namespace MCCS.ViewModels
 
         #region 页面属性
         private ObservableCollection<MainTabsViewModel> _tabs;
-        public ObservableCollection<MainTabsViewModel> Tabs { get => _tabs; set => SetProperty(ref _tabs, value);
+        public ObservableCollection<MainTabsViewModel> Tabs { 
+            get => _tabs; 
+            set => SetProperty(ref _tabs, value);
         }
 
         private HamburgerMenuItem _selectedMenuItem;
@@ -175,7 +177,7 @@ namespace MCCS.ViewModels
             ];
             // 默认选中第一个项，并执行导航
             SelectedTabItem = _tabs.FirstOrDefault();
-            SelectedMenuItem = _menus.FirstOrDefault(); 
+            SelectedMenuItem = _menus[1]; 
             _optionsMenus = [];
         }
     }
