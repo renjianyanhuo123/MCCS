@@ -21,21 +21,21 @@ namespace MCCS.ViewModels.Pages
         }
 
         #region 命令
-        public DelegateCommand<object> MouseRightButtonDownCommand => new(ExcuateMouseRightButtonDownCommand);
-        public DelegateCommand<object> MouseMoveCommand => new(ExcuateMouseMoveCommand);
-        public DelegateCommand<object> MouseRightButtonUpCommand => new(ExcuateMouseRightButtonUpCommand);
-        public DelegateCommand<MouseWheelEventArgs> MouseWheelCommand => new(ExcuateMouseWheelCommand);
+        public DelegateCommand<object> MouseRightButtonDownCommand => new(ExecuteMouseRightButtonDownCommand);
+        public DelegateCommand<object> MouseMoveCommand => new(ExecuteMouseMoveCommand);
+        public DelegateCommand<object> MouseRightButtonUpCommand => new(ExecuteMouseRightButtonUpCommand);
+        public DelegateCommand<MouseWheelEventArgs> MouseWheelCommand => new(ExecuteMouseWheelCommand);
         #endregion
 
         #region 私有方法
-        private void ExcuateMouseRightButtonDownCommand(object param) 
+        private void ExecuteMouseRightButtonDownCommand(object param) 
         {
             _drawingCanvas = param as Canvas;
             _startPoint = Mouse.GetPosition(_drawingCanvas);
             _action = true;
         }
 
-        private void ExcuateMouseMoveCommand(object param) 
+        private void ExecuteMouseMoveCommand(object param) 
         {
             if (_action && Mouse.RightButton == MouseButtonState.Pressed) 
             {
@@ -57,12 +57,12 @@ namespace MCCS.ViewModels.Pages
             }
         }
 
-        private void ExcuateMouseRightButtonUpCommand(object param) 
+        private void ExecuteMouseRightButtonUpCommand(object param) 
         {
             _action = false;
         }
 
-        private void ExcuateMouseWheelCommand(MouseWheelEventArgs e) 
+        private void ExecuteMouseWheelCommand(MouseWheelEventArgs e) 
         {
             // 监听Crtl + 滚轮事件
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) 

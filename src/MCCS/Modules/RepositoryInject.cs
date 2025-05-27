@@ -17,9 +17,11 @@ namespace MCCS.Modules
                 .UseAutoSyncStructure(true) // 自动同步实体结构到数据库
                 .UseMonitorCommand(cmd => Debug.WriteLine($"SQL: {cmd.CommandText}")) // 监视 SQL 命令
                 .Build();
+            // if (freesql == null) throw new ArgumentNullException(nameof(freesql));
             containerRegistry.RegisterInstance(freesql);
             containerRegistry.Register<ISystemMenuRepository, SystemMenuRepository>();
             containerRegistry.Register<ITestInfoRepository, TestInfoRepository>();
+            containerRegistry.Register<IModel3DDataRepository, Model3DDataRepository>();
             SeedData.InitialData(freesql);
         }
     }

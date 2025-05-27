@@ -1,5 +1,4 @@
 ﻿using MahApps.Metro.Controls;
-using MaterialDesignThemes.Wpf;
 using MCCS.Core.Repositories;
 using MCCS.Events;
 using MCCS.ViewModels.Others;
