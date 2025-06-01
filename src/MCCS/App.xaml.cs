@@ -7,10 +7,7 @@ using System.IO;
 using System.Windows;
 using Serilog;
 using System.Windows.Threading;
-using MCCS.LoggerSettings;
-using Microsoft.Extensions.Logging;
-using Serilog.Events;
-using System;
+using MCCS.Services.Model3DService;
 
 namespace MCCS
 {
@@ -65,6 +62,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
+
+            containerRegistry.Register<IModel3DLoaderService, Model3DLoaderService>();
+
             containerRegistry.AddRepository(configuration);
         }
         

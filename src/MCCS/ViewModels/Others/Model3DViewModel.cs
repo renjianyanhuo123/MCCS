@@ -1,55 +1,47 @@
 ﻿using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using MCCS.Models;
 
 namespace MCCS.ViewModels.Others
 {
     public class Model3DViewModel : BindableBase
     {
-        private readonly ModelData _modelData;
+        private string _name; 
+        private Model3D _model;
+        private Point3D _position;
         private bool _isSelected;
-        private bool _isHovered;
-        private bool _isLoaded;
-        private bool _isLoading;
-        private string _loadingStatus;
+        private bool _isHovered; 
+        private bool _isInteractive;
         private Material _currentMaterial;
         private Material _originalMaterial;
+        private bool _isClickable;
 
-        public Model3DViewModel(ModelData modelData)
+        public string Id { get; set; }
+
+        public string FilePath { get; set; }
+
+        public bool IsClickable
         {
-            _modelData = modelData ?? throw new ArgumentNullException(nameof(modelData));
-
-            // 创建原始材质
-            _originalMaterial = new DiffuseMaterial(new SolidColorBrush(modelData.OriginalColor));
-            _currentMaterial = _originalMaterial;
+            get => _isClickable;
+            set => SetProperty(ref _isClickable, value);
         }
 
-        public string Id => _modelData.Id;
-        public string Name => _modelData.Name;
-        public string Description => _modelData.Description;
-        public string FilePath => _modelData.FilePath;
-        public Point3D Position => _modelData.Position;
-        public string FileName => _modelData.FileName;
-        public Model3D Model => _modelData.Model;
-        public string DisplayText => _modelData.DisplayText;
-
-        public bool IsLoaded
+        public string Name
         {
-            get => _isLoaded;
-            set => SetProperty(ref _isLoaded, value);
+            get => _name;
+            set => SetProperty(ref _name, value);
         }
 
-        public bool IsLoading
+        public Point3D Position
         {
-            get => _isLoading;
-            set => SetProperty(ref _isLoading, value);
+            get => _position;
+            set => SetProperty(ref _position, value);
         }
 
-        public string LoadingStatus
+        public bool IsInteractive
         {
-            get => _loadingStatus;
-            set => SetProperty(ref _loadingStatus, value);
-        }
+            get => _isInteractive;
+            set => SetProperty(ref _isInteractive, value);
+        } 
 
         public bool IsSelected
         {
@@ -61,6 +53,12 @@ namespace MCCS.ViewModels.Others
                     UpdateModelMaterial();
                 }
             }
+        }
+
+        public Model3D Model
+        {
+            get => _model;
+            set => SetProperty(ref _model, value);
         }
 
         public bool IsHovered
@@ -79,6 +77,12 @@ namespace MCCS.ViewModels.Others
         {
             get => _currentMaterial;
             set => SetProperty(ref _currentMaterial, value);
+        }
+
+        public Material OriginalMaterial
+        {
+            get => _originalMaterial;
+            set => SetProperty(ref _originalMaterial, value);
         }
 
         // 更新模型的材质基于选中和悬停状态
@@ -103,7 +107,7 @@ namespace MCCS.ViewModels.Others
             }
 
             // 如果模型已加载，应用材质
-            ApplyMaterialToModel(_modelData.Model, CurrentMaterial);
+            ApplyMaterialToModel(Model, CurrentMaterial);
         }
 
         /// <summary>
@@ -133,11 +137,7 @@ namespace MCCS.ViewModels.Others
         // 设置加载完成的模型
         public void SetLoadedModel(Model3D model)
         {
-            _modelData.Model = model;
-            IsLoaded = true;
-            IsLoading = false;
-            LoadingStatus = "加载完成";
-
+            Model = model;  
             // 应用当前材质
             UpdateModelMaterial();
 

@@ -14,6 +14,8 @@ namespace MCCS.Views.Pages
     /// </summary>
     public partial class TestStartingPage : UserControl
     {
+        private Model3DGroup _model3DGroup;
+        private bool _isLoaded;
         private Dictionary<Model3D, Model3DViewModel> _modelViewModelMap;
         // private GeometryModel3D lastHoveredModel = null;
         private TestStartingPageViewModel _viewModel;
@@ -26,7 +28,8 @@ namespace MCCS.Views.Pages
         {
             InitializeComponent();
             // Loaded += TestStartingPage_Loaded;
-            _viewModel = DataContext as TestStartingPageViewModel ?? throw new ArgumentNullException(nameof(_viewModel));
+            _viewModel = DataContext as TestStartingPageViewModel 
+                         ?? throw new ArgumentNullException(nameof(_viewModel));
             // 初始化模型映射字典
             _modelViewModelMap = new Dictionary<Model3D, Model3DViewModel>();
             // 初始化Billboard服务
@@ -46,30 +49,12 @@ namespace MCCS.Views.Pages
             // 订阅模型加载完成事件
             _viewModel.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(TestStartingPageViewModel.LoadedModelsCount))
-                {
-                    // 当模型加载完成时，更新模型映射并添加到视图
-                    UpdateModelsInViewport();
-                }
+                //if (e.PropertyName == nameof(TestStartingPageViewModel.LoadedModelsCount))
+                //{
+                //    // 当模型加载完成时，更新模型映射并添加到视图
+                //    UpdateModelsInViewport();
+                //}
             };
-        }
-
-        private void UpdateModelsInViewport()
-        {
-            foreach (var modelVm in _viewModel.Model3DList)
-            {
-                if (modelVm is not { IsLoaded: true, Model: not null } ||
-                    _modelViewModelMap.ContainsValue(modelVm)) continue;
-                // 添加模型到视图
-                var modelVisual = new ModelVisual3D { Content = modelVm.Model };
-                ModelsGroupContainer.Children.Add(modelVisual);
-
-                // 更新模型映射
-                _modelViewModelMap[modelVm.Model] = modelVm;
-
-                // 创建标签
-                // _billboardService.CreateLabel(modelVm);
-            }
         }
 
         private void SetMaterialAndAddToDictionary(Model3DGroup modelGroup, string name, Color color)
@@ -81,7 +66,7 @@ namespace MCCS.Views.Pages
                     case GeometryModel3D geometryModel:
                         geometryModel.Material = new DiffuseMaterial(new SolidColorBrush(color));
                         geometryModel.BackMaterial = new DiffuseMaterial(new SolidColorBrush(color));
-                        _modelViewModelMap[geometryModel] = new Model3DViewModel { Name = name, OriginalColor = color };
+                        // _modelViewModelMap[geometryModel] = new Model3DViewModel { Name = name, OriginalColor = color };
                         break;
                     case Model3DGroup childGroup:
                         SetMaterialAndAddToDictionary(childGroup, name, color);
@@ -106,8 +91,8 @@ namespace MCCS.Views.Pages
 
         private void AddModelToViewport(GeometryModel3D model)
         {
-            var modelVisual = new ModelVisual3D { Content = model };
-            ModelsGroupContainer.Children.Add(modelVisual);
+            //var modelVisual = new ModelVisual3D { Content = model };
+            //ModelsGroupContainer.Children.Add(modelVisual);
         }
 
         private void ViewPort_MouseDown(object sender, MouseButtonEventArgs e)
@@ -116,17 +101,17 @@ namespace MCCS.Views.Pages
             var hitResult = VisualTreeHelper.HitTest(viewPort, e.GetPosition(viewPort));
 
             // 重置所有模型状态
-            _viewModel.ResetAllModels();
+            //_viewModel.ResetAllModels();
 
             // 处理选中事件
             if (hitResult is RayMeshGeometry3DHitTestResult { ModelHit: { } hitModel })
             {
                 var selectedVm = FindViewModel(hitModel);
-                _viewModel.SelectedModel = selectedVm;
+                //_viewModel.SelectedModel = selectedVm;
             }
             else
             {
-                _viewModel.SelectedModel = null;
+                //_viewModel.SelectedModel = null;
             }
         }
 
@@ -159,7 +144,8 @@ namespace MCCS.Views.Pages
             // 如果模型是一个组的一部分，需要遍历查找父模型
             if (model is GeometryModel3D geometryModel)
             {
-                return (from pair in _modelViewModelMap where IsPartOfModel(geometryModel, pair.Key) 
+                return (from pair in _modelViewModelMap
+                        where IsPartOfModel(geometryModel, pair.Key)
                         select pair.Value).FirstOrDefault();
             }
 

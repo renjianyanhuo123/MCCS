@@ -4,34 +4,64 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
-             xmlns:helix="clr-namespace：HelixToolkit.Wpf;assembly=HelixToolkit.Wpf"
+             xmlns:behaviors="clr-namespace:MCCS.Behaviors"
+             xmlns:convert="clr-namespace:MCCS.Converters"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:h="http://helix-toolkit.org/wpf"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding LoadModelsCommand}" />
+        </b:EventTrigger> 
+    </b:Interaction.Triggers>
+    <UserControl.Resources>
+        <convert:TestProgressVisibleConverter x:Key="TestProgressVisibleConverter"/>
+        <convert:NoTestProgressVisibleConverter x:Key="NoTestProgressVisibleConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
+        <!--<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
             <TextBlock Text="当前选中模型: " VerticalAlignment="Center"/>
             <TextBlock x:Name="SelectedModelText" VerticalAlignment="Center" Margin="5,0" Text="无"/>
-        </StackPanel>
+        </StackPanel>-->
 
-        <h:HelixViewport3D x:Name="viewPort" Grid.Row="1" 
+        <h:HelixViewport3D x:Name="viewPort"  Grid.Row="0" Grid.Column="0"
+                                Visibility="{Binding IsLoaded, Converter={StaticResource NoTestProgressVisibleConverter}}"
                                ZoomExtentsWhenLoaded="True"
                                ShowCoordinateSystem="True"
-                               Background="LightGray"
-                               MouseDown="ViewPort_MouseDown"
-                               MouseMove="ViewPort_MouseMove">
+                               Background="LightGray">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera Position="10,10,10" LookDirection="-10,-10,-10" UpDirection="0,0,1"/>
             </h:HelixViewport3D.Camera>
-            <h:SunLight/>
-            <ModelVisual3D x:Name="ModelsGroupContainer" />
+
+            <!-- 鼠标交互行为 -->
+            <b:Interaction.Behaviors>
+                <behaviors:ModelInteractionBehavior 
+                    Models="{Binding Models}"/>
+            </b:Interaction.Behaviors>
+
+            <h:SunLight/> 
+            <ModelVisual3D  Content="{Binding CombinedModel}" />
         </h:HelixViewport3D>
+        <StackPanel 
+            VerticalAlignment="Center" 
+            Grid.Row="0" 
+            Grid.Column="0" 
+            Orientation="Vertical" 
+            HorizontalAlignment="Center"
+            Visibility="{Binding IsLoaded, Converter={StaticResource TestProgressVisibleConverter}}">
+            <ProgressBar Width="600" Height="10" Value="90"></ProgressBar>
+            <TextBlock FontWeight="Bold"
+                       Margin="0 8" 
+                       HorizontalAlignment="Center" 
+                       Text="模型加载中... 90%" 
+                       Foreground="#666666"></TextBlock>
+        </StackPanel>
     </Grid>
 </UserControl>

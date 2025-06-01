@@ -19,6 +19,8 @@ namespace MCCS.Core.Models.Model3D
 
         public int OriginalColor { get; set; }
 
+        public ModelType Type { get; set; }
+
         /// <summary>
         /// 示例: 50.90,42.09,93.093 (x,y,z)
         /// </summary>
