@@ -1,5 +1,8 @@
-﻿using System.Windows.Media;
+﻿using System.Numerics;
+using MCCS.Core.Models.Model3D;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using MCCS.Common;
 
 namespace MCCS.ViewModels.Others
 {
@@ -10,14 +13,28 @@ namespace MCCS.ViewModels.Others
         private Point3D _position;
         private bool _isSelected;
         private bool _isHovered; 
-        private bool _isInteractive;
-        private Material _currentMaterial;
-        private Material _originalMaterial;
+        // private bool _isSelectable;
+        private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
         private bool _isClickable;
+        private MeshGeometry3D _geometry;
+        private Transform3D _transform;
+        private readonly Model3DData _model3DData;
+
+        public Model3DViewModel(Model3DData model3DData)
+        {
+            _model3DData = model3DData;
+            UpdateTransform();
+        }
 
         public string Id { get; set; }
 
         public string FilePath { get; set; }
+
+        public MeshGeometry3D Geometry
+        {
+            get => _geometry;
+            set => SetProperty(ref _geometry, value);
+        }
 
         public bool IsClickable
         {
@@ -37,11 +54,7 @@ namespace MCCS.ViewModels.Others
             set => SetProperty(ref _position, value);
         }
 
-        public bool IsInteractive
-        {
-            get => _isInteractive;
-            set => SetProperty(ref _isInteractive, value);
-        } 
+        public bool IsSelectable { get; set; }
 
         public bool IsSelected
         {
@@ -50,16 +63,22 @@ namespace MCCS.ViewModels.Others
             {
                 if (SetProperty(ref _isSelected, value))
                 {
-                    UpdateModelMaterial();
+                    UpdateMaterial();
                 }
             }
         }
 
-        public Model3D Model
+        public Transform3D Transform
         {
-            get => _model;
-            set => SetProperty(ref _model, value);
+            get => _transform;
+            set => SetProperty(ref _transform, value);
         }
+
+        //public Model3D Model
+        //{
+        //    get => _model;
+        //    set => SetProperty(ref _model, value);
+        //}
 
         public bool IsHovered
         {
@@ -68,80 +87,55 @@ namespace MCCS.ViewModels.Others
             {
                 if (SetProperty(ref _isHovered, value))
                 {
-                    UpdateModelMaterial();
+                    UpdateMaterial();
                 }
             }
         }
 
-        public Material CurrentMaterial
+        public HelixToolkit.Wpf.SharpDX.Material CurrentMaterial
         {
             get => _currentMaterial;
             set => SetProperty(ref _currentMaterial, value);
         }
 
-        public Material OriginalMaterial
+
+        #region private method
+        private void UpdateTransform()
         {
-            get => _originalMaterial;
-            set => SetProperty(ref _originalMaterial, value);
+            var tg = new Transform3DGroup();
+            // Scale
+            tg.Children.Add(_model3DData.ScaleStr.ToVector<ScaleTransform3D>());
+
+            // Rotation (Euler angles)
+            var vRotationVec = _model3DData.RotationStr.ToVector<Vector3>();
+            tg.Children.Add(new RotateTransform3D(
+                new AxisAngleRotation3D(new Vector3D(1, 0, 0), vRotationVec.X)));
+            tg.Children.Add(new RotateTransform3D(
+                new AxisAngleRotation3D(new Vector3D(0, 1, 0), vRotationVec.Y)));
+            tg.Children.Add(new RotateTransform3D(
+                new AxisAngleRotation3D(new Vector3D(0, 0, 1), vRotationVec.Z)));
+
+            // Translation
+            tg.Children.Add(_model3DData.PositionStr.ToVector<TranslateTransform3D>());
+
+            Transform = tg;
         }
 
-        // 更新模型的材质基于选中和悬停状态
-        private void UpdateModelMaterial()
+        private void UpdateMaterial()
         {
             if (IsSelected)
             {
-                // 选中状态 - 蓝色
-                CurrentMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Blue));
+                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);
             }
             else if (IsHovered)
             {
-                // 悬停状态 - 半透明橙色
-                var hoverColor = Colors.Orange;
-                hoverColor.A = 180;
-                CurrentMaterial = new DiffuseMaterial(new SolidColorBrush(hoverColor));
+                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
             }
             else
             {
-                // 默认状态 - 原始颜色
-                CurrentMaterial = _originalMaterial;
+                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
             }
-
-            // 如果模型已加载，应用材质
-            ApplyMaterialToModel(Model, CurrentMaterial);
-        }
-
-        /// <summary>
-        /// 递归应用材质到模型
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="material"></param>
-        private void ApplyMaterialToModel(Model3D model, Material material)
-        {
-            switch (model)
-            {
-                case GeometryModel3D geometryModel:
-                    geometryModel.Material = material;
-                    geometryModel.BackMaterial = material;
-                    break;
-                case Model3DGroup modelGroup:
-                {
-                    foreach (var child in modelGroup.Children)
-                    {
-                        ApplyMaterialToModel(child, material);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // 设置加载完成的模型
-        public void SetLoadedModel(Model3D model)
-        {
-            Model = model;  
-            // 应用当前材质
-            UpdateModelMaterial();
-
-            // OnPropertyChanged(nameof(Model));
-        }
+        } 
+        #endregion
     }
 }

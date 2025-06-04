@@ -1,12 +1,17 @@
 ﻿
-using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
+using HelixToolkit.Wpf.SharpDX;
+using MCCS.Core.Models.Model3D;
 using MCCS.Core.Repositories;
 using MCCS.Services.Model3DService;
 using MCCS.ViewModels.Others;
 using Microsoft.Extensions.Configuration;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Media.Media3D;
+using HelixToolkit.SharpDX.Core.Assimp;
+using SharpDX;
+using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -15,26 +20,30 @@ namespace MCCS.ViewModels.Pages
     {
         public const string Tag = "TestStartPage";
 
-        private bool _isLoaded = false;
-        private Model3DGroup _combinedModel;
-        private Model3DViewModel _hoveredModel;
-
-        private readonly IConfiguration _configuration;
-        private readonly IModel3DDataRepository _model3DDataRepository;
-        private readonly IModel3DLoaderService _model3DLoaderService;
-
-        public ObservableCollection<Model3DViewModel> Models { get; } = [];
+        
 
         #region private field
         private ObservableCollection<Model3DViewModel> _model3DList;
+        private bool _isLoading = false;
+        private string _loadingMessage;
+        private Model3DGroup _combinedModel;
+        private ObservableCollection<Model3DViewModel> _models;
+        private Model3DViewModel _hoveredModel;
 
+        private readonly Camera _camera;
+        private readonly IConfiguration _configuration;
+        private readonly IModel3DDataRepository _model3DDataRepository;
+        private readonly IModel3DLoaderService _model3DLoaderService;
         #endregion
 
         #region Command
 
-        public AsyncDelegateCommand LoadModelsCommand => new(ExecuteLoadModelsCommand);
-        public DelegateCommand<Model3DViewModel> ModelClickCommand { get; }
-        public DelegateCommand<Model3DViewModel> ModelHoverCommand { get; }
+        public AsyncDelegateCommand LoadModelsCommand { get; }
+        public DelegateCommand Model3DMouseDownCommand { get; }
+        public DelegateCommand Model3DMouseMoveCommand { get; }
+        public DelegateCommand Model3DMouseLeaveCommand { get; }
+        public DelegateCommand ClearSelectionCommand { get; }
+
         #endregion
 
         public TestStartingPageViewModel(
@@ -47,13 +56,26 @@ namespace MCCS.ViewModels.Pages
             _configuration = configuration;
             _model3DDataRepository = model3DDataRepository;
             _model3DLoaderService = model3DLoaderService;
+            Models = [];
+
+            // Initialize camera
+            _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
+            {
+                Position = new Point3D(10, 10, 10),
+                LookDirection = new Vector3D(-10, -10, -10),
+                UpDirection = new Vector3D(0, 1, 0),
+                FarPlaneDistance = 1000,
+                NearPlaneDistance = 0.1,
+                FieldOfView = 45
+            };
         }
 
         #region Property
-        public Model3DViewModel HoveredModel
+
+        public string LoadingMessage
         {
-            get => _hoveredModel;
-            set => SetProperty(ref _hoveredModel, value);
+            get => _loadingMessage;
+            set => SetProperty(ref _loadingMessage, value);
         }
 
         public Model3DGroup CombinedModel
@@ -62,66 +84,110 @@ namespace MCCS.ViewModels.Pages
             set => SetProperty(ref _combinedModel, value);
         }
 
-        public bool IsLoaded
+        public bool IsLoading
         {
-            get => _isLoaded;
-            set => SetProperty(ref _isLoaded, value);
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
         }
-        public ObservableCollection<Model3DViewModel> Model3DList
+        public ObservableCollection<Model3DViewModel> Models
         {
-            get => _model3DList;
-            set => SetProperty(ref _model3DList, value);
+            get => _models;
+            set => SetProperty(ref _models, value);
         }
         #endregion
 
         #region private method
-        private void CombineModels()
+        private async Task LoadModelsAsync()
         {
-            var modelGroup = new Model3DGroup();
-
-            foreach (var modelVm in Models)
-            {
-                modelGroup.Children.Add(modelVm.Model);
-            }
-
-            // 添加光源
-            modelGroup.Children.Add(new DirectionalLight(Colors.White, new Vector3D(-1, -1, -1)));
-            modelGroup.Children.Add(new DirectionalLight(Colors.White, new Vector3D(1, 1, 1)));
-            modelGroup.Children.Add(new AmbientLight(Color.FromRgb(60, 60, 60)));
-
-            CombinedModel = modelGroup;
-        }
-
-        private async Task ExecuteLoadModelsCommand()
-        {
-            if (IsLoaded) return;
+            IsLoading = true;
+            LoadingMessage = "正在加载模型...";
             try
             {
-                // Load models from the repository
-                var groupKey = _configuration["AppSettings:ModelKey"] ?? throw new ArgumentNullException("AppSettings:ModelKey");
-                var modelList = await _model3DDataRepository.GetModelAsync(groupKey);
-                // 定义要加载的模型
-                var list = modelList
-                    .Select(model => _model3DLoaderService.LoadModelAsync(model)).ToList();
-                var loadedModels = await Task.WhenAll(list);
-                // 确保在 UI 线程上执行
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    Models.Clear();
-                    foreach (var model in loadedModels)
-                    {
-                        Models.Add(model);
-                    }
-                    CombineModels();
-                    IsLoaded = true;
-                });
+                var groupKey = _configuration["AppSettings:ModelKey"] 
+                               ?? throw new ArgumentNullException("AppSettings:ModelKey");
+                var model3DList = await _model3DDataRepository.GetModelAsync(groupKey);
+                var loadTasks = model3DList.Select((modelData, index) =>
+                    LoadSingleModelAsync(modelData, index, model3DList.Count));
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("import model 3d error");
+            }
+            finally
+            {
+                IsLoading = false;
+                LoadingMessage = string.Empty;
             }
         }
 
+        private async Task LoadSingleModelAsync(Model3DData modelData, int index, int total)
+        {
+            await Task.Run(() =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LoadingMessage = $"加载模型 {index + 1}/{total}: {Path.GetFileName(modelData.FilePath)}";
+                });
+
+                try
+                {
+                    // 使用Assimp加载模型
+                    var importer = new Importer();
+                    var scene = importer.Load(modelData.FilePath);
+
+                    if (scene is { Root: not null })
+                    {
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 处理加载错误
+                    System.Diagnostics.Debug.WriteLine($"Failed to load model {modelData.FilePath}: {ex.Message}");
+                }
+            });
+        }
+
+        private void OnModel3DMouseDown(object parameter)
+        {
+            if (parameter is Model3DViewModel model && model.IsSelectable)
+            {
+                model.IsSelected = !model.IsSelected;
+            }
+        }
+
+        private void OnModel3DMouseMove(object parameter)
+        {
+            // 清除之前的悬停状态
+            if (_hoveredModel != null && _hoveredModel != parameter)
+            {
+                _hoveredModel.IsHovered = false;
+            }
+
+            if (parameter is Model3DViewModel model && model.IsSelectable)
+            {
+                model.IsHovered = true;
+                _hoveredModel = model;
+            }
+        }
+
+        private void OnModel3DMouseLeave(object parameter)
+        {
+            if (parameter is Model3DViewModel model)
+            {
+                model.IsHovered = false;
+                if (_hoveredModel == model)
+                {
+                    _hoveredModel = null;
+                }
+            }
+        }
+
+        private void ClearSelection()
+        {
+            foreach (var model in Models.Where(m => m.IsSelected))
+            {
+                model.IsSelected = false;
+            }
+        }
         #endregion
 
     }

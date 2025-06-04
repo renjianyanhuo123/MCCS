@@ -23,38 +23,52 @@ namespace MCCS.Views.Pages
         private BillboardTextGroupVisual3D _billboardTextGroup;
         // private Dictionary<string, LinesVisual3D> labelLines = [];
 
+        protected override async void OnInitialized(EventArgs e)
+        {
+            try
+            {
+                base.OnInitialized(e);
+                _viewModel = DataContext as TestStartingPageViewModel
+                             ?? throw new ArgumentNullException(nameof(_viewModel));
+                await _viewModel.LoadModelsCommand.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(nameof(ex));
+            }
+        }
 
         public TestStartingPage()
         {
             InitializeComponent();
             // Loaded += TestStartingPage_Loaded;
-            _viewModel = DataContext as TestStartingPageViewModel 
-                         ?? throw new ArgumentNullException(nameof(_viewModel));
-            // 初始化模型映射字典
-            _modelViewModelMap = new Dictionary<Model3D, Model3DViewModel>();
-            // 初始化Billboard服务
-            _billboardTextGroup = new BillboardTextGroupVisual3D
-            {
-                Background = new SolidColorBrush(Colors.White),
-                BorderBrush = new SolidColorBrush(Colors.Black),
-                Foreground = new SolidColorBrush(Colors.Black),
-                BorderThickness = new Thickness(1),
-                FontSize = 18,
-                Padding = new Thickness(2),
-                Offset = new Vector(20, 20),
-                PinBrush = new SolidColorBrush(Colors.Gray)
-            };
-            viewPort.Children.Add(_billboardTextGroup);
-            // LoadModels();
-            // 订阅模型加载完成事件
-            _viewModel.PropertyChanged += (s, e) =>
-            {
-                //if (e.PropertyName == nameof(TestStartingPageViewModel.LoadedModelsCount))
-                //{
-                //    // 当模型加载完成时，更新模型映射并添加到视图
-                //    UpdateModelsInViewport();
-                //}
-            };
+            //_viewModel = DataContext as TestStartingPageViewModel
+            //             ?? throw new ArgumentNullException(nameof(_viewModel));
+            //// 初始化模型映射字典
+            //_modelViewModelMap = new Dictionary<Model3D, Model3DViewModel>();
+            //// 初始化Billboard服务
+            //_billboardTextGroup = new BillboardTextGroupVisual3D
+            //{
+            //    Background = new SolidColorBrush(Colors.White),
+            //    BorderBrush = new SolidColorBrush(Colors.Black),
+            //    Foreground = new SolidColorBrush(Colors.Black),
+            //    BorderThickness = new Thickness(1),
+            //    FontSize = 18,
+            //    Padding = new Thickness(2),
+            //    Offset = new Vector(20, 20),
+            //    PinBrush = new SolidColorBrush(Colors.Gray)
+            //};
+            //viewPort.Children.Add(_billboardTextGroup);
+            //// LoadModels();
+            //// 订阅模型加载完成事件
+            //_viewModel.PropertyChanged += (s, e) =>
+            //{
+            //    if (e.PropertyName == nameof(TestStartingPageViewModel.LoadedModelsCount))
+            //    {
+            //        // 当模型加载完成时，更新模型映射并添加到视图
+            //        UpdateModelsInViewport();
+            //    }
+            //};
         }
 
         private void SetMaterialAndAddToDictionary(Model3DGroup modelGroup, string name, Color color)
@@ -95,6 +109,11 @@ namespace MCCS.Views.Pages
             //ModelsGroupContainer.Children.Add(modelVisual);
         }
 
+        /// <summary>
+        /// 处理鼠标点击事件，选中模型并更新状态
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ViewPort_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left) return;
@@ -115,8 +134,14 @@ namespace MCCS.Views.Pages
             }
         }
 
+        /// <summary>
+        /// 鼠标悬停事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ViewPort_MouseMove(object sender, MouseEventArgs e)
         {
+            return;
             // 处理鼠标悬停事件
             var hitResult = VisualTreeHelper.HitTest(viewPort, e.GetPosition(viewPort));
 
@@ -165,14 +190,5 @@ namespace MCCS.Views.Pages
                    && modelGroup.Children
                        .Any(child => IsPartOfModel(geometryModel, child));
         }
-    }
-
-    public class ModelData
-    {
-        public string Name { get; set; }
-        public Color OriginalColor { get; set; }
-        public string Description { get; set; }
-        public string Value { get; set; }
-        public Point3D Position { get; set; }
     }
 }

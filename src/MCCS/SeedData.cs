@@ -84,7 +84,7 @@ namespace MCCS
                         Key = Guid.NewGuid().ToString("N"),
                         Name = "模型2",
                         GroupKey = "2025052901",
-                        FilePath = @"F:\\models\\others\\model1.stl",
+                        FilePath = @"F:\\models\\others\\model2.stl",
                         Description = "这是另一个测试模型",
                         PositionStr = "0,0,0",
                         Type = ModelType.Other

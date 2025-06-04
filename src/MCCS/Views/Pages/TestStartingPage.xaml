@@ -12,46 +12,37 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <b:Interaction.Triggers>
-        <b:EventTrigger EventName="Loaded">
-            <b:InvokeCommandAction Command="{Binding LoadModelsCommand}" />
-        </b:EventTrigger> 
-    </b:Interaction.Triggers>
     <UserControl.Resources>
         <convert:TestProgressVisibleConverter x:Key="TestProgressVisibleConverter"/>
         <convert:NoTestProgressVisibleConverter x:Key="NoTestProgressVisibleConverter"/>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!--<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="5">
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
             <TextBlock Text="当前选中模型: " VerticalAlignment="Center"/>
             <TextBlock x:Name="SelectedModelText" VerticalAlignment="Center" Margin="5,0" Text="无"/>
-        </StackPanel>-->
+        </StackPanel>
 
-        <h:HelixViewport3D x:Name="viewPort"  Grid.Row="0" Grid.Column="0"
+        <h:HelixViewport3D x:Name="viewPort"  Grid.Row="1" Grid.Column="0"
                                 Visibility="{Binding IsLoaded, Converter={StaticResource NoTestProgressVisibleConverter}}"
                                ZoomExtentsWhenLoaded="True"
-                               ShowCoordinateSystem="True"
-                               Background="LightGray">
+                               ShowCoordinateSystem="True" 
+                                MouseLeftButtonDown="ViewPort_MouseDown"
+                                MouseMove="ViewPort_MouseMove">
             <h:HelixViewport3D.Camera>
                 <PerspectiveCamera Position="10,10,10" LookDirection="-10,-10,-10" UpDirection="0,0,1"/>
             </h:HelixViewport3D.Camera>
 
-            <!-- 鼠标交互行为 -->
-            <b:Interaction.Behaviors>
-                <behaviors:ModelInteractionBehavior 
-                    Models="{Binding Models}"/>
-            </b:Interaction.Behaviors>
-
             <h:SunLight/> 
-            <ModelVisual3D  Content="{Binding CombinedModel}" />
+            <ModelVisual3D x:Name="Model3DContainer" Content="{Binding CombinedModel}" />
         </h:HelixViewport3D>
         <StackPanel 
             VerticalAlignment="Center" 
-            Grid.Row="0" 
+            Grid.Row="1" 
             Grid.Column="0" 
             Orientation="Vertical" 
             HorizontalAlignment="Center"
