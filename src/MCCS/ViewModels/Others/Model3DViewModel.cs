@@ -1,8 +1,8 @@
-﻿using System.Numerics;
-using MCCS.Core.Models.Model3D;
-using System.Windows.Media;
+﻿using MCCS.Core.Models.Model3D;
 using System.Windows.Media.Media3D;
-using MCCS.Common;
+using HelixToolkit.SharpDX.Core.Model.Scene;
+using MCCS.Common; 
+using SharpDX;
 
 namespace MCCS.ViewModels.Others
 {
@@ -13,28 +13,22 @@ namespace MCCS.ViewModels.Others
         private Point3D _position;
         private bool _isSelected;
         private bool _isHovered; 
-        // private bool _isSelectable;
+
         private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
         private bool _isClickable;
         private MeshGeometry3D _geometry;
         private Transform3D _transform;
         private readonly Model3DData _model3DData;
+        private readonly SceneNode _sceneNode;
 
-        public Model3DViewModel(Model3DData model3DData)
+        public Model3DViewModel(SceneNode sceneNode, Model3DData model3DData)
         {
             _model3DData = model3DData;
+            _sceneNode = sceneNode;
             UpdateTransform();
         }
 
-        public string Id { get; set; }
-
-        public string FilePath { get; set; }
-
-        public MeshGeometry3D Geometry
-        {
-            get => _geometry;
-            set => SetProperty(ref _geometry, value);
-        }
+        public Model3DData Model3DData { get; } 
 
         public bool IsClickable
         {
@@ -53,6 +47,8 @@ namespace MCCS.ViewModels.Others
             get => _position;
             set => SetProperty(ref _position, value);
         }
+
+        public SceneNode SceneNode => _sceneNode;
 
         public bool IsSelectable { get; set; }
 
@@ -74,12 +70,6 @@ namespace MCCS.ViewModels.Others
             set => SetProperty(ref _transform, value);
         }
 
-        //public Model3D Model
-        //{
-        //    get => _model;
-        //    set => SetProperty(ref _model, value);
-        //}
-
         public bool IsHovered
         {
             get => _isHovered;
@@ -91,13 +81,6 @@ namespace MCCS.ViewModels.Others
                 }
             }
         }
-
-        public HelixToolkit.Wpf.SharpDX.Material CurrentMaterial
-        {
-            get => _currentMaterial;
-            set => SetProperty(ref _currentMaterial, value);
-        }
-
 
         #region private method
         private void UpdateTransform()
@@ -123,17 +106,18 @@ namespace MCCS.ViewModels.Others
 
         private void UpdateMaterial()
         {
+            if (_sceneNode is not MaterialGeometryNode geometryNode) return;
             if (IsSelected)
             {
-                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);
+                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);
             }
             else if (IsHovered)
             {
-                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
+                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
             }
             else
             {
-                CurrentMaterial = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
+                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
             }
         } 
         #endregion

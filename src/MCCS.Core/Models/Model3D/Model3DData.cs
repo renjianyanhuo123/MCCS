@@ -41,7 +41,22 @@ namespace MCCS.Core.Models.Model3D
         [Column(IsNullable = false, StringLength = 80)]
         public string ScaleStr { get; set; } = "1,1,1";
 
+        // 边界框信息
+        public double BoundMinX { get; set; }
+        public double BoundMinY { get; set; }
+        public double BoundMinZ { get; set; }
+        public double BoundMaxX { get; set; }
+        public double BoundMaxY { get; set; }
+        public double BoundMaxZ { get; set; }
+
         [Column(IsNullable = true, StringLength = 200)]
         public string Description { get; set; }
+
+        // 显示属性
+        public bool IsVisible { get; set; } = true;
+
+        // 元数据
+        public long FileSize { get; set; }
+        public bool HasAnimations { get; set; }
     }
 }

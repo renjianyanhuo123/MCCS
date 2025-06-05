@@ -10,7 +10,7 @@
     {
         public int CompletedCount { get; set; }
         public int TotalCount { get; set; }
-        public string CurrentFile { get; set; }
+        public string CurrentFileName { get; set; }
         public double ProgressPercentage { get; set; }
     }
 }

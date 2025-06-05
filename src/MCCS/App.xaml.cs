@@ -57,11 +57,11 @@ namespace MCCS
             containerRegistry.RegisterInstance<Serilog.ILogger>(logger);
             var configuration = builder.Build();
 
+            // 2. 将 IConfiguration 注册到容器
+            containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
 
-            // 2. 将 IConfiguration 注册到容器
-            containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);

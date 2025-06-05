@@ -14,7 +14,7 @@ namespace MCCS.Modules
             // ServiceCollection.AddSingleton<IModel3DDataRepository, Model3DDataRepository>();
             // Note: The actual implementation of these services should be defined in their respective files.
             var effectManager = new DefaultEffectsManager();
-            containerRegistry.RegisterInstance(effectManager);
+            containerRegistry.RegisterInstance<IEffectsManager>(effectManager);
             containerRegistry.Register<IModel3DLoaderService, Model3DLoaderService>();
 
         }
