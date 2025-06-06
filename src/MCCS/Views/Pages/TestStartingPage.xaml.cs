@@ -11,7 +11,14 @@ namespace MCCS.Views.Pages
 
         public TestStartingPage()
         {
-            InitializeComponent(); 
+            InitializeComponent();
+        }
+
+        protected override async void OnInitialized(EventArgs e)
+        {
+            base.OnInitialized(e);
+            var viewModel = DataContext as ViewModels.Pages.TestStartingPageViewModel;
+            await viewModel?.LoadModelsCommand.Execute()!;
         }
 
         /// <summary>

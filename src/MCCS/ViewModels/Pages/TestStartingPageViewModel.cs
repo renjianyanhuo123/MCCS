@@ -48,21 +48,13 @@ namespace MCCS.ViewModels.Pages
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
-                LookDirection = new Vector3D(0, -10, -10),
-                Position = new Point3D(0, 10, 10),
+                LookDirection = new Vector3D(-50, -50, -50),
+                Position = new Point3D(50, 50, 50),
                 UpDirection = new Vector3D(0, 1, 0),
-                FarPlaneDistance = 5000,
+                FarPlaneDistance = 100000,
                 NearPlaneDistance = 0.1f
             };
             _effectsManager = effectsManager;
-            //PropertyChanged += (s, e) =>
-            //{
-            //    if (e.PropertyName == nameof(IsLoading))
-            //    {
-            //        LoadModelsCommand?.RaiseCanExecuteChanged();
-            //        // CancelLoadingCommand.RaiseCanExecuteChanged();
-            //    }
-            //};
         }
 
         #region Property
@@ -119,14 +111,11 @@ namespace MCCS.ViewModels.Pages
                 var wrappers = await _model3DLoaderService.ImportModelsAsync(progress, _loadingCancellation.Token);
 
                 // UI线程更新
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                foreach (var wrapper in wrappers)
                 {
-                    foreach (var wrapper in wrappers)
-                    {
-                        Models.Add(wrapper);
-                        GroupModel.AddNode(wrapper.SceneNode);
-                    }
-                });
+                    Models.Add(wrapper);
+                    GroupModel.AddNode(wrapper.SceneNode);
+                }
             }
             catch (OperationCanceledException)
             {

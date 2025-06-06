@@ -4,13 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
+             xmlns:convert="clr-namespace:MCCS.Converters"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/> 
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter"></convert:InverseBoolToVisibleConverter>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -18,13 +20,15 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <!-- 3D视窗 -->
-        <hx:Viewport3DX
+        <hx:Viewport3DX 
             x:Name="viewport"
+            Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}"
                         Grid.Row="1" Grid.Column="0"
                         BackgroundColor="#595959"
                         EffectsManager="{Binding EffectsManager}"
                         Camera="{Binding Camera}"
                         EnableSwapChainRendering="True"
+                        ShowCoordinateSystem="True"
                         FXAALevel="Low">
 
             <hx:Viewport3DX.InputBindings>
@@ -40,13 +44,18 @@
                 <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
             </hx:Viewport3DX.InputBindings>
 
-            <!-- 光照 -->
+             <!--光照--> 
             <hx:AmbientLight3D Color="#363636" />
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
 
-            <!-- 模型内容 -->
+             <!--模型内容--> 
             <hx:Element3DPresenter Content="{Binding GroupModel}"/>
-            <hx:PostEffectMeshBorderHighlight EffectName="highlight" />
+            <hx:PostEffectMeshBorderHighlight EffectName="highlight" /> 
+            <hx:AxisPlaneGridModel3D
+                 x:Name="plane"
+                 AutoSpacing="False"
+                 RenderShadowMap="True"
+                 Offset="-0.2" />
         </hx:Viewport3DX>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
             <TextBlock Text="当前选中模型: " VerticalAlignment="Center"/>

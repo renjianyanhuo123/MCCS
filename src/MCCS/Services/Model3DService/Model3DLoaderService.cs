@@ -7,6 +7,9 @@ using MCCS.Core.Repositories;
 using Microsoft.Extensions.Configuration;
 using MCCS.Common;
 using SharpDX;
+using HelixToolkit.SharpDX.Core.Model.Scene;
+using HelixToolkit.SharpDX.Core.Model;
+using SharpDX.Direct3D9;
 
 namespace MCCS.Services.Model3DService
 {
@@ -15,13 +18,13 @@ namespace MCCS.Services.Model3DService
         private readonly SemaphoreSlim _importSemaphore;
         private CancellationTokenSource _cancellationTokenSource;
         // private readonly SynchronizationContext? _uiContext;
-        private readonly  HelixToolkit.SharpDX.Core.EffectsManager _effectsManager; 
+        private readonly  IEffectsManager _effectsManager; 
         private const int MaxConcurrentImports = 4;
         private readonly IModel3DDataRepository _modelRepository;
         private readonly IConfiguration _configuration;
 
-        public Model3DLoaderService(
-            HelixToolkit.SharpDX.Core.EffectsManager effectsManager,
+        public Model3DLoaderService( 
+            IEffectsManager effectsManager,
             IModel3DDataRepository model3DDataRepository,
             IConfiguration configuration)
         {
@@ -79,12 +82,21 @@ namespace MCCS.Services.Model3DService
                 var loader = new Importer();
                 var scene = loader.Load(modelInfo.FilePath);
 
-                if (scene?.Root == null) throw new InvalidOperationException($"无法加载模型文件: {modelInfo.FilePath}"); 
+                if (scene?.Root == null) throw new InvalidOperationException($"无法加载模型文件: {modelInfo.FilePath}");
+                const double angle = -90.0;
                 // 应用变换
                 var transform = Matrix.Scaling(modelInfo.ScaleStr.ToVector<Vector3>())
-                                * Matrix.RotationAxis(modelInfo.RotationStr.ToVector<Vector3>(), 10) 
+                                * Matrix.RotationAxis(modelInfo.RotationStr.ToVector<Vector3>(), (float)angle.ToRadian()) 
                                 * Matrix.Translation(modelInfo.PositionStr.ToVector<Vector3>());
                 scene.Root.ModelMatrix = transform;
+                foreach (var node in scene.Root.Traverse())
+                {
+                    if (node is MaterialGeometryNode m)
+                    {
+                        //m.Geometry.SetAsTransient();
+                        m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original); 
+                    }
+                }
                 // 预附加场景图以优化性能
                 scene.Root.Attach(_effectsManager);
                 scene.Root.UpdateAllTransformMatrix();

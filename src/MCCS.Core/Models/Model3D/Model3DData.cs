@@ -36,6 +36,11 @@ namespace MCCS.Core.Models.Model3D
         public string RotationStr { get; set; }
 
         /// <summary>
+        /// 选装角度
+        /// </summary>
+        public double RotateAngle { get; set; }
+
+        /// <summary>
         /// 放缩比例 示例: 50.90,42.09,93.093 (x,y,z)
         /// </summary>
         [Column(IsNullable = false, StringLength = 80)]

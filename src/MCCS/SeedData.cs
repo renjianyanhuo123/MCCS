@@ -74,20 +74,169 @@ namespace MCCS
                         Key = Guid.NewGuid().ToString("N"),
                         Name = "模型1",
                         GroupKey = "2025052901",
-                        FilePath = @"F:\\models\\others\\model1.stl",
+                        FilePath = @"F:\\models\\test\\main.STL",
                         PositionStr = "1,0,0",
-                        Description = "这是一个测试模型",
+                        Description = "0",
                         Type = ModelType.Actuator,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
                     },
                     new()
                     {
                         Key = Guid.NewGuid().ToString("N"),
                         Name = "模型2",
                         GroupKey = "2025052901",
-                        FilePath = @"F:\\models\\others\\model2.stl",
-                        Description = "这是另一个测试模型",
-                        PositionStr = "0,0,0",
-                        Type = ModelType.Other
+                        FilePath = @"F:\\models\\test\\1.STL",
+                        Description = "1",
+                        PositionStr = "2,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型3",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\2.STL",
+                        Description = "2",
+                        PositionStr = "3,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型4",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\3.STL",
+                        Description = "3",
+                        PositionStr = "4,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型5",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\4.STL",
+                        Description = "4",
+                        PositionStr = "5,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型6",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\5.STL",
+                        Description = "5",
+                        PositionStr = "6,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型7",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\6.STL",
+                        Description = "6",
+                        PositionStr = "7,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型8",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\7.STL",
+                        Description = "7",
+                        PositionStr = "8,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型9",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\8.STL",
+                        Description = "8",
+                        PositionStr = "9,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型10",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\9.STL",
+                        Description = "9",
+                        PositionStr = "10,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型11",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\10.STL",
+                        Description = "10",
+                        PositionStr = "11,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型12",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\11.STL",
+                        Description = "11",
+                        PositionStr = "12,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
+                    },
+                    new()
+                    {
+                        Key = Guid.NewGuid().ToString("N"),
+                        Name = "模型13",
+                        GroupKey = "2025052901",
+                        FilePath = @"F:\\models\\test\\12.STL",
+                        Description = "12",
+                        PositionStr = "13,0,0",
+                        Type = ModelType.Other,
+                        RotationStr = "1,0,0",
+                        ScaleStr = "1,1,1",
+                        RotateAngle = -90.0
                     }
                 };
                 freeSql.Insert(entities).ExecuteAffrows();

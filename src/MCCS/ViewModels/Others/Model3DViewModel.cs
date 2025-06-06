@@ -3,6 +3,7 @@ using System.Windows.Media.Media3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common; 
 using SharpDX;
+using Assimp;
 
 namespace MCCS.ViewModels.Others
 {
@@ -25,7 +26,7 @@ namespace MCCS.ViewModels.Others
         {
             _model3DData = model3DData;
             _sceneNode = sceneNode;
-            UpdateTransform();
+            UpdateMaterial();
         }
 
         public Model3DData Model3DData { get; } 
@@ -82,31 +83,13 @@ namespace MCCS.ViewModels.Others
             }
         }
 
-        #region private method
-        private void UpdateTransform()
-        {
-            var tg = new Transform3DGroup();
-            // Scale
-            tg.Children.Add(_model3DData.ScaleStr.ToVector<ScaleTransform3D>());
-
-            // Rotation (Euler angles)
-            var vRotationVec = _model3DData.RotationStr.ToVector<Vector3>();
-            tg.Children.Add(new RotateTransform3D(
-                new AxisAngleRotation3D(new Vector3D(1, 0, 0), vRotationVec.X)));
-            tg.Children.Add(new RotateTransform3D(
-                new AxisAngleRotation3D(new Vector3D(0, 1, 0), vRotationVec.Y)));
-            tg.Children.Add(new RotateTransform3D(
-                new AxisAngleRotation3D(new Vector3D(0, 0, 1), vRotationVec.Z)));
-
-            // Translation
-            tg.Children.Add(_model3DData.PositionStr.ToVector<TranslateTransform3D>());
-
-            Transform = tg;
-        }
+        #region private method 
 
         private void UpdateMaterial()
         {
-            if (_sceneNode is not MaterialGeometryNode geometryNode) return;
+            var t = _sceneNode.GetType();
+            if (_sceneNode is not MeshNode geometryNode) return; 
+
             if (IsSelected)
             {
                 geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);

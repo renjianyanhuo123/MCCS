@@ -4,13 +4,13 @@ using System.Windows.Data;
 
 namespace MCCS.Converters
 {
-    public class NoTestProgressVisibleConverter : IValueConverter
+    public class InverseBoolToVisibleConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool isLoaded)
+            if (value is bool isLoading)
             {
-                return isLoaded ? Visibility.Visible : Visibility.Hidden;
+                return isLoading ? Visibility.Hidden : Visibility.Visible;
             }
             return Visibility.Visible;
         }
