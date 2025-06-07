@@ -17,7 +17,7 @@ namespace MCCS.ViewModels.Others
 
         private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
         private bool _isClickable;
-        private MeshGeometry3D _geometry;
+        private Geometry3D _geometry;
         private Transform3D _transform;
         private readonly Model3DData _model3DData;
         private readonly SceneNode _sceneNode;
@@ -29,7 +29,13 @@ namespace MCCS.ViewModels.Others
             UpdateMaterial();
         }
 
-        public Model3DData Model3DData { get; } 
+        public Model3DData Model3DData { get; }
+
+        public Geometry3D Geometry
+        {
+            get => _geometry;
+            set => SetProperty(ref _geometry, value);
+        }
 
         public bool IsClickable
         {

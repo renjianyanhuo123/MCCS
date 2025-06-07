@@ -4,15 +4,38 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
+             xmlns:localViewModel="clr-namespace:MCCS.ViewModels.Others"
              xmlns:convert="clr-namespace:MCCS.Converters"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter"></convert:InverseBoolToVisibleConverter>
+
+        <!-- 3D模型的DataTemplate -->
+        <!--<DataTemplate x:Key="Model3DTemplate" DataType="{x:Type localViewModel:Model3DViewModel}">
+            <hx:MeshGeometryModel3D 
+                Geometry="{Binding Geometry}"
+                Material="{Binding Material}"
+                Transform="{Binding Transform}"
+                IsHitTestVisible="True">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="MouseLeftButtonDown">
+                        <b:InvokeCommandAction Command="{Binding SelectCommand}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="MouseEnter">
+                        <b:InvokeCommandAction Command="{Binding MouseEnterCommand}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="MouseLeave">
+                        <b:InvokeCommandAction Command="{Binding MouseLeaveCommand}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </hx:MeshGeometryModel3D>
+        </DataTemplate>-->
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -30,7 +53,11 @@
                         EnableSwapChainRendering="True"
                         ShowCoordinateSystem="True"
                         FXAALevel="Low">
-
+            <b:Interaction.Triggers>
+                <b:EventTrigger EventName="MouseLeftButtonDown">
+                    <b:InvokeCommandAction Command="{Binding Model3DMouseDownCommand}" PassEventArgsToCommand="True"/>
+                </b:EventTrigger> 
+            </b:Interaction.Triggers>
             <hx:Viewport3DX.InputBindings>
                 <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
                 <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />
@@ -44,8 +71,8 @@
                 <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
             </hx:Viewport3DX.InputBindings>
 
-             <!--光照--> 
-            <hx:AmbientLight3D Color="#363636" />
+             <!--光照-->
+            <hx:AmbientLight3D Color="#414141" />
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
 
              <!--模型内容--> 
@@ -53,9 +80,9 @@
             <hx:PostEffectMeshBorderHighlight EffectName="highlight" /> 
             <hx:AxisPlaneGridModel3D
                  x:Name="plane"
-                 AutoSpacing="False"
+                 AutoSpacing="True"
                  RenderShadowMap="True"
-                 Offset="-0.2" />
+                 Offset="-65" />
         </hx:Viewport3DX>
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
             <TextBlock Text="当前选中模型: " VerticalAlignment="Center"/>

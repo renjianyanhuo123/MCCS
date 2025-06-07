@@ -29,10 +29,10 @@ namespace MCCS.ViewModels.Pages
         #region Command
 
         public AsyncDelegateCommand LoadModelsCommand => new(LoadModelsAsync);
-        public DelegateCommand Model3DMouseDownCommand { get; }
-        public DelegateCommand Model3DMouseMoveCommand { get; }
-        public DelegateCommand Model3DMouseLeaveCommand { get; }
-        public DelegateCommand ClearSelectionCommand { get; }
+        public DelegateCommand<object> Model3DMouseDownCommand => new(OnModel3DMouseDown);
+        public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
+        public DelegateCommand<object> Model3DMouseLeaveCommand => new(OnModel3DMouseLeave);
+        public DelegateCommand ClearSelectionCommand => new(ClearSelection);
 
         #endregion
 
@@ -48,10 +48,10 @@ namespace MCCS.ViewModels.Pages
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
-                LookDirection = new Vector3D(-50, -50, -50),
-                Position = new Point3D(50, 50, 50),
+                LookDirection = new Vector3D(-100, -100, -100),
+                Position = new Point3D(100, 100, 100),
                 UpDirection = new Vector3D(0, 1, 0),
-                FarPlaneDistance = 100000,
+                FarPlaneDistance = 10000,
                 NearPlaneDistance = 0.1f
             };
             _effectsManager = effectsManager;

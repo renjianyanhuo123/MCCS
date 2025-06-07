@@ -83,7 +83,7 @@ namespace MCCS.Services.Model3DService
                 var scene = loader.Load(modelInfo.FilePath);
 
                 if (scene?.Root == null) throw new InvalidOperationException($"无法加载模型文件: {modelInfo.FilePath}");
-                const double angle = -90.0;
+                const double angle = 0;
                 // 应用变换
                 var transform = Matrix.Scaling(modelInfo.ScaleStr.ToVector<Vector3>())
                                 * Matrix.RotationAxis(modelInfo.RotationStr.ToVector<Vector3>(), (float)angle.ToRadian()) 
