@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
-             xmlns:localViewModel="clr-namespace:MCCS.ViewModels.Others"
+             xmlns:behaviors="clr-namespace:MCCS.Behaviors"
              xmlns:convert="clr-namespace:MCCS.Converters"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
@@ -15,27 +15,6 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter"></convert:InverseBoolToVisibleConverter>
-
-        <!-- 3D模型的DataTemplate -->
-        <!--<DataTemplate x:Key="Model3DTemplate" DataType="{x:Type localViewModel:Model3DViewModel}">
-            <hx:MeshGeometryModel3D 
-                Geometry="{Binding Geometry}"
-                Material="{Binding Material}"
-                Transform="{Binding Transform}"
-                IsHitTestVisible="True">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="MouseLeftButtonDown">
-                        <b:InvokeCommandAction Command="{Binding SelectCommand}"/>
-                    </b:EventTrigger>
-                    <b:EventTrigger EventName="MouseEnter">
-                        <b:InvokeCommandAction Command="{Binding MouseEnterCommand}"/>
-                    </b:EventTrigger>
-                    <b:EventTrigger EventName="MouseLeave">
-                        <b:InvokeCommandAction Command="{Binding MouseLeaveCommand}"/>
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-            </hx:MeshGeometryModel3D>
-        </DataTemplate>-->
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -51,13 +30,21 @@
                         EffectsManager="{Binding EffectsManager}"
                         Camera="{Binding Camera}"
                         EnableSwapChainRendering="True"
+                        IsHitTestVisible="True"
                         ShowCoordinateSystem="True"
                         FXAALevel="Low">
             <b:Interaction.Triggers>
-                <b:EventTrigger EventName="MouseLeftButtonDown">
+                <b:EventTrigger EventName="MouseDown3D">
                     <b:InvokeCommandAction Command="{Binding Model3DMouseDownCommand}" PassEventArgsToCommand="True"/>
-                </b:EventTrigger> 
+                </b:EventTrigger>
+                <b:EventTrigger EventName="MouseLeave">
+                    <b:InvokeCommandAction Command="{Binding Model3DMouseLeaveCommand}" PassEventArgsToCommand="True"/>
+                </b:EventTrigger>
+                
             </b:Interaction.Triggers>
+            <b:Interaction.Behaviors>
+                <behaviors:MouseMoveHitTestBehavior HitTestCommand="{Binding Model3DMouseMoveCommand}" />
+            </b:Interaction.Behaviors>
             <hx:Viewport3DX.InputBindings>
                 <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
                 <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />
@@ -68,7 +55,8 @@
                 <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
                 <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
                 <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
-                <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
+                <!-- 移除了 LeftClick 的 Pan 命令，改为使用 Shift+LeftClick 或 Alt+LeftClick -->
+                <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="Shift+LeftClick" />
             </hx:Viewport3DX.InputBindings>
 
              <!--光照-->

@@ -1,8 +1,8 @@
 ﻿using MCCS.Core.Models.Model3D;
 using System.Windows.Media.Media3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
-using MCCS.Common; 
-using SharpDX;
+using MCCS.Common;
+using HelixToolkit.SharpDX.Core;
 using Assimp;
 
 namespace MCCS.ViewModels.Others
@@ -16,8 +16,7 @@ namespace MCCS.ViewModels.Others
         private bool _isHovered; 
 
         private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
-        private bool _isClickable;
-        private Geometry3D _geometry;
+        private bool _isClickable; 
         private Transform3D _transform;
         private readonly Model3DData _model3DData;
         private readonly SceneNode _sceneNode;
@@ -27,15 +26,17 @@ namespace MCCS.ViewModels.Others
             _model3DData = model3DData;
             _sceneNode = sceneNode;
             UpdateMaterial();
+
+            // 为场景节点设置Tag，以便在点击时识别
+            if (_sceneNode != null)
+            {
+                _sceneNode.Tag = this; 
+                // 为所有子节点也设置Tag
+                foreach (var node in _sceneNode.Traverse()) node.Tag = this;
+            }
         }
 
-        public Model3DData Model3DData { get; }
-
-        public Geometry3D Geometry
-        {
-            get => _geometry;
-            set => SetProperty(ref _geometry, value);
-        }
+        public Model3DData Model3DData => _model3DData; 
 
         public bool IsClickable
         {
@@ -57,7 +58,7 @@ namespace MCCS.ViewModels.Others
 
         public SceneNode SceneNode => _sceneNode;
 
-        public bool IsSelectable { get; set; }
+        public bool IsSelectable => _model3DData.Type == ModelType.Actuator;
 
         public bool IsSelected
         {
@@ -93,20 +94,22 @@ namespace MCCS.ViewModels.Others
 
         private void UpdateMaterial()
         {
-            var t = _sceneNode.GetType();
-            if (_sceneNode is not MeshNode geometryNode) return; 
-
-            if (IsSelected)
+            foreach (var node in _sceneNode.Traverse())
             {
-                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);
-            }
-            else if (IsHovered)
-            {
-                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
-            }
-            else
-            {
-                geometryNode.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
+                if (node is not MaterialGeometryNode m) continue;
+                m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
+                if (IsSelected)
+                {
+                    m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);
+                }
+                else if (IsHovered)
+                {
+                    m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
+                }
+                else
+                {
+                    m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
+                }
             }
         } 
         #endregion

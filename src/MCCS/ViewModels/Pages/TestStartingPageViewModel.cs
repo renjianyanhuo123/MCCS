@@ -1,12 +1,18 @@
 ﻿using MCCS.Services.Model3DService;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices.ObjectiveC;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Services.Model3DService.EventParameters;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using HelixToolkit.SharpDX.Core;
+using HelixToolkit.SharpDX.Core.Model.Scene;
+using DryIoc;
+using Newtonsoft.Json;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -18,12 +24,15 @@ namespace MCCS.ViewModels.Pages
         private bool _isLoading = true;
         private string _loadingMessage;
         private ObservableCollection<Model3DViewModel> _models;
-        private Model3DViewModel _hoveredModel;
+        private Model3DViewModel? _lastHoveredModel = null;
 
         private Camera _camera;
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService;
         private CancellationTokenSource _loadingCancellation;
+
+        private DateTime _lastMouseMoveTime = DateTime.MinValue;
+        private const int MouseMoveThrottleMs = 50; // 50ms 节流
         #endregion
 
         #region Command
@@ -131,39 +140,63 @@ namespace MCCS.ViewModels.Pages
             }
         }
 
+        /// <summary>
+        /// 左键单击选择事件
+        /// </summary>
+        /// <param name="parameter"></param>
         private void OnModel3DMouseDown(object parameter)
         {
-            if (parameter is Model3DViewModel model && model.IsSelectable)
+            if (parameter is not MouseDown3DEventArgs args) return;
+            // 检查是否按住了修饰键（如果按住修饰键，则不处理选择）
+            if (Keyboard.IsKeyDown(Key.LeftShift) ||
+                Keyboard.IsKeyDown(Key.RightShift) ||
+                Keyboard.IsKeyDown(Key.LeftAlt) ||
+                Keyboard.IsKeyDown(Key.RightAlt) ||
+                Keyboard.IsKeyDown(Key.LeftCtrl) ||
+                Keyboard.IsKeyDown(Key.RightCtrl)) return;
+            if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
+                mouseArgs.LeftButton != MouseButtonState.Pressed) return;
+            // 获取点击的模型
+            var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
+            // 如果点击到了模型
+            if (clickedModel is { IsSelectable: true })
             {
-                model.IsSelected = !model.IsSelected;
+                // 切换当前模型的选中状态
+                clickedModel.IsSelected = !clickedModel.IsSelected; 
             }
         }
 
-        private void OnModel3DMouseMove(object parameter)
+        private void OnModel3DMouseMove(object? parameter)
         {
-            // 清除之前的悬停状态
-            if (_hoveredModel != null && _hoveredModel != parameter)
-            {
-                _hoveredModel.IsHovered = false;
-            }
+            if (parameter is not HitTestResult res) return;
 
-            if (parameter is Model3DViewModel model && model.IsSelectable)
+            // 节流处理，避免过于频繁的更新
+            var now = DateTime.Now;
+            if ((now - _lastMouseMoveTime).TotalMilliseconds < MouseMoveThrottleMs) return;
+            _lastMouseMoveTime = now;
+            var hoveredModel = FindViewModel(res.ModelHit);
+            // 清除之前的悬停状态
+            if (hoveredModel != null)
             {
-                model.IsHovered = true;
-                _hoveredModel = model;
+                hoveredModel.IsHovered = true;
             }
+            if (_lastHoveredModel != hoveredModel && _lastHoveredModel != null)
+            {
+                _lastHoveredModel.IsHovered = false;
+            }
+            _lastHoveredModel = hoveredModel;
         }
 
         private void OnModel3DMouseLeave(object parameter)
         {
-            if (parameter is Model3DViewModel model)
-            {
-                model.IsHovered = false;
-                if (_hoveredModel == model)
-                {
-                    _hoveredModel = null;
-                }
-            }
+            //if (parameter is Model3DViewModel model)
+            //{
+            //    model.IsHovered = false;
+            //    if (_hoveredModel == model)
+            //    {
+            //        _hoveredModel = null;
+            //    }
+            //}
         }
 
         private void ClearSelection()
@@ -184,6 +217,28 @@ namespace MCCS.ViewModels.Pages
             GroupModel.Clear();
             ClearSelection();
         }
+
+        /// <summary>
+        /// 寻找Tag中的Model3D对象
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        private Model3DViewModel? FindViewModel(object obj)
+        {
+            var hitNode = obj as SceneNode;
+            if (obj is not SceneNode node) return null;
+            // 通过Tag找到对应的ViewModel
+            while (hitNode != null)
+            {
+                if (hitNode.Tag is Model3DViewModel vm)
+                {
+                    return vm; 
+                }
+                hitNode = hitNode.Parent;
+            }
+            return null;
+        }
+
         #endregion
 
     }

@@ -89,14 +89,14 @@ namespace MCCS.Services.Model3DService
                                 * Matrix.RotationAxis(modelInfo.RotationStr.ToVector<Vector3>(), (float)angle.ToRadian()) 
                                 * Matrix.Translation(modelInfo.PositionStr.ToVector<Vector3>());
                 scene.Root.ModelMatrix = transform;
-                foreach (var node in scene.Root.Traverse())
-                {
-                    if (node is MaterialGeometryNode m)
-                    {
-                        //m.Geometry.SetAsTransient();
-                        m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original); 
-                    }
-                }
+                //foreach (var node in scene.Root.Traverse())
+                //{
+                //    if (node is MaterialGeometryNode m)
+                //    {
+                //        //m.Geometry.SetAsTransient();
+                //        m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original); 
+                //    }
+                //}
                 // 预附加场景图以优化性能
                 scene.Root.Attach(_effectsManager);
                 scene.Root.UpdateAllTransformMatrix();
