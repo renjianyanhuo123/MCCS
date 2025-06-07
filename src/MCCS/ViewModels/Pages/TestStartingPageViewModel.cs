@@ -1,18 +1,13 @@
-﻿using MCCS.Services.Model3DService;
+﻿using HelixToolkit.SharpDX.Core;
+using HelixToolkit.SharpDX.Core.Model.Scene;
+using HelixToolkit.Wpf.SharpDX;
+using MCCS.Services.Model3DService;
+using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Runtime.InteropServices.ObjectiveC;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
-using HelixToolkit.Wpf.SharpDX;
-using MCCS.Services.Model3DService.EventParameters;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
-using HelixToolkit.SharpDX.Core;
-using HelixToolkit.SharpDX.Core.Model.Scene;
-using DryIoc;
-using Newtonsoft.Json;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -40,7 +35,6 @@ namespace MCCS.ViewModels.Pages
         public AsyncDelegateCommand LoadModelsCommand => new(LoadModelsAsync);
         public DelegateCommand<object> Model3DMouseDownCommand => new(OnModel3DMouseDown);
         public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
-        public DelegateCommand<object> Model3DMouseLeaveCommand => new(OnModel3DMouseLeave);
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
 
         #endregion
@@ -85,7 +79,13 @@ namespace MCCS.ViewModels.Pages
         public ImportProgressEventArgs LoadingProgress
         {
             get => _loadingProgress;
-            set => SetProperty(ref _loadingProgress, value);
+            set
+            {
+                if (SetProperty(ref _loadingProgress, value))
+                {
+                    LoadingMessage = $"模型加载中...{Math.Round(_loadingProgress.ProgressPercentage, 2)}%";
+                }
+            }
         }
 
         public string LoadingMessage
@@ -185,18 +185,6 @@ namespace MCCS.ViewModels.Pages
                 _lastHoveredModel.IsHovered = false;
             }
             _lastHoveredModel = hoveredModel;
-        }
-
-        private void OnModel3DMouseLeave(object parameter)
-        {
-            //if (parameter is Model3DViewModel model)
-            //{
-            //    model.IsHovered = false;
-            //    if (_hoveredModel == model)
-            //    {
-            //        _hoveredModel = null;
-            //    }
-            //}
         }
 
         private void ClearSelection()

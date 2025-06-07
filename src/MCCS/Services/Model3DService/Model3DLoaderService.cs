@@ -44,21 +44,33 @@ namespace MCCS.Services.Model3DService
             var modelInfos = await _modelRepository.GetModelAsync(groupKey, cancellationToken);
             var viewModels = new List<Model3DViewModel>();
 
-            var progressInfo = new ImportProgressEventArgs { TotalCount = modelInfos.Count };
-
+            var progressInfo = new ImportProgressEventArgs
+            {
+                CompletedCount = 0,
+                ProgressPercentage = 0,
+                TotalCount = modelInfos.Count
+            };
+            progress.Report(progressInfo);
             var tasks = modelInfos.Select(async modelInfo =>
             {
                 await _importSemaphore.WaitAsync(cancellationToken);
                 try
                 {
                     var result = await ImportSingleModelAsync(modelInfo, cancellationToken);
-
+                    // await Task.Delay(5000, cancellationToken); 测试使用
                     lock (viewModels)
                     {
                         viewModels.Add(result);
                         progressInfo.CompletedCount++;
                         progressInfo.CurrentFileName = modelInfo.Name;
-                        progress?.Report(progressInfo);
+                        progressInfo.ProgressPercentage = (double)progressInfo.CompletedCount / progressInfo.TotalCount * 100;
+                        progress.Report(new ImportProgressEventArgs
+                        {
+                            CompletedCount = progressInfo.CompletedCount,
+                            CurrentFileName = progressInfo.CurrentFileName,
+                            ProgressPercentage = progressInfo.ProgressPercentage,
+                            TotalCount = progressInfo.TotalCount
+                        });
                     }
                     return result;
                 }
@@ -89,14 +101,6 @@ namespace MCCS.Services.Model3DService
                                 * Matrix.RotationAxis(modelInfo.RotationStr.ToVector<Vector3>(), (float)angle.ToRadian()) 
                                 * Matrix.Translation(modelInfo.PositionStr.ToVector<Vector3>());
                 scene.Root.ModelMatrix = transform;
-                //foreach (var node in scene.Root.Traverse())
-                //{
-                //    if (node is MaterialGeometryNode m)
-                //    {
-                //        //m.Geometry.SetAsTransient();
-                //        m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original); 
-                //    }
-                //}
                 // 预附加场景图以优化性能
                 scene.Root.Attach(_effectsManager);
                 scene.Root.UpdateAllTransformMatrix();
