@@ -1,10 +1,12 @@
-﻿using HelixToolkit.SharpDX.Core;
+﻿using ControlzEx.Standard;
+using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
@@ -25,18 +27,20 @@ namespace MCCS.ViewModels.Pages
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService;
         private CancellationTokenSource _loadingCancellation;
+        private ImportProgressEventArgs _loadingProgress;
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流
+
+        private SceneNodeGroupModel3D _dataLabelsGroup;
+        private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
 
         #region Command
-
         public AsyncDelegateCommand LoadModelsCommand => new(LoadModelsAsync);
         public DelegateCommand<object> Model3DMouseDownCommand => new(OnModel3DMouseDown);
         public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
-
         #endregion
 
         public TestStartingPageViewModel(
@@ -73,9 +77,13 @@ namespace MCCS.ViewModels.Pages
             protected set => SetProperty(ref _effectsManager, value);
         }
 
-        public SceneNodeGroupModel3D GroupModel { get; } = new();
+        /// <summary>
+        /// 采集数据显示的标签
+        /// </summary>
+        public BillboardText3D CollectionDataLabels { get; } = new() { IsDynamic = true };
 
-        private ImportProgressEventArgs _loadingProgress;
+        public SceneNodeGroupModel3D GroupModel { get; } = new();
+        
         public ImportProgressEventArgs LoadingProgress
         {
             get => _loadingProgress;
@@ -124,6 +132,8 @@ namespace MCCS.ViewModels.Pages
                 {
                     Models.Add(wrapper);
                     GroupModel.AddNode(wrapper.SceneNode);
+                    if(wrapper.DataLabels.Count > 0) 
+                        CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
                 }
             }
             catch (OperationCanceledException)
@@ -162,10 +172,14 @@ namespace MCCS.ViewModels.Pages
             if (clickedModel is { IsSelectable: true })
             {
                 // 切换当前模型的选中状态
-                clickedModel.IsSelected = !clickedModel.IsSelected; 
+                clickedModel.IsSelected = !clickedModel.IsSelected;
             }
         }
 
+        /// <summary>
+        /// 鼠标移动事件处理
+        /// </summary>
+        /// <param name="parameter"></param>
         private void OnModel3DMouseMove(object? parameter)
         {
             if (parameter is not HitTestResult res) return;
@@ -225,8 +239,7 @@ namespace MCCS.ViewModels.Pages
                 hitNode = hitNode.Parent;
             }
             return null;
-        }
-
+        } 
         #endregion
 
     }

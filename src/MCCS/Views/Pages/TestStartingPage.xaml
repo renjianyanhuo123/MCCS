@@ -54,12 +54,18 @@
                 <!-- 移除了 LeftClick 的 Pan 命令，改为使用 Shift+LeftClick 或 Alt+LeftClick -->
                 <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="Shift+LeftClick" />
             </hx:Viewport3DX.InputBindings>
-
-             <!--光照-->
+            <!--光照-->
             <hx:AmbientLight3D Color="#414141" />
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
-
-             <!--模型内容--> 
+            <!-- 绑定Billboard文本集合 -->
+            <hx:TopMostGroup3D x:Name="topMostGroup" EnableTopMost="True">
+                 <!--动态文本: FixedSize: 是否固定大小 Geometry: 绑定到 ViewModel 中的 BatchedText 属性 IsHitTestVisible: 是否可被鼠标事件检测到--> 
+                <hx:BillboardTextModel3D
+                            FixedSize="True"
+                            Geometry="{Binding CollectionDataLabels}"
+                            IsHitTestVisible="False" />
+            </hx:TopMostGroup3D>
+            <!--模型内容-->
             <hx:Element3DPresenter Content="{Binding GroupModel}"/>
             <hx:PostEffectMeshBorderHighlight EffectName="highlight" /> 
             <hx:AxisPlaneGridModel3D
