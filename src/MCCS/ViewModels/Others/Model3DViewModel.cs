@@ -30,6 +30,10 @@ namespace MCCS.ViewModels.Others
         private double _forceNum;
         private double _displacementNum;
 
+        // 性能优化：缓存文本格式
+        private const string ForceFormat = "力: {0:F2} kN";
+        private const string DisplacementFormat = "位移: {0:F2} mm";
+
         public Model3DViewModel(SceneNode sceneNode, Model3DData model3DData)
         {
             _model3DData = model3DData;
@@ -217,8 +221,8 @@ namespace MCCS.ViewModels.Others
         {
             if (DataLabels.Count >= 2)
             {
-                DataLabels[0].Text = $"力: {force} kN";
-                DataLabels[1].Text = $"位移: {displacement} mm";
+                DataLabels[0].Text = string.Format(ForceFormat, force);
+                DataLabels[1].Text = string.Format(DisplacementFormat, displacement);
             }
         }
 
