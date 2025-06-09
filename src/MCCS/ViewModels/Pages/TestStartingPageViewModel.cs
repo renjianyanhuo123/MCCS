@@ -2,6 +2,7 @@
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
+using MahApps.Metro.Controls;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
@@ -80,7 +81,15 @@ namespace MCCS.ViewModels.Pages
         /// <summary>
         /// 采集数据显示的标签
         /// </summary>
-        public BillboardText3D CollectionDataLabels { get; } = new() { IsDynamic = true };
+        public BillboardText3D CollectionDataLabels { get; } = new() 
+        { 
+            IsDynamic = true
+        };
+
+        public LineGeometry3D ConnectionLineGeometry { get; } = new LineGeometry3D() 
+        {
+            IsDynamic = true
+        };
 
         public SceneNodeGroupModel3D GroupModel { get; } = new();
         
@@ -127,6 +136,9 @@ namespace MCCS.ViewModels.Pages
                 var progress = new Progress<ImportProgressEventArgs>(p => LoadingProgress = p);
                 var wrappers = await _model3DLoaderService.ImportModelsAsync(progress, _loadingCancellation.Token);
 
+                var positions = new Vector3Collection();
+                var connectionIndexs = new IntCollection();
+
                 // UI线程更新
                 foreach (var wrapper in wrappers)
                 {
@@ -134,7 +146,21 @@ namespace MCCS.ViewModels.Pages
                     GroupModel.AddNode(wrapper.SceneNode);
                     if(wrapper.DataLabels.Count > 0) 
                         CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
+                    // 重新整合线段; 默认没有一个点连接两条线的情况.
+                    if (wrapper.ConnectPoints.Count > 0 
+                        && wrapper.ConnectCollection.Count > 0 
+                        && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count) 
+                    {
+                        foreach (var index in wrapper.ConnectCollection)
+                        {
+                            positions.Add(wrapper.ConnectPoints[index]);
+                            connectionIndexs.Add(connectionIndexs.Count);
+                        }
+                    }
                 }
+                // 渲染时机很重要,这里相当于首次设置
+                ConnectionLineGeometry.Positions = positions;
+                ConnectionLineGeometry.Indices = connectionIndexs;
             }
             catch (OperationCanceledException)
             {

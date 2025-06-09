@@ -6,6 +6,7 @@ using HelixToolkit.SharpDX.Core;
 using HelixToolkit.Wpf.SharpDX;
 using System.Collections.ObjectModel;
 using SharpDX;
+using Assimp;
 
 namespace MCCS.ViewModels.Others
 {
@@ -50,9 +51,18 @@ namespace MCCS.ViewModels.Others
         public Model3DData Model3DData => _model3DData;
 
         #region BillboardText3D集合 
-        public List<TextInfo> DataLabels { get; set; } = [];
+        public List<TextInfo> DataLabels { get; private set; } = [];
 
-        public List<LineGeometry3D> ConnectionLines { get; set; } = [];
+        /// <summary>
+        /// 所有点的集合
+        /// </summary>
+        public Vector3Collection ConnectPoints { get; private set; } = [];
+
+        /// <summary>
+        /// 连接线集合
+        /// 例如: 0,1,2,3  表示0---1  2---3
+        /// </summary>
+        public IntCollection ConnectCollection { get; private set; } = [];
         #endregion
 
         public string Name
@@ -133,21 +143,24 @@ namespace MCCS.ViewModels.Others
             // 获取模型的边界框来确定标签位置
             // X=0.000, Y=-0.136, Z=0.991
             // var offset = 2.0f;
-            var labelOffset = new Vector3(0,0,0);
-
+            var labelOffset = new Vector3(20, 20, 20);
+            var center = GetModelCenterFromGeometry();
             // 创建力标签
-            var forceLabel = new TextInfo($"Force: {ForceNum} kN", labelOffset) 
+            var forceLabel = new TextInfoExt
             {
+                Text = $"Force: {ForceNum} kN",
+                Origin = center + labelOffset,
                 Foreground = Color4.White,
-                Background = Color4.Black,
+                Background = new Color4(0, 0, 0, 0.7f), // 半透明背景
+                FontFamily = "Microsoft YaHei",
                 Scale = 1f, 
             };
 
             // 创建位移标签
-            var displacementLabel = new TextInfo($"位移: {DisplacementNum} mm",  labelOffset + new Vector3(0, 20, 0))
+            var displacementLabel = new TextInfo($"Displacement: {DisplacementNum} mm",  labelOffset + center + new Vector3(0,2,0))
             {
                 Foreground = Color4.White,
-                Background = Color4.Black,
+                Background = new Color4(0, 0, 0, 0.7f), // 半透明背景
                 Scale = 1f,
                 VerticalAlignment = BillboardVerticalAlignment.Top
             };
@@ -156,9 +169,12 @@ namespace MCCS.ViewModels.Others
             DataLabels.Add(displacementLabel);
 
             // 创建连接线
-            // CreateConnectionLines(modelCenter, labelOffset);
+            CreateConnectionLines(center, labelOffset);
         }
 
+        /// <summary>
+        /// 更新当前模型的材质
+        /// </summary>
         private void UpdateMaterial()
         {
             foreach (var node in _sceneNode.Traverse())
@@ -180,24 +196,25 @@ namespace MCCS.ViewModels.Others
             }
         }
 
-        private void CreateConnectionLines(Vector3 modelCenter, Vector3 labelOffset)
+        /// <summary>
+        /// 创建好当前模型中的连接线
+        /// </summary>
+        /// <param name="modelCenter"></param>
+        /// <param name="labelOffset"></param>
+        private void CreateConnectionLines(Vector3 center, Vector3 labelOffset)
         {
-            var linePoints = new Vector3[]
-            {
-                modelCenter,
-                modelCenter + new Vector3(labelOffset.X * 0.8f, labelOffset.Y * 0.8f, labelOffset.Z)
-            };
-
-            var lineGeometry = new LineGeometry3D
-            {
-                Positions = new Vector3Collection(linePoints),
-                Indices = new IntCollection([0, 1]),
-                Colors = []
-            };
-
-            ConnectionLines.Add(lineGeometry);
+            // 以中心为起点
+            ConnectPoints.Add(center);
+            ConnectPoints.Add(center + labelOffset);
+            ConnectCollection.Add(0);
+            ConnectCollection.Add(1);
         }
 
+        /// <summary>
+        /// 更新当前模型的标签
+        /// </summary>
+        /// <param name="force"></param>
+        /// <param name="displacement"></param>
         private void UpdateLabels(double force, double displacement)
         {
             if (DataLabels.Count >= 2)
@@ -205,6 +222,34 @@ namespace MCCS.ViewModels.Others
                 DataLabels[0].Text = $"力: {force} kN";
                 DataLabels[1].Text = $"位移: {displacement} mm";
             }
+        }
+
+        /// <summary>
+        /// 寻找模型的中心
+        /// </summary>
+        /// <returns></returns>
+        private Vector3 GetModelCenterFromGeometry()
+        {
+            var minBound = new Vector3(float.MaxValue);
+            var maxBound = new Vector3(float.MinValue);
+            bool hasGeometry = false;
+
+            foreach (var node in _sceneNode.Traverse())
+            {
+                if (node is GeometryNode geometryNode && geometryNode.Geometry != null)
+                {
+                    var nodeBounds = geometryNode.BoundsWithTransform;
+                    minBound = Vector3.Min(minBound, nodeBounds.Minimum);
+                    maxBound = Vector3.Max(maxBound, nodeBounds.Maximum);
+                    hasGeometry = true;
+                }
+            }
+            if (hasGeometry)
+            {
+                return (minBound + maxBound) / 2;
+            }
+
+            return Vector3.Zero;
         }
         #endregion
     }
