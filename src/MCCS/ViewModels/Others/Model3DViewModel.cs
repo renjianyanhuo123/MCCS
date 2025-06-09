@@ -141,8 +141,6 @@ namespace MCCS.ViewModels.Others
         private void InitializeDataLabels()
         {
             // 获取模型的边界框来确定标签位置
-            // X=0.000, Y=-0.136, Z=0.991
-            // var offset = 2.0f;
             var labelOffset = new Vector3(20, 20, 20);
             var center = GetModelCenterFromGeometry();
             // 创建力标签
