@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MCCS.Services.DevicesService
+namespace MCCS.Services.CollectionService
 {
-    public interface IDeviceConnectionManager
+    public interface IDataAcquisitionManager
     {
     }
 }

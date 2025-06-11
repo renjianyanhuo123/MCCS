@@ -1,9 +1,9 @@
-﻿namespace MCCS.Core.Devices;
+﻿namespace MCCS.Core.Devices.Connections;
 
 /// <summary>
 /// 设备连接接口 - 负责底层通信
 /// </summary>
-public interface IDeviceConnection
+public interface IDeviceConnection : IDisposable
 {
     string ConnectionString { get; }
         

@@ -1,13 +1,10 @@
-﻿using ControlzEx.Standard;
-using HelixToolkit.SharpDX.Core;
+﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
-using MahApps.Metro.Controls;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;

@@ -1,6 +1,4 @@
-﻿using HelixToolkit.Wpf.SharpDX;
-
-namespace MCCS.Common
+﻿namespace MCCS.Common
 {
     public static class IntToColor
     {

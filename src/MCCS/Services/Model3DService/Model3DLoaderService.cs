@@ -7,9 +7,6 @@ using MCCS.Core.Repositories;
 using Microsoft.Extensions.Configuration;
 using MCCS.Common;
 using SharpDX;
-using HelixToolkit.SharpDX.Core.Model.Scene;
-using HelixToolkit.SharpDX.Core.Model;
-using SharpDX.Direct3D9;
 
 namespace MCCS.Services.Model3DService
 {

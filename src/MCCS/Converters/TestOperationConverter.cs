@@ -1,7 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
-using MCCS.Models;
 using System.Globalization;
 using System.Windows.Data;
+using MCCS.Core.Models.TestInfo;
 
 namespace MCCS.Converters
 {

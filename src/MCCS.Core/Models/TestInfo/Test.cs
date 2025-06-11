@@ -1,5 +1,4 @@
 ﻿using FreeSql.DataAnnotations;
-using MCCS.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace MCCS.Core.Models.TestInfo
@@ -17,7 +16,7 @@ namespace MCCS.Core.Models.TestInfo
         /// 试样名称
         /// </summary>
         [MaxLength(50)]
-        public string Name {get;set;}
+        public string? Name {get;set;}
 
         /// <summary>
         /// 试样标准

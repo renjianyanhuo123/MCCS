@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models
+﻿namespace MCCS.Core.Models.TestInfo
 {
     public enum TestStatus
     {

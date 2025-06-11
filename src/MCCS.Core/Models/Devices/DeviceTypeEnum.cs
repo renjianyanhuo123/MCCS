@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.Core.Models.Devices
+﻿namespace MCCS.Core.Models.Devices
 {
     public enum DeviceTypeEnum: int
     {

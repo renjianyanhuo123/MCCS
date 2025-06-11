@@ -1,6 +1,4 @@
-﻿using System.Windows.Media.Media3D;
-
-namespace MCCS.Common
+﻿namespace MCCS.Common
 {
     public static class StringToVector
     {

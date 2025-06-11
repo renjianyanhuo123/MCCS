@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace MCCS.UserControl.ComboBox
+﻿namespace MCCS.UserControl.ComboBox
 {
     /// <summary>
     /// CustomComboBox.xaml 的交互逻辑
@@ -12,9 +10,6 @@ namespace MCCS.UserControl.ComboBox
             InitializeComponent();
         }
 
-        /// <summary>
-        /// 后缀文本 依赖属性
-        /// </summary>
         //public string SuffixText
         //{
         //    get => (string)GetValue(SuffixTextProperty);

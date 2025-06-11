@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.Core.Models.Devices
+﻿namespace MCCS.Core.Models.Devices
 {
     public enum DeviceStatusEnum: int
     {
@@ -13,24 +7,28 @@ namespace MCCS.Core.Models.Devices
         /// </summary>
         Unknown = 0,
         /// <summary>
-        /// 在线
+        /// 已连接
         /// </summary>
-        Online = 1,
+        Connected = 1,
         /// <summary>
         /// 离线
         /// </summary>
-        Offline = 2,
+        Disconnected = 2,
         /// <summary>
         /// 错误 异常
         /// </summary>
         Error = 3,
         /// <summary>
-        /// 维护中
+        /// 繁忙
         /// </summary>
-        Maintenance = 4,
+        Busy = 4,
         /// <summary>
         /// 无效
         /// </summary>
-        Disabled = 5
+        Disabled = 5,
+        /// <summary>
+        /// 连接中
+        /// </summary>
+        Connecting
     }
 }

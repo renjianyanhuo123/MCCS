@@ -2,11 +2,8 @@
 using System.Windows.Media.Media3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
-using HelixToolkit.SharpDX.Core; 
-using HelixToolkit.Wpf.SharpDX;
-using System.Collections.ObjectModel;
+using HelixToolkit.SharpDX.Core;
 using SharpDX;
-using Assimp;
 
 namespace MCCS.ViewModels.Others
 {
@@ -18,15 +15,12 @@ namespace MCCS.ViewModels.Others
         private bool _isSelected;
         private bool _isHovered; 
 
-        private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
+        // private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
         private Transform3D _transform;
         private readonly Model3DData _model3DData;
         private readonly SceneNode _sceneNode;
 
         // BillboardText3D相关属性 一般包括: 力 和 位移
-        private List<TextInfo> _dataLabels;
-        private List<LineGeometry3D> _connectionLines;
-
         private double _forceNum;
         private double _displacementNum;
 
@@ -44,12 +38,9 @@ namespace MCCS.ViewModels.Others
                 InitializeDataLabels();
             }
             // 为场景节点设置Tag，以便在点击时识别
-            if (_sceneNode != null)
-            {
-                _sceneNode.Tag = this; 
-                // 为所有子节点也设置Tag
-                foreach (var node in _sceneNode.Traverse()) node.Tag = this;
-            }
+            _sceneNode.Tag = this; 
+            // 为所有子节点也设置Tag
+            foreach (var node in _sceneNode.Traverse()) node.Tag = this;
         }
 
         public Model3DData Model3DData => _model3DData;

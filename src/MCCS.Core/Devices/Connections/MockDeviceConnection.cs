@@ -1,21 +1,31 @@
-﻿namespace MCCS.Core.Devices
+﻿namespace MCCS.Core.Devices.Connections;
+
+/// <summary>
+/// 模拟演示的链接
+/// </summary>
+public class MockDeviceConnection : BaseConnection
 {
-    public class MockDeviceConnection : IDeviceConnection
+    public MockDeviceConnection(string connectionString) : base(connectionString)
     {
-        public bool IsConnected { get; private set; }
+    }
 
-        public async Task<bool> ConnectAsync()
-        {
-            await Task.Delay(1000); // Simulate a delay for connection
-            IsConnected = true; // Simulate a successful connection
-            return true; // Simulate a successful connection
-        }
+    public override async Task<bool> OpenAsync()
+    {
+        await Task.Delay(100); // 模拟连接延迟
+        _connectionStateSubject.OnNext(true);
+        return true;
+    }
 
-        public async Task<bool> DisconnectAsync()
-        {
-            await Task.Delay(1000); // Simulate a delay for disconnection
-            IsConnected = false; // Simulate a successful disconnection
-            return true; // Simulate a successful disconnection
-        }
+    public override async Task<bool> CloseAsync()
+    {
+        await Task.Delay(100);
+        _connectionStateSubject.OnNext(false);
+        return true;
+    }
+
+    public override async Task<byte[]> SendCommandAsync(byte[] command)
+    {
+        await Task.Delay(10); // 模拟通信延迟
+        return [0x01, 0x02, 0x03, 0x04]; // 模拟响应
     }
 }

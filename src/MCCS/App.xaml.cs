@@ -7,7 +7,6 @@ using System.IO;
 using System.Windows;
 using Serilog;
 using System.Windows.Threading;
-using MCCS.Services.Model3DService;
 
 namespace MCCS
 {
