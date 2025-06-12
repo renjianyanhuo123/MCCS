@@ -1,48 +1,67 @@
 ﻿using MCCS.Core.Devices;
+using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Manager;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
 using SharpDX.Direct3D9;
+using System.Collections.Concurrent;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace MCCS.Services.DevicesService
 {
     /// <summary>
-    /// Manages device connections within the MCCS application.
     /// 注意: 管理多个设备连接的逻辑需要在此类中实现。
     /// </summary>
-    public class DeviceManager : IDeviceManager
+    public sealed class DeviceManager : IDeviceManager
     {
-        private readonly Dictionary<string, IDevice> _devices = [];
-        private readonly IDeviceConnectionFactory _connectionFactory;
+        private readonly ConcurrentDictionary<string, IDevice> _devices = [];
         private readonly IDeviceInfoRepository _deviceInfoRepository;
+        private readonly IDeviceFactory _deviceFactory;
+        private readonly CompositeDisposable _disposables = [];
+        private readonly Subject<CommandResponse> _commandExecutionSubject = new();
 
-        // 使用Subject发布设备事件
+        /// <summary>
+        /// 使用Subject发布设备事件
+        /// </summary>
         private readonly Subject<DeviceEvent> _deviceEventSubject = new();
 
-        // 公开的事件流
+        /// <summary>
+        /// 公开的事件流，供外部订阅设备事件
+        /// </summary>
         public IObservable<DeviceEvent> DeviceEvents => _deviceEventSubject.AsObservable();
 
-        // 设备状态变化流
+        /// <summary>
+        /// 设备状态变化流
+        /// </summary>
         public IObservable<DeviceStatusEvent> StatusChanges =>
             DeviceEvents.OfType<DeviceStatusEvent>();
 
-        // 设备添加/移除流
+        /// <summary>
+        /// 设备添加/移除流
+        /// </summary>
         public IObservable<DeviceRegistrationEvent> RegistrationChanges =>
             DeviceEvents.OfType<DeviceRegistrationEvent>();
 
-        // 所有设备的状态聚合流
+        /// <summary>
+        /// 所有设备的状态聚合流
+        /// </summary>
         public IObservable<Dictionary<string, DeviceStatusEnum>> AllDeviceStatuses { get; }
 
+        /// <summary>
+        /// 指令执行流
+        /// </summary>
+        public IObservable<CommandResponse> CommandExecutions { get; }
+
         public DeviceManager(
-            IDeviceConnectionFactory connectionFactory,
+            IDeviceFactory deviceFactory,
             IDeviceInfoRepository deviceInfoRepository)
         {
-            _connectionFactory = connectionFactory 
-                ?? throw new ArgumentNullException(nameof(connectionFactory));
             _deviceInfoRepository = deviceInfoRepository 
                 ?? throw new ArgumentNullException(nameof(deviceInfoRepository));
+            _deviceFactory = deviceFactory;
+            CommandExecutions = _commandExecutionSubject.AsObservable();
             // 创建所有设备状态的聚合流
             AllDeviceStatuses = Observable
                 .Interval(TimeSpan.FromSeconds(1))
@@ -55,8 +74,24 @@ namespace MCCS.Services.DevicesService
                 .RefCount();
         }
 
+        public async Task<bool> RegisterAllDeviceFromRepository()
+        {
+            var devices = await _deviceInfoRepository.GetAllDevicesAsync();
+            if (devices == null || !devices.Any())
+                return false;
+            foreach (var deviceInfo in devices) 
+            {
+                var device = _deviceFactory.CreateDevice(deviceInfo);
+                if (device != null)
+                {
+                    RegisterDevice(device);
+                }
+            }
+            return true;
+        }
+
         /// <summary>
-        /// 注册设备
+        /// 注册单个设备
         /// </summary>
         /// <param name="device"></param>
         /// <exception cref="InvalidOperationException"></exception>
@@ -86,6 +121,10 @@ namespace MCCS.Services.DevicesService
                     });
                 });
 
+            // 汇总各个设备 订阅设备指令响应
+            device.CommandResponseStream
+                .Subscribe(response => _commandExecutionSubject.OnNext(response));
+
             // 发布设备注册事件
             _deviceEventSubject.OnNext(new DeviceRegistrationEvent
             {
@@ -99,13 +138,14 @@ namespace MCCS.Services.DevicesService
         /// 卸载设备
         /// </summary>
         /// <param name="deviceId"></param>
-        public void UnregisterDevice(string deviceId)
+        public async Task UnregisterDevice(string deviceId)
         {
             if (_devices.TryGetValue(deviceId, out var device))
             {
-                device.DisconnectAsync().Wait();
-                _devices.Remove(deviceId);
-
+                var isSuccess = await device.DisconnectAsync();
+                if (device is IDisposable disposable && isSuccess)
+                    disposable.Dispose();
+                _devices.Remove(deviceId, out var deviceTemp);
                 _deviceEventSubject.OnNext(new DeviceRegistrationEvent
                 {
                     DeviceId = deviceId,
@@ -132,6 +172,38 @@ namespace MCCS.Services.DevicesService
             return Observable.Return(_devices.Values.AsEnumerable());
         }
 
+        public async Task<CommandResponse> SendCommandAsync(DeviceCommand command)
+        {
+            var device = GetDevice(command.DeviceId);
+            if (device == null)
+                throw new InvalidOperationException($"Device {command.DeviceId} not found");
+
+            return await device.SendCommandAsync(command);
+        }
+
+
+        public IObservable<CommandResponse> SendCommandsAsync(IEnumerable<DeviceCommand> commands)
+        {
+            return commands.ToObservable()
+                .SelectMany(async cmd =>
+                {
+                    try
+                    {
+                        return await SendCommandAsync(cmd);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new CommandResponse
+                        {
+                            CommandId = cmd.CommandId,
+                            DeviceId = cmd.DeviceId,
+                            Success = false,
+                            ErrorMessage = ex.Message
+                        };
+                    }
+                });
+        }
+
         public void Dispose()
         {
             foreach (var device in _devices.Values)
@@ -141,6 +213,7 @@ namespace MCCS.Services.DevicesService
             }
             _devices.Clear();
             _deviceEventSubject.Dispose();
-        }
+            _commandExecutionSubject.Dispose();
+        } 
     }
 }

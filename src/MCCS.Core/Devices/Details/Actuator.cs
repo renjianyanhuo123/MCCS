@@ -7,15 +7,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MCCS.Core.Devices.Mocks
+namespace MCCS.Core.Devices.Details
 {
-    public class ActuatorMock : BaseDevice
+    public sealed class Actuator : BaseDevice
     {
-        public ActuatorMock(
-            string id,
-            string name,
-            DeviceTypeEnum type,
-            IDeviceConnection connection) : base(id, name, type, connection)
+        public Actuator(
+            DeviceInfo deviceInfo,
+            IDeviceConnectionFactory connectionFactory,
+            bool isMock = true)
+            : base(
+                  deviceInfo.DeviceId, 
+                  deviceInfo.DeviceName, 
+                  deviceInfo.DeviceType, 
+                  connectionFactory,
+                  isMock)
         {
         }
 
@@ -26,17 +31,18 @@ namespace MCCS.Core.Devices.Mocks
             _statusSubject.OnNext(DeviceStatusEnum.Busy);
             try
             {
-                // 模拟读取数据
-                await Task.Delay(100); // 模拟延迟
-                var data = new DeviceData
+                // TODO: 修改为实际的命令和数据处理逻辑
+                var command = new byte[] { 0x01, 0x03, 0x00, 0x00, 0x00, 0x01 };
+                var data = await _connection.SendCommandAsync(command);
+                var res = new DeviceData
                 {
                     DeviceId = Id,
-                    Value = "Sample Data", // 这里可以替换为实际读取的数据
+                    Value = data,
                     Unit = "units",
                     Timestamp = DateTimeOffset.UtcNow,
                     Metadata = new Dictionary<string, object> { { "source", "simulated" } }
                 };
-                return data;
+                return res;
             }
             finally
             {
@@ -45,6 +51,11 @@ namespace MCCS.Core.Devices.Mocks
 
         }
 
+        /// <summary>
+        /// 在BaseDevice中实现的命令处理方法
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
         protected override async Task<CommandResponse> ProcessCommandAsync(DeviceCommand command)
         {
             var response = new CommandResponse
@@ -53,6 +64,7 @@ namespace MCCS.Core.Devices.Mocks
                 DeviceId = Id,
                 Success = true
             };
+            // TODO: 实现具体的命令处理逻辑
             await Task.Delay(100); // 模拟处理延迟
             return response;
         }

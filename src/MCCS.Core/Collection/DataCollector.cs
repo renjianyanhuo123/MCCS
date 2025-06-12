@@ -15,16 +15,21 @@ namespace MCCS.Core.Collection
     {
         private readonly IDevice _device;
         private readonly Subject<Unit> _stopSubject = new();
+        private readonly BehaviorSubject<bool> _isCollectingSubject = new(false);
         private IDisposable _collectionSubscription;
 
         public string DeviceId => _device.Id;
-        public IObservable<bool> IsCollecting { get; }
+        public bool IsCollecting => _isCollectingSubject.Value;
 
-        // 数据流
+        /// <summary>
+        /// 数据流
+        /// </summary>
         public IObservable<DeviceData> DataStream { get; }
 
-        // 错误流
-        public IObservable<Exception?> ErrorStream { get; }
+        /// <summary>
+        /// 错误流
+        /// </summary>
+        // public IObservable<Exception?> ErrorStream { get; }
 
         public DataCollector(
             IDevice device, 
@@ -32,45 +37,31 @@ namespace MCCS.Core.Collection
         {
             _device = device;
 
-            // 创建共享的数据源
-            var sharedDataSource = Observable
+            DataStream = Observable
                 .Interval(interval, NewThreadScheduler.Default)
                 .TakeUntil(_stopSubject)
                 .SelectMany(async _ => await _device.ReadDataAsync())
+                .Where(data => data != null)
+                .Do(_ => { },
+                    _ => _isCollectingSubject.OnNext(false),
+                    () => _isCollectingSubject.OnNext(false))
                 .Publish()
                 .RefCount();
-
-            // 分离数据和错误
-            DataStream = sharedDataSource
-                .Retry() // 自动重试
-                .Where(data => data != null);
-
-            ErrorStream = sharedDataSource
-                .Materialize()
-                .Where(notification => notification.Kind == System.Reactive.NotificationKind.OnError)
-                .Select(notification => notification.Exception);
-
-            // 采集状态流
-            var isCollectingSubject = new BehaviorSubject<bool>(false);
-            IsCollecting = isCollectingSubject.AsObservable();
-
-            // 监听订阅状态
-            DataStream.Subscribe(
-                _ => { },
-                _ => isCollectingSubject.OnNext(false),
-                () => isCollectingSubject.OnNext(false)
-            );
         }
 
         public void Start()
         {
             if (_collectionSubscription != null) return;
 
-            _collectionSubscription = DataStream.Subscribe();
+            _collectionSubscription = DataStream.Subscribe(
+                data => { /* 数据处理在外部订阅中完成 */ },
+                error => _isCollectingSubject.OnNext(false),
+                () => _isCollectingSubject.OnNext(false));
         }
 
         public void Stop()
         {
+            _isCollectingSubject.OnNext(false);
             _stopSubject.OnNext(Unit.Default);
             _collectionSubscription?.Dispose();
             _collectionSubscription = null;

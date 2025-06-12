@@ -17,7 +17,7 @@ namespace MCCS.ViewModels.Pages
         
         #region private field 
         private bool _isLoading = true;
-        private string _loadingMessage;
+        private string _loadingMessage = "";
         private ObservableCollection<Model3DViewModel> _models;
         private Model3DViewModel? _lastHoveredModel = null;
 

@@ -12,26 +12,42 @@ namespace MCCS.Core.Devices;
 /// </summary>
 public abstract class BaseDevice : IDevice
 {
-    protected IDeviceConnection _connection;
     protected readonly BehaviorSubject<DeviceStatusEnum> _statusSubject = new(DeviceStatusEnum.Disconnected);
     protected readonly Subject<CommandResponse> _commandResponseSubject = new();
+    protected readonly IDeviceConnection _connection;
 
     public string Id { get; }
     public string Name { get; }
     public DeviceTypeEnum Type { get; }
-    // 公开状态流
+    
+    /// <summary>
+    /// 公开状态流
+    /// </summary>
     public IObservable<DeviceStatusEnum> StatusStream => _statusSubject.AsObservable();
 
-    // 公开指令响应流
+    /// <summary>
+    /// 公开指令响应流
+    /// </summary>
     public IObservable<CommandResponse> CommandResponseStream => _commandResponseSubject.AsObservable();
 
-    protected BaseDevice(string id, string name, DeviceTypeEnum type, IDeviceConnection connection)
+    /// <summary>
+    /// 当前设备状态
+    /// </summary>
+    public DeviceStatusEnum CurrentStatus => _statusSubject.Value;
+
+    protected BaseDevice(
+        string id, 
+        string name, 
+        DeviceTypeEnum type,
+        IDeviceConnectionFactory connectionFactory,
+        bool isMock = true)
     {
         Id = id;
         Name = name;
         Type = type;
-        _connection = connection;
-            
+        // TODO: 根据isMock参数选择连接类型
+        var t = isMock ? ConnectionTypeEnum.Mock : ConnectionTypeEnum.Modbus;
+        _connection = connectionFactory.CreateConnection("XXXXXX", t);
         // 监听连接状态变化，自动更新设备状态
         _connection.ConnectionStateStream
             .DistinctUntilChanged()
@@ -65,11 +81,6 @@ public abstract class BaseDevice : IDevice
         var result = await _connection.CloseAsync();
         _statusSubject.OnNext(DeviceStatusEnum.Disconnected);
         return result;
-    }
-
-    public Task<DeviceStatusEnum> GetStatusAsync()
-    {
-        return Task.FromResult(_statusSubject.Value);
     }
 
     public abstract Task<DeviceData> ReadDataAsync();

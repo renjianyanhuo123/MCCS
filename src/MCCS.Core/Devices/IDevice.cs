@@ -3,7 +3,7 @@ using MCCS.Core.Models.Devices;
 
 namespace MCCS.Core.Devices
 {
-    public interface IDevice
+    public interface IDevice : IDisposable
     {
         string Id { get; }
         string Name { get; }
@@ -18,7 +18,10 @@ namespace MCCS.Core.Devices
         IObservable<CommandResponse> CommandResponseStream { get; }
         Task<bool> ConnectAsync();
         Task<bool> DisconnectAsync();
-        Task<DeviceStatusEnum> GetStatusAsync();
+        /// <summary>
+        /// 当前状态
+        /// </summary>
+        DeviceStatusEnum CurrentStatus { get; }
 
         /// <summary>
         /// 设备自己负责读取数据

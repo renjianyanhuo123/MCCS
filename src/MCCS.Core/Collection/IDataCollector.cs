@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace MCCS.Core.Collection
 {
-    public interface IDataCollector
+    public interface IDataCollector : IDisposable
     {
+        public string DeviceId { get; }
     }
 }

@@ -8,5 +8,6 @@ namespace MCCS.Services.Coordinators
 {
     public interface IDeviceSystemCoordinator
     {
+
     }
 }

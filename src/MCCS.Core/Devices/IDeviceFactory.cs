@@ -1,0 +1,14 @@
+﻿using MCCS.Core.Models.Devices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MCCS.Core.Devices
+{
+    public interface IDeviceFactory
+    {
+        IDevice CreateDevice(DeviceInfo deviceInfo, bool IsMock = true);
+    }
+}

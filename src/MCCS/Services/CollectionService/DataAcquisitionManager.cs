@@ -17,48 +17,25 @@ namespace MCCS.Services.CollectionService
     /// <summary>
     /// 数据采集管理器
     /// </summary>
-    public class DataAcquisitionManager : IDataAcquisitionManager
+    public class DataAcquisitionManager
     {
-        private readonly Dictionary<string, DataCollector> _collectors = new();
-        private readonly DeviceManager _deviceManager;
-        private readonly Subject<DeviceData> _allDataSubject = new();
+        private readonly Dictionary<string, DataCollector> _collectors = [];
+        private readonly IDeviceManager _deviceManager; 
         private readonly Subject<DataCollectionError> _errorSubject = new();
 
-        // 所有设备的数据流
-        public IObservable<DeviceData> AllDataStream => _allDataSubject.AsObservable();
-        // 错误流
-        public IObservable<DataCollectionError> ErrorStream => _errorSubject.AsObservable();
+        /// <summary>
+        /// 错误流
+        /// </summary>
+        public IObservable<DataCollectionError> ErrorStream =>  _errorSubject.AsObservable(); 
 
-        // 特定设备的数据流
-        public IObservable<DeviceData> GetDeviceDataStream(string deviceId)
-        {
-            return AllDataStream.Where(data => data.DeviceId == deviceId);
-        }
-
-        // 数据统计流（每秒更新）
-        public IObservable<DataStatistics> StatisticsStream { get; }
-
-        public DataAcquisitionManager(DeviceManager deviceManager)
+        public DataAcquisitionManager(IDeviceManager deviceManager)
         {
             _deviceManager = deviceManager;
 
             // 监听设备状态变化，自动管理采集器
             _deviceManager.StatusChanges
             .Where(e => e.NewStatus == DeviceStatusEnum.Disconnected || e.NewStatus == DeviceStatusEnum.Error)
-                .Subscribe(e => StopCollection(e.DeviceId));
-
-            // 创建统计流
-            StatisticsStream = AllDataStream
-                .Buffer(TimeSpan.FromSeconds(1))
-                .Select(dataList => new DataStatistics
-                {
-                    Timestamp = DateTime.Now,
-                    DeviceCount = _collectors.Count,
-                    DataPointsPerSecond = dataList.Count,
-                    ActiveDevices = dataList.Select(d => d.DeviceId).Distinct().Count()
-                })
-                .Publish()
-                .RefCount();
+            .Subscribe(e => StopCollection(e.DeviceId)); 
         }
 
         public void StartCollection(string deviceId, TimeSpan? interval = null)
@@ -70,11 +47,7 @@ namespace MCCS.Services.CollectionService
             if (_collectors.ContainsKey(deviceId))
                 return;
 
-            var collector = new DataCollector(device, interval ?? TimeSpan.FromSeconds(1));
-
-            // 订阅数据流
-            collector.DataStream.Subscribe(data => _allDataSubject.OnNext(data));
-
+            var collector = new DataCollector(device, interval ?? TimeSpan.FromSeconds(1)); 
             // 订阅错误流
             collector.ErrorStream.Subscribe(error =>
                 _errorSubject.OnNext(new DataCollectionError
@@ -98,18 +71,6 @@ namespace MCCS.Services.CollectionService
             }
         }
 
-        /// <summary>
-        /// 创建数据处理管道
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="pipelineFactory"></param>
-        /// <returns></returns>
-        public IObservable<T> CreateDataPipeline<T>(
-            Func<IObservable<DeviceData>, IObservable<T>> pipelineFactory)
-        {
-            return pipelineFactory(AllDataStream);
-        }
-
         public void Dispose()
         {
             foreach (var collector in _collectors.Values)
@@ -117,8 +78,17 @@ namespace MCCS.Services.CollectionService
                 collector.Dispose();
             }
             _collectors.Clear();
-            _allDataSubject.Dispose();
             _errorSubject.Dispose();
+        }
+
+        public void StartAllCollection(TimeSpan? interval = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StopAllCollection()
+        {
+            throw new NotImplementedException();
         }
     }
 }
