@@ -2,7 +2,7 @@
 
 public class SerialPortConnection : BaseConnection
 {
-    public SerialPortConnection(string connectionString) : base(connectionString)
+    public SerialPortConnection(string connectionId, string connectionString) : base(connectionId, connectionString)
     {
     }
 

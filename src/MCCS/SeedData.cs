@@ -1,8 +1,11 @@
-﻿using MCCS.Core.Models.Model3D;
+﻿using FreeSql.DataAnnotations;
+using MCCS.Core.Models.Devices;
+using MCCS.Core.Models.Model3D;
 using MCCS.Core.Models.SystemSetting;
 using MCCS.Core.Models.TestInfo;
 using MCCS.Models;
 using MCCS.ViewModels.Pages;
+using Newtonsoft.Json;
 
 namespace MCCS
 {
@@ -75,11 +78,11 @@ namespace MCCS
                         Name = "模型1",
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\main.STL",
-                        PositionStr = "1,0,0",
+                        PositionStr = "0,0,0",
                         Description = "0",
-                        Type = ModelType.Actuator,
+                        Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -89,10 +92,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\1.STL",
                         Description = "1",
-                        PositionStr = "2,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -102,10 +105,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\2.STL",
                         Description = "2",
-                        PositionStr = "3,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -115,11 +118,12 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\3.STL",
                         Description = "3",
-                        PositionStr = "4,0,0",
-                        Type = ModelType.Other,
+                        PositionStr = "0,0,0",
+                        Type = ModelType.Actuator,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
-                        RotateAngle = -90.0
+                        ScaleStr = "0.005,0.005,0.005",
+                        RotateAngle = -90.0,
+                        DeviceId = "1882785835a24a83aae53ac51f153c04"
                     },
                     new()
                     {
@@ -128,10 +132,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\4.STL",
                         Description = "4",
-                        PositionStr = "5,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -141,10 +145,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\5.STL",
                         Description = "5",
-                        PositionStr = "6,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -154,10 +158,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\6.STL",
                         Description = "6",
-                        PositionStr = "7,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -167,10 +171,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\7.STL",
                         Description = "7",
-                        PositionStr = "8,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -180,10 +184,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\8.STL",
                         Description = "8",
-                        PositionStr = "9,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -193,10 +197,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\9.STL",
                         Description = "9",
-                        PositionStr = "10,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -206,10 +210,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\10.STL",
                         Description = "10",
-                        PositionStr = "11,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr ="0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -219,10 +223,10 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\11.STL",
                         Description = "11",
-                        PositionStr = "12,0,0",
+                        PositionStr = "0,0,0",
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
+                        ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0
                     },
                     new()
@@ -232,14 +236,46 @@ namespace MCCS
                         GroupKey = "2025052901",
                         FilePath = @"F:\\models\\test\\12.STL",
                         Description = "12",
-                        PositionStr = "13,0,0",
-                        Type = ModelType.Other,
+                        PositionStr = "0,0,0",
+                        Type = ModelType.Actuator,
                         RotationStr = "1,0,0",
-                        ScaleStr = "1,1,1",
-                        RotateAngle = -90.0
+                        ScaleStr = "0.005,0.005,0.005",
+                        RotateAngle = -90.0,
+                        DeviceId = "dd1d1798920e49cbaba9b4a59aead10f"
                     }
                 };
                 freeSql.Insert(entities).ExecuteAffrows();
+            }
+            if (!freeSql.Select<DeviceInfo>().Any()) 
+            {
+                var mainDeviceId1 = Guid.NewGuid().ToString("N");
+                var devices = new List<DeviceInfo>() 
+                {
+                    new() {
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        DeviceName = "作动器1",
+                        DeviceType = DeviceTypeEnum.Actuator,
+                        Description = "作动器1的传感器数据",
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "port", "COM3" } }),
+                    },
+                    new() {
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        DeviceName = "作动器2",
+                        DeviceType = DeviceTypeEnum.Actuator,
+                        Description = "作动器2的传感器数据",
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "port", "COM1" } }),
+                    },
+                    new() {
+                        DeviceId = mainDeviceId1,
+                        DeviceName = "控制器1",
+                        DeviceType = DeviceTypeEnum.Controller,
+                        Description = "控制器",
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    }
+                };
+                freeSql.Insert(devices).ExecuteAffrows();
             }
         }
 

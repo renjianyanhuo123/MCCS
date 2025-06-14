@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MCCS.Core.Devices.Details;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace MCCS.Core.Devices
     /// 统一的设备数据结构
     /// </summary>
     public record DeviceData
-    {
+    { 
         public required string DeviceId { get; init; }
         public required object Value { get; init; }
         public string? Unit { get; init; }

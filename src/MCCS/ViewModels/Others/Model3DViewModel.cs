@@ -9,14 +9,11 @@ namespace MCCS.ViewModels.Others
 {
     public class Model3DViewModel : BindableBase
     {
-        private string _name; 
-        private Model3D _model;
-        private Point3D _position;
         private bool _isSelected;
         private bool _isHovered; 
 
         // private HelixToolkit.Wpf.SharpDX.Material _currentMaterial;
-        private Transform3D _transform;
+        // private Transform3D _transform;
         private readonly Model3DData _model3DData;
         private readonly SceneNode _sceneNode;
 
@@ -25,8 +22,8 @@ namespace MCCS.ViewModels.Others
         private double _displacementNum;
 
         // 性能优化：缓存文本格式
-        private const string ForceFormat = "力: {0:F2} kN";
-        private const string DisplacementFormat = "位移: {0:F2} mm";
+        private const string ForceFormat = "Force: {0:F2} kN";
+        private const string DisplacementFormat = "Displacement: {0:F2} mm";
 
         public Model3DViewModel(SceneNode sceneNode, Model3DData model3DData)
         {
@@ -59,18 +56,6 @@ namespace MCCS.ViewModels.Others
         /// </summary>
         public IntCollection ConnectCollection { get; private set; } = [];
         #endregion
-
-        public string Name
-        {
-            get => _name;
-            set => SetProperty(ref _name, value);
-        }
-
-        public Point3D Position
-        {
-            get => _position;
-            set => SetProperty(ref _position, value);
-        }
 
         public double ForceNum 
         {
@@ -112,13 +97,7 @@ namespace MCCS.ViewModels.Others
                     UpdateMaterial();
                 }
             }
-        }
-
-        public Transform3D Transform
-        {
-            get => _transform;
-            set => SetProperty(ref _transform, value);
-        }
+        } 
 
         public bool IsHovered
         {

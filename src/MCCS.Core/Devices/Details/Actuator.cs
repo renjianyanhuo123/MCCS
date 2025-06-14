@@ -4,7 +4,9 @@ using MCCS.Core.Models.Devices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices.Details
@@ -13,60 +15,41 @@ namespace MCCS.Core.Devices.Details
     {
         public Actuator(
             DeviceInfo deviceInfo,
-            IDeviceConnectionFactory connectionFactory,
-            bool isMock = true)
+            IDeviceConnection connection)
             : base(
                   deviceInfo.DeviceId, 
                   deviceInfo.DeviceName, 
                   deviceInfo.DeviceType, 
-                  connectionFactory,
-                  isMock)
+                  connection)
         {
         }
 
-        public override async Task<DeviceData> ReadDataAsync()
+        protected override bool IsDeviceData(byte[] data)
         {
-            if (_statusSubject.Value != DeviceStatusEnum.Connected)
-                throw new InvalidOperationException("Device not connected");
-            _statusSubject.OnNext(DeviceStatusEnum.Busy);
-            try
-            {
-                // TODO: 修改为实际的命令和数据处理逻辑
-                var command = new byte[] { 0x01, 0x03, 0x00, 0x00, 0x00, 0x01 };
-                var data = await _connection.SendCommandAsync(command);
-                var res = new DeviceData
-                {
-                    DeviceId = Id,
-                    Value = data,
-                    Unit = "units",
-                    Timestamp = DateTimeOffset.UtcNow,
-                    Metadata = new Dictionary<string, object> { { "source", "simulated" } }
-                };
-                return res;
-            }
-            finally
-            {
-                _statusSubject.OnNext(DeviceStatusEnum.Connected);
-            }
-
+            return true;
         }
 
-        /// <summary>
-        /// 在BaseDevice中实现的命令处理方法
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        protected override async Task<CommandResponse> ProcessCommandAsync(DeviceCommand command)
+        protected override byte[] PrepareCommand(DeviceCommand command)
         {
-            var response = new CommandResponse
+            return [];
+        }
+
+        protected override DeviceData ProcessData(byte[] rawData)
+        {
+            var str = Encoding.UTF8.GetString(rawData);
+            var res = JsonSerializer.Deserialize<MockActuatorCollection>(str);
+            var deviceData = new DeviceData() 
             {
-                CommandId = command.CommandId,
                 DeviceId = Id,
-                Success = true
+                Value = res,
+                Unit = "none",
+                Timestamp = DateTimeOffset.Now,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "rawData", rawData }
+                }
             };
-            // TODO: 实现具体的命令处理逻辑
-            await Task.Delay(100); // 模拟处理延迟
-            return response;
+            return deviceData;
         }
     }
 }

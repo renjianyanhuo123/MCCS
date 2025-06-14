@@ -8,26 +8,11 @@ namespace MCCS.Core.Devices
         string Id { get; }
         string Name { get; }
         DeviceTypeEnum Type { get; }
+        bool IsActive { get; }
         /// <summary>
-        /// 状态流 - 可观察的设备状态
+        /// 数据流
         /// </summary>
-        IObservable<DeviceStatusEnum> StatusStream { get; }
-        /// <summary>
-        /// 指令响应流 - 可观察的指令执行结果
-        /// </summary>
-        IObservable<CommandResponse> CommandResponseStream { get; }
-        Task<bool> ConnectAsync();
-        Task<bool> DisconnectAsync();
-        /// <summary>
-        /// 当前状态
-        /// </summary>
-        DeviceStatusEnum CurrentStatus { get; }
-
-        /// <summary>
-        /// 设备自己负责读取数据
-        /// </summary>
-        /// <returns></returns>
-        Task<DeviceData> ReadDataAsync();
+        IObservable<DeviceData> DataStream { get; }
 
         /// <summary>
         /// 发送指令到设备
@@ -35,5 +20,20 @@ namespace MCCS.Core.Devices
         /// <param name="command"></param>
         /// <returns></returns>
         Task<CommandResponse> SendCommandAsync(DeviceCommand command);
+
+        /// <summary>
+        /// 开始订阅数据流
+        /// </summary>
+        void Start();
+
+        /// <summary>
+        /// 停止订阅数据流
+        /// </summary>
+        void Stop();
+        /// <summary>
+        /// 设置采集频率
+        /// </summary>
+        /// <param name="interval"></param>
+        void SetSamplingInterval(TimeSpan interval);
     }
 }

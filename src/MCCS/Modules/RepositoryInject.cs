@@ -22,6 +22,7 @@ namespace MCCS.Modules
             containerRegistry.Register<ISystemMenuRepository, SystemMenuRepository>();
             containerRegistry.Register<ITestInfoRepository, TestInfoRepository>();
             containerRegistry.Register<IModel3DDataRepository, Model3DDataRepository>();
+            containerRegistry.Register<IDeviceInfoRepository, DeviceInfoRepository>();
             SeedData.InitialData(freesql);
         }
     }

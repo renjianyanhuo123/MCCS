@@ -1,25 +1,23 @@
-﻿using MCCS.Core.Devices.Details;
-using MCCS.Core.Devices.Mocks;
+﻿using MCCS.Core.Devices.Connections;
+using MCCS.Core.Devices.Details;
 using MCCS.Core.Models.Devices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices
 {
     public class DeviceFactory : IDeviceFactory
     {
-        private readonly IDeviceConnectionFactory _deviceConnectionFactory;
+        private readonly IConnectionManager _connectionManager;
 
-        public DeviceFactory(IDeviceConnectionFactory deviceConnectionFactory) 
+        public DeviceFactory(
+            IConnectionManager connectionManager) 
         {
-            _deviceConnectionFactory = deviceConnectionFactory;
+            _connectionManager = connectionManager;
         }
 
         public IDevice CreateDevice(DeviceInfo deviceInfo, bool isMock = true)
         {
+            IDeviceConnection? deviceConnection = isMock ? _connectionManager.GetConnection("Mock")
+                    : _connectionManager.GetConnection(deviceInfo.MainDeviceId ?? "");
             switch (deviceInfo.DeviceType)
             {
                 case DeviceTypeEnum.Unknown:
@@ -39,7 +37,9 @@ namespace MCCS.Core.Devices
                 default:
                     break;
             }
-            return new Actuator(deviceInfo, _deviceConnectionFactory, isMock);
+            if (deviceConnection == null)
+                throw new ArgumentNullException(nameof(deviceConnection));
+            return new Actuator(deviceInfo, deviceConnection);
         }
     }
 }

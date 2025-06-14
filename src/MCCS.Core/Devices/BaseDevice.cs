@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Channels;
 using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Models.Devices;
@@ -12,82 +14,73 @@ namespace MCCS.Core.Devices;
 /// </summary>
 public abstract class BaseDevice : IDevice
 {
-    protected readonly BehaviorSubject<DeviceStatusEnum> _statusSubject = new(DeviceStatusEnum.Disconnected);
+    private readonly Channel<DeviceData> _dataChannel;
     protected readonly Subject<CommandResponse> _commandResponseSubject = new();
     protected readonly IDeviceConnection _connection;
+    private readonly MCCS.Core.Devices.Connections.AsyncLock _sendLock = new();
+    private IDisposable _dataSubscription;
+    private TimeSpan _samplingInterval = TimeSpan.Zero; // 默认不限制频率
 
     public string Id { get; }
+
+    public string ConnectionId { get; }
+
+    public bool IsActive { get; private set; }
+
     public string Name { get; }
     public DeviceTypeEnum Type { get; }
-    
-    /// <summary>
-    /// 公开状态流
-    /// </summary>
-    public IObservable<DeviceStatusEnum> StatusStream => _statusSubject.AsObservable();
 
-    /// <summary>
-    /// 公开指令响应流
-    /// </summary>
-    public IObservable<CommandResponse> CommandResponseStream => _commandResponseSubject.AsObservable();
-
-    /// <summary>
-    /// 当前设备状态
-    /// </summary>
-    public DeviceStatusEnum CurrentStatus => _statusSubject.Value;
+    public IObservable<DeviceData> DataStream { get; }
 
     protected BaseDevice(
         string id, 
         string name, 
         DeviceTypeEnum type,
-        IDeviceConnectionFactory connectionFactory,
-        bool isMock = true)
+        IDeviceConnection connection)
     {
         Id = id;
         Name = name;
         Type = type;
-        // TODO: 根据isMock参数选择连接类型
-        var t = isMock ? ConnectionTypeEnum.Mock : ConnectionTypeEnum.Modbus;
-        _connection = connectionFactory.CreateConnection("XXXXXX", t);
-        // 监听连接状态变化，自动更新设备状态
-        _connection.ConnectionStateStream
-            .DistinctUntilChanged()
-            .Subscribe(isConnected =>
-            {
-                if (!isConnected && _statusSubject.Value == DeviceStatusEnum.Connected)
-                {
-                    _statusSubject.OnNext(DeviceStatusEnum.Disconnected);
-                }
-            });
-    }
-    
-    public virtual async Task<bool> ConnectAsync()
-    {
-        try
+        ConnectionId = connection.ConnectionId;
+        _connection = connection;
+        _dataChannel = Channel.CreateUnbounded<DeviceData>(); 
+        DataStream = Observable.Create<DeviceData>(async (observer, ct) =>
         {
-            _statusSubject.OnNext(DeviceStatusEnum.Connecting);
-            var result = await _connection.OpenAsync();
-            _statusSubject.OnNext(result ? DeviceStatusEnum.Connected : DeviceStatusEnum.Error);
-            return result;
-        }
-        catch
-        {
-            _statusSubject.OnNext(DeviceStatusEnum.Error);
-            return false;
-        }
+            await foreach (var data in _dataChannel.Reader.ReadAllAsync(ct))
+                observer.OnNext(data);
+        });
     }
 
-    public virtual async Task<bool> DisconnectAsync()
+    public virtual void Start()
     {
-        var result = await _connection.CloseAsync();
-        _statusSubject.OnNext(DeviceStatusEnum.Disconnected);
-        return result;
+        if (IsActive) return;
+
+        IsActive = true;
+        // 每个设备独立订阅连接的数据流，自行过滤属于自己的数据
+        var dataStream = _connection.DataReceived
+            .Where(data => IsDeviceData(data))
+            .Select(data => ProcessData(data))
+            .Where(data => data != null);
+        // 如果设置了采样间隔，使用Sample操作符控制频率
+        if (_samplingInterval != TimeSpan.Zero)
+        {
+            dataStream = dataStream.Sample(_samplingInterval);
+        }
+        _dataSubscription = dataStream.Subscribe(data => _dataChannel.Writer.TryWrite(data));
     }
 
-    public abstract Task<DeviceData> ReadDataAsync();
+    public virtual void Stop()
+    {
+        IsActive = false;
+        _dataSubscription?.Dispose();
+    }
+
+    protected abstract bool IsDeviceData(byte[] data);
+    protected abstract DeviceData ProcessData(byte[] rawData);
+    protected abstract byte[] PrepareCommand(DeviceCommand command);
 
     public virtual async Task<CommandResponse> SendCommandAsync(DeviceCommand command)
     {
-        var stopwatch = Stopwatch.StartNew();
         var response = new CommandResponse
         {
             CommandId = command.CommandId,
@@ -96,48 +89,37 @@ public abstract class BaseDevice : IDevice
 
         try
         {
-            if (_statusSubject.Value != DeviceStatusEnum.Connected)
+            using (await _sendLock.LockAsync()) // 多设备共享连接时防止命令冲突
             {
-                throw new InvalidOperationException("Device not connected");
+                // 调用具体设备的指令处理
+                var commandData = PrepareCommand(command);
+                await _connection.SendCommandAsync(commandData);
             }
-            // 繁忙状态
-            _statusSubject.OnNext(DeviceStatusEnum.Busy);
-
-            // 调用具体设备的指令处理
-            response = await ProcessCommandAsync(command);
-            response.ExecutionTime = stopwatch.Elapsed;
-
-            // 发布到响应流
-            _commandResponseSubject.OnNext(response);
-
             return response;
         }
         catch (Exception ex)
         {
             response.Success = false;
             response.ErrorMessage = ex.Message;
-            response.ExecutionTime = stopwatch.Elapsed;
-
-            _commandResponseSubject.OnNext(response);
             return response;
-        }
-        finally
-        {
-            _statusSubject.OnNext(DeviceStatusEnum.Connected);
         }
     }
 
-    /// <summary>
-    /// 子类实现具体的指令处理逻辑
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    protected abstract Task<CommandResponse> ProcessCommandAsync(DeviceCommand command);
+    public virtual void SetSamplingInterval(TimeSpan interval)
+    {
+        _samplingInterval = interval;
+
+        // 如果设备正在运行，重新启动以应用新的采样间隔
+        if (IsActive)
+        {
+            Stop();
+            Start();
+        }
+    }
 
     public virtual void Dispose()
     {
-        _statusSubject.Dispose();
-        _commandResponseSubject.Dispose();
-        _connection?.Dispose();
+        Stop();
+        _dataChannel.Writer.TryComplete();
     }
 }

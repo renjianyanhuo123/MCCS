@@ -4,5 +4,5 @@ namespace MCCS.Core.Devices;
 
 public interface IDeviceConnectionFactory
 {
-    IDeviceConnection CreateConnection(string connectionString, ConnectionTypeEnum type);
+    IDeviceConnection CreateConnection(string connectionId, string connectionString, ConnectionTypeEnum type);
 }

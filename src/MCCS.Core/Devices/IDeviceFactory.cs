@@ -9,6 +9,6 @@ namespace MCCS.Core.Devices
 {
     public interface IDeviceFactory
     {
-        IDevice CreateDevice(DeviceInfo deviceInfo, bool IsMock = true);
+        IDevice CreateDevice(DeviceInfo deviceInfo, bool isMock = true);
     }
 }

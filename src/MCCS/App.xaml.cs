@@ -6,7 +6,12 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Windows;
 using Serilog;
-using System.Windows.Threading;
+using System.Windows.Threading; 
+using MCCS.Core.Repositories;
+using MCCS.Core.Devices;
+using MCCS.Core.Devices.Connections;
+using MCCS.Core.Devices.Manager;
+using MCCS.Core.Devices.Collections;
 
 namespace MCCS
 {
@@ -17,7 +22,7 @@ namespace MCCS
     {
 
         /// <summary>
-        /// (2)
+        /// (3)
         /// </summary>
         /// <returns></returns>
         protected override Window CreateShell()
@@ -25,7 +30,7 @@ namespace MCCS
             return Container.Resolve<MainWindow>();
         }
         /// <summary>
-        /// (3)
+        /// (2)
         /// </summary>
         /// <param name="moduleCatalog"></param>
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
@@ -59,26 +64,64 @@ namespace MCCS
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);
-            containerRegistry.AddModel3DServices(configuration);
+            containerRegistry.AddModel3DServices(configuration); 
 
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
-
-            
+            containerRegistry.Inject(configuration);
         }
-        
-        protected override void OnStartup(StartupEventArgs e)
+        /// <summary>
+        /// (4)初始化应用程序
+        /// </summary>
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+        }
+
+        /// <summary>
+        /// (0)
+        /// </summary>
+        /// <param name="e"></param>
+        protected override async void OnStartup(StartupEventArgs e)
         {
             // 设置全局异常处理
             SetupExceptionHandling();
             base.OnStartup(e);
+            var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
+            var devices = await deviceRepository.GetAllDevicesAsync();
+            var connectionDevices = devices.Where(c => c.MainDeviceId != null);
+            var deviceConnectionFactory = Container.Resolve<IDeviceConnectionFactory>();
+            var connectionManager = Container.Resolve<IConnectionManager>();
+            var deviceManager = Container.Resolve<IDeviceManager>();
+            // 默认注册模拟设备连接
+            var connection = deviceConnectionFactory.CreateConnection("Mock", "XXXXX", ConnectionTypeEnum.Mock);
+            connectionManager.RegisterConnection(connection);
+            // (1)注册所有设备连接
+            foreach (var item in connectionDevices)
+            {
+                var temp = deviceConnectionFactory.CreateConnection(item.MainDeviceId, "XXXXX", ConnectionTypeEnum.TcpIp);
+                if (temp != null)
+                {
+                    connectionManager.RegisterConnection(temp);
+                }
+                else
+                {
+                    Log.Error("设备连接失败,设备ID:{deviceId}", item.MainDeviceId);
+                } 
+            }
+            // (2)默认注册所有设备
+            await deviceManager.RegisterDeviceFromRepository();
+            // (3)注册数据采集器
+            var dataCollector = Container.Resolve<IDataCollector>();
+            dataCollector.StartCollection(TimeSpan.FromMilliseconds(20));
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             Log.CloseAndFlush();
             base.OnExit(e);
+
         }
 
         #region private method

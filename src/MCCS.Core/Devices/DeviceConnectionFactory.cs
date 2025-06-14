@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices
 {
-    public class DeviceConnectionFactory : IDeviceConnectionFactory
+    public sealed class DeviceConnectionFactory : IDeviceConnectionFactory
     {
-        public IDeviceConnection CreateConnection(string connectionString, ConnectionTypeEnum type)
+        public IDeviceConnection CreateConnection(string connectionId, string connectionString, ConnectionTypeEnum type)
         {
             switch (type)
             {
                 case ConnectionTypeEnum.SerialPort:
-                    return new SerialPortConnection("COM1");
+                    return new SerialPortConnection(connectionId, "COM1");
                 case ConnectionTypeEnum.TcpIp:
                     break;
                 case ConnectionTypeEnum.Modbus:
@@ -24,7 +24,7 @@ namespace MCCS.Core.Devices
                 default:
                     break;
             }
-            return new MockDeviceConnection(connectionString);
+            return new MockDeviceConnection(connectionString, connectionId);
         }
     }
 }

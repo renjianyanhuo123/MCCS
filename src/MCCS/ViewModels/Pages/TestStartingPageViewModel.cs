@@ -1,13 +1,20 @@
 ﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
+using MCCS.Core.Devices;
+using MCCS.Core.Devices.Details; 
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Reactive.Linq;
+using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Media3D;
+using System.Windows.Media.Media3D; 
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
+using System.Diagnostics;
+using MCCS.Core.Devices.Collections;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -24,14 +31,15 @@ namespace MCCS.ViewModels.Pages
         private Camera _camera;
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService;
-        private CancellationTokenSource _loadingCancellation;
-        private ImportProgressEventArgs _loadingProgress;
+        private CancellationTokenSource? _loadingCancellation;
+        private ImportProgressEventArgs _loadingProgress; 
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流
 
-        private SceneNodeGroupModel3D _dataLabelsGroup;
-        private SceneNodeGroupModel3D _connectionLinesGroup;
+        private readonly IDataCollector _dataCollector;
+        //private SceneNodeGroupModel3D _dataLabelsGroup;
+        //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
 
         #region Command
@@ -42,11 +50,13 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         public TestStartingPageViewModel(
+            IDataCollector dataCollector,
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
-        { 
+        {
+            _dataCollector = dataCollector;
             _model3DLoaderService = model3DLoaderService;
             Models = [];
 
@@ -60,6 +70,7 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = 0.1f
             };
             _effectsManager = effectsManager;
+            InitializeDataSubscriptions();
         }
 
         #region Property
@@ -163,13 +174,57 @@ namespace MCCS.ViewModels.Pages
             {
                 // 加载被取消
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // _eventAggregator.GetEvent<ErrorEvent>().Publish($"加载模型失败: {ex.Message}");
             }
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 初始化数据订阅
+        /// </summary>
+        private void InitializeDataSubscriptions()
+        {
+            _dataCollector.GetDataStream("b45ca75a266043c4aecf15062ec292fa")
+                    .Sample(TimeSpan.FromSeconds(1)) 
+                    .Subscribe(OnDeviceDataReceived);
+
+            _dataCollector.GetDataStream("11e883d901904c30ae3ccf43fd4447e0")
+                    .Sample(TimeSpan.FromSeconds(1)) 
+                    .Subscribe(OnDeviceDataReceived);
+        } 
+
+        /// <summary>
+        /// 处理设备数据更新
+        /// </summary>
+        /// <param name="deviceData">设备数据</param>
+        private void OnDeviceDataReceived(DeviceData deviceData)
+        {
+            // 在UI线程更新模型
+            var targetModel = Models.FirstOrDefault(m => m.Model3DData.DeviceId == deviceData.DeviceId);
+            if (targetModel != null)
+            {
+                UpdateModelWithDeviceData(targetModel, deviceData);
+            }
+        }
+
+        /// <summary>
+        /// 使用设备数据更新模型
+        /// </summary>
+        /// <param name="model">要更新的模型</param>
+        /// <param name="deviceData">设备数据</param>
+        private void UpdateModelWithDeviceData(Model3DViewModel model, DeviceData deviceData)
+        {
+            if (deviceData.Value is MockActuatorCollection v) 
+            {
+                Debug.WriteLine($"更新模型: {model.Model3DData.DeviceId}, 力: {v.Force}, 位移: {v.Displacement}");
+                model.ForceNum = v.Force;
+                model.DisplacementNum = v.Displacement;
+                CollectionDataLabels.Invalidate();
             }
         }
 
