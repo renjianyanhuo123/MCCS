@@ -11,20 +11,15 @@ namespace MCCS.Core.Devices
     {
         public IDeviceConnection CreateConnection(string connectionId, string connectionString, ConnectionTypeEnum type)
         {
-            switch (type)
+            return type switch
             {
-                case ConnectionTypeEnum.SerialPort:
-                    return new SerialPortConnection(connectionId, "COM1");
-                case ConnectionTypeEnum.TcpIp:
-                    break;
-                case ConnectionTypeEnum.Modbus:
-                    break;
-                case ConnectionTypeEnum.OPC:
-                    break;
-                default:
-                    break;
-            }
-            return new MockDeviceConnection(connectionString, connectionId);
+                ConnectionTypeEnum.SerialPort => new SerialPortConnection(connectionId, "COM1"),
+                ConnectionTypeEnum.TcpIp => throw new NotSupportedException(),
+                ConnectionTypeEnum.Modbus => throw new NotSupportedException(),
+                ConnectionTypeEnum.OPC => throw new NotSupportedException(),
+                ConnectionTypeEnum.Mock => new MockDeviceConnection(connectionString, connectionId),
+                _ => new MockDeviceConnection(connectionString, connectionId),
+            };
         }
     }
 }

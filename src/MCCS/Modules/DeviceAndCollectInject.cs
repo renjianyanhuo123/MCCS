@@ -24,7 +24,7 @@ namespace MCCS.Modules
             // 设备管理注入---全局单例
             containerRegistry.RegisterSingleton<IDeviceManager, DeviceManager>(); 
             // 注入协调管理
-            containerRegistry.RegisterSingleton<IDataCollector, DataCollector>();
+            // containerRegistry.RegisterSingleton<IDataCollector, DataCollector>();
         }
     }
 }

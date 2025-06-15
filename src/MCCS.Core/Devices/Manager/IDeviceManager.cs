@@ -20,6 +20,11 @@ namespace MCCS.Core.Devices.Manager
         /// <param name="deviceInfo"></param>
         void RegisterDevice(DeviceInfo deviceInfo);
         /// <summary>
+        /// 批量注册设备
+        /// </summary>
+        /// <param name="deviceInfo"></param>
+        void RegisterDevices(IEnumerable<DeviceInfo> deviceInfo);
+        /// <summary>
         /// 获取某个设备
         /// </summary>
         /// <param name="deviceId"></param>
@@ -28,7 +33,7 @@ namespace MCCS.Core.Devices.Manager
         /// <summary>
         /// 开始所有设备
         /// </summary>
-        void StartAllDevices(TimeSpan? timeSpan = null);
+        void StartAllDevices();
         /// <summary>
         /// 停止所有设备
         /// </summary>
@@ -37,7 +42,7 @@ namespace MCCS.Core.Devices.Manager
         /// 开始某个设备
         /// </summary>
         /// <param name="deviceId"></param>
-        void StartDevice(string deviceId, TimeSpan? timeSpan = null);
+        void StartDevice(string deviceId);
         /// <summary>
         /// 停止某个设备
         /// </summary>

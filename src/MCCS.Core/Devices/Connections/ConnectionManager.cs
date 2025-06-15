@@ -10,10 +10,33 @@ namespace MCCS.Core.Devices.Connections
     public sealed class ConnectionManager : IConnectionManager
     {
         private readonly ConcurrentDictionary<string, IDeviceConnection> _connections = new();
+        private readonly IDeviceConnectionFactory _deviceConnectionFactory;
 
-        public void RegisterConnection(IDeviceConnection connection)
+        public ConnectionManager(IDeviceConnectionFactory deviceConnectionFactory) 
         {
-            _connections.TryAdd(connection.ConnectionId, connection);
+            _deviceConnectionFactory = deviceConnectionFactory ?? throw new ArgumentNullException(nameof(deviceConnectionFactory));
+        }
+
+        public void RegisterConnection(ConnectionSetting connectionSetting)
+        {
+            var connection = _deviceConnectionFactory.CreateConnection(connectionSetting.ConnectionId, connectionSetting.ConnectionStr, connectionSetting.ConnectionType);
+            _connections.TryAdd(connectionSetting.ConnectionId, connection);
+        }
+
+        public void RegisterBatchConnections(List<ConnectionSetting> connectionSettings) 
+        {
+            foreach (var setting in connectionSettings)
+            {
+                RegisterConnection(setting);
+            }
+        }
+
+        public async Task OpenAllConnections()
+        {
+            foreach (var connection in _connections.Values)
+            {
+                await connection.OpenAsync();
+            }
         }
 
         public IDeviceConnection? GetConnection(string connectionId)

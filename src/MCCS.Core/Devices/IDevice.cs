@@ -5,35 +5,39 @@ namespace MCCS.Core.Devices
 {
     public interface IDevice : IDisposable
     {
+        /// <summary>
+        /// 设备ID - 唯一标识
+        /// </summary>
         string Id { get; }
+        /// <summary>
+        /// 设备名称 - 用于描述设备
+        /// </summary>
         string Name { get; }
+        /// <summary>
+        /// 设备类型
+        /// </summary>
         DeviceTypeEnum Type { get; }
-        bool IsActive { get; }
+        /// <summary>
+        /// 设备状态
+        /// </summary>
+        DeviceStatusEnum Status { get; }
         /// <summary>
         /// 数据流
         /// </summary>
         IObservable<DeviceData> DataStream { get; }
-
         /// <summary>
         /// 发送指令到设备
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
         Task<CommandResponse> SendCommandAsync(DeviceCommand command);
-
         /// <summary>
         /// 开始订阅数据流
         /// </summary>
-        void Start();
-
+        void StartCollection();
         /// <summary>
         /// 停止订阅数据流
         /// </summary>
-        void Stop();
-        /// <summary>
-        /// 设置采集频率
-        /// </summary>
-        /// <param name="interval"></param>
-        void SetSamplingInterval(TimeSpan interval);
+        void StopCollection();
     }
 }

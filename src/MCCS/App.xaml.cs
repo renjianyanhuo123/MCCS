@@ -64,12 +64,12 @@ namespace MCCS
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);
-            containerRegistry.AddModel3DServices(configuration); 
-
+            containerRegistry.AddModel3DServices(configuration);
+            containerRegistry.Inject(configuration);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
-            containerRegistry.Inject(configuration);
+            
         }
         /// <summary>
         /// (4)初始化应用程序
@@ -90,31 +90,21 @@ namespace MCCS
             base.OnStartup(e);
             var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
             var devices = await deviceRepository.GetAllDevicesAsync();
-            var connectionDevices = devices.Where(c => c.MainDeviceId != null);
-            var deviceConnectionFactory = Container.Resolve<IDeviceConnectionFactory>();
+            var connectionDevices = devices.Where(c => c.MainDeviceId == null); 
             var connectionManager = Container.Resolve<IConnectionManager>();
             var deviceManager = Container.Resolve<IDeviceManager>();
-            // 默认注册模拟设备连接
-            var connection = deviceConnectionFactory.CreateConnection("Mock", "XXXXX", ConnectionTypeEnum.Mock);
-            connectionManager.RegisterConnection(connection);
-            // (1)注册所有设备连接
-            foreach (var item in connectionDevices)
+            // (1)默认注册模拟设备连接
+            connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting 
             {
-                var temp = deviceConnectionFactory.CreateConnection(item.MainDeviceId, "XXXXX", ConnectionTypeEnum.TcpIp);
-                if (temp != null)
-                {
-                    connectionManager.RegisterConnection(temp);
-                }
-                else
-                {
-                    Log.Error("设备连接失败,设备ID:{deviceId}", item.MainDeviceId);
-                } 
-            }
-            // (2)默认注册所有设备
-            await deviceManager.RegisterDeviceFromRepository();
-            // (3)注册数据采集器
-            var dataCollector = Container.Resolve<IDataCollector>();
-            dataCollector.StartCollection(TimeSpan.FromMilliseconds(20));
+                ConnectionId = c.DeviceId,
+                ConnectionType = ConnectionTypeEnum.Mock,
+                ConnectionStr = "XXXXXX"
+            }).ToList());
+            // (2) 打开所有连接
+            await connectionManager.OpenAllConnections();
+            // (3) 注册所有设备
+            deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null));
+            deviceManager.StartAllDevices();
         }
 
         protected override void OnExit(ExitEventArgs e)

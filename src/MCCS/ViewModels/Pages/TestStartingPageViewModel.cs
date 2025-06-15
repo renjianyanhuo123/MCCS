@@ -15,6 +15,8 @@ using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using System.Diagnostics;
 using MCCS.Core.Devices.Collections;
+using MCCS.Core.Devices.Manager;
+using System.Windows.Threading;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -35,9 +37,9 @@ namespace MCCS.ViewModels.Pages
         private ImportProgressEventArgs _loadingProgress; 
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
-        private const int MouseMoveThrottleMs = 50; // 50ms 节流
+        private const int MouseMoveThrottleMs = 50; // 50ms 节流 
 
-        private readonly IDataCollector _dataCollector;
+        private readonly IDeviceManager _deviceManager;
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -50,13 +52,13 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         public TestStartingPageViewModel(
-            IDataCollector dataCollector,
+            IDeviceManager deviceManager,
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            _dataCollector = dataCollector;
+            _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService;
             Models = [];
 
@@ -70,7 +72,6 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = 0.1f
             };
             _effectsManager = effectsManager;
-            InitializeDataSubscriptions();
         }
 
         #region Property
@@ -187,15 +188,19 @@ namespace MCCS.ViewModels.Pages
         /// <summary>
         /// 初始化数据订阅
         /// </summary>
-        private void InitializeDataSubscriptions()
+        public void InitializeDataSubscriptions()
         {
-            _dataCollector.GetDataStream("b45ca75a266043c4aecf15062ec292fa")
-                    .Sample(TimeSpan.FromSeconds(1)) 
-                    .Subscribe(OnDeviceDataReceived);
+            var actor1 = _deviceManager.GetDevice("a1af5b38688247a58d3a9011bab98f81")?.DataStream 
+                ?? throw new ArgumentNullException($"Device id {"a1af5b38688247a58d3a9011bab98f81"} is not exist！");
+            var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream 
+                ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
+            actor1
+                .Sample(TimeSpan.FromSeconds(0.8)) 
+                .Subscribe(OnDeviceDataReceived);
 
-            _dataCollector.GetDataStream("11e883d901904c30ae3ccf43fd4447e0")
-                    .Sample(TimeSpan.FromSeconds(1)) 
-                    .Subscribe(OnDeviceDataReceived);
+            actor2
+                .Sample(TimeSpan.FromSeconds(0.8))
+                .Subscribe(OnDeviceDataReceived);
         } 
 
         /// <summary>
@@ -221,7 +226,7 @@ namespace MCCS.ViewModels.Pages
         {
             if (deviceData.Value is MockActuatorCollection v) 
             {
-                Debug.WriteLine($"更新模型: {model.Model3DData.DeviceId}, 力: {v.Force}, 位移: {v.Displacement}");
+                // Debug.WriteLine($"更新模型: {model.Model3DData.DeviceId}, 力: {v.Force}, 位移: {v.Displacement}");
                 model.ForceNum = v.Force;
                 model.DisplacementNum = v.Displacement;
                 CollectionDataLabels.Invalidate();

@@ -39,6 +39,13 @@ namespace MCCS.Core.Devices.Manager
             }
             return true;
         }
+        public void RegisterDevices(IEnumerable<DeviceInfo> deviceInfo)
+        {
+            foreach (var info in deviceInfo)
+            {
+                RegisterDevice(info);
+            }
+        }
 
         public void RegisterDevice(DeviceInfo deviceInfo)
         {
@@ -52,12 +59,11 @@ namespace MCCS.Core.Devices.Manager
             return _devices.TryGetValue(deviceId, out var device) ? device : null;
         }
 
-        public void StartAllDevices(TimeSpan? timeSpan = null)
+        public void StartAllDevices()
         {
             foreach (var device in _devices.Values)
             {
-                device.SetSamplingInterval(timeSpan ?? TimeSpan.FromSeconds(1));
-                device.Start();
+                device.StartCollection();
             }
         }
 
@@ -65,21 +71,20 @@ namespace MCCS.Core.Devices.Manager
         {
             foreach (var device in _devices.Values)
             {
-                device.Stop();
+                device.StopCollection();
             }
         }
 
-        public void StartDevice(string deviceId, TimeSpan? timeSpan = null)
-        {
+        public void StartDevice(string deviceId)
+        { 
             var device = GetDevice(deviceId);
-            if (device == null) return;
-            device.SetSamplingInterval(timeSpan ?? TimeSpan.FromSeconds(1));
-            device.Start();
+            device?.StartCollection();
         }
 
         public void StopDevice(string deviceId)
         {
-            GetDevice(deviceId)?.Stop();
+            var device = GetDevice(deviceId);
+            device?.StopCollection();
         }
 
         public void Dispose()
@@ -90,5 +95,7 @@ namespace MCCS.Core.Devices.Manager
             }
             _devices.Clear();
         }
+
+        
     }
 }

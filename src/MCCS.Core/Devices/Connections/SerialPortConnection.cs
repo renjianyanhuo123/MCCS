@@ -16,7 +16,12 @@ public class SerialPortConnection : BaseConnection
         throw new NotImplementedException();
     }
 
-    public override Task<byte[]> SendCommandAsync(byte[] command)
+    public override bool Open()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool Close()
     {
         throw new NotImplementedException();
     }

@@ -14,32 +14,30 @@ namespace MCCS.Core.Devices
             _connectionManager = connectionManager;
         }
 
-        public IDevice CreateDevice(DeviceInfo deviceInfo, bool isMock = true)
+        public IDevice CreateDevice(DeviceInfo deviceInfo)
         {
-            IDeviceConnection? deviceConnection = isMock ? _connectionManager.GetConnection("Mock")
-                    : _connectionManager.GetConnection(deviceInfo.MainDeviceId ?? "");
+            var deviceConnection = _connectionManager.GetConnection(deviceInfo.MainDeviceId ?? "") 
+                ?? throw new ArgumentNullException(nameof(deviceInfo.MainDeviceId));
             switch (deviceInfo.DeviceType)
             {
                 case DeviceTypeEnum.Unknown:
-                    break;
+                    throw new NotSupportedException();
                 case DeviceTypeEnum.Sensor:
-                    break;
+                    throw new NotSupportedException();
                 case DeviceTypeEnum.Actuator:
-                    break;
+                    return new Actuator(deviceInfo, deviceConnection);
                 case DeviceTypeEnum.Controller:
-                    break;
+                    throw new NotSupportedException();
                 case DeviceTypeEnum.Gateway:
-                    break;
+                    throw new NotSupportedException();
                 case DeviceTypeEnum.Display:
-                    break;
+                    throw new NotSupportedException();
                 case DeviceTypeEnum.Other:
-                    break;
+                    throw new NotSupportedException();
                 default:
-                    break;
+                    throw new NotSupportedException();
             }
-            if (deviceConnection == null)
-                throw new ArgumentNullException(nameof(deviceConnection));
-            return new Actuator(deviceInfo, deviceConnection);
+            
         }
     }
 }
