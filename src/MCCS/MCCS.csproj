@@ -9,6 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\Pages\新文件夹\**" />
+    <EmbeddedResource Remove="ViewModels\Pages\新文件夹\**" />
+    <None Remove="ViewModels\Pages\新文件夹\**" />
+    <Page Remove="ViewModels\Pages\新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="App.xaml~RF43ad201d.TMP" />
   </ItemGroup>
 
@@ -34,6 +41,10 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Behaviors\" />
   </ItemGroup>
 
 </Project>

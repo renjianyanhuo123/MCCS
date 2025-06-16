@@ -96,7 +96,7 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
-    <mah:MetroWindow.Flyouts>
+    <!--<mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
             <mah:Flyout x:Name="TestCommandFlyout"
             IsOpen="{Binding IsOpenFlyout}"
@@ -104,11 +104,11 @@
             Position="Right"
             Theme="Adapt">
                 <Grid Width="500" Margin="10">
-                    <ContentControl prism:RegionManager.RegionName="RightFlyoutRegion" />
+                    <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}" />
                 </Grid>
             </mah:Flyout>
         </mah:FlyoutsControl>
-    </mah:MetroWindow.Flyouts>
+    </mah:MetroWindow.Flyouts>-->
     
     <Grid>
         <Grid.RowDefinitions>

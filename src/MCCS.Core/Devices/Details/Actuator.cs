@@ -57,8 +57,8 @@ namespace MCCS.Core.Devices.Details
 
         protected override async Task<DeviceData> ReadDataAsync()
         {
-            var mockForceData = NextNormal(10, 8);
-            var mockDisplacement = NextNormal(22, 10);
+            var mockForceData = NextNormal(10, 0.1);
+            var mockDisplacement = NextNormal(22, 0.1);
             var data = new DeviceData
             {
                 DeviceId = Id,

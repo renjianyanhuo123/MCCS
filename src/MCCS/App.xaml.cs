@@ -12,6 +12,8 @@ using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
 using MCCS.Core.Devices.Collections;
+using MCCS.Views.Pages.Controllers;
+using MCCS.ViewModels.Pages.Controllers;
 
 namespace MCCS
 {
@@ -68,8 +70,8 @@ namespace MCCS
             containerRegistry.Inject(configuration);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
-            
         }
         /// <summary>
         /// (4)初始化应用程序

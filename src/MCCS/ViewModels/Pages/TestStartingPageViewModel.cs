@@ -17,6 +17,10 @@ using System.Diagnostics;
 using MCCS.Core.Devices.Collections;
 using MCCS.Core.Devices.Manager;
 using System.Windows.Threading;
+using MCCS.Events;
+using MCCS.ViewModels.Others.Controllers;
+using MCCS.ViewModels.Pages.Controllers;
+using Prism.Navigation.Regions;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -26,13 +30,17 @@ namespace MCCS.ViewModels.Pages
         
         #region private field 
         private bool _isLoading = true;
+        private bool _isStartedTest = false; // 是否开始试验
         private string _loadingMessage = "";
+        private bool _isRightDrawerOpen = false; // 右侧抽屉是否打开
+
         private ObservableCollection<Model3DViewModel> _models;
         private Model3DViewModel? _lastHoveredModel = null;
 
         private Camera _camera;
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService;
+        private readonly IRegionManager _regionManager;
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress; 
 
@@ -49,9 +57,14 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<object> Model3DMouseDownCommand => new(OnModel3DMouseDown);
         public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
+        public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
+
+        public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
+        //public DelegateCommand OpenRightDrawerCommand => new(ExecuteOpenRightDrawerCommand);
         #endregion
 
         public TestStartingPageViewModel(
+            IRegionManager regionManager,
             IDeviceManager deviceManager,
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
@@ -60,8 +73,7 @@ namespace MCCS.ViewModels.Pages
         {
             _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService;
-            Models = [];
-
+            Models = []; 
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
@@ -71,10 +83,28 @@ namespace MCCS.ViewModels.Pages
                 FarPlaneDistance = 10000,
                 NearPlaneDistance = 0.1f
             };
-            _effectsManager = effectsManager;
+            _effectsManager = effectsManager; 
+            _regionManager = regionManager;
+        }
+        private void NavigationCompleted(NavigationResult result)
+        {
         }
 
         #region Property
+        /// <summary>
+        /// 右侧抽屉是否打开的属性
+        /// </summary>
+        public bool IsRightDrawerOpen
+        {
+            get => _isRightDrawerOpen;
+            set => SetProperty(ref _isRightDrawerOpen, value);
+        }
+        public bool IsStartedTest
+        {
+            get => _isStartedTest;
+            set => SetProperty(ref _isStartedTest, value);
+        }
+
         public Camera Camera
         {
             get => _camera;
@@ -185,6 +215,20 @@ namespace MCCS.ViewModels.Pages
             }
         }
 
+        private void ExecuteLoadCommand() 
+        {
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), NavigationCompleted);
+        }
+
+        private void ExecuteStartTestCommand()
+        {
+            IsStartedTest = !IsStartedTest;
+            foreach (var model in Models)
+            {
+                model.IsSelected = false;
+            }
+        }
+
         /// <summary>
         /// 初始化数据订阅
         /// </summary>
@@ -249,6 +293,7 @@ namespace MCCS.ViewModels.Pages
                 Keyboard.IsKeyDown(Key.RightCtrl)) return;
             if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
                 mouseArgs.LeftButton != MouseButtonState.Pressed) return;
+            if (!IsStartedTest) return;
             // 获取点击的模型
             var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
@@ -256,6 +301,24 @@ namespace MCCS.ViewModels.Pages
             {
                 // 切换当前模型的选中状态
                 clickedModel.IsSelected = !clickedModel.IsSelected;
+                // IsRightDrawerOpen = true;
+                var channels = Models
+                    .Where(s => s.IsSelected)
+                    .Select(c => new ControllerItemModel
+                    {
+                        ChannelId = c.Model3DData.DeviceId ?? string.Empty,
+                        ChannelName = c.Model3DData.Name ?? string.Empty,
+                    }).ToList();
+                _eventAggregator.GetEvent<ControlEvent>().Publish(new ControlEventParam 
+                {
+                    ChannelId = clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId"),
+                });
+                //var channelsParam = new NavigationParameters
+                //{
+                //    { "Channels", channels }
+                //};
+                // _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
+                // IsOpenFlyout = Models.Any(c => c.IsSelected);
             }
         }
 

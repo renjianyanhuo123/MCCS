@@ -24,7 +24,7 @@ public class BaseViewModel(IEventAggregator eventAggregator, IDialogService dial
         //throw new NotImplementedException();
     }
 
-    public void OnNavigatedTo(NavigationContext navigationContext)
+    public virtual void OnNavigatedTo(NavigationContext navigationContext)
     {
         string viewName = navigationContext.Parameters.GetValue<string>("Parent");
         if (viewName != null)

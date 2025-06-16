@@ -6,6 +6,8 @@ using MCCS.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using MCCS.Common;
+using MCCS.ViewModels.Pages.Controllers;
+using Prism.Navigation.Regions;
 
 namespace MCCS.ViewModels
 {
@@ -47,12 +49,12 @@ namespace MCCS.ViewModels
             set => SetProperty(ref _menus, value);
         }
 
-        private bool _isOpenFlyout = false;
-        public bool IsOpenFlyout
-        {
-            get => _isOpenFlyout;
-            set => SetProperty(ref _isOpenFlyout, value);
-        }
+        //private bool _isOpenFlyout = false;
+        //public bool IsOpenFlyout
+        //{
+        //    get => _isOpenFlyout;
+        //    set => SetProperty(ref _isOpenFlyout, value);
+        //}
 
         private List<HamburgerMenuIconItem> _optionsMenus;
         public List<HamburgerMenuIconItem> OptionsMenus
@@ -107,25 +109,6 @@ namespace MCCS.ViewModels
         {
         }
 
-        /// <summary>
-        /// 打开右侧Modal
-        /// </summary>
-        /// <param name="param"></param>
-        private void OnOpenRightFlyout(OpenRightFlyoutEventParam param)
-        {
-            IsOpenFlyout = true;
-            switch (param.Type)
-            {
-                //case RightFlyoutTypeEnum.ControlCommand:
-                //    var header = param.Others as TestControlCommandParam ?? throw new ArgumentNullException(nameof(TestControlCommandParam));
-                //    RightFlyoutName = $"控制面{header.Face}第{header.Row}行;第{header.Column}列";
-                //    _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ViewTestCommandDialogViewModel.Tag, UriKind.Relative), NavigationCompleted);
-                //    break;
-                //default:
-                //    break;
-            }
-        }
-
         private void OnOpenTabPage(OpenTestOperationEventParam param) 
         {
             var addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
@@ -144,14 +127,12 @@ namespace MCCS.ViewModels
         }
         #endregion
 
-
-
         public MainWindowViewModel(
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager, 
             IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
         {
-            eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
+            // eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
