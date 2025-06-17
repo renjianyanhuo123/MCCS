@@ -14,36 +14,40 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <b:Interaction.Triggers>
-        <b:EventTrigger EventName="Loaded">
-            <b:InvokeCommandAction Command="{Binding MainLoadCommand}" />
-        </b:EventTrigger>
-    </b:Interaction.Triggers>
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
         <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
         <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
     </UserControl.Resources>
-    <Grid Canvas.Left="0" 
-              Canvas.Top="0">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <!-- 顶部按钮区域 - 最先声明 -->
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
+            <Button
+            Width="100"
+            Content="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" 
+            Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
+            Command="{Binding StartTestCommand}"
+            ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
+        </StackPanel>
+        <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <!-- 3D视窗 -->
-            <hx:Viewport3DX 
+            <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染 -->
+            <hx:Viewport3DX  
                 x:Name="viewport"
+                Grid.Column="0"
                 Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}"
                 BackgroundColor="#595959"
                 EffectsManager="{Binding EffectsManager}"
-                Camera="{Binding Camera}"
-                EnableSwapChainRendering="True"
+                Camera="{Binding Camera}" 
                 IsHitTestVisible="True"
                 ShowCoordinateSystem="True"
                 FXAALevel="High">
@@ -73,25 +77,25 @@
                 <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
                 <!-- 绑定Billboard文本集合 -->
                 <hx:TopMostGroup3D x:Name="topMostGroup" EnableTopMost="True">
-                <!--动态文本: FixedSize: 是否固定大小 Geometry: 绑定到 ViewModel 中的 BatchedText 属性 IsHitTestVisible: 是否可被鼠标事件检测到-->
-                <hx:BillboardTextModel3D
-                    FixedSize="True"
-                    Geometry="{Binding CollectionDataLabels}"
-                    IsHitTestVisible="False" />
+                    <!--动态文本: FixedSize: 是否固定大小 Geometry: 绑定到 ViewModel 中的 BatchedText 属性 IsHitTestVisible: 是否可被鼠标事件检测到-->
+                    <hx:BillboardTextModel3D
+                            FixedSize="True"
+                            Geometry="{Binding CollectionDataLabels}"
+                            IsHitTestVisible="False" />
                 </hx:TopMostGroup3D>
                 <!-- 连线 -->
                 <hx:LineGeometryModel3D 
-                    Geometry="{Binding ConnectionLineGeometry}" 
-                    Color="Blue"
-                    IsHitTestVisible="False"/>
+                        Geometry="{Binding ConnectionLineGeometry}" 
+                        Color="Blue"
+                        IsHitTestVisible="False"/>
                 <!--模型内容-->
                 <hx:Element3DPresenter Content="{Binding GroupModel}"/>
                 <hx:PostEffectMeshBorderHighlight EffectName="highlight" />
                 <hx:AxisPlaneGridModel3D
-                    x:Name="plane"
-                    AutoSpacing="True"
-                    RenderShadowMap="True"
-                    Offset="-65" />
+                        x:Name="plane"
+                        AutoSpacing="True"
+                         
+                        Offset="-65" />
             </hx:Viewport3DX>
             <StackPanel Grid.Column="1"  
                         HorizontalAlignment="Center"
@@ -104,16 +108,8 @@
                     </b:Interaction.Triggers>
                 </ContentControl>
             </StackPanel>
-            
         </Grid>
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
-            <Button
-                Width="100"
-                Content="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" 
-                Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
-                Command="{Binding StartTestCommand}"
-                ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
-        </StackPanel>
+        <!-- 进度条 -->
         <StackPanel 
             VerticalAlignment="Center" 
             Grid.Row="1" 
@@ -122,12 +118,43 @@
             Orientation="Vertical" 
             HorizontalAlignment="Center"
             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <ProgressBar Width="600" Height="10" Value="{Binding LoadingProgress.ProgressPercentage}"></ProgressBar>
-                        <TextBlock FontWeight="Bold"
-                       Margin="0 8" 
-                       HorizontalAlignment="Center" 
-                       Text="{Binding LoadingMessage}" 
-                       Foreground="#666666" />
+            <ProgressBar Width="600" Height="10" Value="{Binding LoadingProgress.ProgressPercentage}"></ProgressBar>
+            <TextBlock FontWeight="Bold"
+               Margin="0 8" 
+               HorizontalAlignment="Center" 
+               Text="{Binding LoadingMessage}" 
+               Foreground="#666666" />
         </StackPanel>
+        <!-- 曲线显示部分 -->
+        <StackPanel Grid.Row="1" Grid.Column="0">
+            <StackPanel.CacheMode>
+                <BitmapCache />
+            </StackPanel.CacheMode>
+            <Expander
+                x:Name="propertiesPanel"
+                Width="200"
+                Height="Auto" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                BorderBrush="LightGray"
+                Header="Enviroment Map Properties"
+                IsExpanded="True">
+                <Expander.Background>
+                    <SolidColorBrush Opacity="0.9" Color="WhiteSmoke" />
+                </Expander.Background>
+                <StackPanel Orientation="Vertical">
+                    <CheckBox  >
+                        Reflect Environment Map
+                    </CheckBox>
+                    <CheckBox  >
+                        Render Environment Map
+                    </CheckBox>
+                    <CheckBox  >Render Dynamic CubeMap</CheckBox>
+                    <TextBlock   >Material:</TextBlock>
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+        
+        
     </Grid>
 </UserControl>

@@ -20,6 +20,7 @@
             <convert:BoolToWidthConverter x:Key="BoolToWidthConverter" />
             <convert:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
             <convert:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+            <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}">
@@ -40,7 +41,7 @@
             Command="{Binding ParticipateControlCommand}"
             CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
         <GroupBox Grid.Row="1" 
-                  Margin="5 0 5 8" 
+                  Margin="{StaticResource GroupMargin}" 
                   Style="{StaticResource MaterialDesignCardGroupBox}"
                   Header="{StaticResource ControlTypeText}">
             <StackPanel>
@@ -66,7 +67,7 @@
             </StackPanel>
         </GroupBox>
         <GroupBox Grid.Row="2" 
-              Margin="5 0 5 8"
+              Margin="{StaticResource GroupMargin}"
               Header="{StaticResource ControllerStep1}"
               Style="{StaticResource MaterialDesignCardGroupBox}">
             <ItemsControl Name="ChannelItem" ItemsSource="{Binding Channels}">
@@ -84,7 +85,7 @@
             </ItemsControl>
         </GroupBox>
         <GroupBox Grid.Row="3"
-                  Margin="5 0 5 8"
+                  Margin="{StaticResource GroupMargin}"
                   Header="{StaticResource ControllerStep2}"
                   Style="{StaticResource MaterialDesignCardGroupBox}">
             <ComboBox 
@@ -98,7 +99,7 @@
             </ComboBox>
         </GroupBox>
         <GroupBox Grid.Row="4"
-          Margin="5 0 5 8"
+          Margin="{StaticResource GroupMargin}"
           Header="{StaticResource ControllerStep3}"
           Style="{StaticResource MaterialDesignCardGroupBox}">
             <StackPanel>
