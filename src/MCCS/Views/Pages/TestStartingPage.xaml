@@ -10,6 +10,7 @@
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              d:DataContext="{d:DesignInstance Type=pages:TestStartingPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
@@ -131,27 +132,40 @@
                 <BitmapCache />
             </StackPanel.CacheMode>
             <Expander
-                x:Name="propertiesPanel"
-                Width="200"
+                x:Name="Curve1"
+                Width="450"
                 Height="Auto" 
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                BorderBrush="LightGray"
-                Header="Enviroment Map Properties"
+                BorderBrush="LightGray" 
+                Header="曲线一(通道一力)"
                 IsExpanded="True">
                 <Expander.Background>
-                    <SolidColorBrush Opacity="0.9" Color="WhiteSmoke" />
+                    <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
                 </Expander.Background>
-                <StackPanel Orientation="Vertical">
-                    <CheckBox  >
-                        Reflect Environment Map
-                    </CheckBox>
-                    <CheckBox  >
-                        Render Environment Map
-                    </CheckBox>
-                    <CheckBox  >Render Dynamic CubeMap</CheckBox>
-                    <TextBlock   >Material:</TextBlock>
-                </StackPanel>
+                <lvc:CartesianChart
+                    Title="{Binding Title}"
+                    Height="250"
+                    Series="{Binding Series}">
+                </lvc:CartesianChart>
+            </Expander>
+            <Expander
+                x:Name="Curve2"
+                Width="450"
+                Height="Auto" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                BorderBrush="LightGray" 
+                Header="曲线二(通道二力)"
+                IsExpanded="True">
+                <Expander.Background>
+                    <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                </Expander.Background>
+                <lvc:CartesianChart
+                    Title="{Binding Title}"
+                    Height="250"
+                    Series="{Binding Series}">
+                </lvc:CartesianChart>
             </Expander>
         </StackPanel>
         

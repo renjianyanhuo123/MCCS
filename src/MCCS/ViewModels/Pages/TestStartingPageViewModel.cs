@@ -22,6 +22,10 @@ using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using Prism.Navigation.Regions;
 using MCCS.Events.Controllers;
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView;
+using System;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -48,6 +52,7 @@ namespace MCCS.ViewModels.Pages
         private const int MouseMoveThrottleMs = 50; // 50ms 节流 
 
         private readonly IDeviceManager _deviceManager;
+        private readonly Random _random = new();
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -85,12 +90,47 @@ namespace MCCS.ViewModels.Pages
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
+
+            ObservableValues = [
+                new(){ Value = -8.10},
+                new(){ Value = 1.43},
+                new(){ Value = 0.93},
+                new(){ Value = 3.23},
+                new(){ Value = 2.11},
+                new(){ Value = -1.89},
+                new(){ Value = -1.22},
+                new(){ Value = 3.23},
+                new(){ Value = 5.22},
+                new(){ Value = 1.22},
+            ];
+            Series = [
+                new LineSeries<ObservableValue>(ObservableValues)
+            ];
+
+            Task.Run(() => {
+                while (true)
+                {
+                    var randomValue = _random.Next(-5, 5);
+                    ObservableValues.RemoveAt(0);
+                    ObservableValues.Add(new() { Value = randomValue });
+                    Task.Delay(1000).Wait();
+                }
+            });
+
         }
         private void NavigationCompleted(NavigationResult result)
         {
         }
 
         #region Property
+        /// <summary>
+        /// 数据集合
+        /// </summary>
+        private ObservableCollection<ObservableValue> ObservableValues { get; set; }
+        /// <summary>
+        /// 曲线数据集合
+        /// </summary>
+        public ObservableCollection<ISeries> Series { get; set; }
         public bool IsStartedTest
         {
             get => _isStartedTest;
