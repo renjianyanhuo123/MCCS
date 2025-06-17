@@ -19,6 +19,7 @@ namespace MCCS.Views.Pages
             var viewModel = DataContext as ViewModels.Pages.TestStartingPageViewModel;
             viewModel?.InitializeDataSubscriptions();
             await viewModel?.LoadModelsCommand.Execute()!;
+            viewModel?.InitializeCurveDataSubscriptions();
         }
           
     }

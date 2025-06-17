@@ -2,30 +2,25 @@
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Core.Devices;
-using MCCS.Core.Devices.Details; 
+using MCCS.Core.Devices.Details;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Media3D; 
+using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
-using System.Diagnostics;
-using MCCS.Core.Devices.Collections;
 using MCCS.Core.Devices.Manager;
-using System.Windows.Threading;
 using MCCS.Events;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
-using Prism.Navigation.Regions;
 using MCCS.Events.Controllers;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
-using System;
+using MCCS.Models;
+using LiveChartsCore.Kernel;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -50,9 +45,11 @@ namespace MCCS.ViewModels.Pages
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流 
+        private const int MaxPoints = 30;
 
         private readonly IDeviceManager _deviceManager;
         private readonly Random _random = new();
+        private DateTime _currentTime = DateTime.Now;
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -91,32 +88,32 @@ namespace MCCS.ViewModels.Pages
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
 
-            ObservableValues = [
-                new(){ Value = -8.10},
-                new(){ Value = 1.43},
-                new(){ Value = 0.93},
-                new(){ Value = 3.23},
-                new(){ Value = 2.11},
-                new(){ Value = -1.89},
-                new(){ Value = -1.22},
-                new(){ Value = 3.23},
-                new(){ Value = 5.22},
-                new(){ Value = 1.22},
-            ];
+            ObservableValues = [];
             Series = [
-                new LineSeries<ObservableValue>(ObservableValues)
-            ];
-
-            Task.Run(() => {
-                while (true)
+                new LineSeries<TimeAndMeasureValueModel>()
                 {
-                    var randomValue = _random.Next(-5, 5);
-                    ObservableValues.RemoveAt(0);
-                    ObservableValues.Add(new() { Value = randomValue });
-                    Task.Delay(1000).Wait();
+                    Values = ObservableValues,
+                    Mapping = (model, index) =>
+                    {
+                        return new Coordinate(model.Time, model.Value);
+                    },
+                    Fill = null
                 }
-            });
-
+            ];
+            XAxes =
+            [
+                new() {
+                    Name = "Time(s)"
+                }
+            ];
+            YAxes =
+            [
+                new() {
+                    Name = "kN",
+                    MinLimit = -1,
+                    MaxLimit = 30
+                }
+            ]; 
         }
         private void NavigationCompleted(NavigationResult result)
         {
@@ -126,7 +123,10 @@ namespace MCCS.ViewModels.Pages
         /// <summary>
         /// 数据集合
         /// </summary>
-        private ObservableCollection<ObservableValue> ObservableValues { get; set; }
+        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues { get; set; }
+
+        public LiveChartsCore.SkiaSharpView.Axis[] XAxes { get; set; }
+        public LiveChartsCore.SkiaSharpView.Axis[] YAxes { get; set; }
         /// <summary>
         /// 曲线数据集合
         /// </summary>
@@ -271,6 +271,25 @@ namespace MCCS.ViewModels.Pages
             {
                 targetModel.IsSelected = false; 
             }
+        }
+
+        public void InitializeCurveDataSubscriptions()
+        {
+            _currentTime = DateTime.Now;
+            var actor1 = _deviceManager.GetDevice("a1af5b38688247a58d3a9011bab98f81")?.DataStream
+                ?? throw new ArgumentNullException($"Device id {"a1af5b38688247a58d3a9011bab98f81"} is not exist！");
+            var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream
+                ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
+            actor1.Sample(TimeSpan.FromSeconds(1))
+                .SubscribeOn(SynchronizationContext.Current)
+                .Subscribe(x => {
+                    ObservableValues.Add(new TimeAndMeasureValueModel
+                    {
+                        Time = (DateTime.Now - _currentTime).TotalSeconds,
+                        Value = x.Value is MockActuatorCollection v ? v.Force : 0
+                    });
+                    if (ObservableValues.Count > MaxPoints) ObservableValues.RemoveAt(0);
+                });
         }
 
         /// <summary>
