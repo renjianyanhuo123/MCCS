@@ -2,5 +2,5 @@
 {
     public class ControlEvent : PubSubEvent<ControlEventParam>
     {
-    }
+    } 
 }

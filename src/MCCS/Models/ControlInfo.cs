@@ -69,11 +69,32 @@ namespace MCCS.Models
         /// <summary>
         /// 控制参数
         /// </summary>
-        public Dictionary<string, object> ControlParams { get; set; } = [];
+        public Dictionary<string, object> ControlParams { get; set; } = []; 
 
         /// <summary>
-        /// 组合控制通道列表
+        /// 组合控制通道ID
         /// </summary>
-        public List<ControlInfo>? CombineChannels { get; set; }
+        public string? CombineChannelId { get; set; }
+
+        /// <summary>
+        /// 组合控制通道名称
+        /// </summary>
+        public string? CombineChannelName { get; set; }
+    }
+
+    public class ControlCombineInfo
+    {
+        /// <summary>
+        /// 组合控制通道ID
+        /// </summary>
+        public required string CombineChannelId { get; set; }
+        /// <summary>
+        /// 组合控制通道名称
+        /// </summary>
+        public required string CombineChannelName { get; set; }
+        /// <summary>
+        /// 控制通道列表
+        /// </summary>
+        public List<ControlInfo> ControlChannels { get; set; } = [];
     }
 }

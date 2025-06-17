@@ -14,6 +14,8 @@ using MCCS.Core.Devices.Manager;
 using MCCS.Core.Devices.Collections;
 using MCCS.Views.Pages.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
+using MCCS.ViewModels.Pages.ControlCommandPages;
+using MCCS.Views.Pages.ControlCommandPages;
 
 namespace MCCS
 {
@@ -72,12 +74,34 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
+
+            containerRegistry.RegisterForNavigation<ViewFatigueControl>(ViewFatigueControlViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ViewManualControl>(ViewManualControlViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ViewProgramControl>(ViewProgramControlViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ViewStaticControl>(ViewStaticControlViewModel.Tag);
         }
         /// <summary>
         /// (4)初始化应用程序
         /// </summary>
-        protected override void OnInitialized()
+        protected override async void OnInitialized()
         {
+            var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
+            var devices = await deviceRepository.GetAllDevicesAsync();
+            var connectionDevices = devices.Where(c => c.MainDeviceId == null);
+            var connectionManager = Container.Resolve<IConnectionManager>();
+            var deviceManager = Container.Resolve<IDeviceManager>();
+            // (1)默认注册模拟设备连接
+            connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
+            {
+                ConnectionId = c.DeviceId,
+                ConnectionType = ConnectionTypeEnum.Mock,
+                ConnectionStr = "XXXXXX"
+            }).ToList());
+            // (2) 打开所有连接
+            await connectionManager.OpenAllConnections();
+            // (3) 注册所有设备
+            deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null).ToList());
+            deviceManager.StartAllDevices();
             base.OnInitialized();
         }
 
@@ -90,23 +114,6 @@ namespace MCCS
             // 设置全局异常处理
             SetupExceptionHandling();
             base.OnStartup(e);
-            var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
-            var devices = await deviceRepository.GetAllDevicesAsync();
-            var connectionDevices = devices.Where(c => c.MainDeviceId == null); 
-            var connectionManager = Container.Resolve<IConnectionManager>();
-            var deviceManager = Container.Resolve<IDeviceManager>();
-            // (1)默认注册模拟设备连接
-            connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting 
-            {
-                ConnectionId = c.DeviceId,
-                ConnectionType = ConnectionTypeEnum.Mock,
-                ConnectionStr = "XXXXXX"
-            }).ToList());
-            // (2) 打开所有连接
-            await connectionManager.OpenAllConnections();
-            // (3) 注册所有设备
-            deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null));
-            deviceManager.StartAllDevices();
         }
 
         protected override void OnExit(ExitEventArgs e)

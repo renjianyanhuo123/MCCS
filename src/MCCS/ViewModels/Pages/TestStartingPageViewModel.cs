@@ -21,6 +21,7 @@ using MCCS.Events;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using Prism.Navigation.Regions;
+using MCCS.Events.Controllers;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -32,7 +33,6 @@ namespace MCCS.ViewModels.Pages
         private bool _isLoading = true;
         private bool _isStartedTest = false; // 是否开始试验
         private string _loadingMessage = "";
-        private bool _isRightDrawerOpen = false; // 右侧抽屉是否打开
 
         private ObservableCollection<Model3DViewModel> _models;
         private Model3DViewModel? _lastHoveredModel = null;
@@ -58,7 +58,6 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
         public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
-
         public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
         //public DelegateCommand OpenRightDrawerCommand => new(ExecuteOpenRightDrawerCommand);
         #endregion
@@ -83,6 +82,7 @@ namespace MCCS.ViewModels.Pages
                 FarPlaneDistance = 10000,
                 NearPlaneDistance = 0.1f
             };
+            _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
         }
@@ -91,14 +91,6 @@ namespace MCCS.ViewModels.Pages
         }
 
         #region Property
-        /// <summary>
-        /// 右侧抽屉是否打开的属性
-        /// </summary>
-        public bool IsRightDrawerOpen
-        {
-            get => _isRightDrawerOpen;
-            set => SetProperty(ref _isRightDrawerOpen, value);
-        }
         public bool IsStartedTest
         {
             get => _isStartedTest;
@@ -163,6 +155,7 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region private method
+
         private async Task LoadModelsAsync()
         {
             _loadingCancellation = new CancellationTokenSource();
@@ -226,6 +219,17 @@ namespace MCCS.ViewModels.Pages
             foreach (var model in Models)
             {
                 model.IsSelected = false;
+            }
+        }
+
+        private void RevicedInverseControlEvent(InverseControlEventParam param)
+        {
+            if (param == null) return;
+            // 处理控制事件
+            var targetModel = Models.FirstOrDefault(m => m.Model3DData.DeviceId == param.DeviceId);
+            if (targetModel != null)
+            {
+                targetModel.IsSelected = false; 
             }
         }
 
@@ -300,7 +304,7 @@ namespace MCCS.ViewModels.Pages
             if (clickedModel is { IsSelectable: true })
             {
                 // 切换当前模型的选中状态
-                clickedModel.IsSelected = !clickedModel.IsSelected;
+                clickedModel.IsSelected = true;
                 // IsRightDrawerOpen = true;
                 var channels = Models
                     .Where(s => s.IsSelected)
@@ -312,6 +316,7 @@ namespace MCCS.ViewModels.Pages
                 _eventAggregator.GetEvent<ControlEvent>().Publish(new ControlEventParam 
                 {
                     ChannelId = clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId"),
+                    ChannelName = clickedModel.Model3DData.Name
                 });
                 //var channelsParam = new NavigationParameters
                 //{

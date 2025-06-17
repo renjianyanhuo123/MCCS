@@ -8,15 +8,15 @@ using System.Windows.Data;
 
 namespace MCCS.Converters.TestStarting
 {
-    public sealed class BoolToWidthConverter : IValueConverter
+    public sealed class EnumToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool isOpen)
-            {
-                return isOpen ? 300.0 : 0.0;
-            }
-            return 0.0; // 默认宽度
+            if (value == null || parameter == null)
+                return System.Windows.Visibility.Collapsed;
+            if (value.ToString() == parameter.ToString())
+                return System.Windows.Visibility.Visible;
+            return System.Windows.Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
