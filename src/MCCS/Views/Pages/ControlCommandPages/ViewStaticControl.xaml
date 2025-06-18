@@ -31,12 +31,14 @@
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="速度" />
             <TextBox materialDesign:HintAssist.Hint="请输入速度" 
+                     Text="{Binding Speed,Mode=TwoWay}"
                      materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}, ConverterParameter=/min}">
             </TextBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" />
             <TextBox materialDesign:HintAssist.Hint="请输入目标值" 
+                     Text="{Binding TargetValue, Mode=TwoWay}"
              materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}">
             </TextBox>
         </StackPanel>

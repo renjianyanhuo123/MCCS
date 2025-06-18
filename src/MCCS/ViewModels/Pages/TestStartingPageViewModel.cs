@@ -21,6 +21,7 @@ using LiveChartsCore.SkiaSharpView;
 using MCCS.Models;
 using LiveChartsCore.Kernel;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
+using System.Diagnostics;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -87,6 +88,7 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = 0.1f
             };
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
+            _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedMovePositionCommand);
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
 
@@ -126,9 +128,6 @@ namespace MCCS.ViewModels.Pages
                     MaxLimit = 11
                 }
             ]; 
-        }
-        private void NavigationCompleted(NavigationResult result)
-        {
         }
 
         #region Property
@@ -214,7 +213,7 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region private method
-
+        private float _sumPostion = 0;
         private async Task LoadModelsAsync()
         {
             _loadingCancellation = new CancellationTokenSource();
@@ -266,6 +265,9 @@ namespace MCCS.ViewModels.Pages
                 IsLoading = false;
             }
         }
+        /// <summary>
+        /// 测试使用
+        /// </summary>
         private void ExecuteTestModelMoveCommand() 
         {
             var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "12853688641a40b58af7faf9ebe464f8");
@@ -274,11 +276,13 @@ namespace MCCS.ViewModels.Pages
                 testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), 0.1f);
                 testModel.SceneNode.UpdateAllTransformMatrix();
             }
+            _sumPostion += 0.1f;
+            Debug.WriteLine($"模型位置: {_sumPostion}");
         }
 
         private void ExecuteLoadCommand() 
         {
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), NavigationCompleted);
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative));
         }
 
         private void ExecuteStartTestCommand()
@@ -372,6 +376,49 @@ namespace MCCS.ViewModels.Pages
             }
         }
 
+        private void OnReceivedMovePositionCommand(ReceivedCommandDataEventParam param) 
+        {
+            Task.Run(() => 
+            {
+                var lastV = Double.MaxValue;
+                while (true)
+                {
+                    var d = Math.Abs(_sumPostion * 10.0 - param.Target);
+                    if (lastV > d)
+                    {
+                        lastV = d;
+                    }
+                    else 
+                    {
+                        break; // 如果当前力值与目标力值的差距开始增大，停止循环
+                    }
+                    var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "12853688641a40b58af7faf9ebe464f8");
+                    var temp = (float)param.Speed / 60.0f * 0.1f;
+                    
+                    if (_sumPostion * 10 < param.Target)
+                    {
+                        if (testModel != null)
+                        {
+                            testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), temp);
+                            testModel.SceneNode.UpdateAllTransformMatrix();
+                        }
+                        _sumPostion += temp;
+                    }
+                    else 
+                    {
+                        if (testModel != null)
+                        {
+                            testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), -temp);
+                            testModel.SceneNode.UpdateAllTransformMatrix();
+                        }
+                        _sumPostion -= temp;
+                    }
+                    Thread.Sleep(1000); // 模拟延时
+                }
+            });
+        }
+
+
         /// <summary>
         /// 左键单击选择事件
         /// </summary>
@@ -388,7 +435,7 @@ namespace MCCS.ViewModels.Pages
                 Keyboard.IsKeyDown(Key.RightCtrl)) return;
             if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
                 mouseArgs.LeftButton != MouseButtonState.Pressed) return;
-            if (IsStartedTest) return;
+            if (!IsStartedTest) return;
             // 获取点击的模型
             var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型

@@ -17,7 +17,7 @@ namespace MCCS.Core.Devices.Commands
         StopMeasurement,
 
         // 特定设备指令
-        SetTemperatureRange,
+        SetMove,
         SetPressureUnit,
         SetSamplingRate,
         TriggerSelfTest,

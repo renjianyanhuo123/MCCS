@@ -31,17 +31,17 @@
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
                 <CheckBox 
-        Margin="5 5 5 8"
-        Tag="{Binding CurrentChannelId}"
-        IsChecked="{Binding IsParticipateControl}"
-        Content="{StaticResource IsParticipateControl}"
-        Style="{StaticResource MaterialDesignCheckBox}"
-        Command="{Binding ParticipateControlCommand}"
-        CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
+                Margin="5 5 5 8"
+                Tag="{Binding CurrentChannelId}"
+                IsChecked="{Binding IsParticipateControl}"
+                Content="{StaticResource IsParticipateControl}"
+                Style="{StaticResource MaterialDesignCheckBox}"
+                Command="{Binding ParticipateControlCommand}"
+                CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
                 <GroupBox  
-          Margin="{StaticResource GroupMargin}" 
-          Style="{StaticResource MaterialDesignCardGroupBox}"
-          Header="{StaticResource ControlTypeText}">
+                    Margin="{StaticResource GroupMargin}" 
+                    Style="{StaticResource MaterialDesignCardGroupBox}"
+                    Header="{StaticResource ControlTypeText}">
                     <StackPanel>
                         <WrapPanel Margin="0 0 0 10">
                             <RadioButton Content="组合控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Combine}"
@@ -65,31 +65,31 @@
                     </StackPanel>
                 </GroupBox>
                 <GroupBox  
-        Margin="{StaticResource GroupMargin}"
-        Header="{StaticResource ControllerStep1}"
-        Style="{StaticResource MaterialDesignCardGroupBox}">
+                    Margin="{StaticResource GroupMargin}"
+                    Header="{StaticResource ControllerStep1}"
+                    Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ItemsControl Name="ChannelItem" ItemsSource="{Binding Channels}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <materialDesign:Chip
-              Content="{Binding ChannelName}"
-              Tag="{Binding ChannelId}"
-              Icon="{Binding Index}"
-              IconBackground="{DynamicResource PrimaryHueLightBrush}"
-              IconForeground="{DynamicResource PrimaryHueLightForegroundBrush}"
-              IsDeletable="True" />
+                                    Content="{Binding ChannelName}"
+                                    Tag="{Binding ChannelId}"
+                                    Icon="{Binding Index}"
+                                    IconBackground="{DynamicResource PrimaryHueLightBrush}"
+                                    IconForeground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                    IsDeletable="True" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </GroupBox>
                 <GroupBox 
-            Margin="{StaticResource GroupMargin}"
-            Header="{StaticResource ControllerStep2}"
-            Style="{StaticResource MaterialDesignCardGroupBox}">
+                    Margin="{StaticResource GroupMargin}"
+                    Header="{StaticResource ControllerStep2}"
+                    Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ComboBox 
-            materialDesign:HintAssist.Hint="{StaticResource ControllerMethodHelpText}"
-            Style="{StaticResource MaterialDesignFilledComboBox}"
-            SelectedIndex="{Binding SelectedControlMode}">
+                        materialDesign:HintAssist.Hint="{StaticResource ControllerMethodHelpText}"
+                        Style="{StaticResource MaterialDesignFilledComboBox}"
+                        SelectedIndex="{Binding SelectedControlMode}">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="SelectionChanged">
                                 <i:InvokeCommandAction Command="{Binding ControlModeSelectionChangedCommand}"/>
@@ -105,12 +105,24 @@
                     </ComboBox>
                 </GroupBox>
                 <GroupBox  
-          Margin="{StaticResource GroupMargin}"
-          Header="{StaticResource ControllerStep3}"
-          Style="{StaticResource MaterialDesignCardGroupBox}">
+                    Margin="{StaticResource GroupMargin}"
+                    Header="{StaticResource ControllerStep3}"
+                    Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.ControlCommandRegionName}" />
                 </GroupBox>
-            </StackPanel>
+                <UniformGrid Columns="2" Margin="0 20 0 0">
+                    <Button 
+                        Content="应用" 
+                        Width="80"
+                        Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
+                        ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
+                        Command="{Binding ApplyCommand}"/>
+                    <Button  
+                        Content="暂停"
+                        Width="80"
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}" />
+                </UniformGrid>
+            </StackPanel> 
         </ScrollViewer>
     </Grid>
 </UserControl>

@@ -1,6 +1,9 @@
-﻿using MCCS.Events;
+﻿using MCCS.Core.Devices.Commands;
+using MCCS.Core.Devices.Manager;
+using MCCS.Events;
 using MCCS.Events.Controllers;
 using MCCS.Models;
+using MCCS.Services.ControlCommand;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using System.Collections.ObjectModel;
@@ -14,19 +17,21 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         private readonly IEventAggregator _eventAggregator;
         private readonly IRegionManager _regionManager;
+        private readonly IDeviceManager _deviceManager;
+        private readonly ISharedStaticCommandService _sharedStaticCommandService;
 
         private ObservableCollection<ControllerItemModel> _channels = []; 
         private bool _isShowController = false;
         private bool _isParticipateControl = false;
         // 控制器通道信息字典
         private Dictionary<string, ControlInfo> _controlInfoDic = [];
-        private ObservableCollection<ControlCombineInfo> _controlCombineInfos = new ObservableCollection<ControlCombineInfo> 
-        {
+        private ObservableCollection<ControlCombineInfo> _controlCombineInfos =
+        [
             new() {
                 CombineChannelId = None,
                 CombineChannelName = "无(新增组合)"
             }
-        };
+        ];
         private string _currentChannelId = string.Empty;
 
         private ControlTypeEnum _controlType = ControlTypeEnum.Single; 
@@ -36,12 +41,16 @@ namespace MCCS.ViewModels.Pages.Controllers
         private ControlInfo? _lastControlInfoData = null;
 
         public ControllerMainPageViewModel(
+            ISharedStaticCommandService sharedStaticCommandService,
             IRegionManager regionManager,
             IEventAggregator eventAggregator, 
-            IDialogService dialogService) : base(eventAggregator, dialogService)
+            IDialogService dialogService,
+            IDeviceManager deviceManager) : base(eventAggregator, dialogService)
         {
+            _sharedStaticCommandService = sharedStaticCommandService;
             _eventAggregator = eventAggregator;
             _regionManager = regionManager;
+            _deviceManager = deviceManager;
             eventAggregator.GetEvent<ControlEvent>().Subscribe(RenderChannels); 
         }
 
@@ -121,9 +130,49 @@ namespace MCCS.ViewModels.Pages.Controllers
         public DelegateCommand<string> ParticipateControlCommand => new(ExecuteParticipateControlCommand);
 
         public DelegateCommand ControlModeSelectionChangedCommand => new(ExecuteControlModeSelectionChangedCommand);
+
+        public AsyncDelegateCommand ApplyCommand => new(ExecuteApplyCommand);
         #endregion
 
         #region private method
+        private bool _isExecuting = false;
+        private async Task ExecuteApplyCommand() 
+        {
+            if (_isExecuting) return;
+            _isExecuting = true;
+            var device = _deviceManager.GetDevice(CurrentChannelId) ?? throw new ArgumentNullException(nameof(CurrentChannelId));
+            var controlMode = (ControlMode)SelectedControlMode;
+            var commandParams = new Dictionary<string, object>();
+            switch (controlMode)
+            {
+                case ControlMode.Manual:
+                    break;
+                case ControlMode.Static: 
+                    commandParams.Add("UnitType", _sharedStaticCommandService.UnitType);
+                    commandParams.Add("Speed", _sharedStaticCommandService.Speed);
+                    commandParams.Add("TargetValue", _sharedStaticCommandService.TargetValue);
+                    break;
+                case ControlMode.Programmable:
+                    break;
+                case ControlMode.Fatigue:
+                    break;
+                default:
+                    break;
+            }
+            _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(new ReceivedCommandDataEventParam
+            {
+                Speed = _sharedStaticCommandService.Speed,
+                Target = _sharedStaticCommandService.TargetValue,
+            });
+            await device.SendCommandAsync(new DeviceCommand 
+            { 
+                DeviceId = CurrentChannelId,
+                Type = CommandTypeEnum.SetMove,
+                Parameters = commandParams
+            });
+            _isExecuting = false;
+        }
+
         private void ExecuteControlModeSelectionChangedCommand() 
         {
             var controlMode = (ControlMode)SelectedControlMode;

@@ -80,6 +80,11 @@ namespace MCCS.Models
         /// 组合控制通道名称
         /// </summary>
         public string? CombineChannelName { get; set; }
+
+        /// <summary>
+        /// 指令是否正在执行
+        /// </summary>
+        public bool IsExecuting { get; set; } = false;
     }
 
     public class ControlCombineInfo

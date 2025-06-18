@@ -16,6 +16,7 @@ using MCCS.Views.Pages.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
+using MCCS.Services.ControlCommand;
 
 namespace MCCS
 {
@@ -70,6 +71,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
+            containerRegistry.RegisterSingleton<ISharedStaticCommandService, SharedStaticCommandService>();
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);

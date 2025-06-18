@@ -16,6 +16,8 @@ namespace MCCS.Core.Devices.Details
     {
 
         private static readonly Random _rand = new();
+        private static double _currentForce = 10.0; // 初始力值
+        private static double _currentDisplacement = 0.0; // 初始位移值5mm
 
         // 生成符合 N(0, 1) 的随机数（标准正态分布）
         private static double NextStandardNormal()
@@ -51,14 +53,76 @@ namespace MCCS.Core.Devices.Details
                 ExecutionTime = TimeSpan.Zero,
                 Timestamp = DateTimeOffset.Now
             };
+            if (command.Type == CommandTypeEnum.SetMove) 
+            {
+                var parameters = command.Parameters ?? [];
+                var unit = Convert.ToInt32(parameters.GetValueOrDefault("UnitType"));
+                var speed = Convert.ToDouble(parameters.GetValueOrDefault("Speed"));
+                var targetV = Convert.ToDouble(parameters.GetValueOrDefault("TargetValue"));
+                await Task.Run(async () =>
+                {
+                    if (unit == 0)
+                    {
+                        var lastV = Double.MaxValue;
+                        while (true)
+                        {
+                            var d = Math.Abs(_currentForce - targetV);
+                            if (d < lastV)
+                            {
+                                lastV = d;
+                            }
+                            else 
+                            {
+                                break; // 如果当前力值与目标力值的差距开始增大，停止循环
+                            }
+                            if (_currentForce < targetV)
+                            {
+                                _currentForce += speed / 60.0; 
+                            }
+                            else 
+                            {
+                                _currentForce -= speed / 60.0;
+                            }
+                            await Task.Delay(1000);
+                        }
+                        
+                    }
+                    else
+                    {
+                        var lastV = Double.MaxValue;
+                        while (true)
+                        {
+                            var d = Math.Abs(_currentDisplacement - targetV);
+                            if (d < lastV)
+                            {
+                                lastV = d;
+                            }
+                            else
+                            {
+                                break; // 如果当前力值与目标力值的差距开始增大，停止循环
+                            }
+                            if (_currentDisplacement < targetV)
+                            {
+                                _currentDisplacement += speed / 60.0; // 转换为每秒速度
+                            }
+                            else 
+                            {
+                                _currentDisplacement -= speed / 60.0; // 转换为每秒速度
+                            }
+                            await Task.Delay(1000);
+                        }
+                    }
+                    
+                });
+            }
             await Task.Delay(10); // 模拟异步操作
             return response;
         }
 
         protected override async Task<DeviceData> ReadDataAsync()
         {
-            var mockForceData = NextNormal(10, 0.1);
-            var mockDisplacement = NextNormal(22, 0.1);
+            var mockForceData = NextNormal(_currentForce, 0.006);
+            var mockDisplacement = NextNormal(_currentDisplacement, 0.006);
             var data = new DeviceData
             {
                 DeviceId = Id,
