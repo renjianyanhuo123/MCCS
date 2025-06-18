@@ -128,23 +128,14 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             var controlMode = (ControlMode)SelectedControlMode;
             string viewName = string.Empty;
-            switch (controlMode)
+            viewName = controlMode switch
             {
-                case ControlMode.Manual:
-                    viewName = ViewManualControlViewModel.Tag;
-                    break;
-                case ControlMode.Static:
-                    viewName = ViewStaticControlViewModel.Tag;
-                    break;
-                case ControlMode.Programmable:
-                    break;
-                case ControlMode.Fatigue:
-                    viewName = ViewFatigueControlViewModel.Tag;
-                    break;
-                default:
-                    viewName = ViewManualControlViewModel.Tag;
-                    break;
-            }
+                ControlMode.Manual => ViewManualControlViewModel.Tag,
+                ControlMode.Static => ViewStaticControlViewModel.Tag,
+                ControlMode.Programmable => ViewProgramControlViewModel.Tag,
+                ControlMode.Fatigue => ViewFatigueControlViewModel.Tag,
+                _ => ViewManualControlViewModel.Tag,
+            };
             _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(viewName, UriKind.Relative), NavigationCompleted);
         }
         private void NavigationCompleted(NavigationResult result)

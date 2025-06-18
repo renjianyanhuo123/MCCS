@@ -24,7 +24,7 @@
             <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}" Height="800">
+    <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}" Height="900">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
