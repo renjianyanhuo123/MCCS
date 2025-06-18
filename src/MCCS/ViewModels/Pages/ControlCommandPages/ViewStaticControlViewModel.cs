@@ -5,17 +5,18 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
     public class ViewStaticControlViewModel : BaseViewModel
     {
         public const string Tag = "StaticControl";
+
+        private int _selectedControlUnitType = 0;
+
         public ViewStaticControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
         }
 
         #region 页面属性
-        private string _unitText = "clear";
-
-        public string UnitText
+        public int SelectedControlUnitType
         {
-            get => _unitText;
-            set => SetProperty(ref _unitText, value);
+            get => _selectedControlUnitType;
+            set => SetProperty(ref _selectedControlUnitType, value);
         }
         #endregion
     }

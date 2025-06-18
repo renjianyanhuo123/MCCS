@@ -4,19 +4,32 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages.ControlCommandPages"
+             xmlns:convert="clr-namespace:MCCS.Converters.ControlCommand"
+             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:controlcommandpages="clr-namespace:MCCS.ViewModels.Pages.ControlCommandPages" 
+             d:DataContext="{d:DesignInstance Type=controlcommandpages:ViewFatigueControlViewModel}"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel>
-        <GroupBox Header="控制模式">
+    <UserControl.Resources>
+        <Thickness x:Key="StackPanelMargin">0,25,0,0</Thickness>
+        <Thickness x:Key="TextMargin">0,0,0,5</Thickness>
+        <convert:EnumToSuffixTextConverter x:Key="EnumToSuffixTextConverter" />
+    </UserControl.Resources>
+    <StackPanel> 
+        <StackPanel>
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="控制模式" />
             <ComboBox
                 x:Name="control_mode" 
-                SelectedIndex="0">
-                <ComboBoxItem TabIndex="0" Content="位移"  Tag="mm"/>
-                <ComboBoxItem TabIndex="1" Content="试验力" Tag="kN" />
+                SelectedIndex="{Binding SelectedControlUnitType}">
+                <ComboBoxItem TabIndex="0" Content="试验力"  Tag="mm"/>
+                <ComboBoxItem TabIndex="1" Content="位移" Tag="kN" />
             </ComboBox>
-        </GroupBox>
-
-        <GroupBox Header="波形">
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="波形" />
             <ComboBox SelectedIndex="0">
                 <ComboBoxItem TabIndex="0" Content="正弦波"  />
                 <ComboBoxItem TabIndex="1" Content="方波"   />
@@ -24,24 +37,50 @@
                 <ComboBoxItem TabIndex="3" Content="斜波"   />
                 <ComboBoxItem TabIndex="4" Content="半正弦波"  />
             </ComboBox>
-        </GroupBox>
-
-        <TextBox  Text="Hz" />
-
-        <TextBox /> 
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="频率" />
+            <TextBox materialDesign:HintAssist.Hint="请输入频率" 
+                    materialDesign:TextFieldAssist.SuffixText="Hz"> 
+            </TextBox>
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="幅值" />
+            <TextBox materialDesign:HintAssist.Hint="请输入幅值" 
+                     materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}">
+            </TextBox>
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="中值" />
+            <TextBox materialDesign:HintAssist.Hint="请输入中值" 
+                     materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}" />
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环次数" />
+            <TextBox />
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环计数" />
+            <TextBox IsEnabled="False" />
+        </StackPanel>
+        <UniformGrid Columns="2" Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Text="幅值补偿:2.4" />
+            <TextBlock Text="相位补偿:-8.0" />
+        </UniformGrid>
         <Separator Margin="0 5" />
-        <StackPanel HorizontalAlignment="Center"
+        <StackPanel  Margin="{StaticResource StackPanelMargin}"
+                 HorizontalAlignment="Center"
                  Orientation="Horizontal">
-            <Button Width="100" 
+            <Button Width="60" 
                 Content="应用"
                 Margin="0 0 5 0" />
-            <Button Width="100" 
+            <Button Width="60" 
             Content="中值"
             Margin="0 0 5 0"  />
-            <Button Width="100" 
+            <Button Width="60" 
             Content="暂停"
             Margin="0 0 5 0" />
-            <Button Width="100" 
+            <Button Width="60" 
             Content="补偿"  />
         </StackPanel>
     </StackPanel>

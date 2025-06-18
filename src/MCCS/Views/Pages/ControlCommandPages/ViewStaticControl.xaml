@@ -4,9 +4,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages.ControlCommandPages"
+             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:convert="clr-namespace:MCCS.Converters.ControlCommand"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:controlcommandpages="clr-namespace:MCCS.ViewModels.Pages.ControlCommandPages" 
+             d:DataContext="{d:DesignInstance Type=controlcommandpages:ViewStaticControlViewModel}"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <UserControl.Resources>
+        <Thickness x:Key="StackPanelMargin">0,25,0,0</Thickness>
+        <Thickness x:Key="TextMargin">0,0,0,5</Thickness>
+        <convert:EnumToSuffixTextConverter x:Key="EnumToSuffixTextConverter" />
+    </UserControl.Resources>
+    <StackPanel>
+        <StackPanel>
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="控制模式" />
+            <ComboBox
+                    x:Name="control_mode" 
+                    SelectedIndex="{Binding SelectedControlUnitType}">
+                <ComboBoxItem TabIndex="0" Content="试验力"  Tag="mm"/>
+                <ComboBoxItem TabIndex="1" Content="位移" Tag="kN" />
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="速度" />
+            <TextBox materialDesign:HintAssist.Hint="请输入速度" 
+                     materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}, ConverterParameter=/min}">
+            </TextBox>
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" />
+            <TextBox materialDesign:HintAssist.Hint="请输入目标值" 
+             materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}">
+            </TextBox>
+        </StackPanel>
+    </StackPanel>
 </UserControl>

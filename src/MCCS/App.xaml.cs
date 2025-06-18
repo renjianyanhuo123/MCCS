@@ -109,7 +109,7 @@ namespace MCCS
         /// (0)
         /// </summary>
         /// <param name="e"></param>
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
             // 设置全局异常处理
             SetupExceptionHandling();

@@ -34,6 +34,11 @@
             Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
             Command="{Binding StartTestCommand}"
             ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
+            <Button
+                Width="100"
+                Style="{StaticResource MaterialDesignRaisedLightButton}"
+                Content="测试移动"
+                Command="{Binding TestModelMoveCommand}" />
         </StackPanel>
         <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">
@@ -146,7 +151,9 @@
                 <lvc:CartesianChart
                     Title="{Binding Title}"
                     Height="250"
-                    Series="{Binding Series}">
+                    Series="{Binding CurveSeries1}"
+                    XAxes="{Binding XAxes}"
+                    YAxes="{Binding YAxes}">
                 </lvc:CartesianChart>
             </Expander>
             <Expander
@@ -164,7 +171,9 @@
                 <lvc:CartesianChart
                     Title="{Binding Title}"
                     Height="250"
-                    Series="{Binding Series}">
+                    Series="{Binding CurveSeries2}"
+                    XAxes="{Binding XAxes}"
+                    YAxes="{Binding YAxes}">
                 </lvc:CartesianChart>
             </Expander>
         </StackPanel>

@@ -2,6 +2,7 @@
 using MCCS.Events.Controllers;
 using MCCS.Models;
 using MCCS.ViewModels.Others.Controllers;
+using MCCS.ViewModels.Pages.ControlCommandPages;
 using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.Controllers
@@ -12,6 +13,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         private const string None = "None";
 
         private readonly IEventAggregator _eventAggregator;
+        private readonly IRegionManager _regionManager;
 
         private ObservableCollection<ControllerItemModel> _channels = []; 
         private bool _isShowController = false;
@@ -33,9 +35,13 @@ namespace MCCS.ViewModels.Pages.Controllers
         private ControlCombineInfo _selectedControlCombineInfo;
         private ControlInfo? _lastControlInfoData = null;
 
-        public ControllerMainPageViewModel(IEventAggregator eventAggregator, IDialogService dialogService) : base(eventAggregator, dialogService)
+        public ControllerMainPageViewModel(
+            IRegionManager regionManager,
+            IEventAggregator eventAggregator, 
+            IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             _eventAggregator = eventAggregator;
+            _regionManager = regionManager;
             eventAggregator.GetEvent<ControlEvent>().Subscribe(RenderChannels); 
         }
 
@@ -113,9 +119,37 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         #region Command
         public DelegateCommand<string> ParticipateControlCommand => new(ExecuteParticipateControlCommand);
+
+        public DelegateCommand ControlModeSelectionChangedCommand => new(ExecuteControlModeSelectionChangedCommand);
         #endregion
 
         #region private method
+        private void ExecuteControlModeSelectionChangedCommand() 
+        {
+            var controlMode = (ControlMode)SelectedControlMode;
+            string viewName = string.Empty;
+            switch (controlMode)
+            {
+                case ControlMode.Manual:
+                    viewName = ViewManualControlViewModel.Tag;
+                    break;
+                case ControlMode.Static:
+                    viewName = ViewStaticControlViewModel.Tag;
+                    break;
+                case ControlMode.Programmable:
+                    break;
+                case ControlMode.Fatigue:
+                    viewName = ViewFatigueControlViewModel.Tag;
+                    break;
+                default:
+                    viewName = ViewManualControlViewModel.Tag;
+                    break;
+            }
+            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(viewName, UriKind.Relative), NavigationCompleted);
+        }
+        private void NavigationCompleted(NavigationResult result)
+        {
+        }
         private void RenderChannels(ControlEventParam param)
         {
             // (1) 首先收集下之前界面的所有的控制信息

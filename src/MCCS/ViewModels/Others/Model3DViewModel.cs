@@ -4,6 +4,7 @@ using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
 using HelixToolkit.SharpDX.Core;
 using SharpDX;
+using MCCS.Models.Model3D;
 
 namespace MCCS.ViewModels.Others
 {
@@ -222,6 +223,19 @@ namespace MCCS.ViewModels.Others
             }
 
             return Vector3.Zero;
+        }
+        #endregion
+
+        #region public method
+        public void PositionChange(Vector3 directionVec, float moveValue) 
+        {
+            var currentPosition = _sceneNode.ModelMatrix.TranslationVector;
+            var newPosition = currentPosition + directionVec * moveValue;
+            var matrix = _sceneNode.ModelMatrix;
+            matrix.M41 = newPosition.X;
+            matrix.M42 = newPosition.Y;
+            matrix.M43 = newPosition.Z;
+            _sceneNode.ModelMatrix = matrix;
         }
         #endregion
     }

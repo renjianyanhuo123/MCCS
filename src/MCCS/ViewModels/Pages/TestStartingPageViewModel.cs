@@ -17,10 +17,10 @@ using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Events.Controllers;
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using MCCS.Models;
 using LiveChartsCore.Kernel;
+using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -45,7 +45,7 @@ namespace MCCS.ViewModels.Pages
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流 
-        private const int MaxPoints = 30;
+        private const int MaxPoints = 20;
 
         private readonly IDeviceManager _deviceManager;
         private readonly Random _random = new();
@@ -61,6 +61,8 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
         public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
         public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
+
+        public DelegateCommand TestModelMoveCommand => new(ExecuteTestModelMoveCommand);
         //public DelegateCommand OpenRightDrawerCommand => new(ExecuteOpenRightDrawerCommand);
         #endregion
 
@@ -88,11 +90,21 @@ namespace MCCS.ViewModels.Pages
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
 
-            ObservableValues = [];
-            Series = [
+            CurveSeries2 = [
                 new LineSeries<TimeAndMeasureValueModel>()
                 {
-                    Values = ObservableValues,
+                    Values = ObservableValues2,
+                    Mapping = (model, index) =>
+                    {
+                        return new Coordinate(model.Time, model.Value);
+                    },
+                    Fill = null
+                }
+            ];
+            CurveSeries1 = [
+                new LineSeries<TimeAndMeasureValueModel>()
+                {
+                    Values = ObservableValues1,
                     Mapping = (model, index) =>
                     {
                         return new Coordinate(model.Time, model.Value);
@@ -110,8 +122,8 @@ namespace MCCS.ViewModels.Pages
             [
                 new() {
                     Name = "kN",
-                    MinLimit = -1,
-                    MaxLimit = 30
+                    MinLimit = 9,
+                    MaxLimit = 11
                 }
             ]; 
         }
@@ -121,16 +133,23 @@ namespace MCCS.ViewModels.Pages
 
         #region Property
         /// <summary>
-        /// 数据集合
+        /// 曲线一数据集合
         /// </summary>
-        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues { get; set; }
-
+        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues1 { get; set; } = [];
+        /// <summary>
+        /// 曲线二数据集合
+        /// </summary>
+        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues2 { get; set; } = [];
         public LiveChartsCore.SkiaSharpView.Axis[] XAxes { get; set; }
         public LiveChartsCore.SkiaSharpView.Axis[] YAxes { get; set; }
         /// <summary>
-        /// 曲线数据集合
+        /// 曲线一数据集合
         /// </summary>
-        public ObservableCollection<ISeries> Series { get; set; }
+        public ObservableCollection<ISeries> CurveSeries1 { get; set; }
+        /// <summary>
+        /// 曲线二数据集合
+        /// </summary>
+        public ObservableCollection<ISeries> CurveSeries2 { get; set; }
         public bool IsStartedTest
         {
             get => _isStartedTest;
@@ -247,6 +266,15 @@ namespace MCCS.ViewModels.Pages
                 IsLoading = false;
             }
         }
+        private void ExecuteTestModelMoveCommand() 
+        {
+            var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "12853688641a40b58af7faf9ebe464f8");
+            if (testModel != null) 
+            {
+                testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), 0.1f);
+                testModel.SceneNode.UpdateAllTransformMatrix();
+            }
+        }
 
         private void ExecuteLoadCommand() 
         {
@@ -256,10 +284,6 @@ namespace MCCS.ViewModels.Pages
         private void ExecuteStartTestCommand()
         {
             IsStartedTest = !IsStartedTest;
-            foreach (var model in Models)
-            {
-                model.IsSelected = false;
-            }
         }
 
         private void RevicedInverseControlEvent(InverseControlEventParam param)
@@ -281,14 +305,22 @@ namespace MCCS.ViewModels.Pages
             var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream
                 ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
             actor1.Sample(TimeSpan.FromSeconds(1))
-                .SubscribeOn(SynchronizationContext.Current)
                 .Subscribe(x => {
-                    ObservableValues.Add(new TimeAndMeasureValueModel
+                    ObservableValues1.Add(new TimeAndMeasureValueModel
                     {
                         Time = (DateTime.Now - _currentTime).TotalSeconds,
                         Value = x.Value is MockActuatorCollection v ? v.Force : 0
                     });
-                    if (ObservableValues.Count > MaxPoints) ObservableValues.RemoveAt(0);
+                    if (ObservableValues1.Count > MaxPoints) ObservableValues1.RemoveAt(0);
+                });
+            actor2.Sample(TimeSpan.FromSeconds(1))
+                .Subscribe(x => {
+                    ObservableValues2.Add(new TimeAndMeasureValueModel
+                    {
+                        Time = (DateTime.Now - _currentTime).TotalSeconds,
+                        Value = x.Value is MockActuatorCollection v ? v.Force : 0
+                    });
+                    if (ObservableValues2.Count > MaxPoints) ObservableValues2.RemoveAt(0);
                 });
         }
 
@@ -356,7 +388,7 @@ namespace MCCS.ViewModels.Pages
                 Keyboard.IsKeyDown(Key.RightCtrl)) return;
             if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
                 mouseArgs.LeftButton != MouseButtonState.Pressed) return;
-            if (!IsStartedTest) return;
+            if (IsStartedTest) return;
             // 获取点击的模型
             var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
