@@ -21,6 +21,7 @@
             <convert:BoolToWidthConverter x:Key="BoolToWidthConverter" />
             <convert:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
             <convert:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+            <convert:CommandStatusToEnableConverter x:Key="CommandStatusToEnableConverter" />
             <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -113,12 +114,14 @@
                 <UniformGrid Columns="2" Margin="0 20 0 0">
                     <Button 
                         Content="应用" 
+                        IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                         Width="80"
                         Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
                         ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
                         Command="{Binding ApplyCommand}"/>
                     <Button  
                         Content="暂停"
+                        IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
                         Width="80"
                         Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}" />
                 </UniformGrid>

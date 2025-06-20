@@ -26,11 +26,15 @@ namespace MCCS.Core.Devices
         /// </summary>
         IObservable<DeviceData> DataStream { get; }
         /// <summary>
+        /// 指令状态流 - 用于接收指令执行结果
+        /// </summary>
+        IObservable<CommandResponse> CommandStatusStream { get; }
+        /// <summary>
         /// 发送指令到设备
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        Task<CommandResponse> SendCommandAsync(DeviceCommand command);
+        Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken);
         /// <summary>
         /// 开始订阅数据流
         /// </summary>

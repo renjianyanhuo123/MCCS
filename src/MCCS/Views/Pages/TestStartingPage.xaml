@@ -103,7 +103,7 @@
                          
                         Offset="-65" />
             </hx:Viewport3DX>
-            <StackPanel Grid.Column="1"  
+            <StackPanel  Grid.Row="1" Grid.Column="1"  
                         HorizontalAlignment="Center"
                         Margin="5">
                 <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}">
@@ -132,52 +132,87 @@
                Foreground="#666666" />
         </StackPanel>
         <!-- 曲线显示部分 -->
-        <StackPanel Grid.Row="1" Grid.Column="0">
-            <StackPanel.CacheMode>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.CacheMode>
                 <BitmapCache />
-            </StackPanel.CacheMode>
-            <Expander
-                x:Name="Curve1"
-                Width="450"
-                Height="Auto" 
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                BorderBrush="LightGray" 
-                Header="曲线一(通道一力)"
-                IsExpanded="True">
-                <Expander.Background>
-                    <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
-                </Expander.Background>
-                <lvc:CartesianChart
-                    Title="{Binding Title}"
-                    Height="250"
-                    Series="{Binding CurveSeries1}"
-                    XAxes="{Binding XAxes}"
-                    YAxes="{Binding YAxes}">
-                </lvc:CartesianChart>
-            </Expander>
-            <Expander
-                x:Name="Curve2"
-                Width="450"
-                Height="Auto" 
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                BorderBrush="LightGray" 
-                Header="曲线二(通道二力)"
-                IsExpanded="True">
-                <Expander.Background>
-                    <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
-                </Expander.Background>
-                <lvc:CartesianChart
-                    Title="{Binding Title}"
-                    Height="250"
-                    Series="{Binding CurveSeries2}"
-                    XAxes="{Binding XAxes}"
-                    YAxes="{Binding YAxes}">
-                </lvc:CartesianChart>
-            </Expander>
-        </StackPanel>
-        
-        
+            </Grid.CacheMode>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Row="1"
+                        Grid.Column="0">
+                <Expander
+                    x:Name="Curve1"
+                    Width="450"
+                    Height="Auto"  
+                    BorderBrush="LightGray" 
+                    Header="曲线一(通道一力)"
+                    IsExpanded="True">
+                    <Expander.Background>
+                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                    </Expander.Background>
+                    <lvc:CartesianChart
+                        Title="{Binding Title}"
+                        Height="250"
+                        Series="{Binding CurveSeries1}"
+                        XAxes="{Binding XAxes}"
+                        YAxes="{Binding YAxes}">
+                    </lvc:CartesianChart>
+                </Expander>
+                <Expander
+                    x:Name="Curve2"
+                    Width="450"
+                    Height="Auto" 
+                    BorderBrush="LightGray" 
+                    Header="曲线二(通道二力)"
+                    IsExpanded="True">  
+                    <Expander.Background>
+                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                    </Expander.Background>
+                    <lvc:CartesianChart
+                        Title="{Binding Title}"
+                        Height="250"
+                        Series="{Binding CurveSeries2}"
+                        XAxes="{Binding XAxes}"
+                        YAxes="{Binding YAxes}">
+                    </lvc:CartesianChart>
+                </Expander>
+            </StackPanel>
+            <StackPanel Grid.Row="1"
+                        Grid.Column="2">
+                <ItemsControl ItemsSource="">
+                    
+                </ItemsControl>
+                <Expander Width="450"
+                          Height="Auto"  
+                          BorderBrush="LightGray">
+                    <Expander.Background>
+                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                    </Expander.Background>
+                    <Expander.Header>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" /> 
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="作动器一" Height="Auto" />
+                                <TextBlock Text="组合控制" Margin="0,0,20,0"  Height="Auto"/>
+                                <TextBlock Height="Auto">
+                                    执行进度:
+                                    <Run FontSize="15" FontWeight="Bold" Foreground="White">
+                                        45%
+                                    </Run>
+                                </TextBlock>
+                            </StackPanel>
+                            <materialDesign:PackIcon Grid.Column="1" Kind="CloseCircle" />
+                        </Grid>
+                    </Expander.Header>
+                </Expander>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

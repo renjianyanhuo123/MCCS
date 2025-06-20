@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices.Details
@@ -16,8 +18,9 @@ namespace MCCS.Core.Devices.Details
     {
 
         private static readonly Random _rand = new();
-        private static double _currentForce = 10.0; // 初始力值
-        private static double _currentDisplacement = 0.0; // 初始位移值5mm
+        private double _currentForce = 10.0; // 初始力值
+        private double _currentDisplacement = 0.0; // 初始位移值5mm
+        private DateTime _currentStartTime = DateTime.MinValue;
 
         // 生成符合 N(0, 1) 的随机数（标准正态分布）
         private static double NextStandardNormal()
@@ -40,9 +43,52 @@ namespace MCCS.Core.Devices.Details
                   deviceInfo, 
                   connection)
         {
+        } 
+        private async Task CommonReduceGapLogic(
+            Func<double> getValue, 
+            Action<double> setValue, 
+            double targetValue, 
+            double speed, 
+            string commandId,
+            CancellationToken cancellationToken)
+        {
+            var lastGap = double.MaxValue;
+            while (true)
+            {
+                var operationValue = getValue();
+                var currentGap = Math.Abs(operationValue - targetValue);
+                if (currentGap >= lastGap) break;
+
+                lastGap = currentGap;
+                var newValue = operationValue + Math.Sign(targetValue - operationValue) * speed / 60.0;
+                setValue(newValue);
+                _commandStatusSubject.OnNext(new CommandResponse
+                {
+                    CommandId = commandId,
+                    DeviceId = Id,
+                    Success = true,
+                    Result = null,
+                    Progress = operationValue / targetValue * 1.0,
+                    CommandExecuteStatus = CommandExecuteStatusEnum.Executing,
+                    ExecutionTime = (DateTime.Now - _currentStartTime),
+                    Timestamp = DateTimeOffset.Now
+                });
+                await Task.Delay(1000, cancellationToken);
+            }
+            _commandStatusSubject.OnNext(new CommandResponse
+            {
+                CommandId = commandId,
+                DeviceId = Id,
+                Success = true,
+                Result = null,
+                Progress = 1.0,
+                CommandExecuteStatus = CommandExecuteStatusEnum.ExecuttionCompleted,
+                ExecutionTime = (DateTime.Now - _currentStartTime),
+                Timestamp = DateTimeOffset.Now
+            });
         }
 
-        public override async Task<CommandResponse> SendCommandAsync(DeviceCommand command)
+        public override async Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken)
         {
             var response = new CommandResponse
             {
@@ -50,72 +96,28 @@ namespace MCCS.Core.Devices.Details
                 DeviceId = Id,
                 Success = true,
                 Result = null,
+                CommandExecuteStatus = CommandExecuteStatusEnum.Executing,
                 ExecutionTime = TimeSpan.Zero,
                 Timestamp = DateTimeOffset.Now
             };
+            _currentStartTime = DateTime.Now;
+            _commandStatusSubject.OnNext(response);
             if (command.Type == CommandTypeEnum.SetMove) 
             {
                 var parameters = command.Parameters ?? [];
                 var unit = Convert.ToInt32(parameters.GetValueOrDefault("UnitType"));
                 var speed = Convert.ToDouble(parameters.GetValueOrDefault("Speed"));
                 var targetV = Convert.ToDouble(parameters.GetValueOrDefault("TargetValue"));
-                await Task.Run(async () =>
+                _ = Task.Run(async () =>
                 {
-                    if (unit == 0)
-                    {
-                        var lastV = Double.MaxValue;
-                        while (true)
-                        {
-                            var d = Math.Abs(_currentForce - targetV);
-                            if (d < lastV)
-                            {
-                                lastV = d;
-                            }
-                            else 
-                            {
-                                break; // 如果当前力值与目标力值的差距开始增大，停止循环
-                            }
-                            if (_currentForce < targetV)
-                            {
-                                _currentForce += speed / 60.0; 
-                            }
-                            else 
-                            {
-                                _currentForce -= speed / 60.0;
-                            }
-                            await Task.Delay(1000);
-                        }
-                        
-                    }
-                    else
-                    {
-                        var lastV = Double.MaxValue;
-                        while (true)
-                        {
-                            var d = Math.Abs(_currentDisplacement - targetV);
-                            if (d < lastV)
-                            {
-                                lastV = d;
-                            }
-                            else
-                            {
-                                break; // 如果当前力值与目标力值的差距开始增大，停止循环
-                            }
-                            if (_currentDisplacement < targetV)
-                            {
-                                _currentDisplacement += speed / 60.0; // 转换为每秒速度
-                            }
-                            else 
-                            {
-                                _currentDisplacement -= speed / 60.0; // 转换为每秒速度
-                            }
-                            await Task.Delay(1000);
-                        }
-                    }
-                    
-                });
+                    Func<double> operation = unit == 0 ? () => _currentForce : () => _currentDisplacement;
+                    Action<double> target = unit == 0 ?
+                        (value) => _currentForce = value :
+                        (value) => _currentDisplacement = value;
+                    await CommonReduceGapLogic(operation, target, targetV, speed, command.CommandId, cancellationToken);
+                }, cancellationToken);
             }
-            await Task.Delay(10); // 模拟异步操作
+            await Task.Delay(10, cancellationToken); // 模拟异步操作
             return response;
         }
 

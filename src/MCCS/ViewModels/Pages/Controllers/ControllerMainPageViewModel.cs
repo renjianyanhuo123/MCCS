@@ -25,20 +25,20 @@ namespace MCCS.ViewModels.Pages.Controllers
         private bool _isParticipateControl = false;
         // 控制器通道信息字典
         private Dictionary<string, ControlInfo> _controlInfoDic = [];
-        private ObservableCollection<ControlCombineInfo> _controlCombineInfos =
-        [
-            new() {
-                CombineChannelId = None,
-                CombineChannelName = "无(新增组合)"
-            }
-        ];
+        private ControlCombineInfo _selectedControlCombineInfo = new()
+        {
+            CombineChannelId = None,
+            CombineChannelName = "无(新增组合)"
+        };
+        private ObservableCollection<ControlCombineInfo> _controlCombineInfos = [];
         private string _currentChannelId = string.Empty;
 
         private ControlTypeEnum _controlType = ControlTypeEnum.Single; 
         private int _selectedControlMode = 0;
         private string _currentCombineName = string.Empty;
-        private ControlCombineInfo _selectedControlCombineInfo;
+        
         private ControlInfo? _lastControlInfoData = null;
+        private CommandExecuteStatusEnum _currentCommandStatus;
 
         public ControllerMainPageViewModel(
             ISharedStaticCommandService sharedStaticCommandService,
@@ -51,10 +51,19 @@ namespace MCCS.ViewModels.Pages.Controllers
             _eventAggregator = eventAggregator;
             _regionManager = regionManager;
             _deviceManager = deviceManager;
-            eventAggregator.GetEvent<ControlEvent>().Subscribe(RenderChannels); 
+            eventAggregator.GetEvent<ControlEvent>().Subscribe(RenderChannels);
+            _controlCombineInfos.Add(_selectedControlCombineInfo);
         }
 
         #region Proterty
+        /// <summary>
+        /// 当前指令的执行状态
+        /// </summary>
+        public CommandExecuteStatusEnum CurrentCommandStatus 
+        {
+            get => _currentCommandStatus;
+            set => SetProperty(ref _currentCommandStatus, value);
+        }
         /// <summary>
         /// 当前选择的控制模式
         /// </summary>
@@ -95,12 +104,14 @@ namespace MCCS.ViewModels.Pages.Controllers
             get => _controlType;
             set => SetProperty(ref _controlType, value);
         }
+        /// <summary>
+        /// 当前通道Id
+        /// </summary>
         public string CurrentChannelId
         {
             get => _currentChannelId;
             set => SetProperty(ref _currentChannelId, value);
         }
-
         /// <summary>
         /// 是否显示控制区域
         /// </summary>
@@ -109,13 +120,14 @@ namespace MCCS.ViewModels.Pages.Controllers
             get => _isShowController;
             set => SetProperty(ref _isShowController, value);
         }
-
+        /// <summary>
+        /// 是否参与控制
+        /// </summary>
         public bool IsParticipateControl 
         {
             get => _isParticipateControl;
             set => SetProperty(ref _isParticipateControl, value);
         }
-
         /// <summary>
         /// 控制器通道列表
         /// </summary>
@@ -134,12 +146,10 @@ namespace MCCS.ViewModels.Pages.Controllers
         public AsyncDelegateCommand ApplyCommand => new(ExecuteApplyCommand);
         #endregion
 
-        #region private method
-        private bool _isExecuting = false;
-        private async Task ExecuteApplyCommand() 
+        #region private method 
+        private async Task ExecuteApplyCommand(CancellationToken cancellationToken) 
         {
-            if (_isExecuting) return;
-            _isExecuting = true;
+            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             var device = _deviceManager.GetDevice(CurrentChannelId) ?? throw new ArgumentNullException(nameof(CurrentChannelId));
             var controlMode = (ControlMode)SelectedControlMode;
             var commandParams = new Dictionary<string, object>();
@@ -169,10 +179,9 @@ namespace MCCS.ViewModels.Pages.Controllers
                 DeviceId = CurrentChannelId,
                 Type = CommandTypeEnum.SetMove,
                 Parameters = commandParams
-            });
-            _isExecuting = false;
+            }, cancellationToken);
+            // 事件完成后订阅
         }
-
         private void ExecuteControlModeSelectionChangedCommand() 
         {
             var controlMode = (ControlMode)SelectedControlMode;
@@ -262,6 +271,8 @@ namespace MCCS.ViewModels.Pages.Controllers
                 ChannelName = Channels.FirstOrDefault(c => c.ChannelId == CurrentChannelId)?.ChannelName ?? param.ChannelName ?? "",
                 IsCanControl = IsParticipateControl,
                 ControlType = ControlType,
+                Device = _deviceManager.GetDevice(CurrentChannelId) 
+                ?? throw new ArgumentNullException(nameof(CurrentChannelId)),
                 ControlMode = (ControlMode)SelectedControlMode,
             };
             if (ControlType == ControlTypeEnum.Combine)
@@ -296,6 +307,15 @@ namespace MCCS.ViewModels.Pages.Controllers
                 RemoveFromOldCombine(controlInfo.ChannelId);
             }
             return controlInfo;
+        }
+
+        /// <summary>
+        /// 监听指令状态变化
+        /// </summary>
+        /// <param name="response"></param>
+        private void OnChangedCommandStatus(CommandResponse response)
+        {
+
         }
 
         private void RemoveFromOldCombine(string channelId) 

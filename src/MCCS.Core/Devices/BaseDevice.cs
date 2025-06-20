@@ -17,7 +17,8 @@ public abstract class BaseDevice : IDevice
 {
 
     private readonly IDeviceConnection _connection;
-    private readonly Subject<DeviceData> _dataSubject = new();
+    protected readonly Subject<DeviceData> _dataSubject = new();
+    protected readonly Subject<CommandResponse> _commandStatusSubject = new();
     private IDisposable? _collectionSubscription;
 
     public string Id { get; }
@@ -30,6 +31,8 @@ public abstract class BaseDevice : IDevice
     public DeviceTypeEnum Type { get; }
 
     public IObservable<DeviceData> DataStream => _dataSubject.AsObservable();
+
+    public IObservable<CommandResponse> CommandStatusStream => _commandStatusSubject.AsObservable();
 
     public DeviceInfo DeviceInfo { get; }
 
@@ -77,12 +80,13 @@ public abstract class BaseDevice : IDevice
         IsActive = false; 
     }
 
-    public abstract Task<CommandResponse> SendCommandAsync(DeviceCommand command);
+    public abstract Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken);
      
 
     public virtual void Dispose()
     { 
         StopCollection();
         _dataSubject.Dispose();
+        _commandStatusSubject.Dispose();
     }
 }

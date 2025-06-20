@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MCCS.Core.Devices;
+using MCCS.Core.Devices.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,7 +39,7 @@ namespace MCCS.Models
         /// 疲劳
         /// </summary>
         Fatigue
-    }
+    } 
 
     public class ControlInfo
     {
@@ -82,9 +84,13 @@ namespace MCCS.Models
         public string? CombineChannelName { get; set; }
 
         /// <summary>
-        /// 指令是否正在执行
+        /// 指令执行状态
         /// </summary>
-        public bool IsExecuting { get; set; } = false;
+        public CommandExecuteStatusEnum IsExecuting { get; set; } = CommandExecuteStatusEnum.NoExecute;
+        /// <summary>
+        /// 控制的设备
+        /// </summary>
+        public IDevice? Device { get; set; } = null;
     }
 
     public class ControlCombineInfo

@@ -51,6 +51,7 @@ namespace MCCS.ViewModels.Pages
         private readonly IDeviceManager _deviceManager;
         private readonly Random _random = new();
         private DateTime _currentTime = DateTime.Now;
+        private float _sumPostion = 0;
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -62,7 +63,6 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand ClearSelectionCommand => new(ClearSelection);
         public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
         public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
-
         public DelegateCommand TestModelMoveCommand => new(ExecuteTestModelMoveCommand);
         //public DelegateCommand OpenRightDrawerCommand => new(ExecuteOpenRightDrawerCommand);
         #endregion
@@ -213,7 +213,6 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region private method
-        private float _sumPostion = 0;
         private async Task LoadModelsAsync()
         {
             _loadingCancellation = new CancellationTokenSource();
@@ -376,48 +375,44 @@ namespace MCCS.ViewModels.Pages
             }
         }
 
+        /// <summary>
+        /// 接受到信息后移动
+        /// </summary>
+        /// <param name="param"></param>
         private void OnReceivedMovePositionCommand(ReceivedCommandDataEventParam param) 
         {
-            Task.Run(() => 
+            Task.Run(async () =>
             {
-                var lastV = Double.MaxValue;
+                const string targetModelKey = "12853688641a40b58af7faf9ebe464f8";
+                var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == targetModelKey);
+                if (testModel == null) return;
+
+                var lastGap = double.MaxValue;
+                var stepSize = (float)param.Speed / 600.0f; // 60.0f * 0.1f 合并
+
                 while (true)
                 {
-                    var d = Math.Abs(_sumPostion * 10.0 - param.Target);
-                    if (lastV > d)
-                    {
-                        lastV = d;
-                    }
-                    else 
-                    {
-                        break; // 如果当前力值与目标力值的差距开始增大，停止循环
-                    }
-                    var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "12853688641a40b58af7faf9ebe464f8");
-                    var temp = (float)param.Speed / 60.0f * 0.1f;
-                    
-                    if (_sumPostion * 10 < param.Target)
-                    {
-                        if (testModel != null)
-                        {
-                            testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), temp);
-                            testModel.SceneNode.UpdateAllTransformMatrix();
-                        }
-                        _sumPostion += temp;
-                    }
-                    else 
-                    {
-                        if (testModel != null)
-                        {
-                            testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), -temp);
-                            testModel.SceneNode.UpdateAllTransformMatrix();
-                        }
-                        _sumPostion -= temp;
-                    }
-                    Thread.Sleep(1000); // 模拟延时
+                    var currentGap = Math.Abs(_sumPostion * 10.0 - param.Target);
+                    if (currentGap >= lastGap) break;
+
+                    lastGap = currentGap;
+                    var direction = Math.Sign(param.Target - _sumPostion * 10);
+                    var movement = stepSize * direction;
+
+                    testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), movement);
+                    testModel.SceneNode.UpdateAllTransformMatrix();
+                    _sumPostion += movement;
+
+                    await Task.Delay(1000);
                 }
+
+                // 达到最小差距后，直接设置为目标值
+                var finalMovement = (float)(param.Target / 10.0 - _sumPostion);
+                testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), finalMovement);
+                testModel.SceneNode.UpdateAllTransformMatrix();
+                _sumPostion = (float)(param.Target / 10.0);
             });
         }
-
 
         /// <summary>
         /// 左键单击选择事件
