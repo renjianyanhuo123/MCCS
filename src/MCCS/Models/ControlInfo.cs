@@ -88,9 +88,9 @@ namespace MCCS.Models
         /// </summary>
         public CommandExecuteStatusEnum IsExecuting { get; set; } = CommandExecuteStatusEnum.NoExecute;
         /// <summary>
-        /// 控制的设备
+        /// 控制的订阅设备链接
         /// </summary>
-        public IDevice? Device { get; set; } = null;
+        public IDisposable? DeviceSubscription { get; set; } = null;
     }
 
     public class ControlCombineInfo

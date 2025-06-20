@@ -102,7 +102,14 @@ namespace MCCS.ViewModels.Pages.Controllers
         public ControlTypeEnum ControlType
         {
             get => _controlType;
-            set => SetProperty(ref _controlType, value);
+            set 
+            {
+                if (SetProperty(ref _controlType, value)) 
+                {
+                    // 变更保存逻辑
+
+                }
+            }
         }
         /// <summary>
         /// 当前通道Id
@@ -201,6 +208,10 @@ namespace MCCS.ViewModels.Pages.Controllers
         }
         private void RenderChannels(ControlEventParam param)
         {
+            // 寻找需要控制的设备
+            var deviceInfo = _deviceManager.GetDevice(CurrentChannelId)
+               ?? throw new ArgumentNullException(nameof(CurrentChannelId));
+            var d = deviceInfo.CommandStatusStream.Subscribe(OnChangedCommandStatus);
             // (1) 首先收集下之前界面的所有的控制信息
             if (IsShowController) 
             {
@@ -263,18 +274,22 @@ namespace MCCS.ViewModels.Pages.Controllers
             IsParticipateControl = true;
         }
 
-        private ControlInfo GetViewModelValue(ControlEventParam param) 
+        private void ChangeControlInfo(ControlEventParam? param) 
         {
-            var controlInfo = new ControlInfo
+            var success = _controlInfoDic.TryGetValue(param?.ChannelId ?? "", out var controlInfo);
+            if (!success) 
             {
-                ChannelId = string.IsNullOrEmpty(CurrentChannelId) ? param.ChannelId : CurrentChannelId,
-                ChannelName = Channels.FirstOrDefault(c => c.ChannelId == CurrentChannelId)?.ChannelName ?? param.ChannelName ?? "",
-                IsCanControl = IsParticipateControl,
-                ControlType = ControlType,
-                Device = _deviceManager.GetDevice(CurrentChannelId) 
-                ?? throw new ArgumentNullException(nameof(CurrentChannelId)),
-                ControlMode = (ControlMode)SelectedControlMode,
-            };
+                controlInfo = new ControlInfo
+                {
+                    ChannelId = string.IsNullOrEmpty(CurrentChannelId) ? param.ChannelId : CurrentChannelId,
+                    ChannelName = Channels.FirstOrDefault(c => c.ChannelId == CurrentChannelId)?.ChannelName ?? param.ChannelName ?? "",
+                    IsCanControl = IsParticipateControl,
+                    ControlType = ControlType,
+                    ControlMode = (ControlMode)SelectedControlMode,
+                };
+                _controlInfoDic.Add(param.ChannelId, controlInfo);
+            }
+
             if (ControlType == ControlTypeEnum.Combine)
             {
                 if (SelectedControlCombineInfo.CombineChannelId == None)
@@ -306,7 +321,6 @@ namespace MCCS.ViewModels.Pages.Controllers
             {
                 RemoveFromOldCombine(controlInfo.ChannelId);
             }
-            return controlInfo;
         }
 
         /// <summary>
@@ -330,6 +344,11 @@ namespace MCCS.ViewModels.Pages.Controllers
             {
                 DeviceId = channelId,
             });
+            _controlInfoDic.Remove(channelId, out var controlInfo);
+            if (controlInfo?.DeviceSubscription != null)
+            {
+                controlInfo.DeviceSubscription.Dispose();
+            }
             IsShowController = false;
         }
         #endregion
