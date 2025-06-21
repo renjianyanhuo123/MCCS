@@ -13,13 +13,13 @@ public class BaseViewModel(IEventAggregator eventAggregator, IDialogService dial
     {
     }
 
-    public bool IsNavigationTarget(NavigationContext navigationContext)
+    public virtual bool IsNavigationTarget(NavigationContext navigationContext)
     {
         //throw new NotImplementedException();
         return true;
     }
 
-    public void OnNavigatedFrom(NavigationContext navigationContext)
+    public virtual void OnNavigatedFrom(NavigationContext navigationContext)
     {
         //throw new NotImplementedException();
     }

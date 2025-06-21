@@ -69,7 +69,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
-            containerRegistry.RegisterSingleton<ISharedStaticCommandService, SharedStaticCommandService>();
+            // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);

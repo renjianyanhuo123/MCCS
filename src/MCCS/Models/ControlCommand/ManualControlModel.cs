@@ -8,6 +8,7 @@ namespace MCCS.Models.ControlCommand
 {
     public class ManualControlModel
     {
+        public required string ChannelId { get; set; }
         public double MaxValue { get; set; }
 
         public double MinValue { get; set; }

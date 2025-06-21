@@ -1,84 +1,69 @@
 ﻿using MCCS.Events.ControlCommand;
+using MCCS.Models;
 using MCCS.Models.ControlCommand;
 
 namespace MCCS.ViewModels.Pages.ControlCommandPages
 {
     public class ViewStaticControlViewModel : BaseViewModel
     {
-        public const string Tag = "StaticControl";
-
-        private readonly IEventAggregator _eventAggregator;
+        public const string Tag = "StaticControl"; 
 
         private int _selectedControlUnitType = 0;
-        private double _speed = 0.0;
-
-        private StaticControlModel _staticModel = new();
+        private double _speed = 0.0; 
 
         public ViewStaticControlViewModel( 
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _eventAggregator = eventAggregator;
         }
-
+        public string ChannelId { get; set; }
         #region 页面属性
         public int SelectedControlUnitType
         {
             get => _selectedControlUnitType;
-            set 
-            {
-                if (SetProperty(ref _selectedControlUnitType, value))
-                {
-                    UpdateModel();
-                }
-            }
+            set => SetProperty(ref _selectedControlUnitType, value);
         }
 
         public double Speed 
         {
             get => _speed;
-            set 
-            {
-                if (SetProperty(ref _speed, value)) 
-                {
-                    UpdateModel();
-                }
-            }
+            set => SetProperty(ref _speed, value);
         }
         private double _targetValue = 0.0;
         public double TargetValue
         {
             get => _targetValue;
-            set 
-            {
-                if (SetProperty(ref _targetValue, value))
-                {
-                    UpdateModel();
-                }
-            }
+            set => SetProperty(ref _targetValue, value);
         }
         #endregion
 
         #region private method
-        private void UpdateModel() 
-        {
-            _eventAggregator.GetEvent<ControlParamEvent>().Publish(
-                        new ControlParamEventParam
-                        {
-                            ControlMode = Models.ControlMode.Static,
-                            Param = new StaticControlModel 
-                            {
-                                UnitType = (ControlUnitTypeEnum)SelectedControlUnitType,
-                                Speed = Speed,
-                                TargetValue = TargetValue
-                            }
-                        });
-            
-        }
         #endregion
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            base.OnNavigatedTo(navigationContext);
+            var success = navigationContext.Parameters.TryGetValue<StaticControlModel>("ControlModel", out var param);
+            ChannelId = navigationContext.Parameters.GetValue<string>("ChannelId");
+            if (success)
+            { 
+                SelectedControlUnitType = (int)param.UnitType;
+                Speed = param.Speed;
+                TargetValue = param.TargetValue;
+            } 
+        }
+
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam {
+                ChannelId = ChannelId,
+                ControlMode = ControlMode.Static,
+                Param = new StaticControlModel
+                {
+                    ChannelId = ChannelId,
+                    UnitType = (ControlUnitTypeEnum)SelectedControlUnitType,
+                    Speed = Speed,
+                    TargetValue = TargetValue
+                }
+            });
         }
     }
 }

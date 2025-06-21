@@ -8,10 +8,11 @@ namespace MCCS.Models.ControlCommand
 {
     public class FatigueControlModel
     {
+        public required string ChannelId { get; set; }
         /// <summary>
-        /// 控制模式
+        /// 控制单位
         /// </summary>
-        public ControlMode ControlMode { get; set; }
+        public ControlUnitTypeEnum ControlUnitType { get; set; }
 
         /// <summary>
         /// 波形类型
