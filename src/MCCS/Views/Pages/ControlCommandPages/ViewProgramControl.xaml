@@ -15,6 +15,7 @@
       Width="Auto"
       materialDesign:RippleAssist.Feedback="#DD000000"
       Content="点击选择文件!"
+      Tag="{Binding FilePath}"
       Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
       ToolTip="选择对应文件" />   
     </StackPanel>

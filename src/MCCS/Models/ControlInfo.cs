@@ -67,12 +67,7 @@ namespace MCCS.Models
         /// 控制模式
         /// </summary>
         public ControlMode ControlMode { get; set; }
-
-        /// <summary>
-        /// 控制参数
-        /// </summary>
-        public Dictionary<string, object> ControlParams { get; set; } = []; 
-
+          
         /// <summary>
         /// 组合控制通道ID
         /// </summary>
@@ -91,6 +86,10 @@ namespace MCCS.Models
         /// 控制的订阅设备链接
         /// </summary>
         public IDisposable? DeviceSubscription { get; set; } = null;
+        /// <summary>
+        /// 单个控制参数
+        /// </summary>
+        public object? ControlParams { get; set; }
     }
 
     public class ControlCombineInfo
@@ -107,5 +106,13 @@ namespace MCCS.Models
         /// 控制通道列表
         /// </summary>
         public List<ControlInfo> ControlChannels { get; set; } = [];
+        /// <summary>
+        /// 组合控制模式
+        /// </summary>
+        public ControlMode ControlMode { get; set; }
+        /// <summary>
+        /// 组合控制参数
+        /// </summary>
+        public object? ControlParams { get; set; }
     }
 }

@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MCCS.Models.ControlCommand
+{
+    public class FatigueControlModel
+    {
+        /// <summary>
+        /// 控制模式
+        /// </summary>
+        public ControlMode ControlMode { get; set; }
+
+        /// <summary>
+        /// 波形类型
+        /// </summary>
+        public WaveformTypeEnum WaveformType { get; set; }
+        /// <summary>
+        /// 频率
+        /// </summary>
+        public double Frequency { get; set; }
+        /// <summary>
+        /// 幅值
+        /// </summary>
+        public double Amplitude { get; set; }
+        /// <summary>
+        /// 中值
+        /// </summary>
+        public double Median { get; set; }
+        /// <summary>
+        /// 循环次数
+        /// </summary>
+        public int CycleTimes { get; set; }
+        /// <summary>
+        /// 循环计数
+        /// </summary>
+        public int CycleCount { get; set; }
+    }
+}

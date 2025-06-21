@@ -23,14 +23,14 @@
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="控制模式" />
             <ComboBox
                 x:Name="control_mode" 
-                SelectedIndex="{Binding SelectedControlUnitType}">
+                SelectedIndex="{Binding ControlMode, Mode=TwoWay}">
                 <ComboBoxItem TabIndex="0" Content="试验力"  Tag="mm"/>
                 <ComboBoxItem TabIndex="1" Content="位移" Tag="kN" />
             </ComboBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="波形" />
-            <ComboBox SelectedIndex="0">
+            <ComboBox SelectedIndex="{Binding WaveformType, Mode=TwoWay}">
                 <ComboBoxItem TabIndex="0" Content="正弦波"  />
                 <ComboBoxItem TabIndex="1" Content="方波"   />
                 <ComboBoxItem TabIndex="2" Content="二角波"  />
@@ -40,34 +40,37 @@
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="频率" />
-            <TextBox materialDesign:HintAssist.Hint="请输入频率" 
+            <TextBox Text="{Binding Frequency, Mode=TwoWay}" 
+                    materialDesign:HintAssist.Hint="请输入频率" 
                     materialDesign:TextFieldAssist.SuffixText="Hz"> 
             </TextBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="幅值" />
-            <TextBox materialDesign:HintAssist.Hint="请输入幅值" 
+            <TextBox Text="{Binding Amplitude, Mode=TwoWay}" 
+                    materialDesign:HintAssist.Hint="请输入幅值" 
                      materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}">
             </TextBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="中值" />
-            <TextBox materialDesign:HintAssist.Hint="请输入中值" 
+            <TextBox Text="{Binding Median, Mode=TwoWay}" 
+                    materialDesign:HintAssist.Hint="请输入中值" 
                      materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}" />
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环次数" />
-            <TextBox />
+            <TextBox Text="{Binding CycleTimes, Mode=TwoWay}" />
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环计数" />
-            <TextBox IsEnabled="False" />
+            <TextBox IsEnabled="False" Text="{Binding CycleCount}" />
         </StackPanel>
         <UniformGrid Columns="2" Margin="{StaticResource StackPanelMargin}">
             <TextBlock Text="幅值补偿:2.4" />
             <TextBlock Text="相位补偿:-8.0" />
         </UniformGrid>
-        <Separator Margin="0 5" />
+        <!--<Separator Margin="0 5" />
         <StackPanel  Margin="{StaticResource StackPanelMargin}"
                  HorizontalAlignment="Center"
                  Orientation="Horizontal">
@@ -82,6 +85,6 @@
             Margin="0 0 5 0" />
             <Button Width="60" 
             Content="补偿"  />
-        </StackPanel>
+        </StackPanel>-->
     </StackPanel>
 </UserControl>

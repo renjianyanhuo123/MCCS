@@ -1,25 +1,30 @@
-﻿using System;
+﻿using MCCS.Models;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace MCCS.Converters.TestStarting
 {
-    public sealed class EnumToVisibilityConverter : IValueConverter
+    public sealed class EnumToVisibilityConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null || parameter == null)
-                return System.Windows.Visibility.Collapsed;
-            if (value.ToString() == parameter.ToString())
-                return System.Windows.Visibility.Visible;
-            return System.Windows.Visibility.Collapsed;
-        }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values == null || values.Length != 2 || parameter == null)
+                return Visibility.Collapsed;
+            if (values[1].ToString() == "Combine" && parameter.ToString() == "ComboBox") return Visibility.Visible;
+            if (values[1].ToString() == "Combine" && values[0] is ControlCombineInfo combineInfo && combineInfo.CombineChannelId == "None" && parameter.ToString() == "TextBox")
+                return Visibility.Visible;
+            return Visibility.Collapsed;
+        } 
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

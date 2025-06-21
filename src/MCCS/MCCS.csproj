@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <Folder Include="Behaviors\" />
+    <Folder Include="Services\ControlCommand\" />
   </ItemGroup>
 
 </Project>

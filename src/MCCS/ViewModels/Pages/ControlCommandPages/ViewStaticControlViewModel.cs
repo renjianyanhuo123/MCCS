@@ -1,22 +1,23 @@
-﻿using MCCS.Models.ControlCommand;
-using MCCS.Services.ControlCommand;
-using Prism.Events;
+﻿using MCCS.Events.ControlCommand;
+using MCCS.Models.ControlCommand;
 
 namespace MCCS.ViewModels.Pages.ControlCommandPages
 {
     public class ViewStaticControlViewModel : BaseViewModel
     {
         public const string Tag = "StaticControl";
-        private readonly ISharedStaticCommandService _sharedStaticCommandService;
+
+        private readonly IEventAggregator _eventAggregator;
 
         private int _selectedControlUnitType = 0;
         private double _speed = 0.0;
 
-        public ViewStaticControlViewModel(
-            ISharedStaticCommandService sharedStaticCommandService,
+        private StaticControlModel _staticModel = new();
+
+        public ViewStaticControlViewModel( 
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _sharedStaticCommandService = sharedStaticCommandService;
+            _eventAggregator = eventAggregator;
         }
 
         #region 页面属性
@@ -27,7 +28,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
             {
                 if (SetProperty(ref _selectedControlUnitType, value))
                 {
-                    _sharedStaticCommandService.UnitType = (ControlUnitTypeEnum)value;
+                    UpdateModel();
                 }
             }
         }
@@ -39,22 +40,45 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
             {
                 if (SetProperty(ref _speed, value)) 
                 {
-                    _sharedStaticCommandService.Speed = value;
+                    UpdateModel();
                 }
             }
         }
         private double _targetValue = 0.0;
         public double TargetValue
         {
-            get => _sharedStaticCommandService.TargetValue;
+            get => _targetValue;
             set 
             {
                 if (SetProperty(ref _targetValue, value))
                 {
-                    _sharedStaticCommandService.TargetValue = value;
+                    UpdateModel();
                 }
             }
         }
         #endregion
+
+        #region private method
+        private void UpdateModel() 
+        {
+            _eventAggregator.GetEvent<ControlParamEvent>().Publish(
+                        new ControlParamEventParam
+                        {
+                            ControlMode = Models.ControlMode.Static,
+                            Param = new StaticControlModel 
+                            {
+                                UnitType = (ControlUnitTypeEnum)SelectedControlUnitType,
+                                Speed = Speed,
+                                TargetValue = TargetValue
+                            }
+                        });
+            
+        }
+        #endregion
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            base.OnNavigatedTo(navigationContext);
+        }
     }
 }

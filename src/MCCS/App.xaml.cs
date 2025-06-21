@@ -6,17 +6,15 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Windows;
 using Serilog;
-using System.Windows.Threading; 
+using System.Windows.Threading;
 using MCCS.Core.Repositories;
 using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
-using MCCS.Core.Devices.Collections;
 using MCCS.Views.Pages.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
-using MCCS.Services.ControlCommand;
 
 namespace MCCS
 {

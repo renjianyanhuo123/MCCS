@@ -47,22 +47,41 @@
                         <WrapPanel Margin="0 0 0 10">
                             <RadioButton Content="组合控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Combine}"
                                     Style="{StaticResource MaterialDesignRadioButton}" 
+                                    Command="{Binding ControlTypeChangedCommand}"
+                                    CommandParameter="Combine"
                                     GroupName="ComtrolTypeGroup" Margin="0 0 10 0" />
                             <RadioButton Content="单个控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Single}"
-                                    Style="{StaticResource MaterialDesignRadioButton}" 
+                                    Style="{StaticResource MaterialDesignRadioButton}"
+                                    Command="{Binding ControlTypeChangedCommand}"
+                                    CommandParameter="Single"
                                     GroupName="ComtrolTypeGroup" />
                         </WrapPanel>
-                        <ComboBox Visibility="{Binding ControlType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Combine}" Margin="0,0,0,10"
+                        <ComboBox Margin="0,0,0,10"
                                     materialDesign:HintAssist.Hint="请选择加入的组合(未选择默认为新组合)" 
                                     ItemsSource="{Binding ControlCombineInfos}"
                                     SelectedItem="{Binding SelectedControlCombineInfo}"
                                     DisplayMemberPath="CombineChannelName"
                                     SelectedValuePath="CombineChannelId">
+                            <ComboBox.Visibility>
+                                <MultiBinding Converter="{StaticResource EnumToVisibilityConverter}"
+                                              ConverterParameter="ComboBox">
+                                    <Binding Path="SelectedControlCombineInfo" />
+                                    <Binding Path="ControlType" />
+                                </MultiBinding>
+                            </ComboBox.Visibility>
                         </ComboBox>
-                        <TextBox x:Name="CombineName"
-                                Visibility="{Binding ControlType, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Combine}"
+                        <TextBox x:Name="CombineName" 
                                 materialDesign:HintAssist.Hint="请填入组合控制名称"
-                                Text="{Binding CurrentCombineName, Mode=TwoWay}" />
+                                Text="{Binding CurrentCombineName, Mode=TwoWay}" >
+                            <TextBox.Visibility>
+                                <MultiBinding
+                                    Converter="{StaticResource EnumToVisibilityConverter}"
+                                    ConverterParameter="TextBox">
+                                    <Binding Path="SelectedControlCombineInfo" />
+                                    <Binding Path="ControlType" />
+                                </MultiBinding>
+                            </TextBox.Visibility>
+                        </TextBox>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox  
