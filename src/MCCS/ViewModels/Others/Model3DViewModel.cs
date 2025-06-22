@@ -58,6 +58,9 @@ namespace MCCS.ViewModels.Others
         public IntCollection ConnectCollection { get; private set; } = [];
         #endregion
 
+        /// <summary>
+        /// 采集力数值
+        /// </summary>
         public double ForceNum 
         {
             get => _forceNum;
@@ -71,6 +74,9 @@ namespace MCCS.ViewModels.Others
             }
         }
 
+        /// <summary>
+        /// 采集位移数值
+        /// </summary>
         public double DisplacementNum
         {
             get => _displacementNum;
@@ -113,9 +119,14 @@ namespace MCCS.ViewModels.Others
         }
 
         /// <summary>
-        /// 刚加载时默认偏移值 = 0.0
+        /// (模拟模型移动)位移默认偏移值 = 0.0
+        ///</summary>
+        public float DisplacementOffsetValue { get; set; } = 0.0f;
+
+        /// <summary>
+        /// (模拟模型移动)力默认偏移值 = 0.0
         /// </summary>
-        public float OffsetValue { get; set; } = 0.0f;
+        public float ForceOffsetValue { get; set; }
 
         /// <summary>
         /// 控制的订阅设备链接

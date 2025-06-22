@@ -240,6 +240,13 @@ namespace MCCS.ViewModels.Pages.Controllers
                 res.ChannelIds.AddRange(combineInfo.ControlChannels.Select(s => s.ChannelId));
             }
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(res);
+            _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Subscribe(res => 
+            {
+                var success = _controlInfoDic.TryGetValue(res.CommandId, out var controlInfo);
+                if (!success) return;
+                controlInfo.ExecutingStatus = res.CommandExecuteStatus;
+                if (CurrentChannelId == res.CommandId) CurrentCommandStatus = res.CommandExecuteStatus;
+            });
             //await device.SendCommandAsync(new DeviceCommand 
             //{ 
             //    DeviceId = CurrentChannelId,

@@ -24,6 +24,8 @@ using System.Diagnostics;
 using MCCS.Models.ControlCommand;
 using System.Windows.Automation;
 using MCCS.Core.Devices.Commands;
+using MCCS.Events.ControlCommand;
+using MCCS.Common;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -280,8 +282,8 @@ namespace MCCS.ViewModels.Pages
             if (testModel == null) return;
             testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), 0.1f);
             testModel.SceneNode.UpdateAllTransformMatrix();
-            testModel.OffsetValue += 0.1f;
-            Debug.WriteLine($"模型位置: {testModel.OffsetValue}");
+            testModel.DisplacementOffsetValue += 0.1f;
+            Debug.WriteLine($"模型位置: {testModel.DisplacementOffsetValue}");
         }
 
         private void ExecuteLoadCommand() 
@@ -304,7 +306,7 @@ namespace MCCS.ViewModels.Pages
                 targetModel.IsSelected = false; 
             }
         }
-
+        
         public void InitializeCurveDataSubscriptions()
         {
             _currentTime = DateTime.Now;
@@ -435,7 +437,15 @@ namespace MCCS.ViewModels.Pages
             if (response.CommandExecuteStatus == CommandExecuteStatusEnum.ExecuttionCompleted) 
             {
                 // 通知控制界面这条指令已经完成
-
+                _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandFinishedEventParam 
+                { 
+                    CommandId = response.CommandId,
+                    CommandExecuteStatus = CommandExecuteStatusEnum.ExecuttionCompleted
+                }); 
+                PropertyChangeAsync(() => 
+                {
+                    ControlProcessExpanders.Remove(expander);
+                });
             }
         }
 
@@ -451,28 +461,28 @@ namespace MCCS.ViewModels.Pages
 
                 var lastGap = double.MaxValue;
                 var stepSize = (float)param.Speed / 600.0f; // 60.0f * 0.1f 合并
-
+                var moveDirection = testModel.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);
                 while (true)
                 {
-                    var currentGap = Math.Abs(testModel.OffsetValue * 10.0 - param.TargetValue);
+                    var currentGap = Math.Abs(testModel.DisplacementOffsetValue * 10.0 - param.TargetValue);
                     if (currentGap >= lastGap) break;
 
                     lastGap = currentGap;
-                    var direction = Math.Sign(param.TargetValue - testModel.OffsetValue * 10);
+                    var direction = Math.Sign(param.TargetValue - testModel.DisplacementOffsetValue * 10);
                     var movement = stepSize * direction;
 
-                    testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), movement);
+                    testModel.PositionChange(moveDirection, movement);
                     testModel.SceneNode.UpdateAllTransformMatrix();
-                    testModel.OffsetValue += movement;
+                    testModel.DisplacementOffsetValue += movement;
 
                     await Task.Delay(1000);
                 }
 
                 // 达到最小差距后，直接设置为目标值
-                var finalMovement = (float)(param.TargetValue / 10.0 - testModel.OffsetValue);
-                testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), finalMovement);
+                var finalMovement = (float)(param.TargetValue / 10.0 - testModel.DisplacementOffsetValue);
+                testModel.PositionChange(moveDirection, finalMovement);
                 testModel.SceneNode.UpdateAllTransformMatrix();
-                testModel.OffsetValue = (float)(param.TargetValue / 10.0);
+                testModel.DisplacementOffsetValue = (float)(param.TargetValue / 10.0);
             });
         }
 
