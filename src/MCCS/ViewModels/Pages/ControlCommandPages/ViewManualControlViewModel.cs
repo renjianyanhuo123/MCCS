@@ -10,7 +10,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
 
         private double _outputMaxValue = 100.0;
         private double _outputMinValue = 0.0;
-        private double _outPutValue = 0.0;  
+        private double _outPutValue = 0.0; 
 
         public ViewManualControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         { 
@@ -24,6 +24,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
                 if (SetProperty(ref _outputMaxValue, value))
                 {
                     ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一 
+                    SendUpdateEvent();
                 }
             }
         }
@@ -36,10 +37,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
                 if (SetProperty(ref _outputMinValue, value)) 
                 {
                     ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一  
+                    SendUpdateEvent();
                 }
             }
-        }
-        public string ChannelId { get; set; }
+        } 
         private double _changeStep = 1.0;
         public double ChangeStep
         {
@@ -50,30 +51,31 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public double OutPutValue
         {
             get => _outPutValue;
-            set => SetProperty(ref _outPutValue, value);
-        }
-
+            set
+            {
+                if (SetProperty(ref _outPutValue, value)) 
+                {
+                    SendUpdateEvent();
+                }
+            }
+        } 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var success = navigationContext.Parameters.TryGetValue<ManualControlModel>("ControlModel", out var res);
-            ChannelId = navigationContext.Parameters.GetValue<string>("ChannelId"); 
+            var success = navigationContext.Parameters.TryGetValue<ManualControlModel>("ControlModel", out var res); 
             if (success)
             {
                 OutputMaxValue = res.MaxValue;
                 OutputMinValue = res.MinValue;
                 OutPutValue = res.OutputValue;
             } 
-        }
+        } 
 
-        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        private void SendUpdateEvent()
         {
-            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam 
+            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam
             {
-                ChannelId = ChannelId,
-                ControlMode = ControlMode.Manual,
                 Param = new ManualControlModel
                 {
-                    ChannelId = ChannelId,
                     MaxValue = OutputMaxValue,
                     MinValue = OutputMinValue,
                     OutputValue = OutPutValue

@@ -8,7 +8,6 @@ namespace MCCS.Models.ControlCommand
 {
     public class StaticControlModel
     {
-        public required string ChannelId { get; set; }
         public ControlUnitTypeEnum UnitType { get; set; }
 
         public double Speed { get; set; }

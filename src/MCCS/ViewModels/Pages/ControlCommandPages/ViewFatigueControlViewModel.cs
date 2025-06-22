@@ -6,8 +6,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
 {
     public class ViewFatigueControlViewModel : BaseViewModel
     {
-        public const string Tag = "FatigueControl";  
-        private readonly IEventAggregator _eventAggregator;
+        public const string Tag = "FatigueControl";   
 
         private int _controlUnitType = 0;
         private int _waveformType = 0;
@@ -18,11 +17,8 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         private int _cycleCount = 0; 
 
         public ViewFatigueControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
-        {
-            _eventAggregator = eventAggregator;
-        }
-
-        public string ChannelId { get; set; }
+        { 
+        } 
 
         #region 页面属性 
         /// <summary>
@@ -31,7 +27,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public int ControlUnitType
         { 
             get => _controlUnitType;
-            set => SetProperty(ref _controlUnitType, value);
+            set
+            {
+                if (SetProperty(ref _controlUnitType, value)) SendUpdateEvent();
+            }
         }
 
         /// <summary>
@@ -40,7 +39,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public int WaveformType 
         { 
             get => _waveformType;
-            set => SetProperty(ref _waveformType, value);
+            set
+            {
+                if (SetProperty(ref _waveformType, value)) SendUpdateEvent();
+            }
         }
         /// <summary>
         /// 频率
@@ -48,7 +50,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public double Frequency 
         { 
             get => _frequency;
-            set => SetProperty(ref _frequency, value);
+            set
+            {
+                if (SetProperty(ref _frequency, value)) SendUpdateEvent();
+            }
         }
         /// <summary>
         /// 幅值
@@ -56,7 +61,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public double Amplitude 
         { 
             get => _amplitude;
-            set => SetProperty(ref _amplitude, value);
+            set
+            {
+                if (SetProperty(ref _amplitude, value)) SendUpdateEvent();
+            }
         }
         /// <summary>
         /// 中值
@@ -64,7 +72,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public double Median 
         { 
             get => _median;
-            set => SetProperty(ref _median, value);
+            set
+            {
+                if (SetProperty(ref _median, value)) SendUpdateEvent();
+            }
         }
         /// <summary>
         /// 循环次数
@@ -72,7 +83,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public int CycleTimes 
         { 
             get => _cycleTimes;
-            set => SetProperty(ref _cycleTimes, value);
+            set
+            {
+                if (SetProperty(ref _cycleTimes, value)) SendUpdateEvent();
+            }
         }
         /// <summary>
         /// 循环计数
@@ -80,14 +94,16 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public int CycleCount
         { 
             get => _cycleCount;
-            set => SetProperty(ref _cycleCount, value);
+            set 
+            {
+                if (SetProperty(ref _cycleCount, value)) SendUpdateEvent();
+            }
         }
         #endregion
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var success = navigationContext.Parameters.TryGetValue<FatigueControlModel>("ControlModel", out var param);
-            ChannelId = navigationContext.Parameters.GetValue<string>("ChannelId"); 
+            var success = navigationContext.Parameters.TryGetValue<FatigueControlModel>("ControlModel", out var param); 
             if (success)
             { 
                 ControlUnitType = (int)param.ControlUnitType;
@@ -99,17 +115,14 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
                 CycleCount = param.CycleCount;
             }
             
-        }
+        } 
 
-        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        private void SendUpdateEvent() 
         {
-            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam 
+            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam
             {
-                ChannelId = ChannelId,
-                ControlMode =  ControlMode.Fatigue,
                 Param = new FatigueControlModel
                 {
-                    ChannelId = ChannelId,
                     ControlUnitType = (ControlUnitTypeEnum)ControlUnitType,
                     WaveformType = (WaveformTypeEnum)WaveformType,
                     Frequency = Frequency,

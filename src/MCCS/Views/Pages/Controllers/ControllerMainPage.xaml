@@ -31,6 +31,10 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
+                <TextBlock
+                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                    Margin="0,5,0,10"
+                    Text="{Binding CurrentChannelName, Mode=TwoWay}" />
                 <CheckBox 
                 Margin="5 5 5 8"
                 Tag="{Binding CurrentChannelId}"
@@ -62,6 +66,11 @@
                                     SelectedItem="{Binding SelectedControlCombineInfo}"
                                     DisplayMemberPath="CombineChannelName"
                                     SelectedValuePath="CombineChannelId">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding ControlCombineSelectionChangedCommand}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
                             <ComboBox.Visibility>
                                 <MultiBinding Converter="{StaticResource EnumToVisibilityConverter}"
                                               ConverterParameter="ComboBox">

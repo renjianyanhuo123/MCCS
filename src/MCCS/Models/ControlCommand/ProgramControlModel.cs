@@ -8,7 +8,6 @@ namespace MCCS.Models.ControlCommand
 {
     public class ProgramControlModel
     {
-        public required string ChannelId { get; set; }
         /// <summary>
         /// 程序控制文件路径
         /// </summary>

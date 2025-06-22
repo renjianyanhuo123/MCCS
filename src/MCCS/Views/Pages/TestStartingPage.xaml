@@ -114,25 +114,9 @@
                     </b:Interaction.Triggers>
                 </ContentControl>
             </StackPanel>
-        </Grid>
-        <!-- 进度条 -->
-        <StackPanel 
-            VerticalAlignment="Center" 
-            Grid.Row="1" 
-            Grid.Column="0" 
-            ZIndex="3"
-            Orientation="Vertical" 
-            HorizontalAlignment="Center"
-            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
-            <ProgressBar Width="600" Height="10" Value="{Binding LoadingProgress.ProgressPercentage}"></ProgressBar>
-            <TextBlock FontWeight="Bold"
-               Margin="0 8" 
-               HorizontalAlignment="Center" 
-               Text="{Binding LoadingMessage}" 
-               Foreground="#666666" />
-        </StackPanel>
+        </Grid> 
         <!-- 曲线显示部分 -->
-        <Grid Grid.Row="1" Grid.Column="0">
+        <Grid Grid.Row="1" Grid.Column="0" Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}">
             <Grid.CacheMode>
                 <BitmapCache />
             </Grid.CacheMode>
@@ -214,5 +198,20 @@
                 </Expander>
             </StackPanel>
         </Grid>
+        <!-- 进度条 -->
+        <StackPanel 
+        VerticalAlignment="Center" 
+        Grid.Row="1" 
+        Grid.Column="0"  
+        Orientation="Vertical" 
+        HorizontalAlignment="Center"
+        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ProgressBar Width="600" Height="10" Value="{Binding LoadingProgress.ProgressPercentage}"></ProgressBar>
+            <TextBlock FontWeight="Bold"
+           Margin="0 8" 
+           HorizontalAlignment="Center" 
+           Text="{Binding LoadingMessage}" 
+           Foreground="#666666" />
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -281,7 +281,7 @@ namespace MCCS.ViewModels.Pages
 
         private void ExecuteLoadCommand() 
         {
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative));
+            // _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative));
         }
 
         private void ExecuteStartTestCommand()
@@ -446,16 +446,17 @@ namespace MCCS.ViewModels.Pages
                         ChannelId = c.Model3DData.DeviceId ?? string.Empty,
                         ChannelName = c.Model3DData.Name ?? string.Empty,
                     }).ToList();
-                _eventAggregator.GetEvent<ControlEvent>().Publish(new ControlEventParam 
-                {
-                    ChannelId = clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId"),
-                    ChannelName = clickedModel.Model3DData.Name
-                });
-                //var channelsParam = new NavigationParameters
+                //_eventAggregator.GetEvent<ControlEvent>().Publish(new ControlEventParam
                 //{
-                //    { "Channels", channels }
-                //};
-                // _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
+                //    ChannelId = clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId"),
+                //    ChannelName = clickedModel.Model3DData.Name
+                //});
+                var channelsParam = new NavigationParameters
+                {
+                    { "ChannelId", clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId")},
+                    { "ChannelName", clickedModel.Model3DData.Name }
+                };
+                _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
                 // IsOpenFlyout = Models.Any(c => c.IsSelected);
             }
         }

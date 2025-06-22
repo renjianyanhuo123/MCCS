@@ -8,7 +8,6 @@ namespace MCCS.Models.ControlCommand
 {
     public class FatigueControlModel
     {
-        public required string ChannelId { get; set; }
         /// <summary>
         /// 控制单位
         /// </summary>
