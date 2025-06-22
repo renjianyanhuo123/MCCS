@@ -49,6 +49,9 @@ namespace MCCS.Core.Models.Model3D
         [Column(IsNullable = true, StringLength = 100)]
         public string? DeviceId { get; set; }
 
+        [Column(IsNullable = true, StringLength = 50)]
+        public string? Orientation { get; set; }
+
         // 边界框信息
         public double BoundMinX { get; set; }
         public double BoundMinY { get; set; }  

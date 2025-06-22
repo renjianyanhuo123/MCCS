@@ -165,38 +165,61 @@
                     </lvc:CartesianChart>
                 </Expander>
             </StackPanel>
-            <StackPanel Grid.Row="1"
-                        Grid.Column="2">
-                <ItemsControl  >
-                    
-                </ItemsControl>
-                <Expander Width="450"
-                          Height="Auto"  
-                          BorderBrush="LightGray">
-                    <Expander.Background>
-                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
-                    </Expander.Background>
-                    <Expander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" /> 
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="作动器一" Height="Auto" />
-                                <TextBlock Text="组合控制" Margin="0,0,20,0"  Height="Auto"/>
-                                <TextBlock Height="Auto">
-                                    执行进度:
-                                    <Run FontSize="15" FontWeight="Bold" Foreground="White">
-                                        45%
-                                    </Run>
-                                </TextBlock>
-                            </StackPanel>
-                            <materialDesign:PackIcon Grid.Column="1" Kind="CloseCircle" />
-                        </Grid>
-                    </Expander.Header>
-                </Expander>
-            </StackPanel>
+            <ItemsControl Grid.Row="1"
+              Grid.Column="2" 
+              ItemsSource="{Binding ControlProcessExpanders}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Expander Width="450" 
+                                  Height="Auto"  
+                                  BorderBrush="LightGray">
+                            <Expander.Background>
+                                <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                            </Expander.Background>
+                            <Expander.Header>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Tag="{Binding CommandId}" Text="{Binding CommandName}" FontSize="18" Height="Auto" />
+                                        <TextBlock Text="{Binding ControlType}" Margin="5,0,20,0" FontSize="18" Height="Auto"/>
+                                        <TextBlock FontSize="18" Height="Auto">
+                                            执行进度:
+                                            <Run FontSize="15" Text="{Binding ProgressRate}" FontWeight="Bold" Foreground="White">  
+                                            </Run>
+                                            %
+                                        </TextBlock>
+                                    </StackPanel>
+                                    <materialDesign:PackIcon Grid.Column="1" Kind="CloseCircle" />
+                                </Grid>
+                            </Expander.Header>
+                            <ItemsControl ItemsSource="{Binding ControlCommandParams}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="Gray" BorderThickness="1" Padding="5" Margin="5">
+                                            <TextBlock FontWeight="Bold">
+                                                <Run Text="{Binding Key}" />:<Run Text="{Binding Value}" />
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Vertical" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </Grid>
         <!-- 进度条 -->
         <StackPanel 

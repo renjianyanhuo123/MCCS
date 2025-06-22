@@ -7,6 +7,7 @@ using MCCS.Models;
 using MCCS.Models.ControlCommand;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.Controllers
@@ -14,9 +15,7 @@ namespace MCCS.ViewModels.Pages.Controllers
     public class ControllerMainPageViewModel : BaseViewModel
     {
         public const string Tag = "ControllerMainPage";
-        private const string None = "None";
-
-        private readonly IEventAggregator _eventAggregator;
+        private const string None = "None"; 
         private readonly IRegionManager _regionManager;
         private readonly IDeviceManager _deviceManager; 
 
@@ -48,12 +47,10 @@ namespace MCCS.ViewModels.Pages.Controllers
             IEventAggregator eventAggregator, 
             IDialogService dialogService,
             IDeviceManager deviceManager) : base(eventAggregator, dialogService)
-        { 
-            _eventAggregator = eventAggregator;
+        {
             _regionManager = regionManager;
             _deviceManager = deviceManager;
-            // eventAggregator.GetEvent<ControlEvent>().Subscribe(RenderChannels);
-            eventAggregator.GetEvent<ControlParamEvent>().Subscribe(OnrevicedControlParam);
+            _eventAggregator.GetEvent<ControlParamEvent>().Subscribe(OnrevicedControlParam);
             _controlCombineInfos.Add(_selectedControlCombineInfo);
         }
          
@@ -161,7 +158,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 应用命令
         /// </summary>
-        public AsyncDelegateCommand ApplyCommand => new(ExecuteApplyCommand);
+        public DelegateCommand ApplyCommand => new(ExecuteApplyCommand);
         /// <summary>
         /// 控制类型切换命令
         /// </summary>
@@ -178,7 +175,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             var channelId = navigationContext.Parameters.GetValue<string>("ChannelId");
             var channelName = navigationContext.Parameters.GetValue<string>("ChannelName");
             CurrentChannelId = channelId ?? throw new ArgumentNullException(nameof(channelId));
-            CurrentChannelName = channelName;
+            CurrentChannelName = channelName; 
             Channels.Clear(); 
             var success = _controlInfoDic.TryGetValue(channelId, out var controlInfo);
             controlInfo = success ? controlInfo : new ControlInfo
@@ -189,7 +186,8 @@ namespace MCCS.ViewModels.Pages.Controllers
                 ControlType = ControlTypeEnum.Single,
                 ControlMode = ControlMode.Manual,
                 CombineChannelId = null,
-                CombineChannelName = string.Empty
+                CombineChannelName = string.Empty,
+                ExecutingStatus = CommandExecuteStatusEnum.NoExecute
             };
             if (!success) _controlInfoDic.Add(controlInfo.ChannelId, controlInfo);
             SetViewModelValue(controlInfo);
@@ -204,7 +202,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 var temp = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == controlInfoTemp.CombineChannelId)?.ControlParams;
                 sendParams.Add("ControlModel", temp);
             }
-            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), NavigationCompleted, sendParams);
+            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), sendParams);
         }
 
         /// <summary>
@@ -213,48 +211,41 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <param name="navigationContext"></param>
         public override void OnNavigatedFrom(NavigationContext navigationContext)
         {
-            ChangeControlInfo();
+            SaveControlInfo();
         }
 
         #region private method 
-        private async Task ExecuteApplyCommand(CancellationToken cancellationToken) 
+        /// <summary>
+        /// 应用命令
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        private void ExecuteApplyCommand() 
         {
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
-            var device = _deviceManager.GetDevice(CurrentChannelId) 
-                ?? throw new ArgumentNullException(nameof(CurrentChannelId));
-            var controlMode = (ControlMode)SelectedControlMode;
-            var commandParams = new Dictionary<string, object>();
             var model = _controlInfoDic[CurrentChannelId].ControlParams;
-            switch (controlMode)
+            var res = new ReceivedCommandDataEventParam
             {
-                case ControlMode.Manual:
-                    break;
-                case ControlMode.Static:
-                    var temp = model as StaticControlModel
-                        ?? throw new ArgumentNullException(nameof(model));
-                    _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(new ReceivedCommandDataEventParam
-                    {
-                        Speed = temp.Speed,
-                        Target = temp.TargetValue,
-                    });
-                    commandParams.Add("UnitType", temp.UnitType);
-                    commandParams.Add("Speed", temp.Speed);
-                    commandParams.Add("TargetValue", temp.TargetValue);
-                    break;
-                case ControlMode.Programmable:
-                    break;
-                case ControlMode.Fatigue:
-                    break;
-                default:
-                    break;
-            } 
-            
-            await device.SendCommandAsync(new DeviceCommand 
-            { 
-                DeviceId = CurrentChannelId,
-                Type = CommandTypeEnum.SetMove,
-                Parameters = commandParams
-            }, cancellationToken);
+                ControlMode = (ControlMode)SelectedControlMode,
+                Param = _tempSaveControlParamInfo
+            };
+            if (ControlType == ControlTypeEnum.Single)
+            {
+                res.ChannelIds.Add(CurrentChannelId);
+            }
+            else 
+            {
+                var combineInfo = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
+                res.ChannelIds.AddRange(combineInfo.ControlChannels.Select(s => s.ChannelId));
+            }
+            _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(res);
+            //await device.SendCommandAsync(new DeviceCommand 
+            //{ 
+            //    DeviceId = CurrentChannelId,
+            //    Type = CommandTypeEnum.SetMove,
+            //    Parameters = commandParams
+            //}, cancellationToken);
             // 事件完成后订阅
         }
 
@@ -274,12 +265,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         }
         private void ExecuteControlModeSelectionChangedCommand() 
         {
-            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), NavigationCompleted);
+            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative));
         } 
-        private void NavigationCompleted(NavigationResult result)
-        {
-            // ChangeControlInfo();
-        }
         /// <summary>
         /// 控制类型切换触发
         /// </summary>
@@ -289,7 +276,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             if (controlType == "Combine") 
             {
                 // 组合模式下，强制切换为和组合状态一致
-                SelectedControlCombineInfo = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == "None");
+                SelectedControlCombineInfo = _controlCombineInfos.First(c => c.CombineChannelId == "None");
             }
         }
 
@@ -298,6 +285,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             CurrentChannelId = controlInfo.ChannelId;
             ControlType = controlInfo.ControlType;
             SelectedControlMode = (int)controlInfo.ControlMode;
+            CurrentCommandStatus = controlInfo.ExecutingStatus;
             if (controlInfo.ControlType != ControlTypeEnum.Single)
             {
                 SelectedControlCombineInfo = _controlCombineInfos.First(c => c.CombineChannelId == controlInfo.CombineChannelId);
@@ -325,7 +313,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             IsParticipateControl = true;
         }
 
-        private void ChangeControlInfo() 
+        private void SaveControlInfo() 
         {
             if (string.IsNullOrEmpty(CurrentChannelId)) return;
             var success = _controlInfoDic.TryGetValue(CurrentChannelId, out var controlInfo);
@@ -333,7 +321,10 @@ namespace MCCS.ViewModels.Pages.Controllers
             controlInfo.ControlType = ControlType;
             controlInfo.ChannelName = CurrentChannelName;
             controlInfo.ControlMode = (ControlMode)SelectedControlMode;
-            RemoveFromOldCombine(controlInfo.ChannelId);
+            controlInfo.ExecutingStatus = CurrentCommandStatus;
+            // 移除在原有组合中的对应的控制通道
+            var removeObj = _controlCombineInfos.FirstOrDefault(c => c.ControlChannels.Any(s => s.ChannelId == CurrentChannelId));
+            removeObj?.ControlChannels.RemoveAll(c => c.ChannelId == CurrentChannelId);
             if (ControlType != ControlTypeEnum.Combine) 
             {
                 controlInfo.ControlParams = _tempSaveControlParamInfo;
@@ -390,14 +381,11 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void OnChangedCommandStatus(CommandResponse response)
         {
 
-        }
-
-        private void RemoveFromOldCombine(string channelId) 
-        {
-            var removeObj = _controlCombineInfos.FirstOrDefault(c => c.ControlChannels.Any(s => s.ChannelId == channelId));
-            removeObj?.ControlChannels.RemoveAll(c => c.ChannelId == channelId);
-        }
-
+        } 
+        /// <summary>
+        /// 是否参与控制CheckBox
+        /// </summary>
+        /// <param name="channelId"></param>
         private void ExecuteParticipateControlCommand(string channelId) 
         {
             _eventAggregator.GetEvent<InverseControlEvent>().Publish(new InverseControlEventParam
@@ -405,21 +393,25 @@ namespace MCCS.ViewModels.Pages.Controllers
                 DeviceId = channelId,
             });
             _controlInfoDic.Remove(channelId, out var controlInfo);
-            if (controlInfo?.DeviceSubscription != null)
-            {
-                controlInfo.DeviceSubscription.Dispose();
-            }
+            //if (controlInfo?.DeviceSubscription != null)
+            //{
+            //    controlInfo.DeviceSubscription.Dispose();
+            //}
             IsShowController = false;
         }
-
+        /// <summary>
+        /// 控制组合变更触发
+        /// </summary>
         private void ExecuteControlCombineSelectionChangedCommand() 
         {
             // 组合模式下，强制切换为和组合状态一致
             var temp = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
             SelectedControlMode = (int)(temp?.ControlMode ?? 0);
-            var sendParams = new NavigationParameters(); 
-            sendParams.Add("ControlModel", temp?.ControlParams);
-            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), NavigationCompleted, sendParams);
+            var sendParams = new NavigationParameters
+            {
+                { "ControlModel", temp?.ControlParams }
+            }; 
+            _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), sendParams);
         }
         #endregion
     }

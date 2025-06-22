@@ -34,7 +34,7 @@ namespace MCCS.Core.Devices
         /// </summary>
         /// <param name="command"></param>
         /// <returns></returns>
-        Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken);
+        Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken = default);
         /// <summary>
         /// 开始订阅数据流
         /// </summary>

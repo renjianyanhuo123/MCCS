@@ -123,7 +123,8 @@ namespace MCCS
                         RotationStr = "1,0,0",
                         ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0,
-                        DeviceId = "1882785835a24a83aae53ac51f153c04"
+                        DeviceId = "1882785835a24a83aae53ac51f153c04",
+                        Orientation = "0,-1,0"
                     },
                     new()
                     {
@@ -136,7 +137,7 @@ namespace MCCS
                         Type = ModelType.Other,
                         RotationStr = "1,0,0",
                         ScaleStr = "0.005,0.005,0.005",
-                        RotateAngle = -90.0
+                        RotateAngle = -90.0,
                     },
                     new()
                     {
@@ -241,7 +242,8 @@ namespace MCCS
                         RotationStr = "1,0,0",
                         ScaleStr = "0.005,0.005,0.005",
                         RotateAngle = -90.0,
-                        DeviceId = "dd1d1798920e49cbaba9b4a59aead10f"
+                        DeviceId = "dd1d1798920e49cbaba9b4a59aead10f",
+                        Orientation = "1,0,0"
                     }
                 };
                 freeSql.Insert(entities).ExecuteAffrows();

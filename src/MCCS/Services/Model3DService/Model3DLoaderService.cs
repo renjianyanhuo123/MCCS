@@ -54,7 +54,7 @@ namespace MCCS.Services.Model3DService
                 try
                 {
                     var result = await ImportSingleModelAsync(modelInfo, cancellationToken);
-                    await Task.Delay(3000, cancellationToken); // 测试使用
+                    //await Task.Delay(3000, cancellationToken); // 测试使用
                     lock (viewModels)
                     {
                         viewModels.Add(result);

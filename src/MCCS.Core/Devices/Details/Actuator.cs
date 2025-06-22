@@ -88,7 +88,7 @@ namespace MCCS.Core.Devices.Details
             });
         }
 
-        public override async Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken)
+        public override async Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken = default)
         {
             var response = new CommandResponse
             {
@@ -114,7 +114,7 @@ namespace MCCS.Core.Devices.Details
                     Action<double> target = unit == 0 ?
                         (value) => _currentForce = value :
                         (value) => _currentDisplacement = value;
-                    await CommonReduceGapLogic(operation, target, targetV, speed, command.CommandId, cancellationToken);
+                    await CommonReduceGapLogic(operation, target, targetV, speed, command.DeviceId, cancellationToken);
                 }, cancellationToken);
             }
             await Task.Delay(10, cancellationToken); // 模拟异步操作

@@ -31,11 +31,11 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
-                <TextBlock
+                <TextBlock IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                     Margin="0,5,0,10"
-                    Text="{Binding CurrentChannelName, Mode=TwoWay}" />
-                <CheckBox 
+                    Text="{Binding CurrentChannelName, Mode=TwoWay}" Cursor="" />
+                <CheckBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                 Margin="5 5 5 8"
                 Tag="{Binding CurrentChannelId}"
                 IsChecked="{Binding IsParticipateControl, Mode=TwoWay}"
@@ -43,7 +43,7 @@
                 Style="{StaticResource MaterialDesignCheckBox}"
                 Command="{Binding ParticipateControlCommand}"
                 CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
-                <GroupBox  
+                <GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}" 
                     Style="{StaticResource MaterialDesignCardGroupBox}"
                     Header="{StaticResource ControlTypeText}">
@@ -93,7 +93,7 @@
                         </TextBox>
                     </StackPanel>
                 </GroupBox>
-                <GroupBox  
+                <GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep1}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">
@@ -111,7 +111,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </GroupBox>
-                <GroupBox 
+                <GroupBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep2}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">
@@ -133,7 +133,7 @@
                         <ComboBoxItem Content="疲劳控制" />
                     </ComboBox>
                 </GroupBox>
-                <GroupBox  
+                <GroupBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}" 
                     Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep3}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">

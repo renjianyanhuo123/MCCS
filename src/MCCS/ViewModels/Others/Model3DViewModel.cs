@@ -112,6 +112,15 @@ namespace MCCS.ViewModels.Others
             }
         }
 
+        /// <summary>
+        /// 刚加载时默认偏移值 = 0.0
+        /// </summary>
+        public float OffsetValue { get; set; } = 0.0f;
+
+        /// <summary>
+        /// 控制的订阅设备链接
+        /// </summary>
+        public IDisposable? DeviceSubscription { get; set; } = null;
         #region private method 
         private void InitializeDataLabels()
         {

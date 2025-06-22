@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using MCCS.Core.Devices.Manager;
-using MCCS.Events;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Events.Controllers;
@@ -22,6 +21,9 @@ using MCCS.Models;
 using LiveChartsCore.Kernel;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using System.Diagnostics;
+using MCCS.Models.ControlCommand;
+using System.Windows.Automation;
+using MCCS.Core.Devices.Commands;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -36,6 +38,7 @@ namespace MCCS.ViewModels.Pages
 
         private ObservableCollection<Model3DViewModel> _models;
         private Model3DViewModel? _lastHoveredModel = null;
+        private ObservableCollection<ControlProcessExpander> _controlProcessExpanders = [];
 
         private Camera _camera;
         private IEffectsManager _effectsManager;
@@ -50,8 +53,7 @@ namespace MCCS.ViewModels.Pages
 
         private readonly IDeviceManager _deviceManager;
         private readonly Random _random = new();
-        private DateTime _currentTime = DateTime.Now;
-        private float _sumPostion = 0;
+        private DateTime _currentTime = DateTime.Now; 
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -88,7 +90,7 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = 0.1f
             };
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
-            _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedMovePositionCommand);
+            _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
 
@@ -210,6 +212,11 @@ namespace MCCS.ViewModels.Pages
             get => _models;
             set => SetProperty(ref _models, value);
         }
+        public ObservableCollection<ControlProcessExpander> ControlProcessExpanders 
+        {
+            get => _controlProcessExpanders;
+            set => SetProperty(ref _controlProcessExpanders, value);
+        }
         #endregion
 
         #region private method
@@ -269,14 +276,12 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         private void ExecuteTestModelMoveCommand() 
         {
-            var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "12853688641a40b58af7faf9ebe464f8");
-            if (testModel != null) 
-            {
-                testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), 0.1f);
-                testModel.SceneNode.UpdateAllTransformMatrix();
-            }
-            _sumPostion += 0.1f;
-            Debug.WriteLine($"模型位置: {_sumPostion}");
+            var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == "ad129785d8494c759cbe6ede6e28f3cd");
+            if (testModel == null) return;
+            testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), 0.1f);
+            testModel.SceneNode.UpdateAllTransformMatrix();
+            testModel.OffsetValue += 0.1f;
+            Debug.WriteLine($"模型位置: {testModel.OffsetValue}");
         }
 
         private void ExecuteLoadCommand() 
@@ -379,12 +384,69 @@ namespace MCCS.ViewModels.Pages
         /// 接受到信息后移动
         /// </summary>
         /// <param name="param"></param>
-        private void OnReceivedMovePositionCommand(ReceivedCommandDataEventParam param) 
+        private async void OnReceivedCommand(ReceivedCommandDataEventParam param)
+        {
+            var expander = new ControlProcessExpander(param.Param)
+            {
+                CommandId = param.ChannelIds.Count == 1 ? param.ChannelIds.First() : Guid.NewGuid().ToString("N"),
+                CommandName = param.ChannelIds.Count == 1 ? Models.First(s => s.Model3DData.DeviceId == param.ChannelIds.First()).Model3DData.Name : "组合控制",
+                ProgressRate = 0.0,
+                ControlType = param.ChannelIds.Count == 1 ? ControlTypeEnum.Single : ControlTypeEnum.Combine,
+                ControlMode = param.ControlMode
+            };
+            ControlProcessExpanders.Add(expander);
+            var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == expander.CommandId)
+                ?? throw new ArgumentNullException();
+            switch (param.ControlMode)
+            {
+                case ControlMode.Manual:
+                    break;
+                case ControlMode.Static:
+                    var model = param.Param as StaticControlModel;
+                    StaticMode_ModelMovePosition(model, targetModel);
+                    break;
+                case ControlMode.Programmable:
+                    break;
+                case ControlMode.Fatigue:
+                    break;
+                default:
+                    break;
+            }
+            var device = _deviceManager.GetDevice(expander.CommandId) ?? throw new ArgumentNullException(nameof(expander.CommandId));
+            await device.SendCommandAsync(new DeviceCommand
+            {
+                DeviceId = expander.CommandId,
+                Type = CommandTypeEnum.SetMove,
+                Parameters = expander.GetParamDic()
+            });
+
+            // 事件完成后订阅
+            targetModel.DeviceSubscription = device.CommandStatusStream
+                .Sample(TimeSpan.FromSeconds(1.5))
+                .Subscribe(OnChangedCommandStatus);
+        }
+
+        private void OnChangedCommandStatus(CommandResponse response) 
+        {
+            var expander = ControlProcessExpanders.FirstOrDefault(c => c.CommandId == response.CommandId);
+            if (expander == null) return;
+            expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
+            // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
+            if (response.CommandExecuteStatus == CommandExecuteStatusEnum.ExecuttionCompleted) 
+            {
+                // 通知控制界面这条指令已经完成
+
+            }
+        }
+
+        /// <summary>
+        /// 静态控制模式下 模型移动
+        /// </summary>
+        /// <param name="param"></param>
+        private void StaticMode_ModelMovePosition(StaticControlModel param, Model3DViewModel testModel)
         {
             Task.Run(async () =>
             {
-                const string targetModelKey = "12853688641a40b58af7faf9ebe464f8";
-                var testModel = Models.FirstOrDefault(c => c.Model3DData.Key == targetModelKey);
                 if (testModel == null) return;
 
                 var lastGap = double.MaxValue;
@@ -392,25 +454,25 @@ namespace MCCS.ViewModels.Pages
 
                 while (true)
                 {
-                    var currentGap = Math.Abs(_sumPostion * 10.0 - param.Target);
+                    var currentGap = Math.Abs(testModel.OffsetValue * 10.0 - param.TargetValue);
                     if (currentGap >= lastGap) break;
 
                     lastGap = currentGap;
-                    var direction = Math.Sign(param.Target - _sumPostion * 10);
+                    var direction = Math.Sign(param.TargetValue - testModel.OffsetValue * 10);
                     var movement = stepSize * direction;
 
                     testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), movement);
                     testModel.SceneNode.UpdateAllTransformMatrix();
-                    _sumPostion += movement;
+                    testModel.OffsetValue += movement;
 
                     await Task.Delay(1000);
                 }
 
                 // 达到最小差距后，直接设置为目标值
-                var finalMovement = (float)(param.Target / 10.0 - _sumPostion);
+                var finalMovement = (float)(param.TargetValue / 10.0 - testModel.OffsetValue);
                 testModel.PositionChange(new SharpDX.Vector3(0, -1, 0), finalMovement);
                 testModel.SceneNode.UpdateAllTransformMatrix();
-                _sumPostion = (float)(param.Target / 10.0);
+                testModel.OffsetValue = (float)(param.TargetValue / 10.0);
             });
         }
 
@@ -446,18 +508,12 @@ namespace MCCS.ViewModels.Pages
                         ChannelId = c.Model3DData.DeviceId ?? string.Empty,
                         ChannelName = c.Model3DData.Name ?? string.Empty,
                     }).ToList();
-                //_eventAggregator.GetEvent<ControlEvent>().Publish(new ControlEventParam
-                //{
-                //    ChannelId = clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId"),
-                //    ChannelName = clickedModel.Model3DData.Name
-                //});
                 var channelsParam = new NavigationParameters
                 {
                     { "ChannelId", clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId")},
                     { "ChannelName", clickedModel.Model3DData.Name }
                 };
                 _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
-                // IsOpenFlyout = Models.Any(c => c.IsSelected);
             }
         }
 
