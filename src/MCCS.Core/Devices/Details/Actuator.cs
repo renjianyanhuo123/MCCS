@@ -1,16 +1,6 @@
 ﻿using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Models.Devices;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices.Details
 {
@@ -21,6 +11,7 @@ namespace MCCS.Core.Devices.Details
         private double _currentForce = 10.0; // 初始力值
         private double _currentDisplacement = 0.0; // 初始位移值5mm
         private DateTime _currentStartTime = DateTime.MinValue;
+        // private readonly CancellationToken _cancellationToken = new();
 
         // 生成符合 N(0, 1) 的随机数（标准正态分布）
         private static double NextStandardNormal()
@@ -43,49 +34,106 @@ namespace MCCS.Core.Devices.Details
                   deviceInfo, 
                   connection)
         {
-        } 
+        }
         private async Task CommonReduceGapLogic(
-            Func<double> getValue, 
-            Action<double> setValue, 
-            double targetValue, 
-            double speed, 
+            Func<double> getValue,
+            Action<double> setValue,
+            double targetValue,
+            double speed,
             string commandId,
             CancellationToken cancellationToken)
         {
-            var lastGap = double.MaxValue;
-            while (true)
-            {
-                var operationValue = getValue();
-                var currentGap = Math.Abs(operationValue - targetValue);
-                if (currentGap >= lastGap) break;
+            var startValue = getValue();
+            var totalDistance = Math.Abs(targetValue - startValue);
+            var tolerance = speed / 60.0; // 容差值，避免无限循环
 
-                lastGap = currentGap;
-                var newValue = operationValue + Math.Sign(targetValue - operationValue) * speed / 60.0;
-                setValue(newValue);
+            try
+            {
+                while (true)
+                {
+                    // 停止
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var currentValue = getValue();
+                    var currentGap = Math.Abs(currentValue - targetValue);
+
+                    // 如果已经足够接近目标值，则停止
+                    if (currentGap <= tolerance)
+                    {
+                        setValue(targetValue); // 确保最终值为目标值
+                        break;
+                    }
+
+                    // 计算新值
+                    var direction = Math.Sign(targetValue - currentValue);
+                    var stepSize = speed / 60.0;
+                    var newValue = currentValue + direction * stepSize;
+
+                    // 防止越过目标值
+                    if (direction > 0 && newValue > targetValue)
+                    {
+                        newValue = targetValue;
+                    }
+                    else if (direction < 0 && newValue < targetValue)
+                    {
+                        newValue = targetValue;
+                    }
+
+                    setValue(newValue);
+
+                    // 计算进度百分比
+                    double progress;
+                    if (totalDistance == 0)
+                    {
+                        progress = 1.0; // 起始值就等于目标值
+                    }
+                    else
+                    {
+                        var traveledDistance = Math.Abs(currentValue - startValue);
+                        progress = Math.Min(traveledDistance / totalDistance, 1.0);
+                    }
+
+                    _commandStatusSubject.OnNext(new CommandResponse
+                    {
+                        CommandId = commandId,
+                        DeviceId = Id,
+                        Success = true,
+                        Result = null,
+                        Progress = progress,
+                        CommandExecuteStatus = CommandExecuteStatusEnum.Executing,
+                        ExecutionTime = (DateTime.Now - _currentStartTime),
+                        Timestamp = DateTimeOffset.Now
+                    });
+
+                    await Task.Delay(1000, cancellationToken);
+                }
+                // 发送完成状态
                 _commandStatusSubject.OnNext(new CommandResponse
                 {
                     CommandId = commandId,
                     DeviceId = Id,
                     Success = true,
                     Result = null,
-                    Progress = operationValue / targetValue * 1.0,
-                    CommandExecuteStatus = CommandExecuteStatusEnum.Executing,
+                    Progress = 1.0,
+                    CommandExecuteStatus = CommandExecuteStatusEnum.ExecuttionCompleted,
                     ExecutionTime = (DateTime.Now - _currentStartTime),
                     Timestamp = DateTimeOffset.Now
                 });
-                await Task.Delay(1000, cancellationToken);
             }
-            _commandStatusSubject.OnNext(new CommandResponse
+            catch (OperationCanceledException)
             {
-                CommandId = commandId,
-                DeviceId = Id,
-                Success = true,
-                Result = null,
-                Progress = 1.0,
-                CommandExecuteStatus = CommandExecuteStatusEnum.ExecuttionCompleted,
-                ExecutionTime = (DateTime.Now - _currentStartTime),
-                Timestamp = DateTimeOffset.Now
-            });
+                // 用户主动取消 —— 可执行额外动作
+                _commandStatusSubject.OnNext(new CommandResponse
+                {
+                    CommandId = commandId,
+                    DeviceId = Id,
+                    Success = false,
+                    Result = "操作已取消",
+                    Progress = 0.0,
+                    CommandExecuteStatus = CommandExecuteStatusEnum.Stoping,
+                    ExecutionTime = (DateTime.Now - _currentStartTime),
+                    Timestamp = DateTimeOffset.Now
+                });
+            }
         }
 
         public override async Task<CommandResponse> SendCommandAsync(DeviceCommand command, CancellationToken cancellationToken = default)
@@ -117,6 +165,7 @@ namespace MCCS.Core.Devices.Details
                     await CommonReduceGapLogic(operation, target, targetV, speed, command.DeviceId, cancellationToken);
                 }, cancellationToken);
             }
+            
             await Task.Delay(10, cancellationToken); // 模拟异步操作
             return response;
         }

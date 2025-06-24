@@ -129,6 +129,11 @@ namespace MCCS.ViewModels.Others
         public float ForceOffsetValue { get; set; }
 
         /// <summary>
+        /// 取消模型移动
+        /// </summary>
+        public CancellationTokenSource CancelModelMove { get; set; } = new CancellationTokenSource();
+
+        /// <summary>
         /// 控制的订阅设备链接
         /// </summary>
         public IDisposable? DeviceSubscription { get; set; } = null;

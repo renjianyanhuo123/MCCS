@@ -20,6 +20,11 @@
         <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
         <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
         <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
+        <!-- 在Window.Resources或UserControl.Resources中定义ContextMenu -->
+        <!--<ContextMenu x:Key="ModelContextMenu">
+            <MenuItem Header="位移清零"  />
+            <MenuItem Header="力清零"   />
+        </ContextMenu>-->
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -46,6 +51,22 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <!-- 使用Popup实现右键菜单 -->
+            <Popup x:Name="modelPopupMenu" 
+                    IsOpen="{Binding IsShowContextMenu}"
+                    Placement="Mouse"
+                    StaysOpen="False">
+                <Border Background="White" 
+                        BorderBrush="Gray" 
+                        BorderThickness="1"
+                        CornerRadius="5">
+                    <ItemsControl>
+                        <MenuItem Header="位移清零" Command="{Binding DisplacementClearCommand}" />
+                        <Separator/>
+                        <MenuItem Header="力清零" Command="{Binding ForceClearCommand}" />
+                    </ItemsControl>
+                </Border>
+            </Popup>
             <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染 -->
             <hx:Viewport3DX  
                 x:Name="viewport"
@@ -61,10 +82,29 @@
                     <b:EventTrigger EventName="MouseDown3D">
                         <b:InvokeCommandAction Command="{Binding Model3DMouseDownCommand}" PassEventArgsToCommand="True"/>
                     </b:EventTrigger>
+                    <!-- 新增右键事件处理 -->
+                    <b:EventTrigger EventName="MouseDown3D">
+                        <b:InvokeCommandAction 
+                            Command="{Binding Model3DRightMouseDownCommand}" 
+                            PassEventArgsToCommand="True"/>
+                    </b:EventTrigger>
                 </b:Interaction.Triggers>
                 <b:Interaction.Behaviors>
                     <behaviors:MouseMoveHitTestBehavior HitTestCommand="{Binding Model3DMouseMoveCommand}" />
                 </b:Interaction.Behaviors>
+                <!--<hx:Viewport3DX.ContextMenu>
+                    <ContextMenu x:Name="viewportContextMenu" 
+                                 IsOpen="{Binding IsOpenContextMenu}"
+                                 Visibility="{Binding IsShowContextMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                         -->
+                <!--模型相关操作（当点击到模型时显示）-->
+                <!--
+                        <MenuItem Header="位移清零">
+                        </MenuItem>
+                        <MenuItem Header="力清零">
+                        </MenuItem>
+                    </ContextMenu>
+                </hx:Viewport3DX.ContextMenu>-->
                 <hx:Viewport3DX.InputBindings>
                     <KeyBinding Key="B" Command="hx:ViewportCommands.BackView" />
                     <KeyBinding Key="F" Command="hx:ViewportCommands.FrontView" />
@@ -73,7 +113,7 @@
                     <KeyBinding Key="L" Command="hx:ViewportCommands.LeftView" />
                     <KeyBinding Key="R" Command="hx:ViewportCommands.RightView" />
                     <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
-                    <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
+                    <!--<MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="Alt+LeftClick" />-->
                     <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
                     <!-- 移除了 LeftClick 的 Pan 命令，改为使用 Shift+LeftClick 或 Alt+LeftClick -->
                     <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="Shift+LeftClick" />
@@ -100,7 +140,6 @@
                 <hx:AxisPlaneGridModel3D
                         x:Name="plane"
                         AutoSpacing="True"
-                         
                         Offset="-65" />
             </hx:Viewport3DX>
             <StackPanel  Grid.Row="1" Grid.Column="1"  
@@ -126,45 +165,37 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Row="1"
-                        Grid.Column="0">
-                <Expander
-                    x:Name="Curve1"
-                    Width="450"
-                    Height="Auto"  
-                    BorderBrush="LightGray" 
-                    Header="曲线一(通道一力)"
-                    IsExpanded="True">
-                    <Expander.Background>
-                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
-                    </Expander.Background>
-                    <lvc:CartesianChart
-                        Title="{Binding Title}"
-                        Height="250"
-                        Series="{Binding CurveSeries1}"
-                        XAxes="{Binding XAxes}"
-                        YAxes="{Binding YAxes}">
-                    </lvc:CartesianChart>
-                </Expander>
-                <Expander
-                    x:Name="Curve2"
-                    Width="450"
-                    Height="Auto" 
-                    BorderBrush="LightGray" 
-                    Header="曲线二(通道二力)"
-                    IsExpanded="True">  
-                    <Expander.Background>
-                        <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
-                    </Expander.Background>
-                    <lvc:CartesianChart
-                        Title="{Binding Title}"
-                        Height="250"
-                        Series="{Binding CurveSeries2}"
-                        XAxes="{Binding XAxes}"
-                        YAxes="{Binding YAxes}">
-                    </lvc:CartesianChart>
-                </Expander>
-            </StackPanel>
+            <ItemsControl Grid.Row="1"
+                        Grid.Column="0"
+                          ItemsSource="{Binding CurveModels}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Expander
+                            Width="450"
+                            Height="Auto"  
+                            BorderBrush="LightGray" 
+                            Tag="{Binding DeviceId}"
+                            Header="{Binding ExpanderHeaderName}"
+                            IsExpanded="True">
+                            <Expander.Background>
+                                <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
+                            </Expander.Background>
+                            <lvc:CartesianChart
+                                Title="{Binding Title}"
+                                Height="250"
+                                Series="{Binding CurveSeries}"
+                                XAxes="{Binding XAxes}"
+                                YAxes="{Binding YAxes}">
+                            </lvc:CartesianChart>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
             <ItemsControl Grid.Row="1"
               Grid.Column="2" 
               ItemsSource="{Binding ControlProcessExpanders}">

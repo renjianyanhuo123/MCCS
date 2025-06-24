@@ -14,7 +14,7 @@ namespace MCCS.Core.Devices.Commands
         SetParameter,
         GetParameter,
         StartMeasurement,
-        StopMeasurement,
+        Stop,
 
         // 特定设备指令
         SetMove,

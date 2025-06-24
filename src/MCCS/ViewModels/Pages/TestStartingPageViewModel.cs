@@ -15,17 +15,18 @@ using MCCS.Core.Devices.Manager;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Events.Controllers;
-using LiveChartsCore;
-using LiveChartsCore.SkiaSharpView;
 using MCCS.Models;
-using LiveChartsCore.Kernel;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using System.Diagnostics;
 using MCCS.Models.ControlCommand;
-using System.Windows.Automation;
 using MCCS.Core.Devices.Commands;
 using MCCS.Events.ControlCommand;
 using MCCS.Common;
+using MCCS.Models.Model3D;
+using System.Windows.Controls.Primitives;
+using System.Windows;
+using SharpDX;
+using System.Windows.Controls;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -68,7 +69,9 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
         public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
         public DelegateCommand TestModelMoveCommand => new(ExecuteTestModelMoveCommand);
-        //public DelegateCommand OpenRightDrawerCommand => new(ExecuteOpenRightDrawerCommand);
+        public DelegateCommand<MouseDown3DEventArgs> Model3DRightMouseDownCommand => new(ExecuteModel3DRightMouseDownCommand);
+        public DelegateCommand DisplacementClearCommand => new(ExecuteDisplacementClearCommand);
+        public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
         #endregion
 
         public TestStartingPageViewModel(
@@ -93,66 +96,40 @@ namespace MCCS.ViewModels.Pages
             };
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
+            _eventAggregator.GetEvent<NotificationCommandStopedEvent>().Subscribe(x => 
+            {
+                var model = Models.FirstOrDefault(s => s.Model3DData.DeviceId == x.CommandId);
+                if (model == null) return;
+                model.CancelModelMove.Cancel();
+                model.CancelModelMove.Dispose();
+                model.CancelModelMove = new CancellationTokenSource();
+            });
             _effectsManager = effectsManager; 
             _regionManager = regionManager;
-
-            CurveSeries2 = [
-                new LineSeries<TimeAndMeasureValueModel>()
-                {
-                    Values = ObservableValues2,
-                    Mapping = (model, index) =>
-                    {
-                        return new Coordinate(model.Time, model.Value);
-                    },
-                    Fill = null
-                }
-            ];
-            CurveSeries1 = [
-                new LineSeries<TimeAndMeasureValueModel>()
-                {
-                    Values = ObservableValues1,
-                    Mapping = (model, index) =>
-                    {
-                        return new Coordinate(model.Time, model.Value);
-                    },
-                    Fill = null
-                }
-            ];
-            XAxes =
-            [
-                new() {
-                    Name = "Time(s)"
-                }
-            ];
-            YAxes =
-            [
-                new() {
-                    Name = "kN",
-                    MinLimit = 9,
-                    MaxLimit = 11
-                }
-            ]; 
         }
 
         #region Property
         /// <summary>
-        /// 曲线一数据集合
+        /// 是否显示右键菜单
         /// </summary>
-        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues1 { get; set; } = [];
+        private bool _isShowContextMenu = false;
+        public bool IsShowContextMenu 
+        {
+            get => _isShowContextMenu;
+            set => SetProperty(ref _isShowContextMenu, value);
+        }
+
+        private bool _isOpenContextMenu = false;
+        public bool IsOpenContextMenu 
+        {
+            get => _isOpenContextMenu;
+            set => SetProperty(ref _isOpenContextMenu, value);
+        }
+
         /// <summary>
-        /// 曲线二数据集合
+        /// 曲线数据集合
         /// </summary>
-        private ObservableCollection<TimeAndMeasureValueModel> ObservableValues2 { get; set; } = [];
-        public LiveChartsCore.SkiaSharpView.Axis[] XAxes { get; set; }
-        public LiveChartsCore.SkiaSharpView.Axis[] YAxes { get; set; }
-        /// <summary>
-        /// 曲线一数据集合
-        /// </summary>
-        public ObservableCollection<ISeries> CurveSeries1 { get; set; }
-        /// <summary>
-        /// 曲线二数据集合
-        /// </summary>
-        public ObservableCollection<ISeries> CurveSeries2 { get; set; }
+        public ObservableCollection<CurveShowModel> CurveModels { get; set; } = [];
         public bool IsStartedTest
         {
             get => _isStartedTest;
@@ -306,34 +283,51 @@ namespace MCCS.ViewModels.Pages
                 targetModel.IsSelected = false; 
             }
         }
-        
-        public void InitializeCurveDataSubscriptions()
-        {
-            _currentTime = DateTime.Now;
-            var actor1 = _deviceManager.GetDevice("a1af5b38688247a58d3a9011bab98f81")?.DataStream
-                ?? throw new ArgumentNullException($"Device id {"a1af5b38688247a58d3a9011bab98f81"} is not exist！");
-            var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream
-                ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
-            actor1.Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(x => {
-                    ObservableValues1.Add(new TimeAndMeasureValueModel
-                    {
-                        Time = (DateTime.Now - _currentTime).TotalSeconds,
-                        Value = x.Value is MockActuatorCollection v ? v.Force : 0
-                    });
-                    if (ObservableValues1.Count > MaxPoints) ObservableValues1.RemoveAt(0);
-                });
-            actor2.Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(x => {
-                    ObservableValues2.Add(new TimeAndMeasureValueModel
-                    {
-                        Time = (DateTime.Now - _currentTime).TotalSeconds,
-                        Value = x.Value is MockActuatorCollection v ? v.Force : 0
-                    });
-                    if (ObservableValues2.Count > MaxPoints) ObservableValues2.RemoveAt(0);
-                });
-        }
 
+        /// <summary>
+        /// 初始化曲线
+        /// </summary>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void InitialCurves() 
+        {
+            var devices= Models.Where(s => s.Model3DData.DeviceId != null).Select(s => s.Model3DData).ToList();
+            _currentTime = DateTime.Now;
+            foreach (var device in devices) 
+            {
+                var displacementModel = new CurveShowModel("Time(s)", "kN")
+                {
+                    DeviceId = device.DeviceId,
+                    ExpanderHeaderName = $"{device.Name}_时间-位移曲线",
+                };
+                var forceModel = new CurveShowModel("Time(s)", "mm")
+                {
+                    DeviceId = device.DeviceId,
+                    ExpanderHeaderName = $"{device.Name}_时间-力曲线",
+                };
+                CurveModels.Add(displacementModel);
+                CurveModels.Add(forceModel);
+                var actor = _deviceManager.GetDevice(device.DeviceId)?.DataStream
+                ?? throw new ArgumentNullException($"Device id {device.DeviceId} is not exist！"); 
+                actor.Sample(TimeSpan.FromSeconds(1))
+                .Subscribe(x => {
+                    displacementModel.ObservableValues.Add(new CurveMeasureValueModel
+                    {
+                        XValue = (DateTime.Now - _currentTime).TotalSeconds,
+                        YValue = x.Value is MockActuatorCollection v ? v.Displacement : 0
+                    });
+                    if (displacementModel.ObservableValues.Count > MaxPoints) displacementModel.ObservableValues.RemoveAt(0);
+                });
+                actor.Sample(TimeSpan.FromSeconds(1))
+                .Subscribe(x => {
+                    forceModel.ObservableValues.Add(new CurveMeasureValueModel
+                    {
+                        XValue = (DateTime.Now - _currentTime).TotalSeconds,
+                        YValue = x.Value is MockActuatorCollection v ? v.Force : 0
+                    });
+                    if (forceModel.ObservableValues.Count > MaxPoints) forceModel.ObservableValues.RemoveAt(0);
+                });
+            }
+        }
         /// <summary>
         /// 初始化数据订阅
         /// </summary>
@@ -404,8 +398,11 @@ namespace MCCS.ViewModels.Pages
                 case ControlMode.Manual:
                     break;
                 case ControlMode.Static:
-                    var model = param.Param as StaticControlModel;
-                    StaticMode_ModelMovePosition(model, targetModel);
+                    if (param.Param is StaticControlModel model
+                        && model.UnitType == ControlUnitTypeEnum.Displacement)
+                    {
+                        StaticMode_ModelMovePosition(model, targetModel);
+                    }
                     break;
                 case ControlMode.Programmable:
                     break;
@@ -420,7 +417,7 @@ namespace MCCS.ViewModels.Pages
                 DeviceId = expander.CommandId,
                 Type = CommandTypeEnum.SetMove,
                 Parameters = expander.GetParamDic()
-            });
+            }, targetModel.CancelModelMove.Token);
 
             // 事件完成后订阅
             targetModel.DeviceSubscription = device.CommandStatusStream
@@ -431,16 +428,19 @@ namespace MCCS.ViewModels.Pages
         private void OnChangedCommandStatus(CommandResponse response) 
         {
             var expander = ControlProcessExpanders.FirstOrDefault(c => c.CommandId == response.CommandId);
-            if (expander == null) return;
+            var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == response.CommandId);
+            if (expander == null || targetModel == null) return;
             expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
             // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
-            if (response.CommandExecuteStatus == CommandExecuteStatusEnum.ExecuttionCompleted) 
+            if (response.CommandExecuteStatus == CommandExecuteStatusEnum.ExecuttionCompleted || response.CommandExecuteStatus == CommandExecuteStatusEnum.Stoping) 
             {
+                // 解绑状态订阅链接
+                targetModel.DeviceSubscription?.Dispose();
                 // 通知控制界面这条指令已经完成
-                _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandFinishedEventParam 
+                _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandStatusEventParam 
                 { 
                     CommandId = response.CommandId,
-                    CommandExecuteStatus = CommandExecuteStatusEnum.ExecuttionCompleted
+                    CommandExecuteStatus = response.CommandExecuteStatus
                 }); 
                 PropertyChangeAsync(() => 
                 {
@@ -455,15 +455,17 @@ namespace MCCS.ViewModels.Pages
         /// <param name="param"></param>
         private void StaticMode_ModelMovePosition(StaticControlModel param, Model3DViewModel testModel)
         {
+            var cancelToken = testModel.CancelModelMove.Token;
             Task.Run(async () =>
             {
-                if (testModel == null) return;
-
+                if (testModel == null) return; 
                 var lastGap = double.MaxValue;
                 var stepSize = (float)param.Speed / 600.0f; // 60.0f * 0.1f 合并
                 var moveDirection = testModel.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);
                 while (true)
                 {
+                    // 检查取消
+                    testModel.CancelModelMove.Token.ThrowIfCancellationRequested();
                     var currentGap = Math.Abs(testModel.DisplacementOffsetValue * 10.0 - param.TargetValue);
                     if (currentGap >= lastGap) break;
 
@@ -475,7 +477,7 @@ namespace MCCS.ViewModels.Pages
                     testModel.SceneNode.UpdateAllTransformMatrix();
                     testModel.DisplacementOffsetValue += movement;
 
-                    await Task.Delay(1000);
+                    await Task.Delay(1000, testModel.CancelModelMove.Token);
                 }
 
                 // 达到最小差距后，直接设置为目标值
@@ -483,7 +485,7 @@ namespace MCCS.ViewModels.Pages
                 testModel.PositionChange(moveDirection, finalMovement);
                 testModel.SceneNode.UpdateAllTransformMatrix();
                 testModel.DisplacementOffsetValue = (float)(param.TargetValue / 10.0);
-            });
+            }, cancelToken);
         }
 
         /// <summary>
@@ -493,6 +495,7 @@ namespace MCCS.ViewModels.Pages
         private void OnModel3DMouseDown(object parameter)
         {
             if (parameter is not MouseDown3DEventArgs args) return;
+            IsShowContextMenu = false;
             // 检查是否按住了修饰键（如果按住修饰键，则不处理选择）
             if (Keyboard.IsKeyDown(Key.LeftShift) ||
                 Keyboard.IsKeyDown(Key.RightShift) ||
@@ -525,6 +528,40 @@ namespace MCCS.ViewModels.Pages
                 };
                 _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
             }
+        }
+        /// <summary>
+        /// 单独处理鼠标右键弹窗
+        /// </summary>
+        /// <param name="e"></param>
+        private void ExecuteModel3DRightMouseDownCommand(MouseDown3DEventArgs e) 
+        {
+            if (e?.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs && mouseArgs.ChangedButton == MouseButton.Right)
+            {
+                if (e.HitTestResult?.ModelHit != null)
+                {
+                    var model = e.HitTestResult.ModelHit as SceneNode;
+                    if (model != null)
+                    {
+                        IsShowContextMenu = true;
+                        mouseArgs.Handled = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 位移清零
+        /// </summary>
+        private void ExecuteDisplacementClearCommand() 
+        {
+            IsShowContextMenu = false;
+        }
+        /// <summary>
+        /// 力清零
+        /// </summary>
+        private void ExecuteForceClearCommand() 
+        {
+            IsShowContextMenu = false;
         }
 
         /// <summary>

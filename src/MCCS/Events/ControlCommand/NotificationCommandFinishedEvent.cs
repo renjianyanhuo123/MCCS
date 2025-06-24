@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.Events.ControlCommand
+﻿namespace MCCS.Events.ControlCommand
 {
-    public class NotificationCommandFinishedEvent : PubSubEvent<NotificationCommandFinishedEventParam>
+    public class NotificationCommandFinishedEvent : PubSubEvent<NotificationCommandStatusEventParam>
     {
     }
 }

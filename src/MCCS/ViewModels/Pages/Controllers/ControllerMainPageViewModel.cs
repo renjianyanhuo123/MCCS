@@ -163,6 +163,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// 控制类型切换命令
         /// </summary>
         public DelegateCommand<string> ControlTypeChangedCommand => new(ExecuteControlTypeChangedCommand);
+
+        public DelegateCommand StopCommand => new(ExecuteStopCommand);
         #endregion
 
         /// <summary>
@@ -247,13 +249,18 @@ namespace MCCS.ViewModels.Pages.Controllers
                 controlInfo.ExecutingStatus = res.CommandExecuteStatus;
                 if (CurrentChannelId == res.CommandId) CurrentCommandStatus = res.CommandExecuteStatus;
             });
-            //await device.SendCommandAsync(new DeviceCommand 
-            //{ 
-            //    DeviceId = CurrentChannelId,
-            //    Type = CommandTypeEnum.SetMove,
-            //    Parameters = commandParams
-            //}, cancellationToken);
-            // 事件完成后订阅
+        }
+
+        /// <summary>
+        /// 执行停止指令
+        /// </summary>
+        private void ExecuteStopCommand() 
+        {
+            _eventAggregator.GetEvent<NotificationCommandStopedEvent>().Publish(new NotificationCommandStatusEventParam
+            { 
+                CommandId = CurrentChannelId, 
+                CommandExecuteStatus = CommandExecuteStatusEnum.Stoping
+            });
         }
 
         private string GetViewName() 
@@ -324,11 +331,17 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             if (string.IsNullOrEmpty(CurrentChannelId)) return;
             var success = _controlInfoDic.TryGetValue(CurrentChannelId, out var controlInfo);
-            if (!success) throw new ArgumentNullException(nameof(CurrentChannelId));
-            controlInfo.ControlType = ControlType;
-            controlInfo.ChannelName = CurrentChannelName;
-            controlInfo.ControlMode = (ControlMode)SelectedControlMode;
-            controlInfo.ExecutingStatus = CurrentCommandStatus;
+            controlInfo = success ? controlInfo : new ControlInfo
+            {
+                ChannelId = CurrentChannelId,
+                ChannelName = CurrentChannelName ?? "",
+                IsCanControl = false,
+                ControlType = ControlType,
+                ControlMode = (ControlMode)SelectedControlMode,
+                CombineChannelId = null,
+                CombineChannelName = string.Empty,
+                ExecutingStatus = CurrentCommandStatus
+            };
             // 移除在原有组合中的对应的控制通道
             var removeObj = _controlCombineInfos.FirstOrDefault(c => c.ControlChannels.Any(s => s.ChannelId == CurrentChannelId));
             removeObj?.ControlChannels.RemoveAll(c => c.ChannelId == CurrentChannelId);
@@ -379,15 +392,6 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             if (param == null || string.IsNullOrEmpty(CurrentChannelId)) return;
             _tempSaveControlParamInfo = param.Param;
-        }
-
-        /// <summary>
-        /// 监听指令状态变化
-        /// </summary>
-        /// <param name="response"></param>
-        private void OnChangedCommandStatus(CommandResponse response)
-        {
-
         } 
         /// <summary>
         /// 是否参与控制CheckBox

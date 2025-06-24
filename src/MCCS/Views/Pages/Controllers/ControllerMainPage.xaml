@@ -151,7 +151,8 @@
                         Content="暂停"
                         IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
                         Width="80"
-                        Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}" />
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
+                        Command="{Binding StopCommand}"/>
                 </UniformGrid>
             </StackPanel> 
         </ScrollViewer>
