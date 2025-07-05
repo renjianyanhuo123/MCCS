@@ -1,10 +1,4 @@
-﻿using MCCS.Core.Devices;
-using MCCS.Core.Devices.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MCCS.Core.Devices.Commands;
 
 namespace MCCS.Models
 {

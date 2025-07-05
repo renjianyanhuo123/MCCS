@@ -1,5 +1,4 @@
 ﻿using MCCS.Events.ControlCommand;
-using MCCS.Models;
 using MCCS.Models.ControlCommand;
 
 namespace MCCS.ViewModels.Pages.ControlCommandPages

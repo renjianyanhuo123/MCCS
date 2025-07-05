@@ -1,5 +1,4 @@
 ﻿using MCCS.Core.Devices.Commands;
-using MCCS.Models;
 using System.Globalization;
 using System.Windows.Data;
 

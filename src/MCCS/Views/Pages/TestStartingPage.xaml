@@ -175,11 +175,16 @@
                             Height="Auto"  
                             BorderBrush="LightGray" 
                             Tag="{Binding DeviceId}"
-                            Header="{Binding ExpanderHeaderName}"
                             IsExpanded="True">
                             <Expander.Background>
                                 <SolidColorBrush Opacity="0.25" Color="WhiteSmoke" />
                             </Expander.Background>
+                            <Expander.Header>
+                                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding ExpanderHeaderName}" Margin="5,0,15,0" />
+                                    <Button Content="设置曲线"></Button>
+                                </StackPanel>
+                            </Expander.Header>
                             <lvc:CartesianChart
                                 Title="{Binding Title}"
                                 Height="250"

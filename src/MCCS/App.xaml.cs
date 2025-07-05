@@ -61,7 +61,7 @@ namespace MCCS
                 .CreateLogger();
             // 确保是
             Log.Logger = logger;
-            containerRegistry.RegisterInstance<Serilog.ILogger>(logger);
+            containerRegistry.RegisterInstance<ILogger>(logger);
             var configuration = builder.Build();
 
             // 2. 将 IConfiguration 注册到容器
@@ -85,24 +85,31 @@ namespace MCCS
         /// </summary>
         protected override async void OnInitialized()
         {
-            var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
-            var devices = await deviceRepository.GetAllDevicesAsync();
-            var connectionDevices = devices.Where(c => c.MainDeviceId == null);
-            var connectionManager = Container.Resolve<IConnectionManager>();
-            var deviceManager = Container.Resolve<IDeviceManager>();
-            // (1)默认注册模拟设备连接
-            connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
+            try
             {
-                ConnectionId = c.DeviceId,
-                ConnectionType = ConnectionTypeEnum.Mock,
-                ConnectionStr = "XXXXXX"
-            }).ToList());
-            // (2) 打开所有连接
-            await connectionManager.OpenAllConnections();
-            // (3) 注册所有设备
-            deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null).ToList());
-            deviceManager.StartAllDevices();
-            base.OnInitialized();
+                var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
+                var devices = await deviceRepository.GetAllDevicesAsync();
+                var connectionDevices = devices.Where(c => c.MainDeviceId == null);
+                var connectionManager = Container.Resolve<IConnectionManager>();
+                var deviceManager = Container.Resolve<IDeviceManager>();
+                // (1)默认注册模拟设备连接
+                connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
+                {
+                    ConnectionId = c.DeviceId,
+                    ConnectionType = ConnectionTypeEnum.Mock,
+                    ConnectionStr = "XXXXXX"
+                }).ToList());
+                // (2) 打开所有连接
+                await connectionManager.OpenAllConnections();
+                // (3) 注册所有设备
+                deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null).ToList());
+                deviceManager.StartAllDevices();
+                base.OnInitialized();
+            }
+            catch (Exception e)
+            {
+                Log.Error("数据采集初始化异常:{e.Exception}", e.Message);
+            }
         }
 
         /// <summary>

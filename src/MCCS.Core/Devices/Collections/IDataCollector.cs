@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.Core.Devices.Collections
+﻿namespace MCCS.Core.Devices.Collections
 {
     /// <summary>
     /// 数据采集接口

@@ -6,8 +6,6 @@ using MCCS.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using MCCS.Common;
-using MCCS.ViewModels.Pages.Controllers;
-using Prism.Navigation.Regions;
 
 namespace MCCS.ViewModels
 {

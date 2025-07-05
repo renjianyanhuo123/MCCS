@@ -1,13 +1,10 @@
 ﻿using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Manager;
-using MCCS.Events;
 using MCCS.Events.ControlCommand;
 using MCCS.Events.Controllers;
 using MCCS.Models;
-using MCCS.Models.ControlCommand;
 using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.Controllers

@@ -1,9 +1,4 @@
 ﻿using MCCS.Core.Devices.Connections;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices
 {
@@ -17,7 +12,6 @@ namespace MCCS.Core.Devices
                 ConnectionTypeEnum.TcpIp => throw new NotSupportedException(),
                 ConnectionTypeEnum.Modbus => throw new NotSupportedException(),
                 ConnectionTypeEnum.OPC => throw new NotSupportedException(),
-                ConnectionTypeEnum.Mock => new MockDeviceConnection(connectionString, connectionId),
                 _ => new MockDeviceConnection(connectionString, connectionId),
             };
         }

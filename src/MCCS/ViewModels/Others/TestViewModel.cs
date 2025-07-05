@@ -1,5 +1,4 @@
 ﻿using MCCS.Core.Models.TestInfo;
-using MCCS.Models;
 
 namespace MCCS.ViewModels.Others
 {

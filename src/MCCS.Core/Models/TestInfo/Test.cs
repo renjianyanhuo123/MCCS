@@ -10,13 +10,13 @@ namespace MCCS.Core.Models.TestInfo
         /// 试样编号
         /// </summary>
         [MaxLength(50)]
-        public string Code{ get; set; }
+        public string Code { get; set; } = string.Empty;
 
         /// <summary>
         /// 试样名称
         /// </summary>
         [MaxLength(50)]
-        public string? Name {get;set;}
+        public string? Name { get; set; } = null;
 
         /// <summary>
         /// 试样标准
@@ -26,7 +26,7 @@ namespace MCCS.Core.Models.TestInfo
         {
             get;
             set;
-        }
+        } = string.Empty;
         /// <summary>
         /// 试验人员
         /// </summary>

@@ -1,9 +1,7 @@
-﻿using FreeSql.DataAnnotations;
-using MCCS.Core.Models.Devices;
+﻿using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
 using MCCS.Core.Models.SystemSetting;
 using MCCS.Core.Models.TestInfo;
-using MCCS.Models;
 using MCCS.ViewModels.Pages;
 using Newtonsoft.Json;
 

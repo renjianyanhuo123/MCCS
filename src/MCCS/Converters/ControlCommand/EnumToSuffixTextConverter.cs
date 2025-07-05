@@ -1,10 +1,5 @@
 ﻿using MCCS.Models.ControlCommand;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace MCCS.Converters.ControlCommand
@@ -23,7 +18,6 @@ namespace MCCS.Converters.ControlCommand
                 return unit switch
                 {
                     ControlUnitTypeEnum.Force => $"kN{addText}",
-                    ControlUnitTypeEnum.Displacement => $"mm{addText}",
                     _ => $"mm{addText}",
                 };
             }

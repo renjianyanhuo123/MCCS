@@ -1,7 +1,6 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading.Channels;
-using MCCS.Core.Devices.Connections;
+﻿using System.Reactive.Subjects;
+
+namespace MCCS.Core.Devices.Connections;
 
 public abstract class BaseConnection: IDeviceConnection
 {

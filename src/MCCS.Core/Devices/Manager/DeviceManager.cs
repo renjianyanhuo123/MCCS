@@ -1,12 +1,6 @@
-﻿using MCCS.Core.Devices.Connections;
-using MCCS.Core.Models.Devices;
+﻿using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCCS.Core.Devices.Manager
 {

@@ -1,12 +1,6 @@
 ﻿using MCCS.Core.Devices;  
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks; 
 using MCCS.Core.Devices.Manager;
-using MCCS.Core.Devices.Collections;
 using MCCS.Core.Devices.Connections;
 
 namespace MCCS.Modules

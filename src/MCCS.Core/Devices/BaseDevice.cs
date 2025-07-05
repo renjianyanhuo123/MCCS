@@ -1,9 +1,6 @@
-﻿using System.Data.Common;
-using System.Diagnostics;
-using System.Reactive.Concurrency;
+﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading.Channels;
 using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Models.Devices;

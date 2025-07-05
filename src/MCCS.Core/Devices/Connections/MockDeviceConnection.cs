@@ -1,12 +1,4 @@
-﻿using MCCS.Core.Devices.Details;
-using System;
-using System.Text;
-using System.Text.Json;
-
-namespace MCCS.Core.Devices.Connections;
-
-
-
+﻿namespace MCCS.Core.Devices.Connections;
 /// <summary>
 /// 模拟演示的链接
 /// </summary>
@@ -14,16 +6,9 @@ public class MockDeviceConnection(string connectionString, string connectionId) 
 {
     public override async Task<bool> OpenAsync()
     {
-        try
-        {
-            await Task.Delay(100); // 模拟连接延迟 
-            IsConnected = true;
-            return true;
-        }
-        catch (Exception)
-        { 
-            throw;
-        }
+        await Task.Delay(100); // 模拟连接延迟 
+        IsConnected = true;
+        return true;
     }
 
     public override async Task<bool> CloseAsync()

@@ -1,10 +1,8 @@
 ﻿using MCCS.Core.Models.Model3D;
-using System.Windows.Media.Media3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
 using HelixToolkit.SharpDX.Core;
 using SharpDX;
-using MCCS.Models.Model3D;
 
 namespace MCCS.ViewModels.Others
 {

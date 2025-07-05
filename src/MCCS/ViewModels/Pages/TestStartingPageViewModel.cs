@@ -23,10 +23,6 @@ using MCCS.Core.Devices.Commands;
 using MCCS.Events.ControlCommand;
 using MCCS.Common;
 using MCCS.Models.Model3D;
-using System.Windows.Controls.Primitives;
-using System.Windows;
-using SharpDX;
-using System.Windows.Controls;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -56,7 +52,9 @@ namespace MCCS.ViewModels.Pages
 
         private readonly IDeviceManager _deviceManager;
         private readonly Random _random = new();
-        private DateTime _currentTime = DateTime.Now; 
+        private DateTime _currentTime = DateTime.Now;
+
+        private Model3DViewModel? _clearOperationModel = null;
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
         #endregion
@@ -539,9 +537,10 @@ namespace MCCS.ViewModels.Pages
             {
                 if (e.HitTestResult?.ModelHit != null)
                 {
-                    var model = e.HitTestResult.ModelHit as SceneNode;
+                    var model = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
                     if (model != null)
                     {
+                        _clearOperationModel = model;
                         IsShowContextMenu = true;
                         mouseArgs.Handled = true;
                     }
@@ -561,6 +560,10 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         private void ExecuteForceClearCommand() 
         {
+            if (_clearOperationModel != null) 
+            {
+                //_clearOperationModel.
+            }
             IsShowContextMenu = false;
         }
 
