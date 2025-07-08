@@ -16,7 +16,7 @@ namespace MCCS.ViewModels.Pages
                 .Select(s => new TestViewModel 
                 {
                     Id = s.Id,
-                    Name = s.Name,
+                    Name = s.Name ?? string.Empty,
                     Code = s.Code,
                     Standard = s.Standard,
                     Person = s.Person,

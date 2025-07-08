@@ -71,11 +71,11 @@ public sealed class ControlProcessExpander : BindableBase
         var type = obj.GetType();
         var properties = type.GetProperties();
         var res = new ObservableCollection<CommandParamter>();
-        foreach (PropertyInfo prop in properties)
+        foreach (var prop in properties)
         {
-            string name = prop.Name;
-            object value = prop.GetValue(obj) ?? string.Empty;
-            res.Add(new CommandParamter(name, value.ToString()));
+            var name = prop.Name;
+            var value = prop.GetValue(obj) ?? string.Empty;
+            res.Add(new CommandParamter(name, value.ToString() ?? string.Empty));
         }
         return res;
     }
@@ -85,10 +85,10 @@ public sealed class ControlProcessExpander : BindableBase
         var type = _paramter.GetType();
         var properties = type.GetProperties();
         var res = new Dictionary<string, object>();
-        foreach (PropertyInfo prop in properties)
+        foreach (var prop in properties)
         {
-            string name = prop.Name;
-            object value = prop.GetValue(_paramter) ?? string.Empty;
+            var name = prop.Name;
+            var value = prop.GetValue(_paramter) ?? string.Empty;
             res.Add(name, value);
         }
         return res;

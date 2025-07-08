@@ -5,16 +5,16 @@ namespace MCCS.ViewModels.Others
     public class TestViewModel : BindableBase
     {
         private long _id;
-        private string _code;
-        private string _name;
-        private string _stanard;
-        private string _person;
-        private string _remark;
-        private string _filePath;
+        private string _code = string.Empty;
+        private string _name = string.Empty;
+        private string _stanard = string.Empty;
+        private string _person = string.Empty;
+        private string _remark = string.Empty;
+        private string _filePath = string.Empty;
         private TestStatus _status;
         private DateTime? _startTime;
         private DateTime? _endTime;
-        private string _processingStr;
+        private string _processingStr = string.Empty;
         private DateTime? _createtime;
 
         public long Id

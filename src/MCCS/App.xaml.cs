@@ -11,9 +11,11 @@ using MCCS.Core.Repositories;
 using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
+using MCCS.ViewModels.Dialogs;
 using MCCS.Views.Pages.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
+using MCCS.Views.Dialogs;
 using MCCS.Views.Pages.ControlCommandPages;
 
 namespace MCCS
@@ -74,11 +76,13 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
-
+            
             containerRegistry.RegisterForNavigation<ViewFatigueControl>(ViewFatigueControlViewModel.Tag);
             containerRegistry.RegisterForNavigation<ViewManualControl>(ViewManualControlViewModel.Tag);
             containerRegistry.RegisterForNavigation<ViewProgramControl>(ViewProgramControlViewModel.Tag);
             containerRegistry.RegisterForNavigation<ViewStaticControl>(ViewStaticControlViewModel.Tag);
+            // Dialogs
+            containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
         }
         /// <summary>
         /// (4)初始化应用程序

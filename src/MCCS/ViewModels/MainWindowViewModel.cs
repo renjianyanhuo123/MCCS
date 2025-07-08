@@ -154,7 +154,7 @@ namespace MCCS.ViewModels
                 }
             ];
             // 默认选中第一个项，并执行导航
-            SelectedTabItem = _tabs.FirstOrDefault();
+            SelectedTabItem = _tabs.FirstOrDefault() ?? throw new ArgumentNullException(nameof(_tabs));
             SelectedMenuItem = _menus[1]; 
             _optionsMenus = [];
         }

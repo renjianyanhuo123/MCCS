@@ -6,9 +6,9 @@ namespace MCCS.UserControl.Pagination
 
     public class PaginationTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate TextBlockTemplate { get; set; }
+        public DataTemplate? TextBlockTemplate { get; set; }
 
-        public DataTemplate ImageDataTemplate { get; set; }
+        public DataTemplate? ImageDataTemplate { get; set; }
 
         public override DataTemplate? SelectTemplate(object? item, DependencyObject container)
         {

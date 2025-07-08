@@ -25,7 +25,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             var success = navigationContext.Parameters.TryGetValue<ProgramControlModel>("ControlModel", out var param); 
-            if (success) 
+            if (success && param != null) 
             {
                 FilePath = param.FilePath;
             }

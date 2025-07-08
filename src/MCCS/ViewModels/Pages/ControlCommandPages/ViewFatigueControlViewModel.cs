@@ -102,18 +102,16 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var success = navigationContext.Parameters.TryGetValue<FatigueControlModel>("ControlModel", out var param); 
-            if (success)
-            { 
-                ControlUnitType = (int)param.ControlUnitType;
-                WaveformType = (int)param.WaveformType;
-                Frequency = param.Frequency;
-                Amplitude = param.Amplitude;
-                Median = param.Median;
-                CycleTimes = param.CycleTimes;
-                CycleCount = param.CycleCount;
-            }
-            
+            var success = navigationContext.Parameters.TryGetValue<FatigueControlModel>("ControlModel", out var param);
+            if (!success || param == null) return;
+            ControlUnitType = (int)param.ControlUnitType;
+            WaveformType = (int)param.WaveformType;
+            Frequency = param.Frequency;
+            Amplitude = param.Amplitude;
+            Median = param.Median;
+            CycleTimes = param.CycleTimes;
+            CycleCount = param.CycleCount;
+
         } 
 
         private void SendUpdateEvent() 

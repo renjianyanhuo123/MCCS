@@ -13,7 +13,7 @@ namespace MCCS.Services.Model3DService
     public class Model3DLoaderService : IModel3DLoaderService
     {
         private readonly SemaphoreSlim _importSemaphore;
-        private CancellationTokenSource _cancellationTokenSource;
+        // private CancellationTokenSource _cancellationTokenSource;
         // private readonly SynchronizationContext? _uiContext;
         private readonly  IEffectsManager _effectsManager; 
         private const int MaxConcurrentImports = 4;

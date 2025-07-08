@@ -133,16 +133,20 @@ namespace MCCS.UserControl.Pagination
         {
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int pageSize) return;
-            var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.PageSize = pageSize; 
+            if (control.DataContext is PaginationViewModel viewModel)
+            {
+                viewModel.PageSize = pageSize;
+            }
         }
 
         private static void OnCurrentPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not PaginationUserControl control) return;
-            if (e.NewValue is not int currentPage) return;
-            var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.CurrentPage = currentPage; 
+            if (e.NewValue is not int currentPage) return; 
+            if (control.DataContext is PaginationViewModel viewModel)
+            {
+                viewModel.CurrentPage = currentPage;
+            }
         }
 
         private static void OnShowTotalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -155,8 +159,10 @@ namespace MCCS.UserControl.Pagination
         {
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int defaultCurrentPage) return;
-            var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.CurrentPage = defaultCurrentPage;
+            if (control.DataContext is PaginationViewModel viewModel)
+            {
+                viewModel.CurrentPage = defaultCurrentPage;
+            }
         }
 
         private static void OnDefaultPageSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -164,17 +170,21 @@ namespace MCCS.UserControl.Pagination
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int defaultPageSize) return;
             control.UpdatePageSizeUi(defaultPageSize);
-            var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.PageSize = defaultPageSize;
+            if (control.DataContext is PaginationViewModel viewModel)
+            {
+                viewModel.PageSize = defaultPageSize;
+            }
         }
 
         private static void OnTotalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is not PaginationUserControl control) return;
             if (e.NewValue is not int total) return;
-            control.UpdateTotalUi(total);
-            var viewModel = control.DataContext as PaginationViewModel;
-            viewModel.Total = total;
+            control.UpdateTotalUi(total); 
+            if (control.DataContext is PaginationViewModel viewModel)
+            {
+                viewModel.Total = total;
+            }
         }
         #endregion
          

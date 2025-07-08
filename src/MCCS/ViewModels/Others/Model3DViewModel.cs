@@ -1,4 +1,5 @@
-﻿using MCCS.Core.Models.Model3D;
+﻿using System.Diagnostics;
+using MCCS.Core.Models.Model3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
 using HelixToolkit.SharpDX.Core;
@@ -119,7 +120,7 @@ namespace MCCS.ViewModels.Others
         /// <summary>
         /// (模拟模型移动)位移默认偏移值 = 0.0
         ///</summary>
-        public float DisplacementOffsetValue { get; set; } = 0.0f;
+        public float DisplacementOffsetValue { get; set; }
 
         /// <summary>
         /// (模拟模型移动)力默认偏移值 = 0.0
@@ -147,7 +148,7 @@ namespace MCCS.ViewModels.Others
                 Text = $"Force: {ForceNum} kN",
                 Origin = center + labelOffset,
                 Foreground = Color4.White,
-                Background = new Color4(0, 0, 0, 0.7f), // 半透明背景
+                Background = new Color4(1.0f, 0, 0, 0.7f), // 半透明背景
                 FontFamily = "Microsoft YaHei",
                 Scale = 1f, 
             };
@@ -155,8 +156,8 @@ namespace MCCS.ViewModels.Others
             // 创建位移标签
             var displacementLabel = new TextInfo($"Displacement: {DisplacementNum} mm",  labelOffset + center + new Vector3(0,2,0))
             {
-                Foreground = Color4.White,
-                Background = new Color4(0, 0, 0, 0.7f), // 半透明背景
+                Foreground = Color4.Black,
+                Background = new Color4(1.0f, 0, 0, 0.7f), // 半透明背景
                 Scale = 1f,
                 VerticalAlignment = BillboardVerticalAlignment.Top
             };
@@ -176,7 +177,6 @@ namespace MCCS.ViewModels.Others
             foreach (var node in _sceneNode.Traverse())
             {
                 if (node is not MaterialGeometryNode m) continue;
-                m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
                 if (IsSelected)
                 {
                     m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected);

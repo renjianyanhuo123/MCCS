@@ -35,7 +35,7 @@ namespace MCCS.Core.Models.TestInfo
         {
             get;
             set;
-        }
+        } = string.Empty;
         /// <summary>
         /// 备注
         /// </summary>
@@ -44,7 +44,7 @@ namespace MCCS.Core.Models.TestInfo
         {
             get;
             set;
-        }
+        } = string.Empty;
         /// <summary>
         /// 文件路径
         /// </summary>
@@ -53,7 +53,7 @@ namespace MCCS.Core.Models.TestInfo
         {
             get;
             set;
-        }
+        } = string.Empty;
         /// <summary>
         /// 试验状态
         /// </summary>

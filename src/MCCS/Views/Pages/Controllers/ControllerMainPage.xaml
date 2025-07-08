@@ -53,12 +53,12 @@
                                     Style="{StaticResource MaterialDesignRadioButton}" 
                                     Command="{Binding ControlTypeChangedCommand}"
                                     CommandParameter="Combine"
-                                    GroupName="ComtrolTypeGroup" Margin="0 0 10 0" />
+                                    GroupName="ControlTypeGroup" Margin="0 0 10 0" />
                             <RadioButton Content="单个控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Single}"
                                     Style="{StaticResource MaterialDesignRadioButton}"
                                     Command="{Binding ControlTypeChangedCommand}"
                                     CommandParameter="Single"
-                                    GroupName="ComtrolTypeGroup" />
+                                    GroupName="ControlTypeGroup" />
                         </WrapPanel>
                         <ComboBox Margin="0,0,0,10"
                                     materialDesign:HintAssist.Hint="请选择加入的组合(未选择默认为新组合)" 

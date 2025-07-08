@@ -2,6 +2,6 @@
 {
     public class ControlParamEventParam
     {
-        public object Param { get; set; }
+        public object? Param { get; set; } = null;
     }
 }

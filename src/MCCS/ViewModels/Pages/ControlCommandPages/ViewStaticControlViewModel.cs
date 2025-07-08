@@ -69,12 +69,10 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             var success = navigationContext.Parameters.TryGetValue<StaticControlModel>("ControlModel", out var param);
-            if (success)
-            { 
-                SelectedControlUnitType = (int)param.UnitType;
-                Speed = param.Speed;
-                TargetValue = param.TargetValue;
-            } 
+            if (!success || param == null) return;
+            SelectedControlUnitType = (int)param.UnitType;
+            Speed = param.Speed;
+            TargetValue = param.TargetValue;
         } 
     }
 }

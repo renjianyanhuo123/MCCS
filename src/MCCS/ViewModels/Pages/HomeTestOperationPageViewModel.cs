@@ -12,8 +12,8 @@ namespace MCCS.ViewModels.Pages
 
         private bool _action = false;
         private Point _startPoint;
-        private Canvas _drawingCanvas;
-        private Canvas _widgetCanvas;
+        private Canvas? _drawingCanvas;
+        private Canvas? _widgetCanvas;
 
         public HomeTestOperationPageViewModel(IEventAggregator eventAggregator, IDialogService dialogService) 
             : base(eventAggregator, dialogService)
@@ -30,7 +30,7 @@ namespace MCCS.ViewModels.Pages
         #region 私有方法
         private void ExecuteMouseRightButtonDownCommand(object param) 
         {
-            _drawingCanvas = param as Canvas;
+            _drawingCanvas = param as Canvas ?? throw new ArgumentNullException();
             _startPoint = Mouse.GetPosition(_drawingCanvas);
             _action = true;
         }
@@ -39,7 +39,7 @@ namespace MCCS.ViewModels.Pages
         {
             if (_action && Mouse.RightButton == MouseButtonState.Pressed) 
             {
-                var widgetCanvas = param as Canvas;
+                var widgetCanvas = param as Canvas ?? throw new ArgumentNullException(nameof(Canvas));
                 _widgetCanvas = widgetCanvas;
                 var currentPoint = Mouse.GetPosition(_drawingCanvas);
                 var d = currentPoint - _startPoint;
@@ -62,8 +62,9 @@ namespace MCCS.ViewModels.Pages
             _action = false;
         }
 
-        private void ExecuteMouseWheelCommand(MouseWheelEventArgs e) 
+        private void ExecuteMouseWheelCommand(MouseWheelEventArgs e)
         {
+            if (_drawingCanvas == null || _widgetCanvas == null) return;
             // 监听Crtl + 滚轮事件
             if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) 
             {

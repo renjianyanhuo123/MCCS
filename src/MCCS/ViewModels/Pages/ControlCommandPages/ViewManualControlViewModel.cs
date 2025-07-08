@@ -60,13 +60,11 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         } 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var success = navigationContext.Parameters.TryGetValue<ManualControlModel>("ControlModel", out var res); 
-            if (success)
-            {
-                OutputMaxValue = res.MaxValue;
-                OutputMinValue = res.MinValue;
-                OutPutValue = res.OutputValue;
-            } 
+            var success = navigationContext.Parameters.TryGetValue<ManualControlModel>("ControlModel", out var res);
+            if (!success || res == null) return;
+            OutputMaxValue = res.MaxValue;
+            OutputMinValue = res.MinValue;
+            OutPutValue = res.OutputValue;
         } 
 
         private void SendUpdateEvent()

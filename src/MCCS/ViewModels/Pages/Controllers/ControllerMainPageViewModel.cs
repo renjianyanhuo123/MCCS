@@ -180,7 +180,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             controlInfo = success ? controlInfo : new ControlInfo
             {
                 ChannelId = channelId,
-                ChannelName = channelName ?? "",
+                ChannelName = channelName,
                 IsCanControl = false,
                 ControlType = ControlTypeEnum.Single,
                 ControlMode = ControlMode.Manual,
@@ -188,18 +188,26 @@ namespace MCCS.ViewModels.Pages.Controllers
                 CombineChannelName = string.Empty,
                 ExecutingStatus = CommandExecuteStatusEnum.NoExecute
             };
+            if (controlInfo == null) return;
             if (!success) _controlInfoDic.Add(controlInfo.ChannelId, controlInfo);
             SetViewModelValue(controlInfo);
-            var controlInfoTemp = _controlInfoDic[CurrentChannelId];
+            _controlInfoDic.TryGetValue(CurrentChannelId, out var controlInfoTemp);
+            if (controlInfoTemp == null) return;
             var sendParams = new NavigationParameters();
             if (ControlType == ControlTypeEnum.Single)
             {
-                sendParams.Add("ControlModel", controlInfoTemp?.ControlParams);
+                if (controlInfoTemp.ControlParams != null)
+                {
+                    sendParams.Add("ControlModel", controlInfoTemp.ControlParams);
+                }
             }
             else
             {
                 var temp = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == controlInfoTemp.CombineChannelId)?.ControlParams;
-                sendParams.Add("ControlModel", temp);
+                if (temp != null)
+                {
+                    sendParams.Add("ControlModel", temp);
+                }
             }
             _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), sendParams);
         }
@@ -236,13 +244,16 @@ namespace MCCS.ViewModels.Pages.Controllers
             else 
             {
                 var combineInfo = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
-                res.ChannelIds.AddRange(combineInfo.ControlChannels.Select(s => s.ChannelId));
+                if (combineInfo != null)
+                {
+                    res.ChannelIds.AddRange(combineInfo.ControlChannels.Select(s => s.ChannelId));
+                }
             }
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(res);
             _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Subscribe(res => 
             {
                 var success = _controlInfoDic.TryGetValue(res.CommandId, out var controlInfo);
-                if (!success) return;
+                if (!success || controlInfo == null) return;
                 controlInfo.ExecutingStatus = res.CommandExecuteStatus;
                 if (CurrentChannelId == res.CommandId) CurrentCommandStatus = res.CommandExecuteStatus;
             });
@@ -342,6 +353,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             // 移除在原有组合中的对应的控制通道
             var removeObj = _controlCombineInfos.FirstOrDefault(c => c.ControlChannels.Any(s => s.ChannelId == CurrentChannelId));
             removeObj?.ControlChannels.RemoveAll(c => c.ChannelId == CurrentChannelId);
+            if (controlInfo == null) return;
             if (ControlType != ControlTypeEnum.Combine) 
             {
                 controlInfo.ControlParams = _tempSaveControlParamInfo;
@@ -349,23 +361,21 @@ namespace MCCS.ViewModels.Pages.Controllers
             }
             if (SelectedControlCombineInfo.CombineChannelId == None)
             {
-                if (!string.IsNullOrEmpty(CurrentCombineName))
+                if (string.IsNullOrEmpty(CurrentCombineName)) return;
+                // 选择新增组合
+                controlInfo.CombineChannelId = Guid.NewGuid().ToString("N");
+                controlInfo.CombineChannelName = CurrentCombineName;
+                var newCombine = new ControlCombineInfo
                 {
-                    // 选择新增组合
-                    controlInfo.CombineChannelId = Guid.NewGuid().ToString("N");
-                    controlInfo.CombineChannelName = CurrentCombineName;
-                    var newCombine = new ControlCombineInfo
-                    {
-                        CombineChannelId = controlInfo.CombineChannelId,
-                        CombineChannelName = controlInfo.CombineChannelName,
-                        ControlMode = (ControlMode)SelectedControlMode
-                    };
-                    newCombine.ControlParams = _tempSaveControlParamInfo;
-                    newCombine.ControlChannels.Add(controlInfo);
-                    if (!_controlCombineInfos.Any(c => c.CombineChannelName == newCombine.CombineChannelName))
-                    {
-                        _controlCombineInfos.Add(newCombine);
-                    }
+                    CombineChannelId = controlInfo.CombineChannelId,
+                    CombineChannelName = controlInfo.CombineChannelName,
+                    ControlMode = (ControlMode)SelectedControlMode,
+                    ControlParams = _tempSaveControlParamInfo
+                };
+                newCombine.ControlChannels.Add(controlInfo);
+                if (_controlCombineInfos.All(c => c.CombineChannelName != newCombine.CombineChannelName))
+                {
+                    _controlCombineInfos.Add(newCombine);
                 }
             }
             else
@@ -373,8 +383,9 @@ namespace MCCS.ViewModels.Pages.Controllers
                 var combineInfo = _controlCombineInfos.First(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
                 controlInfo.CombineChannelId = combineInfo?.CombineChannelId;
                 controlInfo.CombineChannelName = combineInfo?.CombineChannelName;
+                if (combineInfo == null) return;
                 combineInfo.ControlParams = _tempSaveControlParamInfo;
-                if (!combineInfo.ControlChannels.Any(c => c.ChannelId == controlInfo.ChannelId))
+                if (combineInfo.ControlChannels.All(c => c.ChannelId != controlInfo.ChannelId))
                 {
                     combineInfo?.ControlChannels.Add(controlInfo);
                 }
@@ -415,9 +426,10 @@ namespace MCCS.ViewModels.Pages.Controllers
             // 组合模式下，强制切换为和组合状态一致
             var temp = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
             SelectedControlMode = (int)(temp?.ControlMode ?? 0);
+            if (temp?.ControlParams == null) return;
             var sendParams = new NavigationParameters
             {
-                { "ControlModel", temp?.ControlParams }
+                { "ControlModel", temp.ControlParams }
             }; 
             _regionManager.RequestNavigate(GlobalConstant.ControlCommandRegionName, new Uri(GetViewName(), UriKind.Relative), sendParams);
         }

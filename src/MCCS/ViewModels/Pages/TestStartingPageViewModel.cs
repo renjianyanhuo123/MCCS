@@ -1,28 +1,30 @@
 ﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
+using MaterialDesignThemes.Wpf;
+using MCCS.Common;
 using MCCS.Core.Devices;
+using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Details;
+using MCCS.Core.Devices.Manager;
+using MCCS.Events.ControlCommand;
+using MCCS.Events.Controllers;
+using MCCS.Models;
+using MCCS.Models.ControlCommand;
+using MCCS.Models.Model3D;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
+using MCCS.ViewModels.Others.Controllers;
+using MCCS.ViewModels.Pages.Controllers;
+using MCCS.Views.Dialogs;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
-using MCCS.Core.Devices.Manager;
-using MCCS.ViewModels.Others.Controllers;
-using MCCS.ViewModels.Pages.Controllers;
-using MCCS.Events.Controllers;
-using MCCS.Models;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
-using System.Diagnostics;
-using MCCS.Models.ControlCommand;
-using MCCS.Core.Devices.Commands;
-using MCCS.Events.ControlCommand;
-using MCCS.Common;
-using MCCS.Models.Model3D;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -43,8 +45,9 @@ namespace MCCS.ViewModels.Pages
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService;
         private readonly IRegionManager _regionManager;
+        private readonly IContainerProvider _containerProvider;
         private CancellationTokenSource? _loadingCancellation;
-        private ImportProgressEventArgs _loadingProgress; 
+        private ImportProgressEventArgs _loadingProgress = new(); 
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流 
@@ -70,9 +73,11 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<MouseDown3DEventArgs> Model3DRightMouseDownCommand => new(ExecuteModel3DRightMouseDownCommand);
         public DelegateCommand DisplacementClearCommand => new(ExecuteDisplacementClearCommand);
         public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
+        public AsyncDelegateCommand<string> SetCurveCommand => new(ExecuteSetCurveCommand);
         #endregion
 
         public TestStartingPageViewModel(
+            IContainerProvider containerProvider,
             IRegionManager regionManager,
             IDeviceManager deviceManager,
             IEffectsManager effectsManager,
@@ -80,9 +85,11 @@ namespace MCCS.ViewModels.Pages
             IModel3DLoaderService model3DLoaderService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
+            EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
+            _containerProvider = containerProvider;
             _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService;
-            Models = []; 
+            _models = []; 
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
@@ -92,7 +99,7 @@ namespace MCCS.ViewModels.Pages
                 FarPlaneDistance = 10000,
                 NearPlaneDistance = 0.1f
             };
-            _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(RevicedInverseControlEvent);
+            _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(ReceivedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
             _eventAggregator.GetEvent<NotificationCommandStopedEvent>().Subscribe(x => 
             {
@@ -107,6 +114,11 @@ namespace MCCS.ViewModels.Pages
         }
 
         #region Property
+        /// <summary>
+        /// 背景环境配置
+        /// </summary>
+        public TextureModel EnvironmentMap { get; private set; }
+
         /// <summary>
         /// 是否显示右键菜单
         /// </summary>
@@ -271,7 +283,7 @@ namespace MCCS.ViewModels.Pages
             IsStartedTest = !IsStartedTest;
         }
 
-        private void RevicedInverseControlEvent(InverseControlEventParam param)
+        private void ReceivedInverseControlEvent(InverseControlEventParam param)
         {
             if (param == null) return;
             // 处理控制事件
@@ -294,17 +306,17 @@ namespace MCCS.ViewModels.Pages
             {
                 var displacementModel = new CurveShowModel("Time(s)", "kN")
                 {
-                    DeviceId = device.DeviceId,
+                    DeviceId = device.DeviceId ?? string.Empty,
                     ExpanderHeaderName = $"{device.Name}_时间-位移曲线",
                 };
                 var forceModel = new CurveShowModel("Time(s)", "mm")
                 {
-                    DeviceId = device.DeviceId,
+                    DeviceId = device.DeviceId ?? string.Empty,
                     ExpanderHeaderName = $"{device.Name}_时间-力曲线",
                 };
                 CurveModels.Add(displacementModel);
                 CurveModels.Add(forceModel);
-                var actor = _deviceManager.GetDevice(device.DeviceId)?.DataStream
+                var actor = _deviceManager.GetDevice(device.DeviceId ?? string.Empty)?.DataStream
                 ?? throw new ArgumentNullException($"Device id {device.DeviceId} is not exist！"); 
                 actor.Sample(TimeSpan.FromSeconds(1))
                 .Subscribe(x => {
@@ -380,7 +392,8 @@ namespace MCCS.ViewModels.Pages
         /// <param name="param"></param>
         private async void OnReceivedCommand(ReceivedCommandDataEventParam param)
         {
-            var expander = new ControlProcessExpander(param.Param)
+            if (param.Param == null) throw new ArgumentNullException(nameof(param.Param));
+           var expander = new ControlProcessExpander(param.Param)
             {
                 CommandId = param.ChannelIds.Count == 1 ? param.ChannelIds.First() : Guid.NewGuid().ToString("N"),
                 CommandName = param.ChannelIds.Count == 1 ? Models.First(s => s.Model3DData.DeviceId == param.ChannelIds.First()).Model3DData.Name : "组合控制",
@@ -507,45 +520,49 @@ namespace MCCS.ViewModels.Pages
             // 获取点击的模型
             var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
-            if (clickedModel is { IsSelectable: true })
-            {
-                // 切换当前模型的选中状态
-                clickedModel.IsSelected = true;
-                // IsRightDrawerOpen = true;
-                var channels = Models
-                    .Where(s => s.IsSelected)
-                    .Select(c => new ControllerItemModel
-                    {
-                        ChannelId = c.Model3DData.DeviceId ?? string.Empty,
-                        ChannelName = c.Model3DData.Name ?? string.Empty,
-                    }).ToList();
-                var channelsParam = new NavigationParameters
+            if (clickedModel is not { IsSelectable: true }) return;
+            // 切换当前模型的选中状态
+            clickedModel.IsSelected = true;
+            // IsRightDrawerOpen = true;
+            var channels = Models
+                .Where(s => s.IsSelected)
+                .Select(c => new ControllerItemModel
                 {
-                    { "ChannelId", clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId")},
-                    { "ChannelName", clickedModel.Model3DData.Name }
-                };
-                _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
-            }
+                    ChannelId = c.Model3DData.DeviceId ?? string.Empty,
+                    ChannelName = c.Model3DData.Name ?? string.Empty,
+                }).ToList();
+            var channelsParam = new NavigationParameters
+            {
+                { "ChannelId", clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId")},
+                { "ChannelName", clickedModel.Model3DData.Name }
+            };
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
         }
         /// <summary>
         /// 单独处理鼠标右键弹窗
         /// </summary>
         /// <param name="e"></param>
-        private void ExecuteModel3DRightMouseDownCommand(MouseDown3DEventArgs e) 
+        private void ExecuteModel3DRightMouseDownCommand(MouseDown3DEventArgs e)
         {
-            if (e?.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs && mouseArgs.ChangedButton == MouseButton.Right)
-            {
-                if (e.HitTestResult?.ModelHit != null)
-                {
-                    var model = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
-                    if (model != null)
-                    {
-                        _clearOperationModel = model;
-                        IsShowContextMenu = true;
-                        mouseArgs.Handled = true;
-                    }
-                }
-            }
+            if (e?.OriginalInputEventArgs is not MouseButtonEventArgs { ChangedButton: MouseButton.Right } mouseArgs) return;
+            if (e.HitTestResult?.ModelHit == null) return;
+            var model = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
+            if (model == null) return;
+            _clearOperationModel = model;
+            IsShowContextMenu = true;
+            mouseArgs.Handled = true;
+        }
+        
+        /// <summary>
+        /// 设置曲线
+        /// </summary>
+        private async Task ExecuteSetCurveCommand(string id)
+        {
+            var curveModel = CurveModels.FirstOrDefault(c => c.DeviceId == id);
+            if(curveModel == null) return;
+            var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
+            var result = await DialogHost.Show(setCurveView,"RootDialog");
+            Debug.WriteLine("Test!!!");
         }
 
         /// <summary>

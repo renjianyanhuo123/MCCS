@@ -82,7 +82,7 @@ namespace MCCS.UserControl.Pagination
         #endregion
 
         #region Events
-        public event Action<PageChangedParam> PageChanged;
+        public event Action<PageChangedParam>? PageChanged;
         #endregion
 
         #region private method
@@ -91,7 +91,7 @@ namespace MCCS.UserControl.Pagination
             if (param is not int p || p > TotalPages || p < 1) return;
             CurrentPage = p;
             UpdateSelectorUnits();
-            PageChanged(new PageChangedParam(PageSize, CurrentPage));
+            PageChanged?.Invoke(new PageChangedParam(PageSize, CurrentPage));
         }
 
         private void PreviousPage(object? param)
@@ -100,7 +100,7 @@ namespace MCCS.UserControl.Pagination
             {
                 CurrentPage--;
                 UpdateSelectorUnits();
-                PageChanged(new PageChangedParam(PageSize, CurrentPage));
+                PageChanged?.Invoke(new PageChangedParam(PageSize, CurrentPage));
             }
         }
         private void NextPage(object? param)
@@ -109,7 +109,7 @@ namespace MCCS.UserControl.Pagination
             {
                 CurrentPage++;
                 UpdateSelectorUnits();
-                PageChanged(new PageChangedParam(PageSize, CurrentPage));
+                PageChanged?.Invoke(new PageChangedParam(PageSize, CurrentPage));
             }
         }
         private void SelectedChanged(object? param)
@@ -119,7 +119,7 @@ namespace MCCS.UserControl.Pagination
             if (!int.TryParse(t, out var pageSize)) return;
             PageSize = pageSize;
             UpdateSelectorUnits();
-            PageChanged(new PageChangedParam(PageSize, CurrentPage));
+            PageChanged?.Invoke(new PageChangedParam(PageSize, CurrentPage));
         }
 
         private void UpdateSelectorUnits()

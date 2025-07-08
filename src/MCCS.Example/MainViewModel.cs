@@ -7,7 +7,7 @@ namespace MCCS.Example
 {
     public class MainViewModel : BindingBase
     {
-        private object _param;
+        // private object _param;
         private int _total;
         public MainViewModel()
         {
@@ -25,7 +25,7 @@ namespace MCCS.Example
         {
             var p = param as PageChangedParam;
             Thread.Sleep(1000);
-            Debug.WriteLine($"当前页:{p.CurrentPage},PageSize:{p.PageSize}");
+            Debug.WriteLine($"当前页:{p?.CurrentPage},PageSize:{p?.PageSize}");
         }, _ => true);
     }
 }

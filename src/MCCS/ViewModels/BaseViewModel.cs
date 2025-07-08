@@ -2,11 +2,11 @@
 
 namespace MCCS.ViewModels;
 
-public class BaseViewModel(IEventAggregator eventAggregator, IDialogService dialogService)
+public class BaseViewModel(IEventAggregator eventAggregator, IDialogService? dialogService)
     : BindableBase, INavigationAware
 {
     protected readonly IEventAggregator _eventAggregator = eventAggregator;
-    protected IDialogService _dialogService = dialogService;
+    protected IDialogService? _dialogService = dialogService;
     protected string _parentView = string.Empty;
 
     public BaseViewModel(IEventAggregator eventAggregator) : this(eventAggregator, null)
@@ -26,7 +26,7 @@ public class BaseViewModel(IEventAggregator eventAggregator, IDialogService dial
 
     public virtual void OnNavigatedTo(NavigationContext navigationContext)
     {
-        string viewName = navigationContext.Parameters.GetValue<string>("Parent");
+        var viewName = navigationContext.Parameters.GetValue<string>("Parent");
         if (viewName != null)
         {
             _parentView = viewName;

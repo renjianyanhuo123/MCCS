@@ -4,13 +4,13 @@ namespace MCCS.ViewModels.Others
 {
     public class MainTabsViewModel : BindableBase
     {
-        private string _id;
+        private string _id = string.Empty;
         public string Id {
             get => _id; 
             set => SetProperty(ref _id, value);
         }
 
-        private string _content;
+        private string _content = string.Empty;
         public string Content 
         { 
             get => _content; 
