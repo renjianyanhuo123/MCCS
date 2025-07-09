@@ -10,7 +10,8 @@
              xmlns:prism="http://prismlibrary.com/"
              xmlns:hx="http://helix-toolkit.org/wpf/SharpDX"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" 
+             xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              d:DataContext="{d:DesignInstance Type=pages:TestStartingPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
@@ -22,11 +23,7 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
             <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
-            <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
-            <!--<ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />
-            </ResourceDictionary.MergedDictionaries>-->
+            <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" /> 
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -70,7 +67,7 @@
                     </ItemsControl>
                 </Border>
             </Popup>
-            <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染  595959 -->
+            <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染 -->
             <hx:Viewport3DX  
                 x:Name="viewport"
                 Grid.Column="0"
@@ -134,7 +131,7 @@
                         AutoSpacing="True"
                         Offset="-65" />
             </hx:Viewport3DX>
-            <StackPanel  Grid.Row="1" Grid.Column="1"  
+            <StackPanel  Grid.Row="0" Grid.Column="1"  
                         HorizontalAlignment="Center"
                         Margin="5">
                 <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}">
@@ -157,7 +154,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
-            <ItemsControl Grid.Row="1"
+            <ItemsControl Grid.Row="0"
                           Grid.Column="0"
                           ItemsSource="{Binding CurveModels}">
                 <ItemsControl.ItemTemplate>
@@ -202,7 +199,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
-            <ItemsControl Grid.Row="1"
+            <ItemsControl Grid.Row="0"
               Grid.Column="2" 
               ItemsSource="{Binding ControlProcessExpanders}">
                 <ItemsControl.ItemTemplate>

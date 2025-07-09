@@ -17,6 +17,8 @@ using MCCS.ViewModels.Pages.Controllers;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Dialogs;
 using MCCS.Views.Pages.ControlCommandPages;
+using MCCS.Views.Pages.SystemManager;
+using MCCS.ViewModels.Pages.SystemManager;
 
 namespace MCCS
 {
@@ -76,7 +78,10 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
-            
+            containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
+            containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
+            containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
+
             containerRegistry.RegisterForNavigation<ViewFatigueControl>(ViewFatigueControlViewModel.Tag);
             containerRegistry.RegisterForNavigation<ViewManualControl>(ViewManualControlViewModel.Tag);
             containerRegistry.RegisterForNavigation<ViewProgramControl>(ViewProgramControlViewModel.Tag);

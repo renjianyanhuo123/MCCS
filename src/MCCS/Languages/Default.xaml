@@ -30,4 +30,9 @@
     <system:String x:Key="ControllerMethodHelpText">选择控制模式</system:String>
     <system:String x:Key="IsParticipateControl">是否参与控制</system:String>
     <system:String x:Key="ControlTypeText">控制类型</system:String>
+
+    <!-- SystemManager -->
+    <system:String x:Key="PermissionManagement">权限管理</system:String>
+    <system:String x:Key="HardwareConfiguration">硬件管理</system:String>
+    <system:String x:Key="Model3DSetting">模型配置</system:String>
 </ResourceDictionary>

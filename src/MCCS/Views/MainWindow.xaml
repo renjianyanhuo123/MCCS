@@ -9,6 +9,8 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:prism="http://prismlibrary.com/"
+        xmlns:viewmodels="clr-namespace:MCCS.ViewModels"
+        d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="{DynamicResource AppName}"
         mc:Ignorable="d"
@@ -23,15 +25,20 @@
                     <ColumnDefinition Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:HamburgerMenu}}, Path=CompactPaneLength, Mode=OneWay}" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <ContentControl Grid.Column="0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Content="{Binding Icon}"
-                Focusable="False" />
+                <Viewbox Grid.Column="0" 
+                         Width="24" 
+                         Height="24"
+                         Stretch="Uniform"
+                         StretchDirection="Both"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center">
+                    <ContentControl  
+                        Content="{Binding Icon}" />
+                </Viewbox>
                 <TextBlock Grid.Column="1"
-           VerticalAlignment="Center"
-           FontSize="16"
-           Text="{Binding Label}" />
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           Text="{Binding Label}" />
             </Grid>
         </DataTemplate>
 
@@ -96,19 +103,6 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
-    <!--<mah:MetroWindow.Flyouts>
-        <mah:FlyoutsControl>
-            <mah:Flyout x:Name="TestCommandFlyout"
-            IsOpen="{Binding IsOpenFlyout}"
-            Header="{Binding RightFlyoutName, Mode=OneWay}"
-            Position="Right"
-            Theme="Adapt">
-                <Grid Width="500" Margin="10">
-                    <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}" />
-                </Grid>
-            </mah:Flyout>
-        </mah:FlyoutsControl>
-    </mah:MetroWindow.Flyouts>-->
     <materialDesign:DialogHost Identifier="RootDialog">
         <Grid>
             <Grid.RowDefinitions>
@@ -125,6 +119,9 @@
                   Grid.Column="0" 
                   x:Name="HamburgerMenuControl" 
                   DisplayMode="CompactInline"
+                  CompactPaneLength="48"
+                  HamburgerWidth="48"
+                  HamburgerHeight="48"
                   HamburgerButtonClick="HamburgerMenuControl_HamburgerButtonClick"
                   IsPaneOpen="False"
                   SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
@@ -140,60 +137,6 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <!--<ListBox Grid.Row="0" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTabItem}">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListBoxItem">
-                                        <Border Name="Border" Background="Transparent" Padding="10">
-                                            <ContentPresenter />
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                           
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <RadioButton
-                                    GroupName="TabChange"
-                                    IsChecked="{Binding IsChecked}"
-                                    IsEnabled="{Binding IsEnable}" 
-                                    Style="{StaticResource MaterialDesignTabRadioButton}"
-                                    Content="{Binding Content}"
-                                    Tag="{Binding Id}"
-                                    Command="{Binding DataContext.JumpChildTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding Id}">
-                                </RadioButton>
-                                <Button Visibility="{Binding IsEnableClose}"
-                                        Command="{Binding DataContext.CloseTabCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        CommandParameter="{Binding Id}">
-                                    <Button.Template>
-                                        <ControlTemplate>
-                                            <materialDesign:PackIcon
-                                                VerticalAlignment="Center"
-                                                Kind="Close"
-                                                Foreground="Red"
-                                                Background="Transparent" /> 
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel VerticalAlignment="Center"  Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                </ListBox>-->
                 <ContentControl Grid.Row="1" prism:RegionManager.RegionName="{x:Static local:GlobalConstant.MainContentRegionName}" 
                     Focusable="True" IsTabStop="False">
                     <i:Interaction.Triggers>

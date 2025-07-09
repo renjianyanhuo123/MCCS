@@ -1,7 +1,9 @@
-﻿namespace MCCS.ViewModels.Pages
+﻿namespace MCCS.ViewModels.Pages.SystemManager
 {
-    public class HardwareSettingPageViewModel:BaseViewModel
+    public class HardwareSettingPageViewModel : BaseViewModel
     {
+        public const string Tag = "HardwareSetting";
+
         public HardwareSettingPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
         }

@@ -7,5 +7,7 @@
         public static readonly string RightFlyoutRegionName = "RightFlyoutRegion";
 
         public static readonly string ControlCommandRegionName = "ControlCommandRegion";
+
+        public static readonly string SystemManagerRegionName = "SystemManagerRegion";
     }
 }

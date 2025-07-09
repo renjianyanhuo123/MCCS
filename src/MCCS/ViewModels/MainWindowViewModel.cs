@@ -35,7 +35,7 @@ namespace MCCS.ViewModels
             {
                 if (value == _selectedTabItem) return;
                 foreach (var tab in _tabs) tab.IsChecked = tab.Id == value.Id;
-                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(value.Id, UriKind.Relative), NavigationCompleted);
+                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(value.Id, UriKind.Relative));
                 SetProperty(ref _selectedTabItem, value);
             }
         }
@@ -46,13 +46,6 @@ namespace MCCS.ViewModels
             get => _menus;
             set => SetProperty(ref _menus, value);
         }
-
-        //private bool _isOpenFlyout = false;
-        //public bool IsOpenFlyout
-        //{
-        //    get => _isOpenFlyout;
-        //    set => SetProperty(ref _isOpenFlyout, value);
-        //}
 
         private List<HamburgerMenuIconItem> _optionsMenus;
         public List<HamburgerMenuIconItem> OptionsMenus
@@ -90,7 +83,7 @@ namespace MCCS.ViewModels
 
         private void ExecuteMainRegionLoadedCommand(object parameter)
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative));
         }
         private void ExecuteJumpChildTabCommand(object param)
         {
@@ -100,13 +93,8 @@ namespace MCCS.ViewModels
         {
             if (parameter is not HamburgerMenuIconItem iconItem) return;
             var item = iconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative), NavigationCompleted);
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative));
         }
-
-        private void NavigationCompleted(NavigationResult result)
-        {
-        }
-
         private void OnOpenTabPage(OpenTestOperationEventParam param) 
         {
             var addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
@@ -130,7 +118,6 @@ namespace MCCS.ViewModels
             IRegionManager regionManager, 
             IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
         {
-            // eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
