@@ -25,11 +25,15 @@
             <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}" Height="900">
+    <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}" Height="Auto">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
                 <TextBlock IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Style="{StaticResource MaterialDesignHeadline6TextBlock}"
@@ -139,22 +143,22 @@
                     Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.ControlCommandRegionName}" />
                 </GroupBox>
-                <UniformGrid Columns="2" Margin="0 20 0 0">
-                    <Button 
-                        Content="应用" 
-                        IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                        Width="80"
-                        Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
-                        ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
-                        Command="{Binding ApplyCommand}"/>
-                    <Button  
-                        Content="暂停"
-                        IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
-                        Width="80"
-                        Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
-                        Command="{Binding StopCommand}"/>
-                </UniformGrid>
             </StackPanel> 
         </ScrollViewer>
+        <UniformGrid Grid.Row="1" Columns="2" Margin="0 20 0 0">
+            <Button 
+                Content="应用" 
+                IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
+                Width="80"
+                Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
+                ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
+                Command="{Binding ApplyCommand}"/>
+            <Button  
+                Content="暂停"
+                IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
+                Width="80"
+                Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
+                Command="{Binding StopCommand}"/>
+        </UniformGrid>
     </Grid>
 </UserControl>

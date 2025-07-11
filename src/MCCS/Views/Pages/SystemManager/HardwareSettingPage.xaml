@@ -3,9 +3,20 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager" 
+             d:DataContext="{d:DesignInstance Type=systemmanager:HardwareSettingPageViewModel}"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction 
+                Command="{Binding LoadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"></ColumnDefinition>
@@ -26,57 +37,31 @@
                     </materialDesign:Chip.Icon>
                 </materialDesign:Chip> 
             </UniformGrid>
-            <TreeView MinWidth="220">
-                <TreeViewItem>
-                    <TreeViewItem.Header>
-                        <StackPanel Orientation="Horizontal">
-                            <Viewbox Width="16" Height="16">
-                                <materialDesign:PackIcon Kind="Pipe" />
-                            </Viewbox>
-                            <TextBlock Margin="8,0,0,0" Text="Android" />
-                        </StackPanel>
-                    </TreeViewItem.Header>
-                    <TreeViewItem>
-                        <TreeViewItem.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="16" Height="16">
-                                    <materialDesign:PackIcon Kind="Variable" />
-                                </Viewbox>
-                                <TextBlock Margin="8,0,0,0" Text="Apple" />
-                            </StackPanel>
-                        </TreeViewItem.Header>
-                    </TreeViewItem>
-                    <TreeViewItem Header="Banana" /> 
-                    <TreeViewItem Header="Peach" />
-                    <TreeViewItem Header="Pear" />
-                    <TreeViewItem Header="Strawberry" />
-                </TreeViewItem>
-                <TreeViewItem Header="OS" IsExpanded="True">
-                    <TreeViewItem Header="Amiga" /> 
-                    <TreeViewItem Header="iOS" /> 
-                    <TreeViewItem>
-                        <TreeViewItem.Header>
-                            <StackPanel
-                                    Orientation="Horizontal">
-                                <Viewbox
-                                    Width="16"
-                                    Height="16">
-                                    <Canvas
-                                          Width="24"
-                                          Height="24">
-                                        <Path
-                                             Data="M3,12V6.75L9,5.43V11.91L3,12M20,3V11.75L10,11.9V5.21L20,3M3,13L9,13.09V19.9L3,18.75V13M20,13.25V22L10,20.09V13.1L20,13.25Z"
-                                             Fill="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type TreeViewItem}}, Path=Foreground}" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock
-                                    Margin="8,0,0,0">
-                                    Windows
-                                </TextBlock>
-                            </StackPanel>
-                        </TreeViewItem.Header>
-                    </TreeViewItem>
-                </TreeViewItem> 
+            <TreeView>
+                <ItemsControl ItemsSource="{Binding ChannelVariableInfo}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TreeViewItem>
+                                <TreeViewItem.Header>
+                                    <StackPanel Orientation="Horizontal" Tag="{Binding ChannelId}">
+                                        <Viewbox Width="16" Height="16">
+                                            <materialDesign:PackIcon Kind="Pipe" />
+                                        </Viewbox>
+                                        <TextBlock Margin="8,0,0,0" Text="{Binding ChannelName}" />
+                                    </StackPanel>
+                                </TreeViewItem.Header>
+                                <ItemsControl ItemsSource="{Binding VariableInfos}">
+                                    <!-- <materialDesign:PackIcon Kind="Variable" /> -->
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TreeViewItem Tag="{Binding VariableId}" Header="{Binding VariableName}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </TreeViewItem>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl> 
             </TreeView>
         </StackPanel>
     </Grid>

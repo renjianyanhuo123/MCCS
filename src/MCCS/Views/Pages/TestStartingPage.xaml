@@ -39,11 +39,11 @@
             Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
             Command="{Binding StartTestCommand}"
             ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
-            <Button
+            <!--<Button
                 Width="100"
                 Style="{StaticResource MaterialDesignRaisedLightButton}"
                 Content="测试移动"
-                Command="{Binding TestModelMoveCommand}" />
+                Command="{Binding TestModelMoveCommand}" />-->
         </StackPanel>
         <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">
@@ -173,13 +173,7 @@
                                     <TextBlock VerticalAlignment="Center" Text="{Binding ExpanderHeaderName}" Margin="5,0,15,0" />
                                     <Button Content="设置曲线" 
                                             Command="{Binding DataContext.SetCurveCommand, RelativeSource={RelativeSource AncestorType=localView:TestStartingPage}}"
-                                            CommandParameter="{Binding DeviceId}">
-                                        <!--<Button.CommandParameter>
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding DeviceId}" Visibility="Collapsed" />
-                                                <TextBox></TextBox>
-                                            </StackPanel>
-                                        </Button.CommandParameter>-->
+                                            CommandParameter="{Binding DeviceId}"> 
                                     </Button>
                                 </StackPanel>
                             </Expander.Header>
@@ -199,6 +193,7 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
+            <!-- 进度显示 -->
             <ItemsControl Grid.Row="0"
               Grid.Column="2" 
               ItemsSource="{Binding ControlProcessExpanders}">
@@ -221,8 +216,7 @@
                                         <TextBlock Text="{Binding ControlType}" Margin="5,0,20,0" FontSize="18" Height="Auto"/>
                                         <TextBlock FontSize="18" Height="Auto">
                                             执行进度:
-                                            <Run FontSize="15" Text="{Binding ProgressRate}" FontWeight="Bold" Foreground="White">  
-                                            </Run>
+                                            <Run FontSize="15" Text="{Binding ProgressRate}" FontWeight="Bold" Foreground="Black" />
                                             %
                                         </TextBlock>
                                     </StackPanel>

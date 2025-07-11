@@ -1,5 +1,6 @@
 ﻿using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
+using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Models.SystemSetting;
 using MCCS.Core.Models.TestInfo;
 using MCCS.ViewModels.Pages;
@@ -276,6 +277,223 @@ namespace MCCS
                     }
                 };
                 freeSql.Insert(devices).ExecuteAffrows();
+            }
+
+            if (!freeSql.Select<ChannelInfo>().Any())
+            {
+                var channels = new List<ChannelInfo>
+                {
+                    new()
+                    {
+                        Id = 1,
+                        ChannelId = "Channel_iu89897d8s",
+                        ChannelName = "通道1",
+                        IsShowable = true,
+                        IsOpenSpecimenProtected = true
+                    },
+                    new()
+                    {
+                        Id =2,
+                        ChannelId = "Channel_kdu889sds3",
+                        ChannelName = "通道2",
+                        IsShowable = true,
+                        IsOpenSpecimenProtected = true
+                    }
+                };
+                freeSql.Insert(channels).ExecuteAffrows();
+            }
+
+            if (!freeSql.Select<ChannelAndVariable>().Any())
+            {
+                var channelVariables = new List<ChannelAndVariable>
+                {
+                    new() { ChannelId = 1, VariableId = 1 },
+                    new() { ChannelId = 1, VariableId = 3 },
+                    new() { ChannelId = 2, VariableId = 2 },
+                    new() { ChannelId = 2, VariableId = 4 }
+                };
+                freeSql.Insert(channelVariables).ExecuteAffrows();
+            }
+
+            if (!freeSql.Select<ChannelAndHardware>().Any())
+            {
+                var channelHardware = new List<ChannelAndHardware>
+                {
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 9
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 3
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 1
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 4
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 7
+                    },
+                    new()
+                    {
+                        ChannelId = 2,
+                        HardwareId = 9
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 2
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 5
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 6
+                    },
+                    new()
+                    {
+                        ChannelId = 1,
+                        HardwareId = 8
+                    }
+                };
+                freeSql.Insert(channelHardware).ExecuteAffrows();
+            }
+
+            if (!freeSql.Select<HardwareInfo>().Any())
+            {
+                var hardwares = new List<HardwareInfo>
+                {
+                    new()
+                    {
+                        Id = 1, 
+                        Name = "作动器1",
+                        Type = HardwareTypeEnum.Actuator,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 2, 
+                        Name = "作动器2",
+                        Type = HardwareTypeEnum.Actuator,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        Name = "力传感器1",
+                        Type = HardwareTypeEnum.Sensor,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 4,
+                        Name = "位移传感器1",
+                        Type = HardwareTypeEnum.Sensor,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 5,
+                        Name = "力传感器2",
+                        Type = HardwareTypeEnum.Sensor,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 6,
+                        Name = "位移传感器2",
+                        Type = HardwareTypeEnum.Sensor,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 7,
+                        Name = "伺服阀1",
+                        Type = HardwareTypeEnum.EnergySupply,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 8,
+                        Name = "伺服阀2",
+                        Type = HardwareTypeEnum.EnergySupply,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    },
+                    new()
+                    {
+                        Id = 9,
+                        Name = "控制器1",
+                        Type = HardwareTypeEnum.Controller,
+                        CommunicationType = CommunicationTypeEnum.Ethernet
+                    }
+                };
+                freeSql.Insert(hardwares).ExecuteAffrows();
+            }
+
+            if (!freeSql.Select<VariableInfo>().Any())
+            {
+                var variables = new List<VariableInfo>
+                {
+                    new()
+                    {
+                        Id = 1,
+                        VariableId = "Variable_898293",
+                        Name = "力1",
+                        IsShowable = true,
+                        IsCanCalibration = true,
+                        IsCanControl = true,
+                        IsCanSetLimit = true,
+                        HardwareInfos = "9,1,3,7"
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        VariableId = "Variable_ki39393",
+                        Name = "力2",
+                        IsShowable = true,
+                        IsCanCalibration = true,
+                        IsCanControl = true,
+                        IsCanSetLimit = true,
+                        HardwareInfos = "9,2,5,8"
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        VariableId = "Variable_iu98733",
+                        Name = "位移1",
+                        IsShowable = true,
+                        IsCanCalibration = true,
+                        IsCanControl = true,
+                        IsCanSetLimit = true,
+                        HardwareInfos = "9,1,4,7"
+                    },
+                    new()
+                    {
+                        Id = 4,
+                        VariableId = "Variable_iu28733",
+                        Name = "位移2",
+                        IsShowable = true,
+                        IsCanCalibration = true,
+                        IsCanControl = true,
+                        IsCanSetLimit = true,
+                        HardwareInfos = "9,2,6,8"
+                    }
+                };
+                freeSql.Insert(variables).ExecuteAffrows();
             }
         }
 

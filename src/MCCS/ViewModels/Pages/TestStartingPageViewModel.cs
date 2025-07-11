@@ -443,7 +443,7 @@ namespace MCCS.ViewModels.Pages
             if (expander == null || targetModel == null) return;
             expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
             // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
-            if (response.CommandExecuteStatus == CommandExecuteStatusEnum.ExecuttionCompleted || response.CommandExecuteStatus == CommandExecuteStatusEnum.Stoping) 
+            if (response.CommandExecuteStatus is CommandExecuteStatusEnum.ExecuttionCompleted or CommandExecuteStatusEnum.Stoping) 
             {
                 // 解绑状态订阅链接
                 targetModel.DeviceSubscription?.Dispose();
@@ -562,7 +562,7 @@ namespace MCCS.ViewModels.Pages
             if(curveModel == null) return;
             var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
             var result = await DialogHost.Show(setCurveView,"RootDialog");
-            Debug.WriteLine("Test!!!");
+            // Debug.WriteLine("Test!!!");
         }
 
         /// <summary>

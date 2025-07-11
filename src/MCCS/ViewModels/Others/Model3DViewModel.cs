@@ -130,7 +130,7 @@ namespace MCCS.ViewModels.Others
         /// <summary>
         /// 取消模型移动
         /// </summary>
-        public CancellationTokenSource CancelModelMove { get; set; } = new CancellationTokenSource();
+        public CancellationTokenSource CancelModelMove { get; set; } = new();
 
         /// <summary>
         /// 控制的订阅设备链接
