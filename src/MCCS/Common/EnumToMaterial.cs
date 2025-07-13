@@ -74,6 +74,13 @@ namespace MCCS.Common
                     SpecularColor = Color.White,
                     SpecularShininess = 48
                 },
+                MaterialEnum.MultipleSelected => new PhongMaterial
+                {
+                    DiffuseColor = Color.LightGreen,
+                    SpecularColor = Color.White,
+                    SpecularShininess = 64,
+                    EmissiveColor = Color.LightGreen * 0.3f
+                },
                 _ => new PhongMaterial
                 {
                     DiffuseColor = Color.Gray,

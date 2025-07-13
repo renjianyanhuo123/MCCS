@@ -76,16 +76,11 @@ namespace MCCS
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
-            containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
+            // containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
             containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
             containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
-
-            containerRegistry.RegisterForNavigation<ViewFatigueControl>(ViewFatigueControlViewModel.Tag);
-            containerRegistry.RegisterForNavigation<ViewManualControl>(ViewManualControlViewModel.Tag);
-            containerRegistry.RegisterForNavigation<ViewProgramControl>(ViewProgramControlViewModel.Tag);
-            containerRegistry.RegisterForNavigation<ViewStaticControl>(ViewStaticControlViewModel.Tag);
             // Dialogs
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
         }

@@ -20,6 +20,7 @@ using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Views.Dialogs;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
@@ -60,6 +61,8 @@ namespace MCCS.ViewModels.Pages
         private Model3DViewModel? _clearOperationModel = null;
         //private SceneNodeGroupModel3D _dataLabelsGroup;
         //private SceneNodeGroupModel3D _connectionLinesGroup;
+        private MultipleControllerMainPageViewModel? _multipleControllerMainPageViewModel = null;
+        private bool _isCtrlPressed = false;
         #endregion
 
         #region Command
@@ -74,6 +77,8 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand DisplacementClearCommand => new(ExecuteDisplacementClearCommand);
         public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
         public AsyncDelegateCommand<string> SetCurveCommand => new(ExecuteSetCurveCommand);
+        public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand => new(OnCtrlKeyDownCommand);
+        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand);
         #endregion
 
         public TestStartingPageViewModel(
@@ -127,15 +132,7 @@ namespace MCCS.ViewModels.Pages
         {
             get => _isShowContextMenu;
             set => SetProperty(ref _isShowContextMenu, value);
-        }
-
-        private bool _isOpenContextMenu = false;
-        public bool IsOpenContextMenu 
-        {
-            get => _isOpenContextMenu;
-            set => SetProperty(ref _isOpenContextMenu, value);
-        }
-
+        }  
         /// <summary>
         /// 曲线数据集合
         /// </summary>
@@ -166,7 +163,7 @@ namespace MCCS.ViewModels.Pages
             IsDynamic = true
         };
 
-        public LineGeometry3D ConnectionLineGeometry { get; } = new LineGeometry3D() 
+        public LineGeometry3D ConnectionLineGeometry { get; } = new() 
         {
             IsDynamic = true
         };
@@ -206,6 +203,9 @@ namespace MCCS.ViewModels.Pages
             get => _controlProcessExpanders;
             set => SetProperty(ref _controlProcessExpanders, value);
         }
+
+        public ObservableCollection<object> Controllers { get; } = [];
+
         #endregion
 
         #region private method
@@ -511,9 +511,7 @@ namespace MCCS.ViewModels.Pages
             if (Keyboard.IsKeyDown(Key.LeftShift) ||
                 Keyboard.IsKeyDown(Key.RightShift) ||
                 Keyboard.IsKeyDown(Key.LeftAlt) ||
-                Keyboard.IsKeyDown(Key.RightAlt) ||
-                Keyboard.IsKeyDown(Key.LeftCtrl) ||
-                Keyboard.IsKeyDown(Key.RightCtrl)) return;
+                Keyboard.IsKeyDown(Key.RightAlt)) return;
             if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
                 mouseArgs.LeftButton != MouseButtonState.Pressed) return;
             if (!IsStartedTest) return;
@@ -521,23 +519,66 @@ namespace MCCS.ViewModels.Pages
             var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
             if (clickedModel is not { IsSelectable: true }) return;
+            // 如果已经参与控制则退出
+            if (clickedModel.IsSelected) return;
+            // 鼠标左键 + Ctrl 键单独处理
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
+                Keyboard.IsKeyDown(Key.RightCtrl))
+            {
+                ExecuteLeftMouseCtrlDownCommand(clickedModel);
+                return;
+            }
             // 切换当前模型的选中状态
             clickedModel.IsSelected = true;
-            // IsRightDrawerOpen = true;
-            var channels = Models
-                .Where(s => s.IsSelected)
-                .Select(c => new ControllerItemModel
-                {
-                    ChannelId = c.Model3DData.DeviceId ?? string.Empty,
-                    ChannelName = c.Model3DData.Name ?? string.Empty,
-                }).ToList();
-            var channelsParam = new NavigationParameters
+            var channelId = clickedModel.Model3DData.DeviceId ??
+                            throw new ArgumentNullException("ControlEvent no ChannelId");
+            var channelName = clickedModel.Model3DData.Name;
+            if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentChannelId != channelId)
+                && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentChannelId == channelId)))
             {
-                { "ChannelId", clickedModel.Model3DData.DeviceId ?? throw new ArgumentNullException("ControlEvent no ChannelId")},
-                { "ChannelName", clickedModel.Model3DData.Name }
-            };
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative), channelsParam);
+                Controllers.Add(new ControllerMainPageViewModel(channelId, channelName, _deviceManager));
+            }
         }
+
+        private void ExecuteLeftMouseCtrlDownCommand(Model3DViewModel model)
+        {
+            if (model.IsMultipleSelected) return;
+            model.IsMultipleSelected = true;
+            if (_multipleControllerMainPageViewModel != null)
+            {
+                _multipleControllerMainPageViewModel.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.DeviceId ?? string.Empty, model.Model3DData.Name));
+            }
+        }
+
+        private void OnCtrlKeyDownCommand(KeyEventArgs e)
+        {
+            if ((e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) && !_isCtrlPressed)
+            {
+                _isCtrlPressed = true;
+                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel();
+                Debug.WriteLine("Ctrl Pressed!!!");
+            }
+        }
+
+        private void OnCtrlKeyUpCommand(KeyEventArgs e)
+        {
+            if ((e.Key != Key.LeftCtrl && e.Key != Key.RightCtrl) || !_isCtrlPressed) return;
+            _isCtrlPressed = false; // 重置状态
+            if (_multipleControllerMainPageViewModel is { Children.Count: > 1 })
+            {
+                Controllers.Add(_multipleControllerMainPageViewModel);
+            }
+            else
+            {
+                // 如果没有选择多个模型，则清除多选状态
+                foreach (var model in Models.Where(m => m.IsMultipleSelected))
+                {
+                    model.IsMultipleSelected = false;
+                }
+            }
+            _multipleControllerMainPageViewModel = null;
+        }
+
         /// <summary>
         /// 单独处理鼠标右键弹窗
         /// </summary>

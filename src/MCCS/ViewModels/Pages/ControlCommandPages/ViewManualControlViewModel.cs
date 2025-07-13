@@ -1,19 +1,12 @@
-﻿using MCCS.Events.ControlCommand;
-using MCCS.Models.ControlCommand;
-
-namespace MCCS.ViewModels.Pages.ControlCommandPages
+﻿namespace MCCS.ViewModels.Pages.ControlCommandPages
 {
-    public class ViewManualControlViewModel : BaseViewModel
+    public class ViewManualControlViewModel : BindableBase
     {
         public const string Tag = "ManualControl";
 
         private double _outputMaxValue = 100.0;
         private double _outputMinValue = 0.0;
-        private double _outPutValue = 0.0; 
-
-        public ViewManualControlViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
-        { 
-        }
+        private double _outPutValue = 0.0;  
 
         public double OutputMaxValue
         {
@@ -22,8 +15,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
             {
                 if (SetProperty(ref _outputMaxValue, value))
                 {
-                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一 
-                    SendUpdateEvent();
+                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一  
                 }
             }
         }
@@ -35,8 +27,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
             {
                 if (SetProperty(ref _outputMinValue, value)) 
                 {
-                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一  
-                    SendUpdateEvent();
+                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一   
                 }
             }
         } 
@@ -50,34 +41,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public double OutPutValue
         {
             get => _outPutValue;
-            set
-            {
-                if (SetProperty(ref _outPutValue, value)) 
-                {
-                    SendUpdateEvent();
-                }
-            }
-        } 
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            var success = navigationContext.Parameters.TryGetValue<ManualControlModel>("ControlModel", out var res);
-            if (!success || res == null) return;
-            OutputMaxValue = res.MaxValue;
-            OutputMinValue = res.MinValue;
-            OutPutValue = res.OutputValue;
-        } 
-
-        private void SendUpdateEvent()
-        {
-            _eventAggregator.GetEvent<ControlParamEvent>().Publish(new ControlParamEventParam
-            {
-                Param = new ManualControlModel
-                {
-                    MaxValue = OutputMaxValue,
-                    MinValue = OutputMinValue,
-                    OutputValue = OutPutValue
-                }
-            });
-        }
+            set => SetProperty(ref _outPutValue, value);
+        }  
     }
 }

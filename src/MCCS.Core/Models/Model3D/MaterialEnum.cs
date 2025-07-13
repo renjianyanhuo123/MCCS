@@ -4,6 +4,7 @@
     {
         Original,
         Selected,
-        Hover
+        Hover,
+        MultipleSelected
     }
 }

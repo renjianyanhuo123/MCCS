@@ -13,6 +13,8 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors" 
              xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:controllers="clr-namespace:MCCS.Views.Pages.Controllers"
+             xmlns:vmControllers="clr-namespace:MCCS.ViewModels.Pages.Controllers"
              d:DataContext="{d:DesignInstance Type=pages:TestStartingPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              x:Name="TestStartingControl"
@@ -23,7 +25,14 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
             <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
-            <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" /> 
+            <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
+            <!-- 定义不同ViewModel对应的View -->
+            <DataTemplate DataType="{x:Type vmControllers:ControllerMainPageViewModel}">
+                <controllers:ControllerMainPage />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmControllers:MultipleControllerMainPageViewModel}">
+                <controllers:MultipleControllerMainPage />
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -48,7 +57,8 @@
         <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="3" />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <!-- 使用Popup实现右键菜单 -->
@@ -70,6 +80,7 @@
             <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染 -->
             <hx:Viewport3DX  
                 x:Name="viewport"
+                Grid.Row="0"
                 Grid.Column="0"
                 Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}"
                 BackgroundColor="#595959"
@@ -86,6 +97,18 @@
                     <b:EventTrigger EventName="MouseDown3D">
                         <b:InvokeCommandAction 
                             Command="{Binding Model3DRightMouseDownCommand}" 
+                            PassEventArgsToCommand="True"/>
+                    </b:EventTrigger>
+                    <!-- 新增Ctrl键按下事件 -->
+                    <b:EventTrigger EventName="KeyDown">
+                        <b:InvokeCommandAction 
+                            Command="{Binding CtrlKeyDownCommand}" 
+                            PassEventArgsToCommand="True"/>
+                    </b:EventTrigger>
+                    <!-- 新增Ctrl键弹起事件 -->
+                    <b:EventTrigger EventName="KeyUp">
+                        <b:InvokeCommandAction 
+                            Command="{Binding CtrlKeyUpCommand}" 
                             PassEventArgsToCommand="True"/>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
@@ -131,8 +154,16 @@
                         AutoSpacing="True"
                         Offset="-65" />
             </hx:Viewport3DX>
-            <StackPanel  Grid.Row="0" Grid.Column="1"  
-                        HorizontalAlignment="Center"
+            <GridSplitter Grid.Row="0"
+                          Grid.Column="1"
+                          Width="3"
+                          Background="LightGray"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          ShowsPreview="True"
+                          ResizeBehavior="PreviousAndNext" />
+            <!--<WrapPanel Grid.Row="0" Grid.Column="2"  
+                        HorizontalAlignment="Left"
                         Margin="5">
                 <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}">
                     <b:Interaction.Triggers>
@@ -141,7 +172,25 @@
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
                 </ContentControl>
-            </StackPanel>
+            </WrapPanel>-->
+            <ItemsControl  Grid.Row="0" Grid.Column="2"  
+                           HorizontalAlignment="Left"
+                           Margin="5"
+                           ItemsSource="{Binding Controllers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Gray" BorderThickness="1" Margin="5">
+                            <!--<controllers:ControllerMainPage DataContext="{Binding}" />-->
+                            <ContentControl Content="{Binding}" Margin="0,0,0,15"/>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid> 
         <!-- 曲线显示部分 -->
         <Grid Grid.Row="1" Grid.Column="0" Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}">
@@ -251,18 +300,18 @@
         </Grid>
         <!-- 进度条 -->
         <StackPanel 
-        VerticalAlignment="Center" 
-        Grid.Row="1" 
-        Grid.Column="0"  
-        Orientation="Vertical" 
-        HorizontalAlignment="Center"
-        Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+            VerticalAlignment="Center" 
+            Grid.Row="1" 
+            Grid.Column="0"  
+            Orientation="Vertical" 
+            HorizontalAlignment="Center"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
             <ProgressBar Width="600" Height="10" Value="{Binding LoadingProgress.ProgressPercentage}"></ProgressBar>
             <TextBlock FontWeight="Bold"
-           Margin="0 8" 
-           HorizontalAlignment="Center" 
-           Text="{Binding LoadingMessage}" 
-           Foreground="#666666" />
+                Margin="0 8" 
+                HorizontalAlignment="Center" 
+                Text="{Binding LoadingMessage}" 
+                Foreground="#666666" />
         </StackPanel>
     </Grid>
 </UserControl>

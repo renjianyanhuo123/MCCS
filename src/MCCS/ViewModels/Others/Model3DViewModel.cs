@@ -117,6 +117,20 @@ namespace MCCS.ViewModels.Others
             }
         }
 
+        private bool _isMultipleSelected;
+
+        public bool IsMultipleSelected
+        {
+            get => _isMultipleSelected;
+            set
+            {
+                if (SetProperty(ref _isMultipleSelected, value))
+                {
+                    UpdateMaterial();
+                } 
+            }
+        }
+
         /// <summary>
         /// (模拟模型移动)位移默认偏移值 = 0.0
         ///</summary>
@@ -184,6 +198,10 @@ namespace MCCS.ViewModels.Others
                 else if (IsHovered)
                 {
                     m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Hover);
+                }
+                else if (IsMultipleSelected)
+                {
+                    m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.MultipleSelected);
                 }
                 else
                 {

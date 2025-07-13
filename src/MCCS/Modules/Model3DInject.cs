@@ -1,4 +1,5 @@
 ﻿using HelixToolkit.SharpDX.Core;
+using MCCS.Services.ControlCommand;
 using MCCS.Services.Model3DService;
 using Microsoft.Extensions.Configuration;
 
@@ -16,6 +17,7 @@ namespace MCCS.Modules
             // var effectManager = new DefaultEffectsManager();
             containerRegistry.RegisterSingleton<IEffectsManager, DefaultEffectsManager>();
             containerRegistry.Register<IModel3DLoaderService, Model3DLoaderService>();
+            containerRegistry.RegisterSingleton<IGenerateControlCommandServices, GenerateControlCommandServices>();
 
         }
     }

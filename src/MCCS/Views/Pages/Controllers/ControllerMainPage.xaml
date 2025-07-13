@@ -5,12 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS"
              xmlns:convert="clr-namespace:MCCS.Converters.TestStarting"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:convert1="clr-namespace:MCCS.Converters.ControlCommand"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:controllers="clr-namespace:MCCS.ViewModels.Pages.Controllers" 
+             xmlns:controllers="clr-namespace:MCCS.ViewModels.Pages.Controllers"
              d:DataContext="{d:DesignInstance Type=controllers:ControllerMainPageViewModel}"
-             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -18,17 +17,15 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <convert:BoolToWidthConverter x:Key="BoolToWidthConverter" />
+            <!--<convert:BoolToWidthConverter x:Key="BoolToWidthConverter" />
             <convert:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-            <convert:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />
+            <convert:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />-->
+            <convert1:BooleanToColorConverter x:Key="BooleanToColorConverter" />
             <convert:CommandStatusToEnableConverter x:Key="CommandStatusToEnableConverter" />
             <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Width="{Binding IsShowController, Converter={StaticResource BoolToWidthConverter}}" Height="Auto">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <Grid Width="300" Height="Auto" Background="{Binding IsSelected, Converter={StaticResource BooleanToColorConverter}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -47,7 +44,7 @@
                 Style="{StaticResource MaterialDesignCheckBox}"
                 Command="{Binding ParticipateControlCommand}"
                 CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
-                <GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
+                <!--<GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}" 
                     Style="{StaticResource MaterialDesignCardGroupBox}"
                     Header="{StaticResource ControlTypeText}">
@@ -114,7 +111,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </GroupBox>
+                </GroupBox>-->
                 <GroupBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep2}"
@@ -141,7 +138,7 @@
                     Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep3}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">
-                    <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.ControlCommandRegionName}" />
+                    <ContentControl Content="{Binding CurrentPage}" />
                 </GroupBox>
             </StackPanel> 
         </ScrollViewer>

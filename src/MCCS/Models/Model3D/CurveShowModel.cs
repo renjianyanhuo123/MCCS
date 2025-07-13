@@ -14,10 +14,7 @@ namespace MCCS.Models.Model3D
                 new LineSeries<CurveMeasureValueModel>()
                 {
                     Values = ObservableValues,
-                    Mapping = (model, index) =>
-                    {
-                        return new Coordinate(model.XValue, model.YValue);
-                    },
+                    Mapping = (model, index) => new Coordinate(model.XValue, model.YValue),
                     Fill = null
                 }
             ];
