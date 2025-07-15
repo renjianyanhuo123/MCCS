@@ -1,13 +1,16 @@
 ﻿using MCCS.Core.Devices.Commands;
+using MCCS.Events.Controllers;
 using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
     public class MultipleControllerMainPageViewModel : BindableBase
     {
+        private readonly IEventAggregator _eventAggregator;
 
-        public MultipleControllerMainPageViewModel()
-        { 
+        public MultipleControllerMainPageViewModel(IEventAggregator eventAggregator)
+        {
+            _eventAggregator = eventAggregator;
         }
 
         #region Property
@@ -15,6 +18,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// 所有的组合子组件
         /// </summary>
         public ObservableCollection<MultipleControllerChildPageViewModel> Children { get; } = [];
+
+        public string CombineId { get; private set; } = Guid.NewGuid().ToString("N");
 
         /// <summary>
         /// 是否被选中
@@ -47,6 +52,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// 暂停命令
         /// </summary>
         public DelegateCommand StopCommand => new(ExecuteStopCommand);
+        public DelegateCommand<string> UnLockCommand => new(ExecuteUnLockCommand);
         #endregion
 
         #region private method
@@ -58,6 +64,11 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void ExecuteStopCommand()
         {
 
+        }
+
+        private void ExecuteUnLockCommand(string combineId)
+        {
+            _eventAggregator.GetEvent<UnLockCommandEvent>().Publish(new UnLockCommandEventParam(combineId));
         }
 
         #endregion

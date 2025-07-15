@@ -20,17 +20,32 @@ namespace MCCS.Models.Model3D
             ];
             XAxes =
             [
-                new() {
+                new Axis {
                     Name = xAxe
                 }
             ];
             YAxes =
             [
-                new() {
+                new Axis {
                     Name = yAxe
                 }
             ];
         }
+        /// <summary>
+        /// 曲线ID
+        /// </summary>
+        public string CurveId { get; private set; } = Guid.NewGuid().ToString("N");
+
+        /// <summary>
+        /// 是否显示
+        /// </summary>
+        private bool _isShow = false;
+        public bool IsShow
+        {
+            get => _isShow;
+            set => SetProperty(ref _isShow, value);
+        }
+
         /// <summary>
         /// 曲线标题
         /// </summary>

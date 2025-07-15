@@ -102,6 +102,7 @@ namespace MCCS.ViewModels.Pages
             };
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(ReceivedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
+            _eventAggregator.GetEvent<UnLockCommandEvent>().Subscribe(ReceivedUnLockEvent);
             _eventAggregator.GetEvent<NotificationCommandStopedEvent>().Subscribe(x => 
             {
                 var model = Models.FirstOrDefault(s => s.Model3DData.DeviceId == x.CommandId);
@@ -303,6 +304,23 @@ namespace MCCS.ViewModels.Pages
                 Controllers.Remove(removeObj);
                 IsShowController = Controllers.Count > 0;
             }
+        }
+        /// <summary>
+        /// 接收到解锁事件
+        /// </summary>
+        /// <param name="param"></param>
+        private void ReceivedUnLockEvent(UnLockCommandEventParam param)
+        {
+            // (1) 添加控制器
+            var multipleControllerMainPageViewModel = Controllers.OfType<MultipleControllerMainPageViewModel>()
+                .FirstOrDefault(s => s.CombineId == param.CombineId);
+            if (multipleControllerMainPageViewModel == null) return;
+            foreach (var item in multipleControllerMainPageViewModel.Children)
+            {
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentChannelId, item.CurrentChannelName, _eventAggregator, _deviceManager));
+            }
+            // (2) 移除掉组合控制器部分
+            Controllers.Remove(multipleControllerMainPageViewModel);
         }
 
         /// <summary>
@@ -575,7 +593,7 @@ namespace MCCS.ViewModels.Pages
             if ((e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) && !_isCtrlPressed)
             {
                 _isCtrlPressed = true;
-                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(); 
+                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(_eventAggregator); 
             }
 
             e.Handled = true;
@@ -597,13 +615,10 @@ namespace MCCS.ViewModels.Pages
                     model.IsSelected = true;
                 }
             }
-            else
+            // 清除多选状态
+            foreach (var model in Models.Where(m => m.IsMultipleSelected))
             {
-                // 如果没有选择多个模型，则清除多选状态
-                foreach (var model in Models.Where(m => m.IsMultipleSelected))
-                {
-                    model.IsMultipleSelected = false;
-                }
+                model.IsMultipleSelected = false;
             }
             _multipleControllerMainPageViewModel = null;
             e.Handled = true;
@@ -708,7 +723,6 @@ namespace MCCS.ViewModels.Pages
             foreach (var model in Models)
             {
                 model.Dispose();
-                // model.SceneNode?.Dispose();
             }
             Models.Clear();
             // 显式释放连接线资源
