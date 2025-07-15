@@ -6,6 +6,8 @@ using MCCS.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using MCCS.Common;
+using System.Diagnostics;
+using MCCS.Views;
 
 namespace MCCS.ViewModels
 {
@@ -13,6 +15,7 @@ namespace MCCS.ViewModels
     {
         private readonly IRegionManager _regionManager;
         private readonly ISystemMenuRepository _systemMenuRepository;
+        private readonly IContainerProvider _containerProvider;
 
         #region 页面属性
         private ObservableCollection<MainTabsViewModel> _tabs;
@@ -66,7 +69,7 @@ namespace MCCS.ViewModels
         public DelegateCommand<object> MainRegionLoadedCommand => new(ExecuteMainRegionLoadedCommand);
         public DelegateCommand<object> JumpChildTabCommand => new(ExecuteJumpChildTabCommand);
         public DelegateCommand<object> JumpToCommand => new(ExecuteJumpToCommand);
-        public DelegateCommand<string> CloseTabCommand => new(ExecuteCloseTabCommand);
+        public DelegateCommand<string> CloseTabCommand => new(ExecuteCloseTabCommand); 
         #endregion
 
         #region 命令执行
@@ -110,15 +113,17 @@ namespace MCCS.ViewModels
                 _tabs.Add(addItem);
             }
             SelectedTabItem = addItem;
-        }
+        } 
         #endregion
 
         public MainWindowViewModel(
+            IContainerProvider containerProvider,
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager, 
             IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
         {
             eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
+            _containerProvider = containerProvider;
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
             _selectedMenuItem = selectedMenuItem;

@@ -20,12 +20,15 @@
              x:Name="TestStartingControl"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    
     <UserControl.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
             <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
             <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
+            <convert:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
+            <convert:BoolToColumnSpanConverter x:Key="BoolToColumnSpanConverter" />
             <!-- 定义不同ViewModel对应的View -->
             <DataTemplate DataType="{x:Type vmControllers:ControllerMainPageViewModel}">
                 <controllers:ControllerMainPage />
@@ -36,6 +39,20 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
+        <b:Interaction.Triggers>
+            <!-- 新增Ctrl键按下事件 -->
+            <b:EventTrigger EventName="KeyDown">
+                <b:InvokeCommandAction 
+                    Command="{Binding CtrlKeyDownCommand}" 
+                    PassEventArgsToCommand="True"/>
+            </b:EventTrigger>
+            <!-- 新增Ctrl键弹起事件 -->
+            <b:EventTrigger EventName="KeyUp">
+                <b:InvokeCommandAction 
+                    Command="{Binding CtrlKeyUpCommand}" 
+                    PassEventArgsToCommand="True"/>
+            </b:EventTrigger>
+        </b:Interaction.Triggers>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -82,13 +99,15 @@
                 x:Name="viewport"
                 Grid.Row="0"
                 Grid.Column="0"
+                Grid.ColumnSpan="{Binding IsShowController, Converter={StaticResource BoolToColumnSpanConverter}}"
                 Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}"
                 BackgroundColor="#595959"
                 EffectsManager="{Binding EffectsManager}"
                 Camera="{Binding Camera}" 
                 IsHitTestVisible="True"
-                ShowCoordinateSystem="True"
-                FXAALevel="High">
+                EnableSwapChainRendering="False"
+                ShowCoordinateSystem="True" 
+                FXAALevel="Low">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="MouseDown3D">
                         <b:InvokeCommandAction Command="{Binding Model3DMouseDownCommand}" PassEventArgsToCommand="True"/>
@@ -97,18 +116,6 @@
                     <b:EventTrigger EventName="MouseDown3D">
                         <b:InvokeCommandAction 
                             Command="{Binding Model3DRightMouseDownCommand}" 
-                            PassEventArgsToCommand="True"/>
-                    </b:EventTrigger>
-                    <!-- 新增Ctrl键按下事件 -->
-                    <b:EventTrigger EventName="KeyDown">
-                        <b:InvokeCommandAction 
-                            Command="{Binding CtrlKeyDownCommand}" 
-                            PassEventArgsToCommand="True"/>
-                    </b:EventTrigger>
-                    <!-- 新增Ctrl键弹起事件 -->
-                    <b:EventTrigger EventName="KeyUp">
-                        <b:InvokeCommandAction 
-                            Command="{Binding CtrlKeyUpCommand}" 
                             PassEventArgsToCommand="True"/>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
@@ -161,20 +168,11 @@
                           HorizontalAlignment="Center"
                           VerticalAlignment="Stretch"
                           ShowsPreview="True"
+                          Visibility="{Binding IsShowController, Converter={StaticResource BoolToVisibilityConverter}}"
                           ResizeBehavior="PreviousAndNext" />
-            <!--<WrapPanel Grid.Row="0" Grid.Column="2"  
-                        HorizontalAlignment="Left"
-                        Margin="5">
-                <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="Loaded">
-                            <b:InvokeCommandAction Command="{Binding LoadCommand}" />
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
-                </ContentControl>
-            </WrapPanel>-->
-            <ItemsControl  Grid.Row="0" Grid.Column="2"  
-                           HorizontalAlignment="Left"
+            <ItemsControl  Grid.Row="0" Grid.Column="2"
+                           Visibility="{Binding IsShowController, Converter={StaticResource BoolToVisibilityConverter}}"
+                           HorizontalAlignment="Left"  
                            Margin="5"
                            ItemsSource="{Binding Controllers}">
                 <ItemsControl.ItemsPanel>

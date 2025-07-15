@@ -1,5 +1,6 @@
 ﻿using MCCS.Core.Devices.Commands;
 using MCCS.Core.Devices.Manager;
+using MCCS.Events.Controllers;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
@@ -10,7 +11,9 @@ namespace MCCS.ViewModels.Pages.Controllers
     public class ControllerMainPageViewModel : BindableBase
     {
         public const string Tag = "ControllerMainPage"; 
-        private readonly IDeviceManager _deviceManager;   
+        private readonly IDeviceManager _deviceManager;  
+        private readonly IEventAggregator _eventAggregator;
+
         private bool _isShowController = false;
         private bool _isParticipateControl = false; 
 
@@ -23,17 +26,21 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         private CommandExecuteStatusEnum _currentCommandStatus;
 
-        public ControllerMainPageViewModel( 
+        public ControllerMainPageViewModel(
+            IEventAggregator eventAggregator,
             IDeviceManager deviceManager)
         {
+            _eventAggregator = eventAggregator;
             _deviceManager = deviceManager;  
         }
 
         public ControllerMainPageViewModel(
             string channelId,
             string channelName,
-            IDeviceManager deviceManager) : this(deviceManager)
+            IEventAggregator eventAggregator,
+            IDeviceManager deviceManager) : this(eventAggregator, deviceManager)
         {
+            IsParticipateControl = true;
             CurrentChannelId = channelId;
             CurrentChannelName = channelName;
         }
@@ -95,15 +102,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             get => _currentChannelName;
             set => SetProperty(ref _currentChannelName, value);
-        }
-        /// <summary>
-        /// 是否显示控制区域
-        /// </summary>
-        public bool IsShowController
-        {
-            get => _isShowController;
-            set => SetProperty(ref _isShowController, value);
-        }
+        } 
         /// <summary>
         /// 是否参与控制
         /// </summary>
@@ -226,8 +225,12 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// </summary>
         /// <param name="channelId"></param>
         private void ExecuteParticipateControlCommand(string channelId) 
-        { 
-            IsShowController = false;
+        {
+            IsParticipateControl = false;
+            _eventAggregator.GetEvent<InverseControlEvent>().Publish(new InverseControlEventParam
+            {
+                DeviceId = channelId
+            });
         } 
         #endregion
     }

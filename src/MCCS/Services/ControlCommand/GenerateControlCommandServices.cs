@@ -30,7 +30,7 @@ namespace MCCS.Services.ControlCommand
             }
 
             // 创建新的ViewModel
-            var viewModel = new ControllerMainPageViewModel(_deviceManager);
+            var viewModel = new ControllerMainPageViewModel(_eventAggregator, _deviceManager);
 
             // 创建新的View
             var view = new ControllerMainPage

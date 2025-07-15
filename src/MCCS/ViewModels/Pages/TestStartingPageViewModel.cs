@@ -15,12 +15,10 @@ using MCCS.Models.Model3D;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
-using MCCS.ViewModels.Others.Controllers;
 using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Views.Dialogs;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
@@ -36,9 +34,8 @@ namespace MCCS.ViewModels.Pages
         #region private field 
         private bool _isLoading = true;
         private bool _isStartedTest = false; // 是否开始试验
-        private string _loadingMessage = "";
+        private string _loadingMessage = ""; 
 
-        private ObservableCollection<Model3DViewModel> _models;
         private Model3DViewModel? _lastHoveredModel = null;
         private ObservableCollection<ControlProcessExpander> _controlProcessExpanders = [];
 
@@ -78,7 +75,7 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
         public AsyncDelegateCommand<string> SetCurveCommand => new(ExecuteSetCurveCommand);
         public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand => new(OnCtrlKeyDownCommand);
-        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand);
+        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand); 
         #endregion
 
         public TestStartingPageViewModel(
@@ -93,8 +90,7 @@ namespace MCCS.ViewModels.Pages
             EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
             _containerProvider = containerProvider;
             _deviceManager = deviceManager;
-            _model3DLoaderService = model3DLoaderService;
-            _models = []; 
+            _model3DLoaderService = model3DLoaderService; 
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
@@ -193,11 +189,9 @@ namespace MCCS.ViewModels.Pages
             get => _isLoading;
             set => SetProperty(ref _isLoading, value);
         }
-        public ObservableCollection<Model3DViewModel> Models
-        {
-            get => _models;
-            set => SetProperty(ref _models, value);
-        }
+
+        public List<Model3DViewModel> Models { get; private set; } = [];
+
         public ObservableCollection<ControlProcessExpander> ControlProcessExpanders 
         {
             get => _controlProcessExpanders;
@@ -205,7 +199,13 @@ namespace MCCS.ViewModels.Pages
         }
 
         public ObservableCollection<object> Controllers { get; } = [];
+        private bool _isShowController;
 
+        public bool IsShowController
+        {
+            get => _isShowController;
+            set => SetProperty(ref _isShowController, value);
+        }
         #endregion
 
         #region private method
@@ -217,24 +217,25 @@ namespace MCCS.ViewModels.Pages
             {
                 // 清理旧模型
                 ClearModels();
-
                 var progress = new Progress<ImportProgressEventArgs>(p => LoadingProgress = p);
-                var wrappers = await _model3DLoaderService.ImportModelsAsync(progress, _loadingCancellation.Token);
-
+                var wrappers = await _model3DLoaderService.ImportModelsAsync(progress, _loadingCancellation.Token); 
                 var positions = new Vector3Collection();
                 var connectionIndexs = new IntCollection();
-
+                // 替换连接线创建方式
+                var lineBuilder = new LineBuilder();
+                lineBuilder.ToLineGeometry3D();
                 // UI线程更新
                 foreach (var wrapper in wrappers)
                 {
                     Models.Add(wrapper);
                     GroupModel.AddNode(wrapper.SceneNode);
-                    if(wrapper.DataLabels.Count > 0) 
+
+                    if (wrapper.DataLabels?.Count > 0)
                         CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
                     // 重新整合线段; 默认没有一个点连接两条线的情况.
-                    if (wrapper.ConnectPoints.Count > 0 
-                        && wrapper.ConnectCollection.Count > 0 
-                        && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count) 
+                    if (wrapper.ConnectPoints?.Count > 0
+                        && wrapper.ConnectCollection?.Count > 0
+                        && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count)
                     {
                         foreach (var index in wrapper.ConnectCollection)
                         {
@@ -283,6 +284,10 @@ namespace MCCS.ViewModels.Pages
             IsStartedTest = !IsStartedTest;
         }
 
+        /// <summary>
+        /// 取消控制界面
+        /// </summary>
+        /// <param name="param"></param>
         private void ReceivedInverseControlEvent(InverseControlEventParam param)
         {
             if (param == null) return;
@@ -291,6 +296,12 @@ namespace MCCS.ViewModels.Pages
             if (targetModel != null)
             {
                 targetModel.IsSelected = false; 
+            }
+            var removeObj = Controllers.FirstOrDefault(c => c is ControllerMainPageViewModel vm && vm.CurrentChannelId == param.DeviceId);
+            if (removeObj != null)
+            {
+                Controllers.Remove(removeObj);
+                IsShowController = Controllers.Count > 0;
             }
         }
 
@@ -348,11 +359,11 @@ namespace MCCS.ViewModels.Pages
             var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream 
                 ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
             actor1
-                .Sample(TimeSpan.FromSeconds(0.8)) 
+                .Sample(TimeSpan.FromSeconds(1))
                 .Subscribe(OnDeviceDataReceived);
 
             actor2
-                .Sample(TimeSpan.FromSeconds(0.8))
+                .Sample(TimeSpan.FromSeconds(1))
                 .Subscribe(OnDeviceDataReceived);
         } 
 
@@ -377,7 +388,7 @@ namespace MCCS.ViewModels.Pages
         /// <param name="deviceData">设备数据</param>
         private void UpdateModelWithDeviceData(Model3DViewModel model, DeviceData deviceData)
         {
-            if (deviceData.Value is MockActuatorCollection v) 
+            if (deviceData.Value is MockActuatorCollection v)
             {
                 // Debug.WriteLine($"更新模型: {model.Model3DData.DeviceId}, 力: {v.Force}, 位移: {v.Displacement}");
                 model.ForceNum = v.Force;
@@ -505,6 +516,7 @@ namespace MCCS.ViewModels.Pages
         /// <param name="parameter"></param>
         private void OnModel3DMouseDown(object parameter)
         {
+            Debug.WriteLine("Exec add!!!!!");
             if (parameter is not MouseDown3DEventArgs args) return;
             IsShowContextMenu = false;
             // 检查是否按住了修饰键（如果按住修饰键，则不处理选择）
@@ -516,8 +528,9 @@ namespace MCCS.ViewModels.Pages
                 mouseArgs.LeftButton != MouseButtonState.Pressed) return;
             if (!IsStartedTest) return;
             // 获取点击的模型
-            var clickedModel = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
+            var modelId = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
+            var clickedModel = Models.FirstOrDefault(c => c.ModelId == modelId);
             if (clickedModel is not { IsSelectable: true }) return;
             // 如果已经参与控制则退出
             if (clickedModel.IsSelected) return;
@@ -536,10 +549,14 @@ namespace MCCS.ViewModels.Pages
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentChannelId != channelId)
                 && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentChannelId == channelId)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(channelId, channelName, _deviceManager));
+                Controllers.Add(new ControllerMainPageViewModel(channelId, channelName, _eventAggregator, _deviceManager));
+                IsShowController = Controllers.Count > 0;
             }
         }
-
+        /// <summary>
+        /// 处理左键 + Ctrl 键按下事件
+        /// </summary>
+        /// <param name="model"></param>
         private void ExecuteLeftMouseCtrlDownCommand(Model3DViewModel model)
         {
             if (model.IsMultipleSelected) return;
@@ -549,17 +566,24 @@ namespace MCCS.ViewModels.Pages
                 _multipleControllerMainPageViewModel.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.DeviceId ?? string.Empty, model.Model3DData.Name));
             }
         }
-
+        /// <summary>
+        /// 处理 Ctrl 键按下事件
+        /// </summary>
+        /// <param name="e"></param>
         private void OnCtrlKeyDownCommand(KeyEventArgs e)
         {
             if ((e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) && !_isCtrlPressed)
             {
                 _isCtrlPressed = true;
-                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel();
-                Debug.WriteLine("Ctrl Pressed!!!");
+                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(); 
             }
-        }
 
+            e.Handled = true;
+        }
+        /// <summary>
+        /// 处理 Ctrl 键抬起事件
+        /// </summary>
+        /// <param name="e"></param>
         private void OnCtrlKeyUpCommand(KeyEventArgs e)
         {
             if ((e.Key != Key.LeftCtrl && e.Key != Key.RightCtrl) || !_isCtrlPressed) return;
@@ -567,6 +591,11 @@ namespace MCCS.ViewModels.Pages
             if (_multipleControllerMainPageViewModel is { Children.Count: > 1 })
             {
                 Controllers.Add(_multipleControllerMainPageViewModel);
+                IsShowController = Controllers.Count > 0;
+                foreach (var model in Models.Where(m => m.IsMultipleSelected))
+                {
+                    model.IsSelected = true;
+                }
             }
             else
             {
@@ -577,8 +606,8 @@ namespace MCCS.ViewModels.Pages
                 }
             }
             _multipleControllerMainPageViewModel = null;
+            e.Handled = true;
         }
-
         /// <summary>
         /// 单独处理鼠标右键弹窗
         /// </summary>
@@ -587,9 +616,9 @@ namespace MCCS.ViewModels.Pages
         {
             if (e?.OriginalInputEventArgs is not MouseButtonEventArgs { ChangedButton: MouseButton.Right } mouseArgs) return;
             if (e.HitTestResult?.ModelHit == null) return;
-            var model = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
-            if (model == null) return;
-            _clearOperationModel = model;
+            var modelId = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
+            if (modelId == null) return;
+            _clearOperationModel = Models.FirstOrDefault(c => c.ModelId == modelId);
             IsShowContextMenu = true;
             mouseArgs.Handled = true;
         }
@@ -637,7 +666,8 @@ namespace MCCS.ViewModels.Pages
             var now = DateTime.Now;
             if ((now - _lastMouseMoveTime).TotalMilliseconds < MouseMoveThrottleMs) return;
             _lastMouseMoveTime = now;
-            var hoveredModel = FindViewModel(res.ModelHit);
+            var hoveredModelId = FindViewModel(res.ModelHit);
+            var hoveredModel = Models.FirstOrDefault(c => c.ModelId == hoveredModelId);
             // 清除之前的悬停状态
             if (hoveredModel != null)
             {
@@ -660,28 +690,46 @@ namespace MCCS.ViewModels.Pages
 
         private void ClearModels()
         {
+            // 清理 GroupModel 中的节点
+            if (GroupModel != null)
+            {
+                // SceneNodeGroupModel3D 使用 Clear() 方法清空所有子节点
+                GroupModel.Clear();
+
+                // 如果 GroupModel 有 SceneNode 属性，遍历并清理 Tag
+                if (GroupModel.SceneNode != null)
+                {
+                    foreach (var child in GroupModel.SceneNode.Traverse())
+                    {
+                        child.Tag = null;
+                    }
+                }
+            }
             foreach (var model in Models)
             {
-                model.SceneNode?.Dispose();
+                model.Dispose();
+                // model.SceneNode?.Dispose();
             }
             Models.Clear();
-            GroupModel.Clear();
+            // 显式释放连接线资源
+            ConnectionLineGeometry.Positions = null;
+            ConnectionLineGeometry.Indices = null; 
             ClearSelection();
         }
 
         /// <summary>
-        /// 寻找Tag中的Model3D对象
+        /// 寻找Tag中的Model3D对象的ID
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        private Model3DViewModel? FindViewModel(object obj)
+        private string? FindViewModel(object obj)
         {
             var hitNode = obj as SceneNode;
             if (obj is not SceneNode node) return null;
             // 通过Tag找到对应的ViewModel
             while (hitNode != null)
             {
-                if (hitNode.Tag is Model3DViewModel vm)
+                if (hitNode.Tag is string vm)
                 {
                     return vm; 
                 }

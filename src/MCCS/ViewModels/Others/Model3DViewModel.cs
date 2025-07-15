@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using MCCS.Core.Models.Model3D;
+﻿using MCCS.Core.Models.Model3D;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
 using HelixToolkit.SharpDX.Core;
@@ -7,7 +6,7 @@ using SharpDX;
 
 namespace MCCS.ViewModels.Others
 {
-    public class Model3DViewModel : BindableBase
+    public class Model3DViewModel : BindableBase, IDisposable
     {
         private bool _isSelected;
         private bool _isHovered; 
@@ -30,31 +29,38 @@ namespace MCCS.ViewModels.Others
             _model3DData = model3DData;
             _sceneNode = sceneNode;
             UpdateMaterial();
-            if (model3DData.Type == ModelType.Actuator) 
+            if (model3DData.Type == ModelType.Actuator)
             {
+                DataLabels = [];
+                ConnectPoints = [];
+                ConnectCollection = [];
                 InitializeDataLabels();
             }
             // 为场景节点设置Tag，以便在点击时识别
-            _sceneNode.Tag = this; 
+            _sceneNode.Tag = model3DData.Key;
+            ModelId = model3DData.Key;
             // 为所有子节点也设置Tag
-            foreach (var node in _sceneNode.Traverse()) node.Tag = this;
+            foreach (var node in _sceneNode.Traverse()) node.Tag = model3DData.Key;
         }
+
+        public string ModelId { get; private set; }
 
         public Model3DData Model3DData => _model3DData;
 
         #region BillboardText3D集合 
-        public List<TextInfo> DataLabels { get; private set; } = [];
+        public List<TextInfo>? DataLabels { get; private set; }
 
         /// <summary>
         /// 所有点的集合
         /// </summary>
-        public Vector3Collection ConnectPoints { get; private set; } = [];
+        public Vector3Collection? ConnectPoints { get; private set; }
 
         /// <summary>
         /// 连接线集合
         /// 例如: 0,1,2,3  表示0---1  2---3
         /// </summary>
-        public IntCollection ConnectCollection { get; private set; } = [];
+        public IntCollection? ConnectCollection { get; private set; }
+
         #endregion
 
         /// <summary>
@@ -176,8 +182,8 @@ namespace MCCS.ViewModels.Others
                 VerticalAlignment = BillboardVerticalAlignment.Top
             };
 
-            DataLabels.Add(forceLabel);
-            DataLabels.Add(displacementLabel);
+            DataLabels?.Add(forceLabel);
+            DataLabels?.Add(displacementLabel);
 
             // 创建连接线
             CreateConnectionLines(center, labelOffset);
@@ -218,10 +224,10 @@ namespace MCCS.ViewModels.Others
         private void CreateConnectionLines(Vector3 center, Vector3 labelOffset)
         {
             // 以中心为起点
-            ConnectPoints.Add(center);
-            ConnectPoints.Add(center + labelOffset);
-            ConnectCollection.Add(0);
-            ConnectCollection.Add(1);
+            ConnectPoints?.Add(center);
+            ConnectPoints?.Add(center + labelOffset);
+            ConnectCollection?.Add(0);
+            ConnectCollection?.Add(1);
         }
 
         /// <summary>
@@ -231,7 +237,7 @@ namespace MCCS.ViewModels.Others
         /// <param name="displacement"></param>
         private void UpdateLabels(double force, double displacement)
         {
-            if (DataLabels.Count >= 2)
+            if (DataLabels?.Count >= 2)
             {
                 DataLabels[0].Text = string.Format(ForceFormat, force);
                 DataLabels[1].Text = string.Format(DisplacementFormat, displacement);
@@ -277,6 +283,16 @@ namespace MCCS.ViewModels.Others
             matrix.M42 = newPosition.Y;
             matrix.M43 = newPosition.Z;
             _sceneNode.ModelMatrix = matrix;
+        }
+
+        public void Dispose()
+        {
+            _sceneNode.Dispose();
+            DeviceSubscription?.Dispose();
+            ConnectPoints?.Clear();
+            ConnectCollection?.Clear();
+            DataLabels?.Clear();
+            CancelModelMove.Dispose();
         }
         #endregion
     }

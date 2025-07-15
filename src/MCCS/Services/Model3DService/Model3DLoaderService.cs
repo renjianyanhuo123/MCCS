@@ -19,6 +19,7 @@ namespace MCCS.Services.Model3DService
         private const int MaxConcurrentImports = 4;
         private readonly IModel3DDataRepository _modelRepository;
         private readonly IConfiguration _configuration;
+        private readonly object _lock = new();
 
         public Model3DLoaderService( 
             IEffectsManager effectsManager,
@@ -55,7 +56,7 @@ namespace MCCS.Services.Model3DService
                 {
                     var result = await ImportSingleModelAsync(modelInfo, cancellationToken);
                     //await Task.Delay(3000, cancellationToken); // 测试使用
-                    lock (viewModels)
+                    lock (_lock)
                     {
                         viewModels.Add(result);
                         progressInfo.CompletedCount++;
@@ -101,6 +102,7 @@ namespace MCCS.Services.Model3DService
                 // 预附加场景图以优化性能
                 scene.Root.Attach(_effectsManager);
                 scene.Root.UpdateAllTransformMatrix();
+                loader.Dispose();
                 return new Model3DViewModel(scene.Root, modelInfo);
             }, cancellationToken);
 

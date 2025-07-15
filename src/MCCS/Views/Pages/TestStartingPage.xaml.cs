@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace MCCS.Views.Pages
 {
@@ -11,7 +12,7 @@ namespace MCCS.Views.Pages
         public TestStartingPage()
         {
             InitializeComponent();
-        }
+        } 
 
         protected override async void OnInitialized(EventArgs e)
         {
