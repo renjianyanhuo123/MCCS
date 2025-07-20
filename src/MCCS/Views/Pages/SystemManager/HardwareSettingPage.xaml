@@ -7,10 +7,20 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
              xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager" 
              d:DataContext="{d:DesignInstance Type=systemmanager:HardwareSettingPageViewModel}"
+             xmlns:localContanst="clr-namespace:MCCS"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
             <b:InvokeCommandAction 
@@ -22,7 +32,7 @@
             <ColumnDefinition Width="250"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0">
+        <StackPanel Grid.Column="0" Background="#F3F3F3">
             <UniformGrid Columns="2"> 
                 <materialDesign:Chip
                     Content="添加通道">
@@ -37,32 +47,52 @@
                     </materialDesign:Chip.Icon>
                 </materialDesign:Chip> 
             </UniformGrid>
-            <TreeView>
-                <ItemsControl ItemsSource="{Binding ChannelVariableInfo}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TreeViewItem>
-                                <TreeViewItem.Header>
-                                    <StackPanel Orientation="Horizontal" Tag="{Binding ChannelId}">
+            <TreeView Width="Auto" Height="Auto" ItemsSource="{Binding ChannelVariableInfo}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="SelectedItemChanged">
+                        <b:InvokeCommandAction 
+                            Command="{Binding DataContext.SelectedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            PassEventArgsToCommand="True"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                        <Setter Property="IsExpanded" Value="True" />
+                        <Setter Property="Tag" Value="{Binding ChannelId}" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding VariableInfos}">
+                        <StackPanel Orientation="Horizontal" Background="Transparent">
+                            <Viewbox Width="16" Height="16">
+                                <materialDesign:PackIcon Kind="Pipe" />
+                            </Viewbox>
+                            <TextBlock Margin="8,0,0,0" Text="{Binding ChannelName}" />
+                        </StackPanel>
+
+                        <HierarchicalDataTemplate.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="Transparent" Padding="0"> 
+                                    <StackPanel Orientation="Horizontal">
                                         <Viewbox Width="16" Height="16">
-                                            <materialDesign:PackIcon Kind="Pipe" />
+                                            <materialDesign:PackIcon Kind="Variable" />
                                         </Viewbox>
-                                        <TextBlock Margin="8,0,0,0" Text="{Binding ChannelName}" />
+                                        <TextBlock Margin="8,0,0,0" Text="{Binding VariableName}" />
                                     </StackPanel>
-                                </TreeViewItem.Header>
-                                <ItemsControl ItemsSource="{Binding VariableInfos}">
-                                    <!-- <materialDesign:PackIcon Kind="Variable" /> -->
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TreeViewItem Tag="{Binding VariableId}" Header="{Binding VariableName}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </TreeViewItem>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl> 
+                                </Border>
+                            </DataTemplate>
+                        </HierarchicalDataTemplate.ItemTemplate>
+
+                        <HierarchicalDataTemplate.ItemContainerStyle>
+                            <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
+                                <Setter Property="Tag" Value="{Binding VariableId}" /> 
+                            </Style>
+                        </HierarchicalDataTemplate.ItemContainerStyle>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
             </TreeView>
         </StackPanel>
+        <ContentControl Grid.Column="1" prism:RegionManager.RegionName="{x:Static localContanst:GlobalConstant.SystemManagerHardwarePageRegionName}" />
     </Grid>
 </UserControl>

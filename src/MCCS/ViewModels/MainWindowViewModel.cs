@@ -6,8 +6,6 @@ using MCCS.ViewModels.Pages;
 using System.Collections.ObjectModel;
 using System.Windows;
 using MCCS.Common;
-using System.Diagnostics;
-using MCCS.Views;
 
 namespace MCCS.ViewModels
 {

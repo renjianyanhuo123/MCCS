@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Windows;
 using MCCS.Core.Repositories;
 using MCCS.ViewModels.Others.SystemManager;
+using OpenTK.Input;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -9,21 +12,24 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public const string Tag = "HardwareSetting";
 
         private readonly IChannelAggregateRepository _channelAggregateRepository;
+        private readonly IRegionManager _regionManager;
 
         private ObservableCollection<ChannelVariableInfoViewModel> _channelVariableInfo;
           
         public HardwareSettingPageViewModel(
+            IRegionManager regionManager,
             IEventAggregator eventAggregator,
             IChannelAggregateRepository channelAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
+            _regionManager = regionManager;
             _channelVariableInfo = [];
             _channelAggregateRepository = channelAggregateRepository;
         }
 
-        #region Command
-
+        #region Command 
         public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
+        public DelegateCommand<RoutedPropertyChangedEventArgs<object>> SelectedCommand => new(ExecuteSelectedCommand);
         #endregion
 
         #region Property
@@ -36,8 +42,30 @@ namespace MCCS.ViewModels.Pages.SystemManager
 
         #region private method
 
+        private void ExecuteSelectedCommand(RoutedPropertyChangedEventArgs<object> param)
+        {
+            var parameters = new NavigationParameters(); 
+            switch (param.NewValue)
+            {
+                case ChannelVariableInfoViewModel channel: 
+                    parameters.Add("ChannelId", channel.ChannelId);
+                    _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(ChannelSettingPageViewModel.Tag, UriKind.Relative), parameters);
+                    break;
+                case VariableInfoViewModel variable:
+                    parameters.Add("VariableId", variable.VariableId);
+                    _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(VariableSettingPageViewModel.Tag, UriKind.Relative), parameters);
+                    break;
+                default:
+                    // Debug.WriteLine("Unknown type selected");
+                    break;
+            }
+
+            Debug.WriteLine(param);
+        }
+
         private async Task ExecuteLoadCommand()
         {
+            _channelVariableInfo.Clear();
             var channelInfos = await _channelAggregateRepository.GetChannelsAsync();
             foreach (var channelInfo in channelInfos)
             {

@@ -24,6 +24,7 @@ namespace MCCS.Modules
             containerRegistry.Register<IModel3DDataRepository, Model3DDataRepository>();
             containerRegistry.Register<IDeviceInfoRepository, DeviceInfoRepository>();
             containerRegistry.Register<IChannelAggregateRepository, ChannelAggregateRepository>();
+            containerRegistry.Register<ICurveAggregateRepository, CurveAggregateRepository>();
             SeedData.InitialData(freesql);
         }
     }

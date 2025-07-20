@@ -9,5 +9,7 @@
         public static readonly string ControlCommandRegionName = "ControlCommandRegion";
 
         public static readonly string SystemManagerRegionName = "SystemManagerRegion";
+
+        public static readonly string SystemManagerHardwarePageRegionName = "SystemManagerHardwareRegion";
     }
 }

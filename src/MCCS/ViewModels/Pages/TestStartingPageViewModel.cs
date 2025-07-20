@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
+using MCCS.Core.Repositories;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
@@ -44,6 +45,8 @@ namespace MCCS.ViewModels.Pages
         private readonly IModel3DLoaderService _model3DLoaderService;
         private readonly IRegionManager _regionManager;
         private readonly IContainerProvider _containerProvider;
+        private readonly ICurveAggregateRepository _curveAggregateRepository;
+
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress = new(); 
 
@@ -85,12 +88,14 @@ namespace MCCS.ViewModels.Pages
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
+            ICurveAggregateRepository curveAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
             _containerProvider = containerProvider;
             _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService; 
+            _curveAggregateRepository = curveAggregateRepository;
             // Initialize camera
             _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
             {
@@ -327,9 +332,12 @@ namespace MCCS.ViewModels.Pages
         /// 初始化曲线
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
-        public void InitialCurves() 
+        public async Task InitialCurves()
         {
-            var devices= Models.Where(s => s.Model3DData.DeviceId != null).Select(s => s.Model3DData).ToList();
+            var curveInfos = await _curveAggregateRepository.GetCurvesAsync();
+            var devices= Models
+                .Where(s => s.Model3DData.DeviceId != null)
+                .Select(s => s.Model3DData).ToList();
             _currentTime = DateTime.Now;
             foreach (var device in devices) 
             {

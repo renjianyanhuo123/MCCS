@@ -12,11 +12,7 @@ using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
 using MCCS.ViewModels.Dialogs;
-using MCCS.Views.Pages.Controllers;
-using MCCS.ViewModels.Pages.Controllers;
-using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Dialogs;
-using MCCS.Views.Pages.ControlCommandPages;
 using MCCS.Views.Pages.SystemManager;
 using MCCS.ViewModels.Pages.SystemManager;
 
@@ -81,6 +77,8 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
             containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
             containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ChannelSettingPage>(ChannelSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<VariableSettingPage>(VariableSettingPageViewModel.Tag);
             // Dialogs
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
         }
