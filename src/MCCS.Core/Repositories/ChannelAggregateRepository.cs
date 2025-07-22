@@ -11,7 +11,7 @@ namespace MCCS.Core.Repositories
                 .ExecuteAffrowsAsync(cancellationToken: cancellationToken) > 0;
         }
 
-        public async Task<VariableInfo> GetVariableInfoById(long id, CancellationToken cancellationToken = default)
+        public async Task<VariableInfo> GetVariableInfoByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             return await freeSql.Select<VariableInfo>()
                 .Where(a => a.Id == id)
@@ -63,6 +63,35 @@ namespace MCCS.Core.Repositories
                     .ToList()
                 select new ChannelAggregate(channel, variables, hardwares)).ToList();
             return res;
-        } 
+        }
+        
+        public async Task<ChannelInfo> GetChannelInfoByIdAsync(long id, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<ChannelInfo>()
+                .Where(c => c.Id == id)
+                .FirstAsync(cancellationToken);
+        }
+
+        public VariableInfo GetVariableInfoById(long id)
+        {
+            return freeSql.Select<VariableInfo>()
+                .Where(c => c.Id == id)
+                .ToOne();
+        }
+
+        public ChannelInfo GetChannelInfoById(long id)
+        {
+            return freeSql.Select<ChannelInfo>()
+                .Where(c => c.Id == id)
+                .ToOne();
+        }
+
+        public List<HardwareInfo> GetHardwareInfoByChannelId(long channelId )
+        {
+            return freeSql.Select<ChannelAndHardware, HardwareInfo>()
+                .InnerJoin((a, b) => a.HardwareId == b.Id)
+                .Where((a, b) => a.ChannelId == channelId) 
+                .ToList((a, b) => b);
+        }
     }
 }

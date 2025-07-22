@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using MCCS.Core.Repositories;
 using MCCS.ViewModels.Others.SystemManager;
 
 namespace MCCS.ViewModels.Pages.SystemManager
@@ -7,12 +8,13 @@ namespace MCCS.ViewModels.Pages.SystemManager
     {
         public const string Tag = "ChannelSetting";
 
-        public ChannelSettingPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
-        {
-        }
+        private readonly IChannelAggregateRepository _channelAggregateRepository;
 
-        public ChannelSettingPageViewModel(IEventAggregator eventAggregator, IDialogService? dialogService) : base(eventAggregator, dialogService)
+        public ChannelSettingPageViewModel(
+            IChannelAggregateRepository channelAggregateRepository,
+            IEventAggregator eventAggregator) : base(eventAggregator)
         {
+            _channelAggregateRepository = channelAggregateRepository;
         }
 
         #region Property
@@ -22,14 +24,24 @@ namespace MCCS.ViewModels.Pages.SystemManager
         #endregion
 
         #region Command
-        public AsyncDelegateCommand LoadedCommand => new(ExecuteLoadedCommand);
+        // public AsyncDelegateCommand LoadedCommand => new(ExecuteLoadedCommand);
         #endregion
 
-        #region private method
+        #region private method 
 
-        private async Task ExecuteLoadedCommand()
+        public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-
+            var channelId = navigationContext.Parameters.GetValue<long>("ChannelId");
+            var hardwareInfos = _channelAggregateRepository.GetHardwareInfoByChannelId(channelId);
+            if (hardwareInfos == null) throw new ArgumentNullException(nameof(hardwareInfos));
+            foreach (var hardware in hardwareInfos)
+            {
+                ChannelHardwareInfo.Add(new ChannelHardwareViewModel
+                {
+                    ControllerName = hardware.Name,
+                    HardwareId = hardware.Id,
+                });
+            }
         }
 
         #endregion

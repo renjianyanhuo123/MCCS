@@ -11,6 +11,14 @@ namespace MCCS.Core.Repositories
 
         Task<bool> AddChannelAsync(ChannelInfo channelInfo, CancellationToken cancellationToken = default);
 
-        Task<VariableInfo> GetVariableInfoById(long id, CancellationToken cancellationToken = default);
+        Task<VariableInfo> GetVariableInfoByIdAsync(long id, CancellationToken cancellationToken = default);
+
+        Task<ChannelInfo> GetChannelInfoByIdAsync(long id, CancellationToken cancellationToken = default);
+
+        VariableInfo GetVariableInfoById(long id);
+
+        ChannelInfo GetChannelInfoById(long id);
+
+        List<HardwareInfo> GetHardwareInfoByChannelId(long channelId);
     }
 }

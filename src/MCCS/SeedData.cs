@@ -382,6 +382,7 @@ namespace MCCS
                         Id = 1, 
                         Name = "作动器1",
                         Type = HardwareTypeEnum.Actuator,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -389,6 +390,7 @@ namespace MCCS
                         Id = 2, 
                         Name = "作动器2",
                         Type = HardwareTypeEnum.Actuator,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -396,6 +398,7 @@ namespace MCCS
                         Id = 3,
                         Name = "力传感器1",
                         Type = HardwareTypeEnum.Sensor,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -403,6 +406,7 @@ namespace MCCS
                         Id = 4,
                         Name = "位移传感器1",
                         Type = HardwareTypeEnum.Sensor,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -410,6 +414,7 @@ namespace MCCS
                         Id = 5,
                         Name = "力传感器2",
                         Type = HardwareTypeEnum.Sensor,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -417,6 +422,7 @@ namespace MCCS
                         Id = 6,
                         Name = "位移传感器2",
                         Type = HardwareTypeEnum.Sensor,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -424,6 +430,7 @@ namespace MCCS
                         Id = 7,
                         Name = "伺服阀1",
                         Type = HardwareTypeEnum.EnergySupply,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -431,6 +438,7 @@ namespace MCCS
                         Id = 8,
                         Name = "伺服阀2",
                         Type = HardwareTypeEnum.EnergySupply,
+                        ConnectComponentId = 9,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     },
                     new()
@@ -438,6 +446,7 @@ namespace MCCS
                         Id = 9,
                         Name = "控制器1",
                         Type = HardwareTypeEnum.Controller,
+                        ConnectComponentId = null,
                         CommunicationType = CommunicationTypeEnum.Ethernet
                     }
                 };

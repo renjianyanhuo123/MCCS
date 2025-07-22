@@ -15,6 +15,11 @@ namespace MCCS.Core.Models.SystemManager
         /// 通讯协议类型
         /// </summary>
         public CommunicationTypeEnum CommunicationType { get; set; }
+        /// <summary>
+        /// 连接组件Id
+        /// </summary>
+        [Column(IsNullable = true)]
+        public long? ConnectComponentId { get; set; }
 
         /// <summary>
         /// 通讯连接的参数
