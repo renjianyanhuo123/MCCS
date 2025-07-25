@@ -36,12 +36,20 @@
             <UniformGrid Columns="2"> 
                 <materialDesign:Chip
                     Content="添加通道">
+                    <materialDesign:Chip.InputBindings>
+                        <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding AddChannelCommand}" />
+                    </materialDesign:Chip.InputBindings>
                     <materialDesign:Chip.Icon>
                         <materialDesign:PackIcon Kind="Plus" />
                     </materialDesign:Chip.Icon>
                 </materialDesign:Chip>
                 <materialDesign:Chip
                     Content="添加变量">
+                    <materialDesign:Chip.InputBindings>
+                        <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding AddVariableCommand}" />
+                    </materialDesign:Chip.InputBindings>
                     <materialDesign:Chip.Icon>
                         <materialDesign:PackIcon Kind="Plus" />
                     </materialDesign:Chip.Icon>

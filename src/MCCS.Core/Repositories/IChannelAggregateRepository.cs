@@ -1,4 +1,5 @@
 ﻿using MCCS.Core.Domain;
+using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.SystemManager;
 
 namespace MCCS.Core.Repositories
@@ -19,6 +20,12 @@ namespace MCCS.Core.Repositories
 
         ChannelInfo GetChannelInfoById(long id);
 
-        List<HardwareInfo> GetHardwareInfoByChannelId(long channelId);
+        List<DeviceInfo> GetHardwareInfoByChannelId(long channelId);
+
+        List<long> GetAllChannelHardwareIds();
+
+        Task<bool> DeleteChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default);
+
+        Task<bool> AddChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MCCS.Core.Domain;
+using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.SystemManager;
 
 namespace MCCS.Core.Repositories
@@ -28,8 +29,8 @@ namespace MCCS.Core.Repositories
                 .InnerJoin((a,b) => a.VariableId == b.Id)
                 .Where((a,b) => a.ChannelId == id)
                 .ToListAsync((a,b) => b, cancellationToken);
-            var channelHardwares = await freeSql.Select<ChannelAndHardware, HardwareInfo>()
-                .InnerJoin((a, b) => a.HardwareId == b.Id)
+            var channelHardwares = await freeSql.Select<ChannelAndHardware, DeviceInfo>()
+                .InnerJoin((a, b) => a.DeviceId == b.Id)
                 .Where((a, b) => a.ChannelId == id)
                 .ToListAsync((a, b) => b, cancellationToken);
             var res = new ChannelAggregate(channelInfo, channelVariables, channelHardwares);
@@ -45,8 +46,8 @@ namespace MCCS.Core.Repositories
                     a.ChannelId,
                     b
                 }, cancellation);
-            var channelHardwares = await freeSql.Select<ChannelAndHardware, HardwareInfo>()
-                .InnerJoin((a, b) => a.HardwareId == b.Id)
+            var channelHardwares = await freeSql.Select<ChannelAndHardware, DeviceInfo>()
+                .InnerJoin((a, b) => a.DeviceId == b.Id)
                 .ToListAsync((a, b) => new
                 {
                     a.ChannelId,
@@ -86,12 +87,35 @@ namespace MCCS.Core.Repositories
                 .ToOne();
         }
 
-        public List<HardwareInfo> GetHardwareInfoByChannelId(long channelId )
+        public List<DeviceInfo> GetHardwareInfoByChannelId(long channelId)
         {
-            return freeSql.Select<ChannelAndHardware, HardwareInfo>()
-                .InnerJoin((a, b) => a.HardwareId == b.Id)
+            return freeSql.Select<ChannelAndHardware, DeviceInfo>()
+                .InnerJoin((a, b) => a.DeviceId == b.Id)
                 .Where((a, b) => a.ChannelId == channelId) 
                 .ToList((a, b) => b);
+        }
+
+        public List<long> GetAllChannelHardwareIds()
+        {
+            return freeSql.Select<ChannelAndHardware>()
+                .Where(c => true)
+                .ToList(s => s.DeviceId);
+        }
+
+        public async Task<bool> DeleteChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Delete<ChannelAndHardware>()
+                .Where(c => c.ChannelId == channelId && c.DeviceId == hardwareId)
+                .ExecuteAffrowsAsync(cancellationToken) > 1;
+        }
+
+        public async Task<bool> AddChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Insert(new ChannelAndHardware
+            {
+                ChannelId = channelId,
+                DeviceId = hardwareId
+            }).ExecuteAffrowsAsync(cancellationToken) > 0;
         }
     }
 }

@@ -36,7 +36,7 @@ namespace MCCS.Core.Devices.Connections
 
         public IDeviceConnection? GetConnection(string connectionId)
         {
-            return _connections.TryGetValue(connectionId, out var connection) ? connection : null;
+            return _connections.GetValueOrDefault(connectionId);
         }
 
         public void RemoveConnection(string connectionId)

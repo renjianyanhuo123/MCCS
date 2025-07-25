@@ -9,6 +9,6 @@ namespace MCCS.Core.Models.SystemManager
     public class ChannelAndHardware : BaseModel
     {
         public long ChannelId { get; set; }
-        public long HardwareId { get; set; }
+        public long DeviceId { get; set; }
     }
 }

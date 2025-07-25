@@ -4,29 +4,130 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager" 
+             xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager"
+             xmlns:localDeviceStatus="clr-namespace:MCCS.Core.Models.Devices;assembly=MCCS.Core"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=systemmanager:ChannelSettingPageViewModel}">
     <UserControl.Resources>
-        <!-- 定义数据模板 -->
+        <!-- 状态指示灯样式 -->
+        <Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <!-- 定义公共的Border样式 -->
+        <Style x:Key="AlternatingRowBorderStyle" TargetType="Border">
+            <!-- 默认背景色 -->
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Padding" Value="8"/>
+
+            <Style.Triggers>
+                <!-- 鼠标悬停效果 -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Trigger>
+
+                <!-- 偶数行背景色 -->
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=(ItemsControl.AlternationIndex)}" Value="0">
+                    <Setter Property="Background" Value="White"/>
+                </DataTrigger>
+
+                <!-- 奇数行背景色 -->
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ContentPresenter}, Path=(ItemsControl.AlternationIndex)}" Value="1">
+                    <Setter Property="Background" Value="#F8F9FA"/>
+                </DataTrigger>
+
+                <!-- 鼠标悬停时的优先级设置 -->
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="BorderBrush" Value="#2196F3"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+        <!-- 定义选中的硬件数据模板 -->
         <DataTemplate x:Key="HardwareItemTemplate">
-            <Border BorderBrush="LightGray" BorderThickness="5" Margin="2" Padding="8">
+            <Border Style="{StaticResource AlternatingRowBorderStyle}"> 
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions> 
+                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" Text="{Binding HardwareName}"></TextBlock>
-                    <TextBlock Grid.Column="1" Text="{Binding ControllerName}"></TextBlock>
-                    <materialDesign:PackIcon Grid.Column="2" Kind="DeleteForever" Tag="{Binding HardwareId}"></materialDesign:PackIcon>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding HardwareName}"></TextBlock>
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ControllerName}"></TextBlock>
+                    <materialDesign:PackIcon 
+                        Grid.Column="2" 
+                        Width="24"
+                        Height="24"
+                        Kind="DeleteForever" 
+                        Tag="{Binding HardwareId}" 
+                        Cursor="Hand">
+                        <materialDesign:PackIcon.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" 
+                                          Command="{Binding DataContext.DeleteHardwareCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding HardwareId}"/>
+                        </materialDesign:PackIcon.InputBindings>
+                    </materialDesign:PackIcon>
                 </Grid>
             </Border>
         </DataTemplate>
-
+        <!-- 定义待选的硬件数据模板列表 -->
+        <DataTemplate x:Key="HardwareSelectedItemTemplate">
+            <Border Style="{StaticResource AlternatingRowBorderStyle}"> 
+                <Grid>
+                    <Grid.ColumnDefinitions> 
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox
+                        Content="{Binding HardwareName}"
+                        Tag="{Binding HardwareId}"
+                        IsChecked="{Binding IsSelected}"
+                        IsEnabled="{Binding IsSelectable}"
+                        Style="{StaticResource MaterialDesignDarkCheckBox}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="Checked">
+                                <b:InvokeCommandAction Command="{Binding DataContext.CheckedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                       CommandParameter="{Binding HardwareId}"/>
+                            </b:EventTrigger> 
+                        </b:Interaction.Triggers>
+                    </CheckBox>
+                    <Ellipse Grid.Column="1">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicatorStyle}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Connected}">
+                                        <Setter Property="Fill" Value="#90EE90"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Busy}">
+                                        <Setter Property="Fill" Value="#FFA500"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Error}">
+                                        <Setter Property="Fill" Value="#FF6B6B"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Disconnected}">
+                                        <Setter Property="Fill" Value="#808080"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                </Grid>
+            </Border>
+        </DataTemplate>
         <!-- 定义ItemsControl的样式 -->
         <Style x:Key="ListViewStyle" TargetType="ItemsControl">
             <Setter Property="Background" Value="White"/>
@@ -34,6 +135,7 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="AlternationCount" Value="2"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ItemsControl">
@@ -48,17 +150,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
-
-        <!-- 列表项容器样式 -->
-        <!--<Style x:Key="ListItemStyle" TargetType="ContentPresenter">
-            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="LightBlue"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>-->
+        </Style> 
     </UserControl.Resources>
     <Grid>
          <Grid.RowDefinitions>
@@ -102,5 +194,27 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
+
+        <StackPanel Grid.Column="1" Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding HardwareList}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Expander>
+                            <Expander.Header>
+                                <TextBlock Text="{Binding ControllerName}" FontSize="24" FontWeight="Bold" Margin="15,0,0,0"  VerticalAlignment="Center"/>
+                            </Expander.Header>
+                            <ItemsControl ItemsSource="{Binding ChildItems}"
+                                          ItemTemplate="{StaticResource HardwareSelectedItemTemplate}"> 
+                            </ItemsControl>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
     </Grid>
 </UserControl>

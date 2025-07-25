@@ -27,6 +27,7 @@
         <StackPanel
             Grid.Row="0"
             Margin="4"
+            Background="#F3F3F3"
             Orientation="Horizontal">
             <b:Interaction.Triggers>
                 <b:EventTrigger EventName="Loaded">

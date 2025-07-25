@@ -1,4 +1,5 @@
-﻿using MCCS.Core.Models.Devices;
+﻿using MCCS.Core.Devices;
+using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
 using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Models.SystemSetting;
@@ -253,26 +254,104 @@ namespace MCCS
                 var devices = new List<DeviceInfo>() 
                 {
                     new() {
-                        DeviceId = Guid.NewGuid().ToString("N"),
+                        Id = 1,
+                        DeviceId = "1b7914d074794b5990f97df4ccdc65ae",
                         DeviceName = "作动器1",
                         DeviceType = DeviceTypeEnum.Actuator,
                         Description = "作动器1的传感器数据",
                         MainDeviceId = mainDeviceId1,
+                        FunctionType = FunctionTypeEnum.Implement,
                         ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "port", "COM3" } }),
                     },
                     new() {
-                        DeviceId = Guid.NewGuid().ToString("N"),
+                        Id = 2,
+                        DeviceId = "ff8db91959a64338b80dba86b16c92c7",
                         DeviceName = "作动器2",
                         DeviceType = DeviceTypeEnum.Actuator,
                         Description = "作动器2的传感器数据",
                         MainDeviceId = mainDeviceId1,
+                        FunctionType = FunctionTypeEnum.Implement,
                         ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "port", "COM1" } }),
                     },
                     new() {
+                        Id = 3,
                         DeviceId = mainDeviceId1,
                         DeviceName = "控制器1",
                         DeviceType = DeviceTypeEnum.Controller,
-                        Description = "控制器",
+                        Description = "控制器,用于链接其他部分属于一种分布式控制器",
+                        FunctionType = FunctionTypeEnum.None,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 4,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "力传感器1",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "附着于作动器1上的力传感器",
+                        FunctionType = FunctionTypeEnum.Measurement,
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 5,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "位移传感器1",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "附着于作动器1上的位移传感器",
+                        FunctionType = FunctionTypeEnum.Measurement,
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 6,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "力传感器2",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "附着于作动器2上的位移传感器",
+                        FunctionType = FunctionTypeEnum.Measurement,
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 7,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "位移传感器2",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "附着于作动器2上的位移传感器",
+                        FunctionType = FunctionTypeEnum.Measurement,
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 8,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "伺服阀1",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "作用于作动器1上的伺服阀",
+                        FunctionType = FunctionTypeEnum.Implement,
+                        MainDeviceId = mainDeviceId1,
+                        ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
+                    },
+                    new()
+                    {
+                        Id = 9,
+                        DeviceId = Guid.NewGuid().ToString("N"),
+                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceName = "伺服阀2",
+                        DeviceType = DeviceTypeEnum.Sensor,
+                        Description = "作用于作动器2上的伺服阀",
+                        MainDeviceId = mainDeviceId1,
+                        FunctionType = FunctionTypeEnum.Implement,
                         ConnectionInfo = JsonConvert.SerializeObject(new Dictionary<string, string>{ { "ip", "192.168.0.112" } }),
                     }
                 };
@@ -322,135 +401,55 @@ namespace MCCS
                     new()
                     {
                         ChannelId = 1,
-                        HardwareId = 9
+                        DeviceId = 1
                     },
                     new()
                     {
                         ChannelId = 1,
-                        HardwareId = 3
+                        DeviceId = 3
                     },
                     new()
                     {
                         ChannelId = 1,
-                        HardwareId = 1
+                        DeviceId = 4
                     },
                     new()
                     {
                         ChannelId = 1,
-                        HardwareId = 4
+                        DeviceId = 5
                     },
                     new()
                     {
                         ChannelId = 1,
-                        HardwareId = 7
+                        DeviceId = 8
                     },
                     new()
                     {
                         ChannelId = 2,
-                        HardwareId = 9
+                        DeviceId = 2
                     },
                     new()
                     {
-                        ChannelId = 1,
-                        HardwareId = 2
+                        ChannelId = 2,
+                        DeviceId = 3
                     },
                     new()
                     {
-                        ChannelId = 1,
-                        HardwareId = 5
+                        ChannelId = 2,
+                        DeviceId = 6
                     },
                     new()
                     {
-                        ChannelId = 1,
-                        HardwareId = 6
+                        ChannelId = 2,
+                        DeviceId = 7
                     },
                     new()
                     {
-                        ChannelId = 1,
-                        HardwareId = 8
+                        ChannelId = 2,
+                        DeviceId = 9
                     }
                 };
                 freeSql.Insert(channelHardware).ExecuteAffrows();
-            }
-
-            if (!freeSql.Select<HardwareInfo>().Any())
-            {
-                var hardwares = new List<HardwareInfo>
-                {
-                    new()
-                    {
-                        Id = 1, 
-                        Name = "作动器1",
-                        Type = HardwareTypeEnum.Actuator,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 2, 
-                        Name = "作动器2",
-                        Type = HardwareTypeEnum.Actuator,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 3,
-                        Name = "力传感器1",
-                        Type = HardwareTypeEnum.Sensor,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 4,
-                        Name = "位移传感器1",
-                        Type = HardwareTypeEnum.Sensor,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 5,
-                        Name = "力传感器2",
-                        Type = HardwareTypeEnum.Sensor,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 6,
-                        Name = "位移传感器2",
-                        Type = HardwareTypeEnum.Sensor,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 7,
-                        Name = "伺服阀1",
-                        Type = HardwareTypeEnum.EnergySupply,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 8,
-                        Name = "伺服阀2",
-                        Type = HardwareTypeEnum.EnergySupply,
-                        ConnectComponentId = 9,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    },
-                    new()
-                    {
-                        Id = 9,
-                        Name = "控制器1",
-                        Type = HardwareTypeEnum.Controller,
-                        ConnectComponentId = null,
-                        CommunicationType = CommunicationTypeEnum.Ethernet
-                    }
-                };
-                freeSql.Insert(hardwares).ExecuteAffrows();
             }
 
             if (!freeSql.Select<VariableInfo>().Any())

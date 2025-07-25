@@ -22,14 +22,11 @@ namespace MCCS.Core.Devices.Manager
         public async Task<bool> RegisterDeviceFromRepository() 
         {
             var devices = await _deviceInfoRepository.GetAllDevicesAsync();
-            if (devices == null || !devices.Any()) return false;
+            if (!devices.Any()) return false;
             foreach (var deviceInfo in devices)
             {
                 var device = _deviceFactory.CreateDevice(deviceInfo);
-                if (device != null)
-                {
-                    _devices.TryAdd(deviceInfo.DeviceId, device);
-                }
+                _devices.TryAdd(deviceInfo.DeviceId, device);
             }
             return true;
         }
@@ -44,13 +41,12 @@ namespace MCCS.Core.Devices.Manager
         public void RegisterDevice(DeviceInfo deviceInfo)
         {
             var device = _deviceFactory.CreateDevice(deviceInfo);
-            if (device == null) return;
             _devices.TryAdd(device.Id, device);
         }
 
         public IDevice? GetDevice(string deviceId)
         {
-            return _devices.TryGetValue(deviceId, out var device) ? device : null;
+            return _devices.GetValueOrDefault(deviceId);
         }
 
         public void StartAllDevices()

@@ -21,23 +21,26 @@ namespace MCCS.Core.Devices
             switch (deviceInfo.DeviceType)
             {
                 case DeviceTypeEnum.Unknown:
-                    throw new NotSupportedException();
+                    //throw new NotSupportedException();
                 case DeviceTypeEnum.Sensor:
-                    throw new NotSupportedException();
+                    break;
+                    //throw new NotSupportedException();
                 case DeviceTypeEnum.Actuator:
                     return new Actuator(deviceInfo, deviceConnection);
                 case DeviceTypeEnum.Controller:
-                    throw new NotSupportedException();
+                    //throw new NotSupportedException();
                 case DeviceTypeEnum.Gateway:
-                    throw new NotSupportedException();
+                    //throw new NotSupportedException();
                 case DeviceTypeEnum.Display:
-                    throw new NotSupportedException();
+                    //throw new NotSupportedException();
                 case DeviceTypeEnum.Other:
-                    throw new NotSupportedException();
+                    //throw new NotSupportedException();
                 default:
-                    throw new NotSupportedException();
+                    break;
+                    //throw new NotSupportedException();
             }
-            
+
+            return new Actuator(deviceInfo, deviceConnection);
         }
     }
 }

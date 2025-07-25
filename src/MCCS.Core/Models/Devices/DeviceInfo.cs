@@ -46,10 +46,14 @@ public class DeviceInfo : BaseModel
     /// 连接方式
     /// </summary>
     public ConnectionTypeEnum ConnectionType { get; set; } = ConnectionTypeEnum.Mock;
+    /// <summary>
+    /// 功能类型
+    /// </summary>
+    public FunctionTypeEnum FunctionType { get; set; }
 
     /// <summary>
     /// 设备的连接信息
     /// </summary>
-    [Column(IsNullable = true, StringLength = 500)]
+    [Column(IsNullable = true, StringLength = -2)]
     public string? ConnectionInfo { get; set; }
 }

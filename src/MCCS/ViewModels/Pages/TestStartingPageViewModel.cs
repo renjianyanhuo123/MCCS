@@ -380,10 +380,10 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         public void InitializeDataSubscriptions()
         {
-            var actor1 = _deviceManager.GetDevice("a1af5b38688247a58d3a9011bab98f81")?.DataStream 
-                ?? throw new ArgumentNullException($"Device id {"a1af5b38688247a58d3a9011bab98f81"} is not exist！");
-            var actor2 = _deviceManager.GetDevice("b32bfa58d691427f86d339a2e3c9a596")?.DataStream 
-                ?? throw new ArgumentNullException($"Device id {"b32bfa58d691427f86d339a2e3c9a596"} is not exist！");
+            var actor1 = _deviceManager.GetDevice("1b7914d074794b5990f97df4ccdc65ae")?.DataStream 
+                ?? throw new ArgumentNullException($"Device id {"1b7914d074794b5990f97df4ccdc65ae"} is not exist！");
+            var actor2 = _deviceManager.GetDevice("ff8db91959a64338b80dba86b16c92c7")?.DataStream 
+                ?? throw new ArgumentNullException($"Device id {"ff8db91959a64338b80dba86b16c92c7"} is not exist！");
             actor1
                 .Sample(TimeSpan.FromSeconds(1))
                 .Subscribe(OnDeviceDataReceived);

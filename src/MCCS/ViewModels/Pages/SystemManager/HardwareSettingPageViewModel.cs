@@ -1,9 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using MCCS.Core.Repositories;
 using MCCS.ViewModels.Others.SystemManager;
-using OpenTK.Input;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -30,6 +28,8 @@ namespace MCCS.ViewModels.Pages.SystemManager
         #region Command 
         public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
         public DelegateCommand<RoutedPropertyChangedEventArgs<object>> SelectedCommand => new(ExecuteSelectedCommand);
+        public DelegateCommand AddChannelCommand => new(ExecuteAddChannelCommand);
+        public DelegateCommand AddVariableCommand => new(ExecuteAddVariableCommand);
         #endregion
 
         #region Property
@@ -41,6 +41,16 @@ namespace MCCS.ViewModels.Pages.SystemManager
         #endregion
 
         #region private method
+
+        private void ExecuteAddVariableCommand()
+        {
+            // _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(AddChannelPageViewModel.Tag, UriKind.Relative));
+        }
+
+        private void ExecuteAddChannelCommand()
+        {
+            _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(AddChannelPageViewModel.Tag, UriKind.Relative));
+        }
 
         private void ExecuteSelectedCommand(RoutedPropertyChangedEventArgs<object> param)
         {
@@ -60,7 +70,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
                     break;
             }
 
-            Debug.WriteLine(param);
+            // Debug.WriteLine(param);
         }
 
         private async Task ExecuteLoadCommand()

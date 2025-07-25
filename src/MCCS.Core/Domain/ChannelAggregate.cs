@@ -1,11 +1,12 @@
-﻿using MCCS.Core.Models.SystemManager;
+﻿using MCCS.Core.Models.Devices;
+using MCCS.Core.Models.SystemManager;
 
 namespace MCCS.Core.Domain
 {
     public class ChannelAggregate( 
         ChannelInfo channelInfo,
         List<VariableInfo> variableInfos,
-        List<HardwareInfo> hardwareInfos)
+        List<DeviceInfo> deviceInfos)
     {
         public ChannelInfo ChannelInfo { get; private set; } = channelInfo;
         /// <summary>
@@ -15,6 +16,6 @@ namespace MCCS.Core.Domain
         /// <summary>
         /// 所有的硬件信息集合
         /// </summary>
-        public List<HardwareInfo> HardwareInfos { get; private set; } = hardwareInfos;
+        public List<DeviceInfo> DeviceInfos { get; private set; } = deviceInfos;
     }
 }

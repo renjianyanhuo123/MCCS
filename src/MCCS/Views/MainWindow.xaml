@@ -153,6 +153,17 @@
                 <StatusBarItem>Time: 2025-02-26</StatusBarItem>
                 <StatusBarItem Content="{DynamicResource Company}" />
             </StatusBar>
+            <materialDesign:Card Width="200" 
+                                 Height="200" 
+                                 Background="White"
+                                 Grid.Row="0" 
+                                 Grid.Column="0"
+                                 Grid.ColumnSpan="2"
+                                 HorizontalAlignment="Right"
+                                 VerticalAlignment="Top"
+                                 Margin="0,10,10,0">
+
+            </materialDesign:Card>
         </Grid>
     </materialDesign:DialogHost>
 </mah:MetroWindow>
