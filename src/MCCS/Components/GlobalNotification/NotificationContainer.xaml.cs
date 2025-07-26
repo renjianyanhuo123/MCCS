@@ -17,7 +17,9 @@ namespace MCCS.Components.GlobalNotification
             InitializeComponent();
         }
 
-        // 延迟初始化服务
+        /// <summary>
+        /// 关键点: 延迟初始化服务
+        /// </summary>
         private void EnsureServiceInitialized()
         {
             if (_isInitialized) return;
@@ -43,9 +45,7 @@ namespace MCCS.Components.GlobalNotification
         {
             EnsureServiceInitialized();
 
-            if (_notificationService != null &&
-                sender is NotificationItemControl item &&
-                item.DataContext is Models.NotificationItem notification)
+            if (sender is NotificationItemControl { DataContext: Models.NotificationItem notification })
             {
                 _notificationService.Remove(notification);
             }

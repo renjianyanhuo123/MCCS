@@ -10,7 +10,7 @@ namespace MCCS.Core.Repositories
         
         Task<ChannelAggregate?> GetChannelByIdAsync(long id, CancellationToken cancellationToken = default);
 
-        Task<bool> AddChannelAsync(ChannelInfo channelInfo, CancellationToken cancellationToken = default);
+        Task<long> AddChannelAsync(ChannelInfo channelInfo, CancellationToken cancellationToken = default);
 
         Task<VariableInfo> GetVariableInfoByIdAsync(long id, CancellationToken cancellationToken = default);
 

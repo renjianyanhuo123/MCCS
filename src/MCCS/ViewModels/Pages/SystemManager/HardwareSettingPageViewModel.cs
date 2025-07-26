@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
 using MCCS.Core.Repositories;
+using MCCS.Events.SystemManager;
 using MCCS.ViewModels.Others.SystemManager;
+using Serilog;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -23,6 +25,20 @@ namespace MCCS.ViewModels.Pages.SystemManager
             _regionManager = regionManager;
             _channelVariableInfo = [];
             _channelAggregateRepository = channelAggregateRepository;
+            _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(async void (param) =>
+            {
+                try
+                {
+                    await ExecuteLoadCommand();
+                    var selectedChannel = ChannelVariableInfo.FirstOrDefault(c => c.ChannelId == param.ChannelId);
+                    if (selectedChannel == null) return;
+                    SelectedItem = selectedChannel;
+                }
+                catch (Exception e)
+                {
+                    Log.Error("添加通道后选中鱼刷新失败！");
+                }
+            });
         }
 
         #region Command 
@@ -32,7 +48,14 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public DelegateCommand AddVariableCommand => new(ExecuteAddVariableCommand);
         #endregion
 
-        #region Property
+        #region Property 
+        private object _selectedItem; 
+        public object SelectedItem
+        {
+            get => _selectedItem;
+            set => SetProperty(ref _selectedItem, value);
+        }
+
         public ObservableCollection<ChannelVariableInfoViewModel> ChannelVariableInfo
         {
             get => _channelVariableInfo;

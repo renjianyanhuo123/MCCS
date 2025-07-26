@@ -6,10 +6,10 @@ namespace MCCS.Core.Repositories
 {
     public class ChannelAggregateRepository(IFreeSql freeSql) : IChannelAggregateRepository
     {
-        public async Task<bool> AddChannelAsync(ChannelInfo channelInfo, CancellationToken cancellationToken = default)
+        public async Task<long> AddChannelAsync(ChannelInfo channelInfo, CancellationToken cancellationToken = default)
         {
             return await freeSql.Insert(channelInfo)
-                .ExecuteAffrowsAsync(cancellationToken: cancellationToken) > 0;
+                .ExecuteIdentityAsync(cancellationToken: cancellationToken);
         }
 
         public async Task<VariableInfo> GetVariableInfoByIdAsync(long id, CancellationToken cancellationToken = default)

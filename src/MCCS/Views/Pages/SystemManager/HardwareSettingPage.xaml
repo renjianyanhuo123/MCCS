@@ -10,6 +10,7 @@
              xmlns:localContanst="clr-namespace:MCCS"
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:MCCS.Behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -55,7 +56,9 @@
                     </materialDesign:Chip.Icon>
                 </materialDesign:Chip> 
             </UniformGrid>
-            <TreeView Width="Auto" Height="Auto" ItemsSource="{Binding ChannelVariableInfo}">
+            <TreeView Width="Auto" Height="Auto" 
+                      behaviors:TreeViewSelectedItemBehavior.SelectedItem="{Binding SelectedItem}"
+                      ItemsSource="{Binding ChannelVariableInfo}">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="SelectedItemChanged">
                         <b:InvokeCommandAction 

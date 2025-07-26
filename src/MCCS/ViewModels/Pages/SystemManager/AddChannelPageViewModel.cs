@@ -4,6 +4,7 @@ using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Helper;
 using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Repositories;
+using MCCS.Events.SystemManager;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.SystemManager
@@ -63,12 +64,18 @@ namespace MCCS.ViewModels.Pages.SystemManager
                 IsShowable = IsShowable,
                 IsOpenSpecimenProtected = IsOpenProtected
             };
-            await _channelAggregateRepository.AddChannelAsync(channelInfo);
+            var addedChannelId = await _channelAggregateRepository.AddChannelAsync(channelInfo);
             _notificationService.Show(
                 "添加通道成功",
                 "通道信息已成功添加到系统中!",
                 NotificationType.Success,
                 3);
+            _eventAggregator.GetEvent<NotificationAddChannelEvent>()
+                .Publish(new NotificationAddChannelEventParam
+                {
+                    ChannelId = addedChannelId,
+                    ChannelName = ChannelName
+                });
         }
 
         #endregion
