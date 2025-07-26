@@ -6,6 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCCS"
         ResizeMode="NoResize"
+        xmlns:components="clr-namespace:MCCS.Components.GlobalNotification"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
@@ -153,7 +154,7 @@
                 <StatusBarItem>Time: 2025-02-26</StatusBarItem>
                 <StatusBarItem Content="{DynamicResource Company}" />
             </StatusBar>
-            <materialDesign:Card Width="200" 
+            <!--<materialDesign:Card Width="200" 
                                  Height="200" 
                                  Background="White"
                                  Grid.Row="0" 
@@ -163,7 +164,14 @@
                                  VerticalAlignment="Top"
                                  Margin="0,10,10,0">
 
-            </materialDesign:Card>
+            </materialDesign:Card>-->
+            <components:NotificationContainer Height="Auto" Width="Auto" 
+                                              Grid.Row="0" 
+                                              Grid.Column="0"
+                                              Grid.ColumnSpan="2"
+                                              HorizontalAlignment="Right"
+                                              VerticalAlignment="Top"
+                                              Margin="0,10,10,0"></components:NotificationContainer>
         </Grid>
     </materialDesign:DialogHost>
 </mah:MetroWindow>

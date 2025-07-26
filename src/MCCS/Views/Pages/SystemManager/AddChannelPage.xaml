@@ -42,7 +42,6 @@
             <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Text="是否开启试样保护："></TextBlock>
             <ToggleButton HorizontalAlignment="Left"  Grid.Row="2" Grid.Column="1" IsChecked="{Binding IsOpenProtected, Mode=TwoWay}"></ToggleButton>
             <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Width="80" Content="保存" Command="{Binding AddChannelCommand}"></Button>
-            <materialDesign:Snackbar  x:Name="SnackbarSeven"  MessageQueue="{materialDesign:MessageQueue}"  />
         </Grid>
     </GroupBox>
 

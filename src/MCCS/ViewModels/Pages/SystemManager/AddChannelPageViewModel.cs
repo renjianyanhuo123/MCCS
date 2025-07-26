@@ -1,8 +1,10 @@
 ﻿
 using MaterialDesignThemes.Wpf;
+using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Helper;
 using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Repositories;
+using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -11,14 +13,16 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public const string Tag = "AddChannel";
 
         private readonly IChannelAggregateRepository _channelAggregateRepository;
-        
+        private readonly INotificationService _notificationService;
 
         public AddChannelPageViewModel(
+            INotificationService notificationService,
             IEventAggregator eventAggregator, 
             IDialogService? dialogService, 
             IChannelAggregateRepository channelAggregateRepository) : base(eventAggregator, dialogService)
         {
             _channelAggregateRepository = channelAggregateRepository;
+            _notificationService = notificationService;
         }
 
         #region Property
@@ -41,22 +45,11 @@ namespace MCCS.ViewModels.Pages.SystemManager
         {
             get => _isOpenProtected;
             set => SetProperty(ref _isOpenProtected, value);
-        }
-
-        private ISnackbarMessageQueue _snackbarMessageQueue;
-
-        public ISnackbarMessageQueue MessageQueue
-        {
-            get => _snackbarMessageQueue;
-            set => SetProperty(ref _snackbarMessageQueue, value);
-        }
-
+        } 
         #endregion
 
-        #region Command
-
-        public AsyncDelegateCommand AddChannelCommand => new(ExexuteAddChannelCommand);
-
+        #region Command 
+        public AsyncDelegateCommand AddChannelCommand => new(ExexuteAddChannelCommand); 
         #endregion
 
         #region private method
@@ -71,14 +64,11 @@ namespace MCCS.ViewModels.Pages.SystemManager
                 IsOpenSpecimenProtected = IsOpenProtected
             };
             await _channelAggregateRepository.AddChannelAsync(channelInfo);
-            MessageQueue?.Enqueue(
-                $"保存成功！",
-                null,
-                null,
-                null,
-                false,
-                true,
-                TimeSpan.FromSeconds(2));
+            _notificationService.Show(
+                "添加通道成功",
+                "通道信息已成功添加到系统中!",
+                NotificationType.Success,
+                3);
         }
 
         #endregion

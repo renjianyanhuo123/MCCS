@@ -39,7 +39,7 @@ namespace MCCS
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
             // 注册模块
-            //moduleCatalog.AddModule<RepositoryModule>();
+            moduleCatalog.AddModule<NotificationModule>();
         }
         /// <summary>
         /// (1)
@@ -69,6 +69,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
+            // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
@@ -83,6 +84,7 @@ namespace MCCS
             // Dialogs
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
         }
+
         /// <summary>
         /// (4)初始化应用程序
         /// </summary>
