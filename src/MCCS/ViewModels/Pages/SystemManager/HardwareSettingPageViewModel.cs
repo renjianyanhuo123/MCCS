@@ -25,20 +25,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             _regionManager = regionManager;
             _channelVariableInfo = [];
             _channelAggregateRepository = channelAggregateRepository;
-            _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(async void (param) =>
-            {
-                try
-                {
-                    await ExecuteLoadCommand();
-                    var selectedChannel = ChannelVariableInfo.FirstOrDefault(c => c.ChannelId == param.ChannelId);
-                    if (selectedChannel == null) return;
-                    SelectedItem = selectedChannel;
-                }
-                catch (Exception e)
-                {
-                    Log.Error("添加通道后选中鱼刷新失败！");
-                }
-            });
+            _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(RefreshTreeViewAndSelected);
         }
 
         #region Command 
@@ -113,6 +100,21 @@ namespace MCCS.ViewModels.Pages.SystemManager
                             VariableName = variable.Name
                         }).ToList()
                 });
+            }
+        }
+
+        private async void RefreshTreeViewAndSelected(NotificationAddChannelEventParam param)
+        {
+            try
+            {
+                await ExecuteLoadCommand();
+                var selectedChannel = ChannelVariableInfo.FirstOrDefault(c => c.ChannelId == param.ChannelId);
+                if (selectedChannel == null) return;
+                SelectedItem = selectedChannel;
+            }
+            catch (Exception e)
+            {
+                Log.Error("添加通道后选中与刷新失败！");
             }
         }
 

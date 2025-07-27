@@ -165,20 +165,20 @@
 
         <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal">
             <StackPanel Orientation="Horizontal" Width="150" VerticalAlignment="Center" Margin="15,0,0,0">
-                <TextBlock Text="通道名称" VerticalAlignment="Center" Margin="0,0,10,0"></TextBlock>
-                <TextBox materialDesign:HintAssist.Hint="输入通道名称"  />
+                <TextBlock Text="通道名称:" VerticalAlignment="Center" Margin="0,0,10,0"></TextBlock>
+                <TextBox materialDesign:HintAssist.Hint="输入通道名称" Width="Auto" Text="{Binding ChannelName}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Width="150" VerticalAlignment="Center" Margin="15,0,0,0">
-                <TextBlock Text="是否可见" VerticalAlignment="Center" Margin="0,0,10,0"></TextBlock>
-                <ToggleButton></ToggleButton>
+                <TextBlock Text="是否可见:" VerticalAlignment="Center" Margin="0,0,10,0"></TextBlock>
+                <ToggleButton IsChecked="{Binding IsShowable}"></ToggleButton>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Width="180" VerticalAlignment="Center" Margin="15,0,0,0">
-                <TextBlock Text="内部名称" Margin="0,0,10,0"></TextBlock>
-                <TextBlock Text="channel_0299jjiks"></TextBlock>
+                <TextBlock Text="内部名称:" Margin="0,0,10,0"></TextBlock>
+                <TextBlock Text="{Binding InternalChannelName}"></TextBlock>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Width="200" VerticalAlignment="Center" Margin="15,0,0,0">
-                <TextBlock Text="是否开启试样保护" Margin="0,0,10,0" VerticalAlignment="Center"></TextBlock>
-                <ToggleButton></ToggleButton>
+                <TextBlock Text="是否开启试样保护:" Margin="0,0,10,0" VerticalAlignment="Center"></TextBlock>
+                <ToggleButton IsChecked="{Binding IsOpenProtected}"></ToggleButton>
             </StackPanel>
         </StackPanel>
 

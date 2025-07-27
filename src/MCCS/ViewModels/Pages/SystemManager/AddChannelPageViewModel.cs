@@ -57,6 +57,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
 
         private async Task ExexuteAddChannelCommand()
         {
+            if (string.IsNullOrEmpty(ChannelName)) return;
             var channelInfo = new ChannelInfo
             {
                 ChannelId = $"Channel_{HighPerformanceRandomHash.GenerateRandomHash6()}",

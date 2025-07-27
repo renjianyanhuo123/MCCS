@@ -7,9 +7,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
 {
     public class ChannelSettingPageViewModel:BaseViewModel
     {
-        public const string Tag = "ChannelSetting";
-
-        private long _currentChannelId = 0;
+        public const string Tag = "ChannelSetting"; 
 
         private readonly IChannelAggregateRepository _channelAggregateRepository;
         private readonly IDeviceInfoRepository _deviceInfoRepository;
@@ -24,6 +22,36 @@ namespace MCCS.ViewModels.Pages.SystemManager
         }
 
         #region Property 
+        public long ChannelId { get; set; }
+
+        private string _internalChannelName = string.Empty; 
+        public string InternalChannelName
+        {
+            get => _internalChannelName;
+            set => SetProperty(ref _internalChannelName, value);
+        } 
+
+        private string _channelName;
+        public string ChannelName
+        {
+            get => _channelName;
+            set => SetProperty(ref _channelName, value);
+        }
+
+        private bool _isShowable;
+        public bool IsShowable
+        {
+            get => _isShowable;
+            set => SetProperty(ref _isShowable, value);
+        }
+
+        private bool _isOpenProtected;
+        public bool IsOpenProtected
+        {
+            get => _isOpenProtected;
+            set => SetProperty(ref _isOpenProtected, value);
+        }
+
         public ObservableCollection<ChannelHardwareViewModel> ChannelHardwareInfo { get; private set; } = [];
         public ObservableCollection<HardwareListItemViewModel> HardwareList { get; private set; } = [];
         #endregion
@@ -34,22 +62,31 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public AsyncDelegateCommand<long> CheckedCommand => new(ExecuteCheckedCommand);
         #endregion
 
-        #region private method 
+        #region private method
+        private void InitEditUI(long channelId)
+        {
+            var channelInfo = _channelAggregateRepository.GetChannelInfoById(channelId);
+            ChannelId = channelInfo.Id;
+            InternalChannelName = channelInfo.ChannelId;
+            ChannelName = channelInfo.ChannelName;
+            IsShowable = channelInfo.IsShowable;
+            IsOpenProtected = channelInfo.IsOpenSpecimenProtected;
+        }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var channelId = navigationContext.Parameters.GetValue<long>("ChannelId");
-            _currentChannelId = channelId;
-            var hardwareInfos = _channelAggregateRepository.GetHardwareInfoByChannelId(channelId);
-            if (hardwareInfos == null) throw new ArgumentNullException(nameof(hardwareInfos));
+            var channelId = navigationContext.Parameters.GetValue<long>("ChannelId"); 
+            InitEditUI(channelId);
+            // 左侧所有已经在对应通道内的设备
+            var hardwareInfos = _channelAggregateRepository.GetHardwareInfoByChannelId(channelId); 
             ChannelHardwareInfo.Clear();
-            HardwareList.Clear();
-            var parentIds = hardwareInfos
+            HardwareList.Clear(); 
+            var allDevices = _deviceInfoRepository.GetDevicesByExpression(c => true);
+            var parentIds = allDevices
                 .Where(s => s.MainDeviceId != null)
                 .Select(s => s.MainDeviceId)
                 .Distinct()
                 .ToList();
-            var allDevices = _deviceInfoRepository.GetDevicesByExpression(c => true);
             var selectedHardwareIds = _channelAggregateRepository.GetAllChannelHardwareIds();
             var parentInfos = allDevices
                 .Where(c => parentIds.Contains(c.DeviceId))
@@ -114,7 +151,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
                     break;
                 }
             }
-            await _channelAggregateRepository.AddChannelHardware(_currentChannelId, hardwareId);
+            await _channelAggregateRepository.AddChannelHardware(ChannelId, hardwareId);
         }
 
         private async Task ExecuteDeleteHardwareCommand(long hardwareId)
@@ -122,7 +159,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             var removeObj = ChannelHardwareInfo.FirstOrDefault(s => s.HardwareId == hardwareId);
             if (removeObj == null) return;
             ChannelHardwareInfo.Remove(removeObj);
-            await _channelAggregateRepository.DeleteChannelHardware(_currentChannelId, hardwareId); 
+            await _channelAggregateRepository.DeleteChannelHardware(ChannelId, hardwareId); 
             foreach (var controller in HardwareList)
             {
                 foreach (var item in controller.ChildItems)

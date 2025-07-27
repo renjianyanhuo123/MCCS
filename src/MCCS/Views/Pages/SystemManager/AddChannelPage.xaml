@@ -8,6 +8,7 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:systemManager="clr-namespace:MCCS.ViewModels.Pages.SystemManager"
+             xmlns:validationRules="clr-namespace:MCCS.ValidationRules.SystemManager"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="1080" d:DataContext="{d:DesignInstance Type=systemManager:AddChannelPageViewModel }">
@@ -36,7 +37,18 @@
                 <materialDesign:PackIcon Kind="Asterisk" Width="8" Height="8" />
                 <TextBlock  Text="通道名称："></TextBlock>
             </StackPanel>
-            <TextBox Grid.Row="0" Grid.Column="1" materialDesign:HintAssist.Hint="请输入通道名称" Height="30" Text="{Binding ChannelName, Mode=TwoWay}"></TextBox>
+            <TextBox Grid.Row="0" Grid.Column="1" materialDesign:HintAssist.Hint="请输入通道名称" 
+                     materialDesign:ValidationAssist.HasError="True"  
+                     materialDesign:ValidationAssist.HorizontalAlignment="Center" 
+                     Height="30">
+                <TextBox.Text>
+                    <Binding Path="ChannelName" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <validationRules:NotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
             <TextBlock VerticalAlignment="Center"  HorizontalAlignment="Right"  Grid.Row="1" Grid.Column="0" Text="是否可见："></TextBlock>
             <ToggleButton HorizontalAlignment="Left"  Grid.Row="1" Grid.Column="1" IsChecked="{Binding IsShowable, Mode=TwoWay}"></ToggleButton>
             <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Right" Text="是否开启试样保护："></TextBlock>
