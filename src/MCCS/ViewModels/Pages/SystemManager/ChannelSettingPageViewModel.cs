@@ -80,7 +80,8 @@ namespace MCCS.ViewModels.Pages.SystemManager
             // 左侧所有已经在对应通道内的设备
             var hardwareInfos = _channelAggregateRepository.GetHardwareInfoByChannelId(channelId); 
             ChannelHardwareInfo.Clear();
-            HardwareList.Clear(); 
+            HardwareList.Clear();
+            // 右侧所有的设备
             var allDevices = _deviceInfoRepository.GetDevicesByExpression(c => true);
             var parentIds = allDevices
                 .Where(s => s.MainDeviceId != null)
