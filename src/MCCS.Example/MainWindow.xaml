@@ -4,13 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCCS.Example"
-        xmlns:customPagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
+        xmlns:transferControl="clr-namespace:MCCS.UserControl.Transfer;assembly=MCCS.UserControl"
+        xmlns:pagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="1000">
     <Window.DataContext>
         <local:MainViewModel />
     </Window.DataContext>
-    <Grid Background="Transparent">
+    <Grid >
         <!--
         使用示例:
         Total: 总页数
@@ -21,7 +22,7 @@
         1. ShowTotal: 是否显示总页数
         2. 一定要写明使用的哪一个DataContext,不然会默认使用控件自身的DataContext
         -->
-        <customPagination:PaginationUserControl 
+        <!--<pagination:PaginationUserControl 
             x:Name="PaginationUserControl" 
             ShowTotal="True"
             Width="1000" 
@@ -29,6 +30,10 @@
             Total="{Binding DataContext.Total, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
             DefaultPageSize="10"
             DefaultCurrentPage="6"
-            PageChangedCommand="{Binding DataContext.OnPageChanged, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" />
+            PageChangedCommand="{Binding DataContext.OnPageChanged, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" />-->
+        <transferControl:TransferUserControl Width="Auto" Height="Auto" 
+                                             SourceItems="{Binding SourceList}"
+                                             TargetItems="{Binding TargetList}"
+                                             SourceName="{Binding SourceName}" TargetName="{Binding TargetName}"/>
     </Grid>
 </Window>

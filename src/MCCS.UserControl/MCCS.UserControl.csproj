@@ -9,9 +9,16 @@
 
   <ItemGroup>
     <None Remove="Assert\ChevronDown_16.png" />
+    <None Remove="Assert\no-data.png" />
     <None Remove="Assert\omitPoint_16.png" />
     <None Remove="Assert\omitPoint_32.png" />
     <None Remove="Assert\right_32.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assert\no-data.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
