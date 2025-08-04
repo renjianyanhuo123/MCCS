@@ -25,10 +25,9 @@ namespace MCCS.Core.Repositories
                 .Where(a => a.Id == id)
                 .FirstAsync(cancellationToken: cancellationToken);
             if (channelInfo == null) return null;
-            var channelVariables = await freeSql.Select<ChannelAndVariable,VariableInfo>() 
-                .InnerJoin((a,b) => a.VariableId == b.Id)
-                .Where((a,b) => a.ChannelId == id)
-                .ToListAsync((a,b) => b, cancellationToken);
+            var channelVariables = await freeSql.Select<VariableInfo>()
+                .Where(a => a.ChannelId == id)
+                .ToListAsync(cancellationToken);
             var channelHardwares = await freeSql.Select<ChannelAndHardware, DeviceInfo>()
                 .InnerJoin((a, b) => a.DeviceId == b.Id)
                 .Where((a, b) => a.ChannelId == id)
@@ -39,13 +38,8 @@ namespace MCCS.Core.Repositories
 
         public async Task<List<ChannelAggregate>> GetChannelsAsync(CancellationToken cancellation = default)
         {
-            var channelVariables = await freeSql.Select<ChannelAndVariable, VariableInfo>()
-                .InnerJoin((a, b) => a.VariableId == b.Id) 
-                .ToListAsync((a, b) => new
-                {
-                    a.ChannelId,
-                    b
-                }, cancellation);
+            var channelVariables = await freeSql.Select<VariableInfo>() 
+                .ToListAsync(cancellation);
             var channelHardwares = await freeSql.Select<ChannelAndHardware, DeviceInfo>()
                 .InnerJoin((a, b) => a.DeviceId == b.Id)
                 .ToListAsync((a, b) => new
@@ -57,7 +51,6 @@ namespace MCCS.Core.Repositories
                 .ToListAsync(cancellation);
             var res = (from channel in channels
                 let variables = channelVariables.Where(a => a.ChannelId == channel.Id)
-                    .Select(a => a.b)
                     .ToList()
                 let hardwares = channelHardwares.Where(a => a.ChannelId == channel.Id)
                     .Select(a => a.b)
@@ -71,6 +64,23 @@ namespace MCCS.Core.Repositories
             return await freeSql.Select<ChannelInfo>()
                 .Where(c => c.Id == id)
                 .FirstAsync(cancellationToken);
+        }
+
+        public ChannelAggregate? GetChannelById(long id)
+        {
+            var channelInfo = freeSql.Select<ChannelInfo>()
+                .Where(a => a.Id == id)
+                .First();
+            if (channelInfo == null) return null;
+            var channelVariables = freeSql.Select<VariableInfo>() 
+                .Where(a => a.ChannelId == id)
+                .ToList();
+            var channelHardwares = freeSql.Select<ChannelAndHardware, DeviceInfo>()
+                .InnerJoin((a, b) => a.DeviceId == b.Id)
+                .Where((a, b) => a.ChannelId == id)
+                .ToList((a, b) => b);
+            var res = new ChannelAggregate(channelInfo, channelVariables, channelHardwares);
+            return res;
         }
 
         public VariableInfo GetVariableInfoById(long id)
@@ -106,7 +116,7 @@ namespace MCCS.Core.Repositories
         {
             return await freeSql.Delete<ChannelAndHardware>()
                 .Where(c => c.ChannelId == channelId && c.DeviceId == hardwareId)
-                .ExecuteAffrowsAsync(cancellationToken) > 1;
+                .ExecuteAffrowsAsync(cancellationToken) > 0;
         }
 
         public async Task<bool> AddChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default)
@@ -116,6 +126,28 @@ namespace MCCS.Core.Repositories
                 ChannelId = channelId,
                 DeviceId = hardwareId
             }).ExecuteAffrowsAsync(cancellationToken) > 0;
+        }
+
+        public async Task<bool> UpdateChannelInfoAsync(long channelId, string channelName, bool isShowable, bool isOpenSpecimenProtected, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Update<ChannelInfo>(channelId)
+                .Set(a => a.ChannelName, channelName)
+                .Set(a => a.IsShowable, isShowable)
+                .Set(a => a.IsOpenSpecimenProtected, isOpenSpecimenProtected)
+                .ExecuteAffrowsAsync(cancellationToken) > 0;
+        }
+
+        public async Task<bool> UpdateVariableInfoAsync(VariableInfo variableInfo, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(variableInfo.HardwareInfos)) variableInfo.HardwareInfos = null;
+            return await freeSql.Update<VariableInfo>(variableInfo.Id)
+                .Set(a => a.Name, variableInfo.Name)
+                .Set(a => a.IsShowable, variableInfo.IsShowable)
+                .Set(a => a.IsCanControl, variableInfo.IsCanControl)
+                .Set(a => a.IsCanSetLimit, variableInfo.IsCanSetLimit)
+                .Set(a => a.IsCanCalibration, variableInfo.IsCanCalibration)
+                .Set(a => a.HardwareInfos, variableInfo.HardwareInfos)
+                .ExecuteAffrowsAsync(cancellationToken) > 0;
         }
     }
 }

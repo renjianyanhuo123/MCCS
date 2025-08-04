@@ -32,8 +32,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 选择的控制方式界面
         /// </summary>
-        private UserControl _currentPage;
-        public UserControl CurrentPage
+        private System.Windows.Controls.UserControl _currentPage;
+        public System.Windows.Controls.UserControl CurrentPage
         {
             get => _currentPage;
             set => SetProperty(ref _currentPage, value);

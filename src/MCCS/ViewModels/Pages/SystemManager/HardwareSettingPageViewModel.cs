@@ -25,7 +25,9 @@ namespace MCCS.ViewModels.Pages.SystemManager
             _regionManager = regionManager;
             _channelVariableInfo = [];
             _channelAggregateRepository = channelAggregateRepository;
-            _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(RefreshTreeViewAndSelected);
+            _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(Add_RefreshTreeViewAndSelected);
+            _eventAggregator.GetEvent<NotificationUpdateChannelEvent>().Subscribe(Update_RefreshTreeView);
+            _eventAggregator.GetEvent<NotificationUpdateVariableEvent>().Subscribe(UpdateVariable_RefreshTreeView);
         }
 
         #region Command 
@@ -103,7 +105,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             }
         }
 
-        private async void RefreshTreeViewAndSelected(NotificationAddChannelEventParam param)
+        private async void Add_RefreshTreeViewAndSelected(NotificationAddChannelEventParam param)
         {
             try
             {
@@ -115,6 +117,29 @@ namespace MCCS.ViewModels.Pages.SystemManager
             catch (Exception e)
             {
                 Log.Error("添加通道后选中与刷新失败！");
+            }
+        } 
+        private async void Update_RefreshTreeView(NotificationUpdateChannelEventParam param)
+        {
+            try
+            {
+                await ExecuteLoadCommand();
+            }
+            catch (Exception e)
+            {
+                Log.Error("更新通道后刷新失败！");
+            }
+        }
+
+        private async void UpdateVariable_RefreshTreeView(NotificationUpdateVariableEventParam param)
+        {
+            try
+            {
+                await ExecuteLoadCommand();
+            }
+            catch (Exception e)
+            {
+                Log.Error("更新变量后刷新失败！");
             }
         }
 

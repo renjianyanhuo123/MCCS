@@ -5,7 +5,7 @@ namespace MCCS.Components
     /// <summary>
     /// CylinderModeControl.xaml 的交互逻辑
     /// </summary>
-    public partial class CylinderModeControl : UserControl
+    public partial class CylinderModeControl : System.Windows.Controls.UserControl
     {
         //public CylinderModeControl()
         //{

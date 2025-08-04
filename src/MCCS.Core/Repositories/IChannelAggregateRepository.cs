@@ -16,6 +16,8 @@ namespace MCCS.Core.Repositories
 
         Task<ChannelInfo> GetChannelInfoByIdAsync(long id, CancellationToken cancellationToken = default);
 
+        ChannelAggregate? GetChannelById(long id);
+
         VariableInfo GetVariableInfoById(long id);
 
         ChannelInfo GetChannelInfoById(long id);
@@ -27,5 +29,9 @@ namespace MCCS.Core.Repositories
         Task<bool> DeleteChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default);
 
         Task<bool> AddChannelHardware(long channelId, long hardwareId, CancellationToken cancellationToken = default);
+
+        Task<bool> UpdateChannelInfoAsync(long channelId, string channelName, bool isShowable, bool isOpenSpecimenProtected, CancellationToken cancellationToken = default);
+
+        Task<bool> UpdateVariableInfoAsync(VariableInfo variableInfo, CancellationToken cancellationToken = default);
     }
 }

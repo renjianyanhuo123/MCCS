@@ -5,7 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages.SystemManager"
              xmlns:prism="http://prismlibrary.com/"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager" d:DataContext="{d:DesignInstance Type=systemmanager:VariableSettingPageViewModel}"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager"
+             xmlns:transfer="clr-namespace:MCCS.UserControl.Transfer;assembly=MCCS.UserControl"
+             d:DataContext="{d:DesignInstance Type=systemmanager:VariableSettingPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -16,7 +19,8 @@
          <Grid.RowDefinitions>
              <RowDefinition Height="Auto"></RowDefinition>
              <RowDefinition Height="Auto"></RowDefinition>
-             <RowDefinition Height="Auto"></RowDefinition>
+             <RowDefinition Height="*"></RowDefinition>
+             <RowDefinition Height="80"></RowDefinition>
          </Grid.RowDefinitions>  
         <GroupBox Header="基础信息">
             <Grid>
@@ -67,7 +71,10 @@
                     <TextBlock Text="是否可设置极限:" Margin="5" VerticalAlignment="Center" />
                     <ToggleButton  Height="30" Margin="5" IsChecked="{Binding IsCanSetLimit}"></ToggleButton>
                 </StackPanel>
-                <WrapPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding IsCanSetLimit, Converter=BooleanToVisibilityConverter}">
+                <WrapPanel Grid.Row="2" 
+                           Grid.Column="0" 
+                           Grid.ColumnSpan="2" 
+                           Visibility="{Binding IsCanSetLimit, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <CheckBox Content="无停止动作, 停用事件检测器" Margin="10"/>
                     <CheckBox Content="作动器断电" Margin="10" />
                     <CheckBox Content="系统停止" Margin="10" />
@@ -75,5 +82,22 @@
                 </WrapPanel>
             </Grid>
         </GroupBox>
+        <GroupBox Grid.Row="2" Header="选择硬件信息">
+            <transfer:TransferUserControl SourceName="可分配资源"
+                                          TargetName="已分配资源"
+                                          SourceItems="{Binding SourceModels}"
+                                          TargetItems="{Binding TargetModels}"></transfer:TransferUserControl>
+        </GroupBox>
+        <Border Grid.Row="3"
+                Grid.Column="0"
+                BorderThickness="0,1,0,0"
+                BorderBrush="Gray">
+            <Button
+                Width="150"
+                Content="保存"
+                Command="{Binding SaveCommand}"
+                Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                ToolTip="保存" />
+        </Border>
     </Grid>
 </UserControl>

@@ -156,7 +156,7 @@
          <Grid.RowDefinitions>
              <RowDefinition Height="80" />
              <RowDefinition Height="*" />
-             <RowDefinition Height="150" />
+             <RowDefinition Height="80" />
          </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" />
@@ -216,5 +216,17 @@
                 </ItemsControl.ItemsPanel>
             </ItemsControl>
         </StackPanel>
+        <Border Grid.Row="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                BorderThickness="0,1,0,0"
+                BorderBrush="Gray">
+            <Button
+                Width="150"
+                Content="保存"
+                Command="{Binding SaveCommand}"
+                Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                ToolTip="保存" />
+        </Border>
     </Grid>
 </UserControl>

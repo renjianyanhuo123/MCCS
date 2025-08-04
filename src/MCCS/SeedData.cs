@@ -382,18 +382,6 @@ namespace MCCS
                 freeSql.Insert(channels).ExecuteAffrows();
             }
 
-            if (!freeSql.Select<ChannelAndVariable>().Any())
-            {
-                var channelVariables = new List<ChannelAndVariable>
-                {
-                    new() { ChannelId = 1, VariableId = 1 },
-                    new() { ChannelId = 1, VariableId = 3 },
-                    new() { ChannelId = 2, VariableId = 2 },
-                    new() { ChannelId = 2, VariableId = 4 }
-                };
-                freeSql.Insert(channelVariables).ExecuteAffrows();
-            }
-
             if (!freeSql.Select<ChannelAndHardware>().Any())
             {
                 var channelHardware = new List<ChannelAndHardware>
@@ -465,7 +453,8 @@ namespace MCCS
                         IsCanCalibration = true,
                         IsCanControl = true,
                         IsCanSetLimit = true,
-                        HardwareInfos = "9,1,3,7"
+                        ChannelId = 1,
+                        HardwareInfos = null
                     },
                     new()
                     {
@@ -476,7 +465,8 @@ namespace MCCS
                         IsCanCalibration = true,
                         IsCanControl = true,
                         IsCanSetLimit = true,
-                        HardwareInfos = "9,2,5,8"
+                        ChannelId = 2,
+                        HardwareInfos = null
                     },
                     new()
                     {
@@ -487,7 +477,8 @@ namespace MCCS
                         IsCanCalibration = true,
                         IsCanControl = true,
                         IsCanSetLimit = true,
-                        HardwareInfos = "9,1,4,7"
+                        ChannelId = 1,
+                        HardwareInfos = null
                     },
                     new()
                     {
@@ -498,7 +489,8 @@ namespace MCCS
                         IsCanCalibration = true,
                         IsCanControl = true,
                         IsCanSetLimit = true,
-                        HardwareInfos = "9,2,6,8"
+                        ChannelId = 2,
+                        HardwareInfos = null
                     }
                 };
                 freeSql.Insert(variables).ExecuteAffrows();

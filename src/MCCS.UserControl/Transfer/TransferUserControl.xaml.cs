@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,13 +10,29 @@ namespace MCCS.UserControl.Transfer
     /// <summary>
     /// TransferUserControl.xaml 的交互逻辑
     /// </summary>
-    public partial class TransferUserControl : System.Windows.Controls.UserControl
+    public partial class TransferUserControl
     {
         public TransferUserControl()
         { 
-            InitializeComponent(); 
+            InitializeComponent();
+            this.Loaded += OnLoaded;
+            this.Unloaded += OnUnloaded;
         }
 
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            if (SourceItems != null)
+                SourceItems.CollectionChanged += OnSourceCollectionChanged;
+            if (TargetItems != null)
+                TargetItems.CollectionChanged += OnTargetCollectionChanged;
+        }
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (SourceItems != null)
+                SourceItems.CollectionChanged -= OnSourceCollectionChanged;
+            if (TargetItems != null)
+                TargetItems.CollectionChanged -= OnTargetCollectionChanged;
+        }
         #region 基本依赖属性
         public static readonly DependencyProperty SourceNameDependencyProperty = DependencyProperty.Register(
             nameof(SourceName), 
@@ -103,7 +119,19 @@ namespace MCCS.UserControl.Transfer
         {
             if (d is TransferUserControl control)
             {
-                control.SourceList.ItemsSource = e.NewValue as IEnumerable;
+                // 取消订阅旧集合的事件
+                if (e.OldValue is ObservableCollection<TransferItemModel> oldCollection)
+                {
+                    oldCollection.CollectionChanged -= control.OnSourceCollectionChanged;
+                }
+
+                // 订阅新集合的事件
+                if (e.NewValue is ObservableCollection<TransferItemModel> newCollection)
+                {
+                    newCollection.CollectionChanged += control.OnSourceCollectionChanged;
+                    control.SourceList.ItemsSource = newCollection;
+                }
+
                 control.UpdateListBox();
             }
         }
@@ -112,7 +140,19 @@ namespace MCCS.UserControl.Transfer
         {
             if (d is TransferUserControl control)
             {
-                control.TargetListBox.ItemsSource = e.NewValue as IEnumerable;
+                // 取消订阅旧集合的事件
+                if (e.OldValue is ObservableCollection<TransferItemModel> oldCollection)
+                {
+                    oldCollection.CollectionChanged -= control.OnTargetCollectionChanged;
+                }
+
+                // 订阅新集合的事件
+                if (e.NewValue is ObservableCollection<TransferItemModel> newCollection)
+                {
+                    newCollection.CollectionChanged += control.OnTargetCollectionChanged;
+                    control.TargetListBox.ItemsSource = newCollection;
+                }
+
                 control.UpdateListBox();
             }
         }
@@ -179,7 +219,16 @@ namespace MCCS.UserControl.Transfer
 
             UpdateSelectAllCheckStatus();
         }
+        // 添加集合变更事件处理方法
+        private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateListBox();
+        }
 
+        private void OnTargetCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdateListBox();
+        }
         #endregion
 
         #region Event  
@@ -207,18 +256,22 @@ namespace MCCS.UserControl.Transfer
         } 
         private void SourceSelectAllCheckBox_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is not CheckBox cb) return;
+            if (SourceItems == null || sender is not CheckBox cb) return;
             cb.IsChecked = !cb.IsChecked;
             foreach (var sourceItem in SourceItems)
             {
-                sourceItem.IsSelected = (bool)cb.IsChecked!;
+                if (cb.IsChecked == null) sourceItem.IsSelected = true;
+                else
+                {
+                    sourceItem.IsSelected = (bool)cb.IsChecked!;
+                }
             } 
             UpdateSelectAllCheckStatus();
             e.Handled = true;
         }
         private void TargetSelectAllCheckBox_OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (sender is not CheckBox cb) return;
+            if (TargetItems == null || sender is not CheckBox cb) return;
             cb.IsChecked = !cb.IsChecked;
             foreach (var targetItem in TargetItems)
             {

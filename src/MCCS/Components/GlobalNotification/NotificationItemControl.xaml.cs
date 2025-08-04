@@ -1,6 +1,5 @@
 ﻿using MCCS.Components.GlobalNotification.Models;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace MCCS.Components.GlobalNotification
@@ -8,7 +7,7 @@ namespace MCCS.Components.GlobalNotification
     /// <summary>
     /// NotificationItemControl.xaml 的交互逻辑
     /// </summary>
-    public partial class NotificationItemControl : UserControl
+    public partial class NotificationItemControl
     {
         public NotificationItemControl()
         {

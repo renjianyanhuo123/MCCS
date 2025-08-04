@@ -1,12 +1,9 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
-namespace MCCS.Views.Pages
+﻿namespace MCCS.Views.Pages
 {
     /// <summary>
     /// TestStartingPage.xaml 的交互逻辑
     /// </summary>
-    public partial class TestStartingPage : UserControl
+    public partial class TestStartingPage
     { 
 
         public TestStartingPage()

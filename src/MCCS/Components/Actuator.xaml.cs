@@ -1,12 +1,11 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 
 namespace MCCS.Components
 {
     /// <summary>
     /// Actuator.xaml 的交互逻辑
     /// </summary>
-    public partial class Actuator : UserControl
+    public partial class Actuator
     {
         public Actuator()
         {

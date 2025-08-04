@@ -1,8 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Windows.Input;
 using MCCS.UserControl;
-using MCCS.UserControl.Params;
 using MCCS.UserControl.Transfer;
 
 namespace MCCS.Example

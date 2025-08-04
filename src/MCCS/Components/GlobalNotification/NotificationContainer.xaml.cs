@@ -1,15 +1,14 @@
 ﻿using MCCS.Services.NotificationService;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace MCCS.Components.GlobalNotification
 {
     /// <summary>
     /// NotificationContainer.xaml 的交互逻辑
     /// </summary>
-    public partial class NotificationContainer : UserControl
+    public partial class NotificationContainer
     {
-        private INotificationService _notificationService;
+        private INotificationService? _notificationService;
         private bool _isInitialized = false;
 
         public NotificationContainer()
@@ -47,7 +46,7 @@ namespace MCCS.Components.GlobalNotification
 
             if (sender is NotificationItemControl { DataContext: Models.NotificationItem notification })
             {
-                _notificationService.Remove(notification);
+                _notificationService?.Remove(notification);
             }
         }
     }

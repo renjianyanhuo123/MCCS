@@ -1,24 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-namespace MCCS.Views.Pages.Controllers
+﻿namespace MCCS.Views.Pages.Controllers
 {
     /// <summary>
     /// MultipleControllerChildPage.xaml 的交互逻辑
     /// </summary>
-    public partial class MultipleControllerChildPage : UserControl
+    public partial class MultipleControllerChildPage
     {
         public MultipleControllerChildPage()
         {

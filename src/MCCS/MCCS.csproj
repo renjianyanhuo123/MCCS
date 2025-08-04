@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Core\MCCS.Core.csproj" />
+    <ProjectReference Include="..\MCCS.UserControl\MCCS.UserControl.csproj" />
   </ItemGroup>
 
   <ItemGroup>

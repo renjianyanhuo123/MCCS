@@ -31,6 +31,11 @@ namespace MCCS.Core.Models.SystemManager
         /// </summary>
         public bool IsCanSetLimit { get; set; }
         /// <summary>
+        /// 通道ID
+        /// </summary>
+        public long ChannelId { get; set; }
+
+        /// <summary>
         /// 硬件信息
         /// ID,ID1,ID2
         /// </summary>

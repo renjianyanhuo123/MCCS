@@ -1,11 +1,9 @@
-﻿using System.Windows.Controls;
-
-namespace MCCS.Views.Pages.ControlCommandPages
+﻿namespace MCCS.Views.Pages.ControlCommandPages
 {
     /// <summary>
     /// ViewStaticControl.xaml 的交互逻辑
     /// </summary>
-    public partial class ViewStaticControl : UserControl
+    public partial class ViewStaticControl
     {
         public ViewStaticControl()
         {

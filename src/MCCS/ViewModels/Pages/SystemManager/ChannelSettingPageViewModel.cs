@@ -1,6 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
+using MCCS.Events.SystemManager;
+using MCCS.Services.NotificationService;
 using MCCS.ViewModels.Others.SystemManager;
 
 namespace MCCS.ViewModels.Pages.SystemManager
@@ -11,14 +14,17 @@ namespace MCCS.ViewModels.Pages.SystemManager
 
         private readonly IChannelAggregateRepository _channelAggregateRepository;
         private readonly IDeviceInfoRepository _deviceInfoRepository;
+        private readonly INotificationService _notificationService;
 
         public ChannelSettingPageViewModel(
+            INotificationService notificationService,
             IDeviceInfoRepository deviceInfoRepository,
             IChannelAggregateRepository channelAggregateRepository,
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _deviceInfoRepository = deviceInfoRepository;
             _channelAggregateRepository = channelAggregateRepository;
+            _notificationService = notificationService;
         }
 
         #region Property 
@@ -57,13 +63,13 @@ namespace MCCS.ViewModels.Pages.SystemManager
         #endregion
 
         #region Command
-        // public AsyncDelegateCommand LoadedCommand => new(ExecuteLoadedCommand);
         public AsyncDelegateCommand<long> DeleteHardwareCommand => new(ExecuteDeleteHardwareCommand);
         public AsyncDelegateCommand<long> CheckedCommand => new(ExecuteCheckedCommand);
+        public AsyncDelegateCommand SaveCommand => new(ExecuteSaveCommand);
         #endregion
 
         #region private method
-        private void InitEditUI(long channelId)
+        private void InitEditUi(long channelId)
         {
             var channelInfo = _channelAggregateRepository.GetChannelInfoById(channelId);
             ChannelId = channelInfo.Id;
@@ -73,10 +79,21 @@ namespace MCCS.ViewModels.Pages.SystemManager
             IsOpenProtected = channelInfo.IsOpenSpecimenProtected;
         }
 
+        private async Task ExecuteSaveCommand()
+        {
+            if (string.IsNullOrEmpty(ChannelName)) return;
+            var success = await _channelAggregateRepository.UpdateChannelInfoAsync(ChannelId, ChannelName, IsShowable, IsOpenProtected);
+            if (success)
+            {
+                _notificationService.Show("保存成功!", "通道基础信息保存成功", NotificationType.Success, 3);
+                _eventAggregator.GetEvent<NotificationUpdateChannelEvent>().Publish(new NotificationUpdateChannelEventParam(ChannelId));
+            }
+        }
+
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             var channelId = navigationContext.Parameters.GetValue<long>("ChannelId"); 
-            InitEditUI(channelId);
+            InitEditUi(channelId);
             // 左侧所有已经在对应通道内的设备
             var hardwareInfos = _channelAggregateRepository.GetHardwareInfoByChannelId(channelId); 
             ChannelHardwareInfo.Clear();
