@@ -10,9 +10,11 @@ namespace MCCS.Core.Models.Model3D
 
         [Column(IsNullable = false, StringLength = 100)]
         public required string Name { get; set; }
-
-        [Column(IsNullable = false, StringLength = 50)]
-        public required string GroupKey { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        [Column(IsNullable = false)]
+        public long GroupKey { get; set; }
 
         [Column(IsNullable = false, StringLength = 500)]
         public required string FilePath { get; set; }

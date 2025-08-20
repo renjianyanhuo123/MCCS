@@ -1,11 +1,21 @@
-﻿using MCCS.Core.Models.Model3D;
+﻿using System.Linq.Expressions;
+using MCCS.Core.Domain;
+using MCCS.Core.Models.Model3D;
 
 namespace MCCS.Core.Repositories
 {
     public interface IModel3DDataRepository
     {
-        public Task<List<Model3DData>> GetModelAsync(string groupKey, CancellationToken cancellationToken);
+        Task<List<Model3DData>> GetModelAsync(long groupKey, CancellationToken cancellationToken);
 
-        public List<Model3DData> GetModel(string groupKey);
+        Task<List<Model3DBaseInfo>> GetModelBaseInfosAsync(Expression<Func<Model3DBaseInfo, bool>> expression, CancellationToken cancellationToken = default);
+
+        List<Model3DBaseInfo> GetModelBaseInfos(Expression<Func<Model3DBaseInfo, bool>> expression);
+
+        Task<Model3DAggregate> GetCurrentUseModelAggregateAsync(CancellationToken cancellationToken = default);
+
+        Task<long> AddModel3DAsync(Model3DBaseInfo baseInfo, CancellationToken cancellationToken = default);
+
+        List<Model3DData> GetModel(long groupKey);
     }
 }

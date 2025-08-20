@@ -81,8 +81,10 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<ChannelSettingPage>(ChannelSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<VariableSettingPage>(VariableSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<AddChannelPage>(AddChannelPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
             // Dialogs
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
         }
 
         /// <summary>

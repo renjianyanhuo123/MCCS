@@ -26,8 +26,7 @@ namespace MCCS.Services.Model3DService
             IModel3DDataRepository model3DDataRepository,
             IConfiguration configuration)
         {
-            _importSemaphore = new SemaphoreSlim(MaxConcurrentImports, MaxConcurrentImports);
-            // _uiContext = SynchronizationContext.Current;
+            _importSemaphore = new SemaphoreSlim(MaxConcurrentImports, MaxConcurrentImports); 
             _effectsManager = effectsManager ?? throw new ArgumentNullException(nameof(effectsManager));
             _modelRepository = model3DDataRepository;
             _configuration = configuration;
@@ -37,9 +36,10 @@ namespace MCCS.Services.Model3DService
             IProgress<ImportProgressEventArgs> progress,
             CancellationToken cancellationToken)
         {
-            var groupKey = _configuration["AppSettings:ModelKey"]
-                           ?? throw new ArgumentNullException("AppSettings:ModelKey");
-            var modelInfos = await _modelRepository.GetModelAsync(groupKey, cancellationToken);
+            //var groupKey = _configuration["AppSettings:ModelKey"]
+            //               ?? throw new ArgumentNullException("AppSettings:ModelKey");
+            var modelAggregate = await _modelRepository.GetCurrentUseModelAggregateAsync(cancellationToken);
+            var modelInfos = modelAggregate.Model3DDataList;
             var viewModels = new List<Model3DViewModel>();
 
             var progressInfo = new ImportProgressEventArgs
