@@ -1,6 +1,7 @@
 ﻿using MCCS.Core.Devices;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
+using MCCS.Core.Models.StationSites;
 using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Models.SystemSetting;
 using MCCS.Core.Models.TestInfo;
@@ -358,29 +359,29 @@ namespace MCCS
                 freeSql.Insert(devices).ExecuteAffrows();
             }
 
-            if (!freeSql.Select<ChannelInfo>().Any())
-            {
-                var channels = new List<ChannelInfo>
-                {
-                    new()
-                    {
-                        Id = 1,
-                        ChannelId = "Channel_iu89897d8s",
-                        ChannelName = "通道1",
-                        IsShowable = true,
-                        IsOpenSpecimenProtected = true
-                    },
-                    new()
-                    {
-                        Id =2,
-                        ChannelId = "Channel_kdu889sds3",
-                        ChannelName = "通道2",
-                        IsShowable = true,
-                        IsOpenSpecimenProtected = true
-                    }
-                };
-                freeSql.Insert(channels).ExecuteAffrows();
-            }
+            //if (!freeSql.Select<ChannelInfo>().Any())
+            //{
+            //    var channels = new List<ChannelInfo>
+            //    {
+            //        new()
+            //        {
+            //            Id = 1,
+            //            ChannelId = "Channel_iu89897d8s",
+            //            ChannelName = "通道1",
+            //            IsShowable = true,
+            //            IsOpenSpecimenProtected = true
+            //        },
+            //        new()
+            //        {
+            //            Id =2,
+            //            ChannelId = "Channel_kdu889sds3",
+            //            ChannelName = "通道2",
+            //            IsShowable = true,
+            //            IsOpenSpecimenProtected = true
+            //        }
+            //    };
+            //    freeSql.Insert(channels).ExecuteAffrows();
+            //}
 
             if (!freeSql.Select<ChannelAndHardware>().Any())
             {

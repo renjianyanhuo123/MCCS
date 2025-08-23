@@ -1,9 +1,5 @@
-﻿
-using MaterialDesignThemes.Wpf;
-using MCCS.Components.GlobalNotification.Models;
+﻿using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Helper;
-using MCCS.Core.Models.SystemManager;
-using MCCS.Core.Repositories;
 using MCCS.Events.SystemManager;
 using MCCS.Services.NotificationService;
 
@@ -13,16 +9,13 @@ namespace MCCS.ViewModels.Pages.SystemManager
     {
         public const string Tag = "AddChannel";
 
-        private readonly IChannelAggregateRepository _channelAggregateRepository;
         private readonly INotificationService _notificationService;
 
         public AddChannelPageViewModel(
             INotificationService notificationService,
             IEventAggregator eventAggregator, 
-            IDialogService? dialogService, 
-            IChannelAggregateRepository channelAggregateRepository) : base(eventAggregator, dialogService)
+            IDialogService? dialogService) : base(eventAggregator, dialogService)
         {
-            _channelAggregateRepository = channelAggregateRepository;
             _notificationService = notificationService;
         }
 
@@ -58,14 +51,14 @@ namespace MCCS.ViewModels.Pages.SystemManager
         private async Task ExexuteAddChannelCommand()
         {
             if (string.IsNullOrEmpty(ChannelName)) return;
-            var channelInfo = new ChannelInfo
-            {
-                ChannelId = $"Channel_{HighPerformanceRandomHash.GenerateRandomHash6()}",
-                ChannelName = ChannelName,
-                IsShowable = IsShowable,
-                IsOpenSpecimenProtected = IsOpenProtected
-            };
-            var addedChannelId = await _channelAggregateRepository.AddChannelAsync(channelInfo);
+            //var channelInfo = new ChannelInfo
+            //{
+            //    ChannelId = $"Channel_{HighPerformanceRandomHash.GenerateRandomHash6()}",
+            //    ChannelName = ChannelName,
+            //    IsShowable = IsShowable,
+            //    IsOpenSpecimenProtected = IsOpenProtected
+            //};
+            //var addedChannelId = await _channelAggregateRepository.AddChannelAsync(channelInfo);
             _notificationService.Show(
                 "添加通道成功",
                 "通道信息已成功添加到系统中!",
@@ -74,7 +67,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             _eventAggregator.GetEvent<NotificationAddChannelEvent>()
                 .Publish(new NotificationAddChannelEventParam
                 {
-                    ChannelId = addedChannelId,
+                    ChannelId = 1,
                     ChannelName = ChannelName
                 });
         }

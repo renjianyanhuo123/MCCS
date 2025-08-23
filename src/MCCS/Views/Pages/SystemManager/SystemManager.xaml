@@ -38,6 +38,7 @@
             </b:Interaction.Triggers>
             <RadioButton
                 Margin="4"
+                FontWeight="Bold"
                 Content="{StaticResource PermissionManagement}"
                 IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:PermissionManagementViewModel.Tag}}"
                 GroupName="Navigation"
@@ -47,15 +48,17 @@
                 Style="{StaticResource MaterialDesignTabRadioButton}" />
             <RadioButton
                 Margin="4"
-                Content="{StaticResource HardwareConfiguration}"
-                IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:HardwareSettingPageViewModel.Tag}}"
+                FontWeight="Bold"
+                Content="{StaticResource StationConfiguration}"
+                IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:StationSiteSettingPageViewModel.Tag}}"
                 GroupName="Navigation"
-                Tag="{x:Static localViewModel:HardwareSettingPageViewModel.Tag}"
+                Tag="{x:Static localViewModel:StationSiteSettingPageViewModel.Tag}"
                 Command="{Binding JumpToCommand}"
                 CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"
                 Style="{StaticResource MaterialDesignTabRadioButton}" />
             <RadioButton
                 Margin="4"
+                FontWeight="Bold"
                 Content="{StaticResource Model3DSetting}"
                 IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:Model3DSettingPageViewModel.Tag}}"
                 GroupName="Navigation"

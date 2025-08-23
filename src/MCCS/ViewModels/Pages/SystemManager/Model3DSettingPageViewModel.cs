@@ -12,7 +12,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public const string Tag = "Model3DSetting";
 
         private readonly IModel3DDataRepository _model3DDataRepository;
-        private IContainerProvider _containerProvider;
+        private readonly IContainerProvider _containerProvider;
 
         public Model3DSettingPageViewModel(IModel3DDataRepository model3DDataRepository,
             IContainerProvider containerProvider,

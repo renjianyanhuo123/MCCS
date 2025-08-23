@@ -33,6 +33,6 @@
 
     <!-- SystemManager -->
     <system:String x:Key="PermissionManagement">权限管理</system:String>
-    <system:String x:Key="HardwareConfiguration">硬件管理</system:String>
+    <system:String x:Key="StationConfiguration">站点管理</system:String>
     <system:String x:Key="Model3DSetting">模型配置</system:String>
 </ResourceDictionary>

@@ -1,0 +1,188 @@
+﻿<UserControl x:Class="MCCS.Views.Dialogs.AddStationSiteInfoDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.Views.Dialogs"
+             xmlns:prism="http://prismlibrary.com/" xmlns:dialogs="clr-namespace:MCCS.ViewModels.Dialogs"
+             xmlns:systemManager="clr-namespace:MCCS.ValidationRules.SystemManager"
+             d:DataContext="{d:DesignInstance Type=dialogs:AddStationSiteInfoDialogViewModel}"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- 渐变背景 -->
+        <LinearGradientBrush x:Key="MainBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#667eea" Offset="0"/>
+            <GradientStop Color="#764ba2" Offset="0.5"/>
+            <GradientStop Color="#ec4899" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- 弹窗标题背景 -->
+        <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#667eea" Offset="0"/>
+            <GradientStop Color="#764ba2" Offset="1"/>
+        </LinearGradientBrush> 
+
+        <!-- 主要按钮样式 -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource HeaderBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="24,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="-1"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 次要按钮样式 -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#F3F4F6"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="24,10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E5E7EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Width="500">
+        <Grid.RowDefinitions>
+            <!-- 固定标题区域 -->
+            <RowDefinition Height="Auto"/>
+            <!-- 可滚动内容区域 -->
+            <RowDefinition Height="*"/>
+            <!-- 固定按钮区域 -->
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- 1、表单标题 -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource HeaderBackgroundBrush}" 
+                CornerRadius="12,12,0,0">
+            <Grid Margin="25,20">
+                <StackPanel>
+                    <TextBlock x:Name="ModalTitle" 
+                                         Text="添加站点" 
+                                         FontSize="20" 
+                                         FontWeight="SemiBold" 
+                                         Foreground="White"/>
+                    <TextBlock x:Name="ModalSubtitle" 
+                                         Text="添加站点信息" 
+                                         FontSize="12" 
+                                         Foreground="#E0FFFFFF" 
+                                         Margin="0,5,0,0"/>
+                </StackPanel>
+                <Button HorizontalAlignment="Right" 
+                                    VerticalAlignment="Top"
+                                    Width="30" Height="30"
+                                    Background="#30FFFFFF"
+                                    BorderThickness="0" 
+                                    Cursor="Hand"
+                                    Command="{Binding CloseDialogCommand}">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                <TextBlock Text="×" FontSize="18" Foreground="White" 
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#50FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Border>
+        <!-- 2、可滚动的表单内容 -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="25,20,25,0">
+            <StackPanel x:Name="FormContent">
+                <StackPanel Margin="20,10,20,10">
+                    <TextBlock Text="站点名称" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" 
+                               Margin="0,0,0,10"></TextBlock>
+                    <TextBox Style="{StaticResource MaterialDesignFilledTextBox}">
+                        <TextBox.Text>
+                            <Binding Path="StationName" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <systemManager:NotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                </StackPanel>
+                <StackPanel Margin="20,10,20,10">
+                    <TextBlock Text="描述" Style="{StaticResource MaterialDesignTitleMediumTextBlock}" Margin="0,0,0,10"></TextBlock>
+                    <TextBox Style="{StaticResource MaterialDesignFilledTextBox}"
+                             Text="{Binding Description}"></TextBox>
+                </StackPanel> 
+            </StackPanel>
+        </ScrollViewer>
+        <!-- 3、固定的操作按钮 -->
+        <Border Grid.Row="2" 
+                BorderBrush="#E5E7EB" 
+                BorderThickness="0,1,0,0" 
+                Background="White"
+                CornerRadius="0,0,12,12">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        Margin="25,15">
+                <Button x:Name="CancelButton" 
+                        Content="取消" 
+                        Width="60"
+                        Height="40"
+                        Style="{StaticResource SecondaryButtonStyle}" 
+                        Command="{Binding CloseDialogCommand}"
+                        Margin="0,0,10,0" />
+                <Button x:Name="SubmitButton" 
+                        Width="60"
+                        Height="40"
+                        Content="提交" 
+                        Command="{Binding SaveStationCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

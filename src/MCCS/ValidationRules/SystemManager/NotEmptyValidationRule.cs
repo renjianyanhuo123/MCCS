@@ -10,7 +10,6 @@ namespace MCCS.ValidationRules.SystemManager
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             var input = value as string;
-
             return string.IsNullOrWhiteSpace(input) ? new ValidationResult(false, ErrorMessage) : ValidationResult.ValidResult;
         }
     }

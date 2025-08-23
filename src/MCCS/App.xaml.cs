@@ -77,14 +77,16 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
             containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
-            containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
+            // containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ChannelSettingPage>(ChannelSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<VariableSettingPage>(VariableSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<AddChannelPage>(AddChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
             // Dialogs
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);
         }
 
         /// <summary>

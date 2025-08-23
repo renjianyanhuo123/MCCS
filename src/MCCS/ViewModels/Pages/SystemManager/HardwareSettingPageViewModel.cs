@@ -11,7 +11,6 @@ namespace MCCS.ViewModels.Pages.SystemManager
     {
         public const string Tag = "HardwareSetting";
 
-        private readonly IChannelAggregateRepository _channelAggregateRepository;
         private readonly IRegionManager _regionManager;
 
         private ObservableCollection<ChannelVariableInfoViewModel> _channelVariableInfo;
@@ -19,12 +18,10 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public HardwareSettingPageViewModel(
             IRegionManager regionManager,
             IEventAggregator eventAggregator,
-            IChannelAggregateRepository channelAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             _regionManager = regionManager;
             _channelVariableInfo = [];
-            _channelAggregateRepository = channelAggregateRepository;
             _eventAggregator.GetEvent<NotificationAddChannelEvent>().Subscribe(Add_RefreshTreeViewAndSelected);
             _eventAggregator.GetEvent<NotificationUpdateChannelEvent>().Subscribe(Update_RefreshTreeView);
             _eventAggregator.GetEvent<NotificationUpdateVariableEvent>().Subscribe(UpdateVariable_RefreshTreeView);
@@ -88,21 +85,21 @@ namespace MCCS.ViewModels.Pages.SystemManager
         private async Task ExecuteLoadCommand()
         {
             _channelVariableInfo.Clear();
-            var channelInfos = await _channelAggregateRepository.GetChannelsAsync();
-            foreach (var channelInfo in channelInfos)
-            {
-                _channelVariableInfo.Add(new ChannelVariableInfoViewModel()
-                {
-                    ChannelId = channelInfo.ChannelInfo.Id,
-                    ChannelName = channelInfo.ChannelInfo.ChannelName,
-                    VariableInfos = channelInfo.Variables
-                        .Select(variable => new VariableInfoViewModel()
-                        {
-                            VariableId = variable.Id,
-                            VariableName = variable.Name
-                        }).ToList()
-                });
-            }
+            //var channelInfos = await _channelAggregateRepository.GetChannelsAsync();
+            //foreach (var channelInfo in channelInfos)
+            //{
+            //    _channelVariableInfo.Add(new ChannelVariableInfoViewModel()
+            //    {
+            //        ChannelId = channelInfo.ChannelInfo.Id,
+            //        ChannelName = channelInfo.ChannelInfo.ChannelName,
+            //        VariableInfos = channelInfo.Variables
+            //            .Select(variable => new VariableInfoViewModel()
+            //            {
+            //                VariableId = variable.Id,
+            //                VariableName = variable.Name
+            //            }).ToList()
+            //    });
+            //}
         }
 
         private async void Add_RefreshTreeViewAndSelected(NotificationAddChannelEventParam param)

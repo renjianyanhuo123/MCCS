@@ -1,9 +1,12 @@
 ﻿using FreeSql.DataAnnotations;
 
-namespace MCCS.Core.Models.SystemManager
+namespace MCCS.Core.Models.StationSites
 {
-    [Table(Name = "tb_channelInfo")]
-    public class ChannelInfo : BaseModel
+    /// <summary>
+    /// 控制通道
+    /// </summary>
+    [Table(Name = "tb_controlChannelInfo")]
+    public class ControlChannelInfo : BaseModel
     {
         /// <summary>
         /// 内部名称
@@ -13,7 +16,10 @@ namespace MCCS.Core.Models.SystemManager
 
         [Column(IsNullable = false, StringLength = 100)]
         public required string ChannelName { get; set; }
-
+        /// <summary>
+        /// 控制模式
+        /// </summary>
+        public ControlChannelModeTypeEnum ControlMode { get; set; }
         /// <summary>
         /// 是否可见
         /// </summary>
