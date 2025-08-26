@@ -1,4 +1,5 @@
-﻿using MCCS.Core.Models.StationSites;
+﻿using MCCS.Core.Models.Devices;
+using MCCS.Core.Models.StationSites;
 
 namespace MCCS.Core.Domain.StationSites
 {
@@ -9,5 +10,7 @@ namespace MCCS.Core.Domain.StationSites
         public List<ControlChannelInfo> ControlChannelInfos { get; set; } = [];
 
         public List<PseudoChannelInfo> PseudoChannelInfos { get; set; } = [];
+
+        public List<DeviceInfo> DeviceInfos { get; set; } = [];
     }
 }

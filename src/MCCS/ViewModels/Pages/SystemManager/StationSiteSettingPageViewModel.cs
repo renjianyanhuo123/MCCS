@@ -1,11 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using MaterialDesignThemes.Wpf;
-using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf;
 using MCCS.Events.StationSites;
 using MCCS.Models.Stations;
 using MCCS.ViewModels.Pages.StationSites;
 using MCCS.Views.Dialogs;
 using Serilog;
+using System.Collections.ObjectModel;
+using MCCS.Core.Repositories;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -13,12 +13,12 @@ namespace MCCS.ViewModels.Pages.SystemManager
     {
         public const string Tag = "StationSiteSetting";
 
-        private readonly IStationSiteRepository _stationSiteRepository;
+        private readonly IStationSiteAggregateRepository _stationSiteRepository;
         private readonly IContainerProvider _containerProvider;
         private readonly IRegionManager _regionManager;
 
         public StationSiteSettingPageViewModel(IEventAggregator eventAggregator,
-            IStationSiteRepository stationSiteRepository,
+            IStationSiteAggregateRepository stationSiteRepository,
             IContainerProvider containerProvider,
             IRegionManager regionManager) : base(eventAggregator)
         {
@@ -43,12 +43,8 @@ namespace MCCS.ViewModels.Pages.SystemManager
         private void ExecuteEditStationCommand(object stationId)
         {
             var paramters = new NavigationParameters { { "StationId", stationId } };
-            _regionManager.RequestNavigate(GlobalConstant.SystemManagerRegionName, new Uri(EditStationSiteMainPageViewModel.Tag, UriKind.Relative), Test, paramters);
-        }
-
-        private void Test(NavigationResult res)
-        {
-        }
+            _regionManager.RequestNavigate(GlobalConstant.SystemManagerRegionName, new Uri(EditStationSiteMainPageViewModel.Tag, UriKind.Relative), paramters);
+        } 
 
         private async void ExecuteNotificationAddStationEvent(NotificationAddStationSiteEventParam param)
         {

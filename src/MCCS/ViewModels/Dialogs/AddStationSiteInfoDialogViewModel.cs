@@ -10,11 +10,11 @@ namespace MCCS.ViewModels.Dialogs
     {
         public const string Tag = "AddStationSiteInfo";
 
-        private readonly IStationSiteRepository _stationSiteRepository;
+        private readonly IStationSiteAggregateRepository _stationSiteRepository;
         private readonly INotificationService _notificationService;
 
         public AddStationSiteInfoDialogViewModel(IEventAggregator eventAggregator, 
-            IStationSiteRepository stationSiteRepository,
+            IStationSiteAggregateRepository stationSiteRepository,
             INotificationService notificationService) : base(eventAggregator)
         {
             _stationSiteRepository = stationSiteRepository;

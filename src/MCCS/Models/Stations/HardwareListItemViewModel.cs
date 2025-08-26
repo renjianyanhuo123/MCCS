@@ -15,6 +15,14 @@ namespace MCCS.Models.Stations
             set => SetProperty(ref _isSelectable, value);
         }
 
+        private bool _isSelected;
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
+        }
+
         private DeviceStatusEnum _deviceStatus = DeviceStatusEnum.Unknown;
         public DeviceStatusEnum DeviceStatus
         {
@@ -29,5 +37,19 @@ namespace MCCS.Models.Stations
         public string ControllerName { get; set; } = string.Empty;
 
         public ObservableCollection<HardwareChildItemViewModel> ChildItems { get; private set; } = [];
+    }
+
+    public sealed class ControlChannelHardwareChildItemViewModel: BindableBase
+    {
+        public long HardwareId { get; set; }
+        public string HardwareName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+    }
+
+    public sealed class ControlChannelHardwareListItemViewModel : BindableBase
+    {
+        public long ControllerId { get; set; }
+        public string ControllerName { get; set; } = string.Empty;
+        public ObservableCollection<ControlChannelHardwareChildItemViewModel> ChildItems { get; private set; } = [];
     }
 }

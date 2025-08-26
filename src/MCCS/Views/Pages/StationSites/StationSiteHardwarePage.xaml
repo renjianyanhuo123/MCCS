@@ -178,7 +178,7 @@
         </ItemsControl>
 
         <StackPanel Grid.Column="1">
-            <ItemsControl ItemsSource="{Binding HardwareList}">
+            <ItemsControl ItemsSource="{Binding HardwareListItems}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Expander>

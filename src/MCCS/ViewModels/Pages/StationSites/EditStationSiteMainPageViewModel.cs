@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using MCCS.Models.Stations;
 
 namespace MCCS.ViewModels.Pages.StationSites
@@ -9,6 +8,7 @@ namespace MCCS.ViewModels.Pages.StationSites
         public const string Tag = "EditStationSiteMainPage";
 
         private readonly IRegionManager _regionManager;
+        private long _stationId = -1;
 
         public EditStationSiteMainPageViewModel(IEventAggregator eventAggregator, 
             IRegionManager regionManager) : base(eventAggregator)
@@ -21,6 +21,11 @@ namespace MCCS.ViewModels.Pages.StationSites
                 new StationMenuItemModel { Name = "虚拟通道", Id = 4 }
             ];
             _regionManager = regionManager;
+        }
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            _stationId = navigationContext.Parameters.GetValue<long>("StationId");
         }
 
         #region Property
@@ -41,7 +46,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                     4 => StationSitePseudoChannelPageViewModel.Tag,
                     _ => "",
                 };
-                _regionManager.RequestNavigate(GlobalConstant.StationSiteNavigateRegionName, new Uri(targetView, UriKind.Relative), ExecuteItemClickCommand);
+                var paramters = new NavigationParameters { { "StationId", _stationId } };
+                _regionManager.RequestNavigate(GlobalConstant.StationSiteNavigateRegionName, new Uri(targetView, UriKind.Relative), paramters);
             }
         }
         #endregion
@@ -55,13 +61,7 @@ namespace MCCS.ViewModels.Pages.StationSites
         private void ExecuteLoadCommand()
         {
             SelectedMenuItem = MenuItems[0]; // 默认选中第一个菜单项
-        }
-
-        private void ExecuteItemClickCommand(NavigationResult result)
-        {
-
-        }
-
+        } 
         #endregion
 
     }

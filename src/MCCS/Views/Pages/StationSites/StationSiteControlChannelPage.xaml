@@ -4,9 +4,50 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages.StationSites"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:stationsites="clr-namespace:MCCS.ViewModels.Pages.StationSites" d:DataContext="{d:DesignInstance Type=stationsites:StationSiteControlChannelPageViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <DataTemplate x:Key="HardwareSelectedItemTemplate">
+            <Border CornerRadius="5" BorderThickness="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid>
-            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <ItemsControl  Grid.Column="0" Background="#F1F1F1" 
+                       ItemsSource="{Binding HardwareListItems}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Expander>
+                        <Expander.Header>
+                            <TextBlock Text="{Binding ControllerName}" FontSize="24" FontWeight="Bold" Margin="15,0,0,0"  VerticalAlignment="Center"/>
+                        </Expander.Header>
+                        <ItemsControl ItemsSource="{Binding ChildItems}"
+                                      ItemTemplate="{StaticResource HardwareSelectedItemTemplate}">
+                        </ItemsControl>
+                    </Expander>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl> 
+        <StackPanel Grid.Column="1"></StackPanel>
+        <StackPanel Grid.Column="2" Background="#F1F1F1">
+
+        </StackPanel>
     </Grid>
 </UserControl>
