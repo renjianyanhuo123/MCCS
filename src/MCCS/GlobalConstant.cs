@@ -11,5 +11,9 @@
         public static readonly string SystemManagerRegionName = "SystemManagerRegion";
 
         public static readonly string SystemManagerHardwarePageRegionName = "SystemManagerHardwareRegion";
+
+        public static readonly string StationSiteMainPageRegionName = "StationSiteMainPageRegion";
+
+        public static readonly string StationSiteNavigateRegionName = "StationSiteNavigateRegion";
     }
 }

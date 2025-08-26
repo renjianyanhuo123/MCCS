@@ -3,7 +3,9 @@ using MaterialDesignThemes.Wpf;
 using MCCS.Core.Repositories;
 using MCCS.Events.StationSites;
 using MCCS.Models.Stations;
+using MCCS.ViewModels.Pages.StationSites;
 using MCCS.Views.Dialogs;
+using Serilog;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -13,15 +15,18 @@ namespace MCCS.ViewModels.Pages.SystemManager
 
         private readonly IStationSiteRepository _stationSiteRepository;
         private readonly IContainerProvider _containerProvider;
+        private readonly IRegionManager _regionManager;
 
         public StationSiteSettingPageViewModel(IEventAggregator eventAggregator,
             IStationSiteRepository stationSiteRepository,
-            IContainerProvider containerProvider) : base(eventAggregator)
+            IContainerProvider containerProvider,
+            IRegionManager regionManager) : base(eventAggregator)
         {
             _stationSiteRepository = stationSiteRepository;
             _containerProvider = containerProvider;
             _eventAggregator.GetEvent<NotificationAddStationSiteEvent>().Subscribe(ExecuteNotificationAddStationEvent);
             StationSites = [];
+            _regionManager = regionManager;
         }
 
         #region Property
@@ -31,12 +36,30 @@ namespace MCCS.ViewModels.Pages.SystemManager
         #region Command
         public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
         public AsyncDelegateCommand AddStationCommand => new(ExecuteAddStationCommand);
+        public DelegateCommand<object> EditStationCommand => new(ExecuteEditStationCommand);
         #endregion
 
-        #region Private Method 
+        #region Private Method
+        private void ExecuteEditStationCommand(object stationId)
+        {
+            var paramters = new NavigationParameters { { "StationId", stationId } };
+            _regionManager.RequestNavigate(GlobalConstant.SystemManagerRegionName, new Uri(EditStationSiteMainPageViewModel.Tag, UriKind.Relative), Test, paramters);
+        }
+
+        private void Test(NavigationResult res)
+        {
+        }
+
         private async void ExecuteNotificationAddStationEvent(NotificationAddStationSiteEventParam param)
         {
-            await ExecuteLoadCommand();
+            try
+            {
+                await ExecuteLoadCommand();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Error occurred while loading station sites after adding a new station site.");
+            }
         }
 
         private async Task ExecuteLoadCommand()

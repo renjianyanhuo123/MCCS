@@ -1,23 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using MCCS.Core.Models.Devices;
 
-namespace MCCS.ViewModels.Others.SystemManager
+namespace MCCS.Models.Stations
 {
 
-    public class HardwareChildItemViewModel : BindableBase
+    public sealed class HardwareChildItemViewModel : BindableBase
     {
         public long HardwareId { get; set; }
         public string HardwareName { get; set; } = string.Empty;
-        /// <summary>
-        /// 是否被通道选中
-        /// </summary>
-        private bool _isSelected;
-        public bool IsSelected 
-        { 
-            get => _isSelected;
-            set => SetProperty(ref _isSelected, value);
-        }
-
         private bool _isSelectable;
         public bool IsSelectable
         {
@@ -28,10 +18,9 @@ namespace MCCS.ViewModels.Others.SystemManager
         private DeviceStatusEnum _deviceStatus = DeviceStatusEnum.Unknown;
         public DeviceStatusEnum DeviceStatus
         {
-            get => _deviceStatus; 
+            get => _deviceStatus;
             set => SetProperty(ref _deviceStatus, value);
         }
-
     }
 
     public sealed class HardwareListItemViewModel : BindableBase

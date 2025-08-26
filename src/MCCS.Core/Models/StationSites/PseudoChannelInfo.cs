@@ -8,6 +8,7 @@ namespace MCCS.Core.Models.StationSites
     [Table(Name = "tb_pseudoChannelInfo")]
     public class PseudoChannelInfo : BaseModel
     {
+        public long StationId { get; set; }
         /// <summary>
         /// 内部名称
         /// </summary>

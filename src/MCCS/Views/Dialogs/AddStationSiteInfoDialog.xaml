@@ -10,14 +10,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <!-- 渐变背景 -->
-        <LinearGradientBrush x:Key="MainBackgroundBrush" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#667eea" Offset="0"/>
-            <GradientStop Color="#764ba2" Offset="0.5"/>
-            <GradientStop Color="#ec4899" Offset="1"/>
-        </LinearGradientBrush>
-
+    <UserControl.Resources>  
         <!-- 弹窗标题背景 -->
         <LinearGradientBrush x:Key="HeaderBackgroundBrush" StartPoint="0,0" EndPoint="1,0">
             <GradientStop Color="#667eea" Offset="0"/>

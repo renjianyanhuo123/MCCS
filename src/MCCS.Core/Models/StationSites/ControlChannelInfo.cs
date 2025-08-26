@@ -8,6 +8,7 @@ namespace MCCS.Core.Models.StationSites
     [Table(Name = "tb_controlChannelInfo")]
     public class ControlChannelInfo : BaseModel
     {
+        public long StationId { get; set; }
         /// <summary>
         /// 内部名称
         /// </summary>

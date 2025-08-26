@@ -12,9 +12,11 @@ using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
 using MCCS.ViewModels.Dialogs;
+using MCCS.ViewModels.Pages.StationSites;
 using MCCS.Views.Dialogs;
 using MCCS.Views.Pages.SystemManager;
 using MCCS.ViewModels.Pages.SystemManager;
+using MCCS.Views.Pages.StationSites;
 
 namespace MCCS
 {
@@ -87,6 +89,12 @@ namespace MCCS
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);
+            // Station Sites
+            containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSiteHydraulicPage>(StationSiteHydraulicPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSiteControlChannelPage>(StationSiteControlChannelPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSitePseudoChannelPage>(StationSitePseudoChannelPageViewModel.Tag);
         }
 
         /// <summary>
