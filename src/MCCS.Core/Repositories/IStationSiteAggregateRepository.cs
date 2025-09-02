@@ -23,6 +23,10 @@ namespace MCCS.Core.Repositories
 
         Task<bool> AddStationSiteHardwareInfosAsync(List<StationSiteAndHardwareInfo> stationSiteHardwares, CancellationToken cancellationToken = default);
 
-        Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long hardwareId, CancellationToken cancellationToken = default);
+        Task<long> AddStationSiteControlChannelAsync(ControlChannelInfo controlChannelInfo, List<ControlChannelAndSignalInfo> signals, CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long hardwareId, CancellationToken cancellationToken = default); 
+
+        Task<List<ControlChannelAndSignalInfo>> GetControlChannelAndSignalInfosAsync(Expression<Func<ControlChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default);
     }
 }

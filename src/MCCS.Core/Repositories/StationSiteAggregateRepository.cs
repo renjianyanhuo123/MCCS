@@ -13,6 +13,18 @@ namespace MCCS.Core.Repositories
             return addId;
         }
 
+        public async Task<long> AddStationSiteControlChannelAsync(ControlChannelInfo controlChannelInfo, List<ControlChannelAndSignalInfo> signals, CancellationToken cancellationToken = default)
+        {
+            using var uow = freeSql.CreateUnitOfWork();
+            var addId = await uow.Orm.Insert(controlChannelInfo).ExecuteIdentityAsync(cancellationToken);
+            foreach (var signal in signals)
+            {
+                signal.ChannelId = addId;
+            }
+            await uow.Orm.Insert(signals).ExecuteAffrowsAsync(cancellationToken);
+            return addId;
+        }
+
         public async Task<bool> AddStationSiteHardwareInfosAsync(List<StationSiteAndHardwareInfo> stationSiteHardwares, CancellationToken cancellationToken = default)
         {
             return await freeSql.Insert(stationSiteHardwares).ExecuteAffrowsAsync(cancellationToken) > 0;
@@ -23,6 +35,13 @@ namespace MCCS.Core.Repositories
             return await freeSql.Delete<StationSiteAndHardwareInfo>()
                 .Where(s => s.StationId == stationId && s.HardwareId == hardwareId)
                 .ExecuteAffrowsAsync(cancellationToken) > 0;
+        }
+
+        public async Task<List<ControlChannelAndSignalInfo>> GetControlChannelAndSignalInfosAsync(Expression<Func<ControlChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<ControlChannelAndSignalInfo>()
+                .Where(expression)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<StationSiteAggregate> GetStationSiteAggregateAsync(long stationId, CancellationToken cancellationToken = default)

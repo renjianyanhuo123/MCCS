@@ -1,5 +1,8 @@
-﻿namespace MCCS.Core.Models.StationSites
+﻿using FreeSql.DataAnnotations;
+
+namespace MCCS.Core.Models.StationSites
 {
+    [Table(Name = "tb_controlChannelAndHardwareInfo")]
     public class StationSiteAndHardwareInfo : BaseModel
     {
         public long StationId { get; set; }

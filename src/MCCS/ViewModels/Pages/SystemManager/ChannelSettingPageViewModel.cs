@@ -1,11 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using MCCS.Components.GlobalNotification.Models;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Repositories;
-using MCCS.Events.SystemManager;
+﻿using MCCS.Core.Repositories;
 using MCCS.Models.Stations;
 using MCCS.Services.NotificationService;
 using MCCS.ViewModels.Others.SystemManager;
+using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {

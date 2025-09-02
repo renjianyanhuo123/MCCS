@@ -103,7 +103,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             // 左侧选中的设备
             foreach (var item in staionSelectedHardware)
             {
-                var parentInfo = allDevices.FirstOrDefault(c => c.MainDeviceId == item.MainDeviceId);
+                var parentInfo = allDevices.FirstOrDefault(c => c.DeviceId == item.MainDeviceId);
                 StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
                 {
                     ControllerName = parentInfo?.DeviceName ?? string.Empty,

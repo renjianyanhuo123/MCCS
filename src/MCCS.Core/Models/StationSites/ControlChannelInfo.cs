@@ -26,8 +26,16 @@ namespace MCCS.Core.Models.StationSites
         /// </summary>
         public bool IsShowable { get; set; }
         /// <summary>
-        /// 是否开启试样保护
+        /// 是否开启试样保护 
         /// </summary>
         public bool IsOpenSpecimenProtected { get; set; }
+        /// <summary>
+        /// 控制周期,单位ms
+        /// </summary>
+        public double ControlCycle { get; set; }
+        /// <summary>
+        /// 输出限制，百分比，取值范围0~100(%)
+        /// </summary>
+        public short OutputLimitation { get; set; }
     }
 }

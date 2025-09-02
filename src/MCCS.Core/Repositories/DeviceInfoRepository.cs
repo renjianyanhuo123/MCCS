@@ -45,5 +45,12 @@ namespace MCCS.Core.Repositories
                 .Where(c => c.Id == id)
                 .FirstAsync(cancellationToken);
         }
+
+        public async Task<List<SignalInterfaceInfo>> GetSignalInterfacesByDeviceIdAsync(Expression<Func<SignalInterfaceInfo, bool>> expression, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<SignalInterfaceInfo>()
+                .Where(expression)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

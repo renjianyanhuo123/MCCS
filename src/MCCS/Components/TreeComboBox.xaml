@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="MCCS.Components.TreeComboBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <!-- TreeViewItem样式 -->
+        <Style TargetType="TreeViewItem">
+            <Setter Property="IsExpanded" Value="True"/>
+            <Setter Property="Padding" Value="2"/>
+            <EventSetter Event="MouseLeftButtonUp" Handler="TreeViewItem_MouseLeftButtonUp"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <ComboBox Name="ComboBoxControl" 
+                  IsDropDownOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  DropDownOpened="ComboBox_DropDownOpened"
+                  DropDownClosed="ComboBox_DropDownClosed">
+            <ComboBox.Template>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton Name="ToggleButton" 
+                                      Grid.Column="2" 
+                                      Focusable="false"
+                                      IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                      ClickMode="Press">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Name="Border" 
+                                            Background="White"
+                                            BorderBrush="Gray" 
+                                            BorderThickness="1"
+                                            CornerRadius="3">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition Width="20" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Name="ContentSite"
+                                                       Grid.Column="0"
+                                                       Text="{Binding SelectedText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                       Margin="5,3,5,3"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Left"/>
+                                            <Path Name="Arrow"
+                                                  Grid.Column="1"
+                                                  Fill="Black"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                        </Grid>
+                                    </Border>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <Popup Name="Popup"
+                               Placement="Bottom"
+                               IsOpen="{TemplateBinding IsDropDownOpen}"
+                               AllowsTransparency="True" 
+                               Focusable="False"
+                               PopupAnimation="Slide">
+                            <Grid Name="DropDown"
+                                  SnapsToDevicePixels="True"
+                                  MinWidth="{TemplateBinding ActualWidth}"
+                                  MaxHeight="{Binding DropDownMaxHeight, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                <Border Name="DropDownBorder"
+                                        Background="White"
+                                        BorderThickness="1"
+                                        BorderBrush="Gray"
+                                        CornerRadius="3"/>
+                                <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                    <TreeView Name="TreeViewControl"
+                                              ItemsSource="{Binding TreeItems, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              Background="Transparent"
+                                              BorderThickness="0">
+                                        <TreeView.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                                <TextBlock Text="{Binding Name}" 
+                                                           Padding="3,2"
+                                                           Tag="{Binding}"/>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
+                                </ScrollViewer>
+                            </Grid>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </ComboBox.Template>
+        </ComboBox>
+    </Grid>
+</UserControl>
