@@ -49,6 +49,16 @@
             <RadioButton
                 Margin="4"
                 FontWeight="Bold"
+                Content="{StaticResource HardwareManagement}"
+                IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:HardwareSettingPageViewModel.Tag}}"
+                GroupName="Navigation"
+                Tag="{x:Static localViewModel:HardwareSettingPageViewModel.Tag}"
+                Command="{Binding JumpToCommand}"
+                CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"
+                Style="{StaticResource MaterialDesignTabRadioButton}" />
+            <RadioButton
+                Margin="4"
+                FontWeight="Bold"
                 Content="{StaticResource StationConfiguration}"
                 IsChecked="{Binding CurrentSelectedPage, Converter={StaticResource StringToBooleanConverter}, ConverterParameter={x:Static localViewModel:StationSiteSettingPageViewModel.Tag}}"
                 GroupName="Navigation"

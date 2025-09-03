@@ -12,11 +12,15 @@ using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
 using MCCS.ViewModels.Dialogs;
+using MCCS.ViewModels.Dialogs.Common;
 using MCCS.ViewModels.Pages.StationSites;
 using MCCS.Views.Dialogs;
 using MCCS.Views.Pages.SystemManager;
 using MCCS.ViewModels.Pages.SystemManager;
 using MCCS.Views.Pages.StationSites;
+using MCCS.Views.Dialogs.Common;
+using MCCS.Views.Dialogs.Hardwares;
+using MCCS.ViewModels.Dialogs.Hardwares;
 
 namespace MCCS
 {
@@ -79,7 +83,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
             containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
-            // containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<HardwareSettingPage>(HardwareSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ChannelSettingPage>(ChannelSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<VariableSettingPage>(VariableSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<AddChannelPage>(AddChannelPageViewModel.Tag);
@@ -89,6 +93,9 @@ namespace MCCS
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<DeleteConfirmDialog>(DeleteConfirmDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<AddHardwareDialog>(AddHardwareDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<EditHardwareDialog>(EditHardwareDialogViewModel.Tag);
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);

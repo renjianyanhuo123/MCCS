@@ -91,7 +91,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     ChannelName = controlChannel.ChannelName,
                     ControlMode = controlChannel.ControlMode,
                 };
-                controlChannelItem.Signals
+                // controlChannelItem.Signals
                 ControlChannels.Add(controlChannelItem);
             }
             // 所有的控制通道

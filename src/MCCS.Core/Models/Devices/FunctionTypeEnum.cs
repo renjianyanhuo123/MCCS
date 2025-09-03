@@ -11,6 +11,10 @@
         /// </summary>
         Measurement,
         /// <summary>
+        /// 连接类
+        /// </summary>
+        Connection,
+        /// <summary>
         /// 无
         /// </summary>
         None

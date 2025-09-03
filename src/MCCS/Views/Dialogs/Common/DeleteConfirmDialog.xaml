@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="MCCS.Views.Dialogs.Common.DeleteConfirmDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.Views.Dialogs.Common" xmlns:common="clr-namespace:MCCS.ViewModels.Dialogs.Common" 
+             d:DataContext="{d:DesignInstance Type=common:DeleteConfirmDialogViewModel}"
+             mc:Ignorable="d" 
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Border Height="190" Width="450" CornerRadius="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="确认操作" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold" FontSize="18"></TextBlock>
+            <TextBlock Grid.Row="1" Margin="15" Text="您确定要执行此操作吗？此操作可能会对数据产生影响，请谨慎选择。" TextWrapping="Wrap" FontSize="14" />
+            <UniformGrid Grid.Row="2" Columns="2" Margin="15">
+                <Button Content="取消" Width="180" Margin="0,0,15,0" IsCancel="True" 
+                        Command="{Binding CancelCommand}"
+                        Style="{StaticResource MaterialDesignPaperLightButton}"/>
+                <Button Content="确认" Width="180" IsDefault="True" Command="{Binding ConfirmCommand}"/>
+            </UniformGrid>
+        </Grid>
+    </Border>
+</UserControl>

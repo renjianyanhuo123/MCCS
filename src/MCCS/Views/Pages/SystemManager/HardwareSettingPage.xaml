@@ -11,6 +11,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:MCCS.Behaviors"
+             xmlns:hardwares="clr-namespace:MCCS.Converters.Hardwares"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -20,6 +21,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <hardwares:DeviceTypeEnumToStringConverter x:Key="DeviceTypeEnumToStringConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <b:Interaction.Triggers>
@@ -29,81 +31,56 @@
         </b:EventTrigger>
     </b:Interaction.Triggers>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Background="#F3F3F3">
-            <UniformGrid Columns="2"> 
-                <materialDesign:Chip
-                    Content="添加通道">
-                    <materialDesign:Chip.InputBindings>
-                        <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding AddChannelCommand}" />
-                    </materialDesign:Chip.InputBindings>
-                    <materialDesign:Chip.Icon>
-                        <materialDesign:PackIcon Kind="Plus" />
-                    </materialDesign:Chip.Icon>
-                </materialDesign:Chip>
-                <materialDesign:Chip
-                    Content="添加变量">
-                    <materialDesign:Chip.InputBindings>
-                        <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding AddVariableCommand}" />
-                    </materialDesign:Chip.InputBindings>
-                    <materialDesign:Chip.Icon>
-                        <materialDesign:PackIcon Kind="Plus" />
-                    </materialDesign:Chip.Icon>
-                </materialDesign:Chip> 
-            </UniformGrid>
-            <TreeView Width="Auto" Height="Auto" 
-                      behaviors:TreeViewSelectedItemBehavior.SelectedItem="{Binding SelectedItem}"
-                      ItemsSource="{Binding ChannelVariableInfo}">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="SelectedItemChanged">
-                        <b:InvokeCommandAction 
-                            Command="{Binding DataContext.SelectedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            PassEventArgsToCommand="True"/>
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                        <Setter Property="IsExpanded" Value="True" />
-                        <Setter Property="Tag" Value="{Binding ChannelId}" />
-                    </Style>
-                </TreeView.ItemContainerStyle>
-
-                <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding VariableInfos}">
-                        <StackPanel Orientation="Horizontal" Background="Transparent">
-                            <Viewbox Width="16" Height="16">
-                                <materialDesign:PackIcon Kind="Pipe" />
-                            </Viewbox>
-                            <TextBlock Margin="8,0,0,0" Text="{Binding ChannelName}" />
-                        </StackPanel>
-
-                        <HierarchicalDataTemplate.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="Transparent" Padding="0"> 
-                                    <StackPanel Orientation="Horizontal">
-                                        <Viewbox Width="16" Height="16">
-                                            <materialDesign:PackIcon Kind="Variable" />
-                                        </Viewbox>
-                                        <TextBlock Margin="8,0,0,0" Text="{Binding VariableName}" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </HierarchicalDataTemplate.ItemTemplate>
-
-                        <HierarchicalDataTemplate.ItemContainerStyle>
-                            <Style TargetType="TreeViewItem" BasedOn="{StaticResource MaterialDesignTreeViewItem}">
-                                <Setter Property="Tag" Value="{Binding VariableId}" /> 
-                            </Style>
-                        </HierarchicalDataTemplate.ItemContainerStyle>
-                    </HierarchicalDataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Left"
+                    Margin="15,0,0,0"
+                    VerticalAlignment="Center">
+            <Button
+                Width="100"
+                Content="添加设备" 
+                Command="{Binding AddHardwareCommand}"
+                Style="{StaticResource MaterialDesignFlatLightBgButton}" />
         </StackPanel>
-        <ContentControl Grid.Column="1" prism:RegionManager.RegionName="{x:Static localContanst:GlobalConstant.SystemManagerHardwarePageRegionName}" />
+        <DataGrid
+            Grid.Row="1"
+            Name="HardwareDataGrid"
+            CanUserAddRows="False"
+            ColumnWidth="*" 
+            ItemsSource="{Binding HardwareList}" 
+            AutoGenerateColumns="False" >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Visibility="Hidden"></DataGridTextColumn>
+                <DataGridTextColumn Header="设备名称" Binding="{Binding Name}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="设备类型" Binding="{Binding Type, Converter={StaticResource DeviceTypeEnumToStringConverter}}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="描述" Binding="{Binding Description}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="创建时间" IsReadOnly="True" Binding="{Binding CreateTime}" Width="*"/>
+                <DataGridTextColumn Header="更新时间" IsReadOnly="True" Binding="{Binding UpdateTime}" Width="*"/>
+                <DataGridTemplateColumn Header="操作"  Width="350">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="编辑" Width="80" 
+                                        Click="EditButton_Click"
+                                        Tag="{Binding Id}"
+                                        Style="{StaticResource MaterialDesignFlatMidBgButton}"  />
+                                <Button Content="编辑信号接口" Width="120" 
+                                        Margin="10,0,0,0" 
+                                        Click="EditSignalButton_Click"
+                                        Tag="{Binding Id}"
+                                        Style="{StaticResource MaterialDesignFlatSecondaryLightBgButton}"  />
+                                <Button Content="删除" Width="80"
+                                        Margin="10,0,0,0" 
+                                        Click="DeleteButton_Click"
+                                        Style="{StaticResource MaterialDesignPaperLightButton}"
+                                        Tag="{Binding Id}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn> 
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>

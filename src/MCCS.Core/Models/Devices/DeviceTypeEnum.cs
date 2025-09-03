@@ -12,8 +12,8 @@
         // 网关
         Gateway = 4,
         // 服务器
-        Display = 6,
+        Display = 5,
         // 其他
-        Other = 99
+        Other = 6
     }
 }

@@ -13,11 +13,11 @@ namespace MCCS.Core.Repositories
                 .ToListAsync(cancellationToken);
         } 
 
-        public async Task<bool> AddDeviceAsync(DeviceInfo device, CancellationToken cancellationToken = default)
+        public async Task<long> AddDeviceAsync(DeviceInfo device, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(device);
-            var count = await freeSql.Insert(device).ExecuteAffrowsAsync(cancellationToken);
-            return count >= 1;
+            var addId = await freeSql.Insert(device).ExecuteIdentityAsync(cancellationToken);
+            return addId;
         }
 
         public async Task<List<DeviceInfo>> GetDevicesByExpressionAsync(Expression<Func<DeviceInfo, bool>> expression, CancellationToken cancellationToken = default)
@@ -46,11 +46,33 @@ namespace MCCS.Core.Repositories
                 .FirstAsync(cancellationToken);
         }
 
-        public async Task<List<SignalInterfaceInfo>> GetSignalInterfacesByDeviceIdAsync(Expression<Func<SignalInterfaceInfo, bool>> expression, CancellationToken cancellationToken = default)
+        public async Task<List<SignalInterfaceInfo>> GetSignalInterfacesByExpressionAsync(Expression<Func<SignalInterfaceInfo, bool>> expression, CancellationToken cancellationToken = default)
         {
             return await freeSql.Select<SignalInterfaceInfo>()
                 .Where(expression)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> DeleteDeviceInfoAsync(long deviceId, CancellationToken cancellationToken = default)
+        {
+            var count = await freeSql.Update<DeviceInfo>()
+                .Set(c => c.IsDeleted, true)
+                .Where(c => c.Id == deviceId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            return count > 0;
+        }
+
+        public async Task<bool> UpdateDeviceInfoAsync(DeviceInfo device, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(device);
+            var count = await freeSql.Update<DeviceInfo>()
+                .Set(c => c.DeviceName, device.DeviceName)
+                .Set(c => c.Description, device.Description)
+                .Set(c => c.DeviceType, device.DeviceType)
+                .Set(c => c.FunctionType, device.FunctionType)
+                .Where(c => c.Id == device.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            return count > 0;
         }
     }
 }
