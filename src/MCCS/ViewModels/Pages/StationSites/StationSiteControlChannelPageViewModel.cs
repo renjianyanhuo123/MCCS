@@ -95,38 +95,38 @@ namespace MCCS.ViewModels.Pages.StationSites
                 ControlChannels.Add(controlChannelItem);
             }
             // 所有的控制通道
-            var parentIds = allDevices
-                .Where(s => s.MainDeviceId != null)
-                .Select(s => s.MainDeviceId)
-                .Distinct()
-                .ToList();
-            var parentInfos = allDevices
-                .Where(c => parentIds.Contains(c.DeviceId))
-                .ToList();
-            foreach (var parentInfo in parentInfos)
-            {
-                var hardwareListItem = new ControlChannelHardwareListItemViewModel()
-                {
-                    ControllerId = parentInfo.Id,
-                    ControllerName = parentInfo.DeviceName,
-                };
-                var childItems = allDevices
-                    .Where(c => c.MainDeviceId == parentInfo.DeviceId 
-                                && allStationSiteHardwares
-                                    .Select(s => s.Id)
-                                    .Contains(c.Id))
-                    .ToList();
-                foreach (var item in childItems)
-                {
-                    hardwareListItem.ChildItems.Add(new ControlChannelHardwareChildItemViewModel
-                    {
-                        HardwareId = item.Id,
-                        HardwareName = item.DeviceName,
-                        Address = "TCU.1 MCU2.1 9232"
-                    });
-                }
-                HardwareListItems.Add(hardwareListItem);
-            }
+            //var parentIds = allDevices
+            //    .Where(s => s.MainDeviceId != null)
+            //    .Select(s => s.MainDeviceId)
+            //    .Distinct()
+            //    .ToList();
+            //var parentInfos = allDevices
+            //    .Where(c => parentIds.Contains(c.DeviceId))
+            //    .ToList();
+            //foreach (var parentInfo in parentInfos)
+            //{
+            //    var hardwareListItem = new ControlChannelHardwareListItemViewModel()
+            //    {
+            //        ControllerId = parentInfo.Id,
+            //        ControllerName = parentInfo.DeviceName,
+            //    };
+            //    var childItems = allDevices
+            //        .Where(c => c.MainDeviceId == parentInfo.DeviceId 
+            //                    && allStationSiteHardwares
+            //                        .Select(s => s.Id)
+            //                        .Contains(c.Id))
+            //        .ToList();
+            //    foreach (var item in childItems)
+            //    {
+            //        hardwareListItem.ChildItems.Add(new ControlChannelHardwareChildItemViewModel
+            //        {
+            //            HardwareId = item.Id,
+            //            HardwareName = item.DeviceName,
+            //            Address = "TCU.1 MCU2.1 9232"
+            //        });
+            //    }
+            //    HardwareListItems.Add(hardwareListItem);
+            //}
         }
         #endregion
     }

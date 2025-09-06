@@ -57,7 +57,7 @@ namespace MCCS.Core.Repositories
         {
             var count = await freeSql.Update<DeviceInfo>()
                 .Set(c => c.IsDeleted, true)
-                .Where(c => c.Id == deviceId)
+                .Where(c => c.Id == deviceId && c.IsDeleted == false)
                 .ExecuteAffrowsAsync(cancellationToken);
             return count > 0;
         }
@@ -71,6 +71,37 @@ namespace MCCS.Core.Repositories
                 .Set(c => c.DeviceType, device.DeviceType)
                 .Set(c => c.FunctionType, device.FunctionType)
                 .Where(c => c.Id == device.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            return count > 0;
+        }
+
+        public async Task<bool> UpdateSignalInfoAsync(SignalInterfaceInfo signalInterfaceInfo, CancellationToken cancellationToken = default)
+        {
+            var count = await freeSql.Update<SignalInterfaceInfo>()
+                .Set(c => c.Address, signalInterfaceInfo.Address)
+                .Set(c => c.DataType, signalInterfaceInfo.DataType)
+                .Set(c => c.SignalName, signalInterfaceInfo.SignalName)
+                .Set(c => c.UpdateCycle, signalInterfaceInfo.UpdateCycle)
+                .Set(c => c.WeightCoefficient, signalInterfaceInfo.WeightCoefficient)
+                .Set(c => c.SignalRole,signalInterfaceInfo.SignalRole)
+                .Set(c => c.UpLimitRange, signalInterfaceInfo.UpLimitRange)
+                .Set(c => c.DownLimitRange, signalInterfaceInfo.DownLimitRange)
+                .Set(c => c.ConnectedDeviceId, signalInterfaceInfo.ConnectedDeviceId)
+                .Where(c => c.Id == signalInterfaceInfo.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            return count > 0;
+        }
+
+        public async Task<long> AddSignalInfoAsync(SignalInterfaceInfo signalInterfaceInfo, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Insert(signalInterfaceInfo).ExecuteIdentityAsync(cancellationToken);
+        }
+
+        public async Task<bool> DeleteSignalInfoAsync(long signalId, CancellationToken cancellationToken = default)
+        {
+            var count = await freeSql.Update<SignalInterfaceInfo>()
+                .Set(c => c.IsDeleted, true)
+                .Where(c => c.Id == signalId)
                 .ExecuteAffrowsAsync(cancellationToken);
             return count > 0;
         }

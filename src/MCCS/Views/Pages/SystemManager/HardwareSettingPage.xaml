@@ -22,6 +22,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <hardwares:DeviceTypeEnumToStringConverter x:Key="DeviceTypeEnumToStringConverter" />
+            <hardwares:DeviceTypeEnumToVisibilityConverter x:Key="DeviceTypeEnumToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <b:Interaction.Triggers>
@@ -70,6 +71,7 @@
                                         Margin="10,0,0,0" 
                                         Click="EditSignalButton_Click"
                                         Tag="{Binding Id}"
+                                        Visibility="{Binding Type,Converter={StaticResource DeviceTypeEnumToVisibilityConverter}}"
                                         Style="{StaticResource MaterialDesignFlatSecondaryLightBgButton}"  />
                                 <Button Content="删除" Width="80"
                                         Margin="10,0,0,0" 

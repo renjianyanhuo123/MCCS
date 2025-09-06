@@ -22,5 +22,11 @@ namespace MCCS.Core.Repositories
         Task<bool> DeleteDeviceInfoAsync(long deviceId, CancellationToken cancellationToken = default);
 
         Task<bool> UpdateDeviceInfoAsync(DeviceInfo device, CancellationToken cancellationToken = default);
+
+        Task<bool> UpdateSignalInfoAsync(SignalInterfaceInfo signalInterfaceInfo, CancellationToken cancellationToken = default);
+
+        Task<long> AddSignalInfoAsync(SignalInterfaceInfo signalInterfaceInfo, CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteSignalInfoAsync(long signalId, CancellationToken cancellationToken = default);
     }
 }

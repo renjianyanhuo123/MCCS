@@ -11,6 +11,7 @@ using MCCS.Core.Repositories;
 using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
+using MCCS.Core.Models.Devices;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Common;
 using MCCS.ViewModels.Pages.StationSites;
@@ -111,23 +112,23 @@ namespace MCCS
         {
             try
             {
-                var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
-                var devices = await deviceRepository.GetAllDevicesAsync();
-                var connectionDevices = devices.Where(c => c.MainDeviceId == null);
-                var connectionManager = Container.Resolve<IConnectionManager>();
-                var deviceManager = Container.Resolve<IDeviceManager>();
-                // (1)默认注册模拟设备连接
-                connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
-                {
-                    ConnectionId = c.DeviceId,
-                    ConnectionType = ConnectionTypeEnum.Mock,
-                    ConnectionStr = "XXXXXX"
-                }).ToList());
-                // (2) 打开所有连接
-                await connectionManager.OpenAllConnections();
-                // (3) 注册所有设备
-                deviceManager.RegisterDevices(devices.Where(c => c.MainDeviceId != null).ToList());
-                deviceManager.StartAllDevices();
+                //var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
+                //var devices = await deviceRepository.GetAllDevicesAsync();
+                //var connectionDevices = devices.Where(c => c.DeviceType == DeviceTypeEnum.Controller);
+                //var connectionManager = Container.Resolve<IConnectionManager>();
+                //var deviceManager = Container.Resolve<IDeviceManager>();
+                //// (1)默认注册模拟设备连接
+                //connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
+                //{
+                //    ConnectionId = c.DeviceId,
+                //    ConnectionType = ConnectionTypeEnum.Mock,
+                //    ConnectionStr = "XXXXXX"
+                //}).ToList());
+                //// (2) 打开所有连接
+                //await connectionManager.OpenAllConnections();
+                //// (3) 注册所有设备
+                //deviceManager.RegisterDevices(devices.Where(c => c.DeviceType == DeviceTypeEnum.Controller).ToList());
+                //deviceManager.StartAllDevices();
                 base.OnInitialized();
             }
             catch (Exception e)

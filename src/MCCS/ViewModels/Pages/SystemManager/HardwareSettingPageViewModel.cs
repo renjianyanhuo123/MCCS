@@ -1,16 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
-using MaterialDesignThemes.Wpf;
+﻿using MaterialDesignThemes.Wpf;
 using MCCS.Core.Repositories;
 using MCCS.Events.Common;
 using MCCS.Events.Hardwares;
-using MCCS.Events.SystemManager;
 using MCCS.Models.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
-using MCCS.ViewModels.Others.SystemManager;
 using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Dialogs.Hardwares;
 using Serilog;
+using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -49,7 +47,8 @@ namespace MCCS.ViewModels.Pages.SystemManager
         private ObservableCollection<HardwareListItemViewModel> _hardwareList = [];
         public ObservableCollection<HardwareListItemViewModel> HardwareList
         {
-            get => _hardwareList; set => SetProperty(ref _hardwareList, value);
+            get => _hardwareList; 
+            set => SetProperty(ref _hardwareList, value);
         } 
         #endregion
 
@@ -82,17 +81,9 @@ namespace MCCS.ViewModels.Pages.SystemManager
         private async Task ExecuteEditSignalCommand(long id)
         {
             var editDialog = _containerProvider.Resolve<EditSignalDialog>(); 
+            _eventAggregator.GetEvent<SendHardwareSignalIdEvent>().Publish(new SendHardwareSignalIdEventParam{ControllerId = id});
             var result = await DialogHost.Show(editDialog, "RootDialog"); 
-        }
-        private void ExecuteAddVariableCommand()
-        {
-            // _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(AddChannelPageViewModel.Tag, UriKind.Relative));
-        }
-
-        private void ExecuteAddChannelCommand()
-        {
-            _regionManager.RequestNavigate(GlobalConstant.SystemManagerHardwarePageRegionName, new Uri(AddChannelPageViewModel.Tag, UriKind.Relative));
-        }
+        }  
 
         private void ExecuteSelectedCommand(RoutedPropertyChangedEventArgs<object> param)
         {
@@ -153,19 +144,6 @@ namespace MCCS.ViewModels.Pages.SystemManager
                 Log.Error("更新设备后刷新失败！");
             }
         }
-
-        private async void UpdateVariable_RefreshTreeView(NotificationUpdateVariableEventParam param)
-        {
-            //try
-            //{
-            //    await ExecuteLoadCommand();
-            //}
-            //catch (Exception e)
-            //{
-            //    Log.Error("更新变量后刷新失败！");
-            //}
-        }
-
         #endregion
     }
 }

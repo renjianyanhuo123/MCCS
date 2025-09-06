@@ -4,9 +4,262 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Dialogs.Hardwares"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:hardwares="clr-namespace:MCCS.ViewModels.Dialogs.Hardwares" 
+             d:DataContext="{d:DesignInstance Type=hardwares:EditSignalDialogViewModel}"
+             xmlns:prism="http://prismlibrary.com/" xmlns:hardwares1="clr-namespace:MCCS.ViewModels.Dialogs.Hardwares"
+             xmlns:hardwares2="clr-namespace:MCCS.Converters.Hardwares"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+        <hardwares2:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <Style x:Key="HoverBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#F1F1F1"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="CornerRadius" Value="3"></Setter>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="LightBlue"/>
+                    <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction 
+            Command="{Binding LoadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <Grid Height="800" Width="1000">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="#C5C5C5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="80"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="编辑信号"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="20"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left"></TextBlock>
+                <Button
+                    Grid.Column="1" 
+                    Width="100"
+                    Content="添加信号" 
+                    Command="{Binding AddSignalContainerCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedLightButton}"  /> 
+                <Border Grid.Column="2" Style="{StaticResource HoverBorderStyle}"
+                        HorizontalAlignment="Right">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseDown">
+                            <b:InvokeCommandAction 
+                                Command="{Binding CloseCommand}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Viewbox>
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Viewbox>
+                </Border>
+            </Grid>
+        </Border>
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding Signals}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="2" BorderBrush="#E5E7EB" Margin="15"
+                                CornerRadius="5">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" Background="Gray"
+                                        BorderThickness="0,0,0,2"  BorderBrush="#E5E7EB">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <TextBlock Width="Auto" FontWeight="Bold" FontSize="18" Text="{Binding SignalName}"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="White"
+                                                   Margin="0,0,500,0"></TextBlock>
+                                        <Border Style="{StaticResource HoverBorderStyle}"
+                                                Visibility="{Binding IsCanEdit, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                HorizontalAlignment="Right">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="MouseDown">
+                                                    <b:InvokeCommandAction 
+                                                        Command="{Binding DataContext.EditOrAddCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding TempId}" />
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                            <Viewbox > 
+                                                <materialDesign:PackIcon Kind="CheckOutline" Foreground="BlueViolet" />
+                                            </Viewbox>
+                                        </Border>
+                                        <Border Style="{StaticResource HoverBorderStyle}"
+                                                Visibility="{Binding IsCanEdit, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                HorizontalAlignment="Right">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="MouseDown">
+                                                    <b:InvokeCommandAction 
+                                                        Command="{Binding DataContext.CancelOrDeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding TempId}"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                            <Viewbox> 
+                                                <materialDesign:PackIcon Kind="CloseOutline" />
+                                            </Viewbox>
+                                        </Border>
+                                        <Border Style="{StaticResource HoverBorderStyle}"
+                                                Visibility="{Binding IsCanEdit, Converter={StaticResource ReverseBooleanToVisibilityConverter}}"
+                                                HorizontalAlignment="Right">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="MouseDown">
+                                                    <b:InvokeCommandAction 
+                                                        Command="{Binding DataContext.EditSignalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding TempId}"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                            <Viewbox> 
+                                                <materialDesign:PackIcon Kind="ApplicationEditOutline" Foreground="BlueViolet"  />
+                                            </Viewbox>
+                                        </Border>
+                                        <Border Style="{StaticResource HoverBorderStyle}"
+                                                Visibility="{Binding IsCanEdit, Converter={StaticResource ReverseBooleanToVisibilityConverter}}"
+                                                HorizontalAlignment="Right">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="MouseDown">
+                                                    <b:InvokeCommandAction 
+                                                        Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding Id}" />
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                            <Viewbox> 
+                                                <materialDesign:PackIcon Kind="DeleteForeverOutline" Foreground="Red"/>
+                                            </Viewbox>
+                                        </Border>
+                                    </StackPanel>
+                                </Border>
+                                <StackPanel Grid.Column="0" Grid.Row="1" Margin="15">
+                                    <TextBlock Text="信号名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <TextBox Width="Auto" IsEnabled="{Binding IsCanEdit}" 
+                                             Text="{Binding SignalName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
+                                    <TextBlock Text="接口地址" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <TextBox Width="Auto" IsEnabled="{Binding IsCanEdit}" 
+                                             Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </StackPanel> 
+                                <StackPanel Grid.Column="2" Grid.Row="1" 
+                                            Margin="15" >
+                                    <TextBlock Text="信号角色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <ComboBox Width="Auto" 
+                                              Height="Auto"
+                                              IsEnabled="{Binding IsCanEdit}"
+                                              SelectedIndex="{Binding SignalRoleType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBoxItem TabIndex="0">主反馈</ComboBoxItem>
+                                        <ComboBoxItem TabIndex="1">辅助反馈</ComboBoxItem>
+                                        <ComboBoxItem TabIndex="2">监控信号</ComboBoxItem>
+                                        <ComboBoxItem TabIndex="2">保护信号</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="0" Grid.Row="2" Margin="15">
+                                    <TextBlock Text="数据类型(输出)" FontSize="14" Margin="0,0,0,15"></TextBlock> 
+                                    <ComboBox Width="Auto" 
+                                              Height="Auto"
+                                              IsEnabled="{Binding  IsCanEdit }"
+                                              SelectedIndex="{Binding DataType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                        <ComboBoxItem TabIndex="0">二进制码</ComboBoxItem>
+                                        <ComboBoxItem TabIndex="1">格雷格码</ComboBoxItem>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Grid.Row="2" Margin="15">
+                                    <TextBlock Text="权重系数" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <TextBox Width="Auto" IsEnabled="{Binding IsCanEdit}" 
+                                             Text="{Binding WeightCoefficient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Grid.Row="2" Margin="15">
+                                    <TextBlock Text="更新周期(ms)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <TextBox Width="Auto" IsEnabled="{Binding  IsCanEdit }" 
+                                             Text="{Binding UpdateCycle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Margin="15">
+                                    <TextBlock Text="量程上下限" FontSize="14" Margin="0,0,0,15"></TextBlock> 
+                                    <UniformGrid Columns="2">
+                                        <TextBox Width="Auto" IsEnabled="{Binding IsCanEdit }" 
+                                                 Margin="0,0,25,0"
+                                                 Text="{Binding UpLimitRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" materialDesign:HintAssist.Hint="上限"></TextBox>
+                                        <TextBox Width="Auto" IsEnabled="{Binding IsCanEdit }" 
+                                                 Text="{Binding DownLimitRange, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" materialDesign:HintAssist.Hint="下限"></TextBox>
+                                    </UniformGrid>
+                                </StackPanel>
+                                <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" Margin="15">
+                                    <TextBlock Text="选择连接的设备" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                    <ComboBox Width="Auto" 
+                                              Height="Auto"
+                                              IsEnabled="{Binding IsCanEdit}"
+                                              SelectedItem="{Binding ConnectedDevice}"
+                                              ItemsSource="{Binding DataContext.BindDevices, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <UniformGrid Columns="2">
+                                                    <TextBlock HorizontalAlignment="Center" Tag="{Binding Id}"  Text="{Binding DeviceName}" FontWeight="Bold"/> 
+                                                    <materialDesign:PackIcon HorizontalAlignment="Center" Kind="Link" Visibility="{Binding IsBinding, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                </UniformGrid>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl> 
+        </ScrollViewer>
+        <Border Grid.Row="2" Grid.Column="0" 
+                Margin="30,0,30,0"
+                BorderThickness="0,2,0,0" BorderBrush="#C5C5C5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button 
+                    Content="取消" 
+                    Width="80"
+                    Command="{Binding CloseCommand}"
+                    Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" />
+                <!--<Button
+                    Width="80"
+                    Content="提交" 
+                    Margin="30,0,30,0"
+                    Command="{Binding SaveCommand}"
+                    Style="{StaticResource MaterialDesignFlatMidBgButton}" />-->
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

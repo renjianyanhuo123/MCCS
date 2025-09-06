@@ -26,11 +26,12 @@ public class DeviceInfo : BaseModel
     [Column(IsNullable = true, StringLength = 500)]
     public string? Description { get; set; }
 
-    /// <summary>
-    /// 主设备ID
-    /// </summary>
-    [Column(IsNullable = true, StringLength = 100)]
-    public string? MainDeviceId { get; set; }
+    ///// <summary>
+    ///// 主设备ID
+    ////  去除掉，使用接口信号的方式绑定设备，增强其灵活性
+    ///// </summary>
+    //[Column(IsNullable = true, StringLength = 100)]
+    //public string? MainDeviceId { get; set; }
 
     /// <summary>
     /// 采集频率（单位：Hz）

@@ -16,31 +16,32 @@ namespace MCCS.Core.Devices
 
         public IDevice CreateDevice(DeviceInfo deviceInfo)
         {
-            var deviceConnection = _connectionManager.GetConnection(deviceInfo.MainDeviceId ?? "") 
-                ?? throw new ArgumentNullException(nameof(deviceInfo.MainDeviceId));
-            switch (deviceInfo.DeviceType)
-            {
-                case DeviceTypeEnum.Unknown:
-                    //throw new NotSupportedException();
-                case DeviceTypeEnum.Sensor:
-                    break;
-                    //throw new NotSupportedException();
-                case DeviceTypeEnum.Actuator:
-                    return new Actuator(deviceInfo, deviceConnection);
-                case DeviceTypeEnum.Controller:
-                    //throw new NotSupportedException();
-                case DeviceTypeEnum.Gateway:
-                    //throw new NotSupportedException();
-                case DeviceTypeEnum.Display:
-                    //throw new NotSupportedException();
-                case DeviceTypeEnum.Other:
-                    //throw new NotSupportedException();
-                default:
-                    break;
-                    //throw new NotSupportedException();
-            }
+            //var deviceConnection = _connectionManager.GetConnection(deviceInfo.MainDeviceId ?? "") 
+            //    ?? throw new ArgumentNullException(nameof(deviceInfo.MainDeviceId));
+            //switch (deviceInfo.DeviceType)
+            //{
+            //    case DeviceTypeEnum.Unknown:
+            //        //throw new NotSupportedException();
+            //    case DeviceTypeEnum.Sensor:
+            //        break;
+            //        //throw new NotSupportedException();
+            //    case DeviceTypeEnum.Actuator:
+            //        return new Actuator(deviceInfo, deviceConnection);
+            //    case DeviceTypeEnum.Controller:
+            //        //throw new NotSupportedException();
+            //    case DeviceTypeEnum.Gateway:
+            //        //throw new NotSupportedException();
+            //    case DeviceTypeEnum.Display:
+            //        //throw new NotSupportedException();
+            //    case DeviceTypeEnum.Other:
+            //        //throw new NotSupportedException();
+            //    default:
+            //        break;
+            //        //throw new NotSupportedException();
+            //}
 
-            return new Actuator(deviceInfo, deviceConnection);
+            //return new Actuator(deviceInfo, deviceConnection);
+            return null;
         }
     }
 }

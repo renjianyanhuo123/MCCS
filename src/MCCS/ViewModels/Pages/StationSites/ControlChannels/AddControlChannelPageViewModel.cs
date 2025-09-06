@@ -190,17 +190,17 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => allDevices.Select(s => s.Id).Contains(c.ConnectedDeviceId));
             foreach (var item in staionSelectedHardware)
             {
-                var parentInfo = allDevices.FirstOrDefault(c => c.DeviceId == item.MainDeviceId);
-                var connectedSignal = allSignals.FirstOrDefault(c => c.ConnectedDeviceId == item.Id);
-                SelectableControlChannels.Add(new ControlChannelSelectableItemModel
-                {
-                    ControllerName = parentInfo?.DeviceName ?? string.Empty,
-                    DeviceName = item.DeviceName,
-                    DeviceId = item.Id,
-                    SignalId = connectedSignal?.Id ?? 0,
-                    SignalName = connectedSignal?.SignalName ?? string.Empty,
-                    IsSelected = false
-                });
+                //var parentInfo = allDevices.FirstOrDefault(c => c.);
+                //var connectedSignal = allSignals.FirstOrDefault(c => c.ConnectedDeviceId == item.Id);
+                //SelectableControlChannels.Add(new ControlChannelSelectableItemModel
+                //{
+                //    ControllerName = parentInfo?.DeviceName ?? string.Empty,
+                //    DeviceName = item.DeviceName,
+                //    DeviceId = item.Id,
+                //    SignalId = connectedSignal?.Id ?? 0,
+                //    SignalName = connectedSignal?.SignalName ?? string.Empty,
+                //    IsSelected = false
+                //});
             }
         }
         #endregion
