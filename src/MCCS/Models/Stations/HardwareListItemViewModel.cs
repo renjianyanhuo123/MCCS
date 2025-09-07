@@ -8,6 +8,21 @@ namespace MCCS.Models.Stations
     {
         public long HardwareId { get; set; }
         public string HardwareName { get; set; } = string.Empty;
+
+        private long _signalId;
+        public long SignalId
+        {
+            get => _signalId;
+            set => SetProperty(ref _signalId, value);
+        }
+
+        private string _signalName = string.Empty;
+        public string SignalName
+        {
+            get => _signalName;
+            set => SetProperty(ref _signalName, value);
+        }
+
         private bool _isSelectable;
         public bool IsSelectable
         {
@@ -16,7 +31,6 @@ namespace MCCS.Models.Stations
         }
 
         private bool _isSelected;
-
         public bool IsSelected
         {
             get => _isSelected;

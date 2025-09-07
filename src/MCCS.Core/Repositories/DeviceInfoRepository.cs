@@ -105,5 +105,12 @@ namespace MCCS.Core.Repositories
                 .ExecuteAffrowsAsync(cancellationToken);
             return count > 0;
         }
+
+        public async Task<SignalInterfaceInfo> GetSignalInterfaceByIdAsync(long signalId, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<SignalInterfaceInfo>()
+                .Where(c => c.Id == signalId && c.IsDeleted == false)
+                .ToOneAsync(cancellationToken);
+        }
     }
 }

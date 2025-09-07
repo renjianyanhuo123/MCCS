@@ -22,6 +22,7 @@ namespace MCCS.Core.Repositories
                 signal.ChannelId = addId;
             }
             await uow.Orm.Insert(signals).ExecuteAffrowsAsync(cancellationToken);
+            uow.Commit();
             return addId;
         }
 
@@ -30,10 +31,24 @@ namespace MCCS.Core.Repositories
             return await freeSql.Insert(stationSiteHardwares).ExecuteAffrowsAsync(cancellationToken) > 0;
         }
 
-        public async Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long hardwareId, CancellationToken cancellationToken)
+        public async Task<bool> DeleteStationSiteControlChannelAsync(long channelId, CancellationToken cancellationToken = default)
+        {
+            using var uow = freeSql.CreateUnitOfWork();
+            var count1 = await uow.Orm.Update<ControlChannelInfo>()
+                .Set(s => s.IsDeleted, true)
+                .Where(s => s.Id == channelId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            var count2 = await uow.Orm.Delete<ControlChannelAndSignalInfo>().Where(s => s.ChannelId == channelId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            uow.Commit();
+            return count1 >= 0 && count2 >= 0;
+
+        }
+
+        public async Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long signalId, CancellationToken cancellationToken)
         {
             return await freeSql.Delete<StationSiteAndHardwareInfo>()
-                .Where(s => s.StationId == stationId && s.HardwareId == hardwareId)
+                .Where(s => s.StationId == stationId && s.SignalId == signalId)
                 .ExecuteAffrowsAsync(cancellationToken) > 0;
         }
 
@@ -44,17 +59,24 @@ namespace MCCS.Core.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<ControlChannelInfo> GetControlChannelById(long channelId, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<ControlChannelInfo>()
+                .Where(c => c.Id == channelId)
+                .FirstAsync(cancellationToken);
+        }
+
         public async Task<StationSiteAggregate> GetStationSiteAggregateAsync(long stationId, CancellationToken cancellationToken = default)
         {
             var stationSite = await freeSql.Select<StationSiteInfo>()
-                .Where(s => s.Id == stationId)
+                .Where(s => s.Id == stationId && s.IsDeleted ==false)
                 .FirstAsync(cancellationToken);
             if (stationSite == null) throw new KeyNotFoundException($"StationSiteInfo with Id {stationId} not found.");
             var pseudoChannels = await freeSql.Select<PseudoChannelInfo>()
-                .Where(pc => pc.StationId == stationId)
+                .Where(pc => pc.StationId == stationId && pc.IsDeleted == false)
                 .ToListAsync(cancellationToken);
             var controlChannels = await freeSql.Select<ControlChannelInfo>()
-                .Where(cc => cc.StationId == stationId)
+                .Where(cc => cc.StationId == stationId && cc.IsDeleted == false)
                 .ToListAsync(cancellationToken);
             var devices = await freeSql.Select<StationSiteAndHardwareInfo, DeviceInfo>()
                 .LeftJoin((a, b) => a.HardwareId == b.Id)
@@ -73,14 +95,14 @@ namespace MCCS.Core.Repositories
         public async Task<List<ControlChannelInfo>> GetStationSiteControlChannels(long stationId, CancellationToken cancellationToken = default)
         {
             return await freeSql.Select<ControlChannelInfo>()
-                .Where(cc => cc.StationId == stationId)
+                .Where(cc => cc.StationId == stationId && cc.IsDeleted == false)
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<DeviceInfo>> GetStationSiteDevices(long stationId, CancellationToken cancellationToken = default)
+        public Task<List<SignalInterfaceInfo>> GetStationSiteDevices(long stationId, CancellationToken cancellationToken = default)
         {
-            return freeSql.Select<StationSiteAndHardwareInfo, DeviceInfo>()
-                .LeftJoin((a,b) => a.HardwareId == b.Id)
+            return freeSql.Select<StationSiteAndHardwareInfo, SignalInterfaceInfo>()
+                .LeftJoin((a,b) => a.SignalId == b.Id)
                 .Where((a,b) => a.StationId == stationId)
                 .ToListAsync((a,b) => b, cancellationToken);
         }
@@ -97,6 +119,30 @@ namespace MCCS.Core.Repositories
             return await freeSql.Select<StationSiteInfo>()
                 .Where(expression)
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> UpdateStationSiteControlChannelAsync(ControlChannelInfo controlChannelInfo, List<ControlChannelAndSignalInfo> signals, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(controlChannelInfo);
+            using var uow = freeSql.CreateUnitOfWork();
+            var count1 = await uow.Orm.Update<ControlChannelInfo>()
+            .Set(s => s.ChannelName, controlChannelInfo.ChannelName)
+            .Set(s => s.OutputLimitation, controlChannelInfo.OutputLimitation)
+            .Set(s => s.ControlCycle, controlChannelInfo.ControlCycle)
+            .Set(s => s.ControlMode, controlChannelInfo.ControlMode)
+            .Set(s => s.IsShowable, controlChannelInfo.IsShowable)
+            .Set(s => s.IsOpenSpecimenProtected, controlChannelInfo.IsOpenSpecimenProtected)
+            .Where(s => s.Id == controlChannelInfo.Id)
+            .ExecuteAffrowsAsync(cancellationToken);
+            var count2 = await uow.Orm.Delete<ControlChannelAndSignalInfo>().Where(s => s.ChannelId == controlChannelInfo.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            var count3 = 0;
+            if (signals.Count > 0)
+            {
+                count3 = await uow.Orm.Insert(signals).ExecuteAffrowsAsync(cancellationToken);
+            }
+            uow.Commit();
+            return count1 >= 0 && count2 >= 0 && count3 >= 0;
         }
     }
 }

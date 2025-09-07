@@ -22,6 +22,8 @@ using MCCS.Views.Pages.StationSites;
 using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
+using MCCS.ViewModels.Pages.StationSites.ControlChannels;
+using MCCS.Views.Pages.StationSites.ControlChannels;
 
 namespace MCCS
 {
@@ -37,7 +39,12 @@ namespace MCCS
         /// <returns></returns>
         protected override Window CreateShell()
         {
-            return Container.Resolve<MainWindow>();
+            var shell = Container.Resolve<MainWindow>();
+            // 在创建Shell后立即设置全屏
+            shell.WindowStyle = WindowStyle.None;
+            shell.WindowState = WindowState.Maximized;
+            shell.ResizeMode = ResizeMode.NoResize;
+            return shell;
         }
         /// <summary>
         /// (2)
@@ -97,6 +104,7 @@ namespace MCCS
             containerRegistry.RegisterDialog<DeleteConfirmDialog>(DeleteConfirmDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddHardwareDialog>(AddHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditHardwareDialog>(EditHardwareDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<EditControlChannelPage>(EditControlChannelPageViewModel.Tag);
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);

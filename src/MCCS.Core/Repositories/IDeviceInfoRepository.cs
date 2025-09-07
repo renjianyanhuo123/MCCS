@@ -19,6 +19,8 @@ namespace MCCS.Core.Repositories
 
         Task<List<SignalInterfaceInfo>> GetSignalInterfacesByExpressionAsync(Expression<Func<SignalInterfaceInfo, bool>> expression, CancellationToken cancellationToken = default);
 
+        Task<SignalInterfaceInfo> GetSignalInterfaceByIdAsync(long signalId, CancellationToken cancellationToken = default);
+
         Task<bool> DeleteDeviceInfoAsync(long deviceId, CancellationToken cancellationToken = default);
 
         Task<bool> UpdateDeviceInfoAsync(DeviceInfo device, CancellationToken cancellationToken = default);

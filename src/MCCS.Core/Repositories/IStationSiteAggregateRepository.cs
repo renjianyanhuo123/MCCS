@@ -19,13 +19,19 @@ namespace MCCS.Core.Repositories
 
         Task<List<PseudoChannelInfo>> GetStationSitePseudoChannels(long stationId, CancellationToken cancellationToken = default);
 
-        Task<List<DeviceInfo>> GetStationSiteDevices(long stationId, CancellationToken cancellationToken = default);
+        Task<List<SignalInterfaceInfo>> GetStationSiteDevices(long stationId, CancellationToken cancellationToken = default);
+
+        Task<ControlChannelInfo> GetControlChannelById(long channelId, CancellationToken cancellationToken = default);
 
         Task<bool> AddStationSiteHardwareInfosAsync(List<StationSiteAndHardwareInfo> stationSiteHardwares, CancellationToken cancellationToken = default);
 
         Task<long> AddStationSiteControlChannelAsync(ControlChannelInfo controlChannelInfo, List<ControlChannelAndSignalInfo> signals, CancellationToken cancellationToken = default);
 
-        Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long hardwareId, CancellationToken cancellationToken = default); 
+        Task<bool> UpdateStationSiteControlChannelAsync(ControlChannelInfo controlChannelInfo, List<ControlChannelAndSignalInfo> signals, CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteStationSiteHardwareInfosAsync(long stationId, long signalId, CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteStationSiteControlChannelAsync(long channelId,CancellationToken cancellationToken = default);
 
         Task<List<ControlChannelAndSignalInfo>> GetControlChannelAndSignalInfosAsync(Expression<Func<ControlChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default);
     }

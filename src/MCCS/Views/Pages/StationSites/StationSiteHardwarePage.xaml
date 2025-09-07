@@ -69,23 +69,25 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding HardwareName}"></TextBlock>
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Tag="{Binding SignalId}" Text="{Binding SignalName}"></TextBlock>
                     <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ControllerName}"></TextBlock>
+                    <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding HardwareName}"></TextBlock>
                     <materialDesign:PackIcon 
-                        Grid.Column="2" 
+                        Grid.Column="3" 
                         Width="24"
                         Height="24"
                         Kind="DeleteForever" 
-                        Tag="{Binding HardwareId}" 
+                        Tag="{Binding SignalId}" 
                         Cursor="Hand">
                         <materialDesign:PackIcon.InputBindings>
                             <MouseBinding MouseAction="LeftClick" 
                                       Command="{Binding DataContext.DeleteHardwareCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                      CommandParameter="{Binding HardwareId}"/>
+                                      CommandParameter="{Binding SignalId}"/>
                         </materialDesign:PackIcon.InputBindings>
                     </materialDesign:PackIcon>
                 </Grid>
@@ -97,22 +99,24 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox
-                    Content="{Binding HardwareName}"
-                    Tag="{Binding HardwareId}"
+                    Content="{Binding SignalName}"
+                    Tag="{Binding SignalId}"
                     IsChecked="{Binding IsSelected}"
                     IsEnabled="{Binding IsSelectable}"
                     Style="{StaticResource MaterialDesignDarkCheckBox}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="Checked">
                                 <b:InvokeCommandAction Command="{Binding DataContext.CheckedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                   CommandParameter="{Binding HardwareId}"/>
+                                                   CommandParameter="{Binding SignalId}"/>
                             </b:EventTrigger>
                         </b:Interaction.Triggers>
                     </CheckBox>
-                    <Ellipse Grid.Column="1">
+                    <TextBlock Grid.Column="1" Text="{Binding HardwareName}" Tag="{Binding HardwareId}" />
+                    <Ellipse Grid.Column="2">
                         <Ellipse.Style>
                             <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicatorStyle}">
                                 <Style.Triggers>

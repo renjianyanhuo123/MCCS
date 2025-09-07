@@ -18,10 +18,27 @@
         }
 
         private string _controllerName = string.Empty;
+        /// <summary>
+        /// 控制器名称
+        /// </summary>
         public string ControllerName
         {
             get => _controllerName;
             set => SetProperty(ref _controllerName, value);
+        }
+
+        private long _signalId; 
+        public long SignalId
+        {
+            get => _signalId;
+            set => SetProperty(ref _signalId, value);
+        }
+
+        private string _signalName = string.Empty;
+        public string SignalName
+        {
+            get => _signalName;
+            set => SetProperty(ref _signalName, value);
         }
     }
 }

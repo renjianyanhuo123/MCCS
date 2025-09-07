@@ -7,5 +7,6 @@ namespace MCCS.Core.Models.StationSites
     {
         public long StationId { get; set; }
         public long HardwareId { get; set; }
+        public long SignalId { get; set; }
     }
 }

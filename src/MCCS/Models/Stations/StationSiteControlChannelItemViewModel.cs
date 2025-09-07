@@ -69,6 +69,6 @@ namespace MCCS.Models.Stations
             get => _controlMode;
             set => SetProperty(ref _controlMode, value);
         }
-        public ObservableCollection<StationSiteControlChannelSignalViewModel> Signals { get; private set; } = [];
+        public ObservableCollection<StationSiteControlChannelSignalViewModel> Signals { get; set; }
     }
 }

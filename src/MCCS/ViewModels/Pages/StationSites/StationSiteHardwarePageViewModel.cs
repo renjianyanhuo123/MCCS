@@ -42,52 +42,57 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         #region Private Method
 
-        private async Task ExecuteDeleteHardwareCommand(long hardwareId)
+        private async Task ExecuteDeleteHardwareCommand(long signalId)
         {
             if (_stationId == -1) throw new ArgumentNullException("StationId is invalid!"); 
             foreach (var controller in HardwareListItems)
             {
-                var hardware = controller.ChildItems.FirstOrDefault(s => s.HardwareId == hardwareId);
+                var hardware = controller.ChildItems.FirstOrDefault(s => s.SignalId == signalId);
                 if (hardware != null)
                 {
                     hardware.IsSelectable = true;
                     hardware.IsSelected = false;
                 }
             }
-            var removeObj = StationSiteHardwareItems.FirstOrDefault(h => h.HardwareId == hardwareId);
+            var removeObj = StationSiteHardwareItems.FirstOrDefault(h => h.SignalId == signalId);
             if (removeObj != null)
             {
                 StationSiteHardwareItems.Remove(removeObj);
-                await _stationSiteRepository.DeleteStationSiteHardwareInfosAsync(_stationId, hardwareId);
+                await _stationSiteRepository.DeleteStationSiteHardwareInfosAsync(_stationId, signalId);
             } 
         }
 
-        private async Task ExecuteCheckedCommand(long hardwareId)
+        private async Task ExecuteCheckedCommand(long signalId)
         {
-            var hardwareInfo = await _deviceInfoRepository.GetDeviceByIdAsync(hardwareId);
-            //if (string.IsNullOrEmpty(hardwareInfo.MainDeviceId)) return;
-            //var parentInfo = await _deviceInfoRepository.GetDeviceByDeviceIdAsync(hardwareInfo.MainDeviceId);
-            //StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
-            //{
-            //    ControllerName = parentInfo.DeviceName,
-            //    HardwareName = hardwareInfo.DeviceName,
-            //    HardwareId = hardwareId
-            //});
-            //foreach (var controller in HardwareListItems)
-            //{
-            //    var itemToRemove = controller.ChildItems.FirstOrDefault(item => item.HardwareId == hardwareId);
-            //    if (itemToRemove != null)
-            //    {
-            //        itemToRemove.IsSelectable = false;
-            //    }
-            //}
-            //await _stationSiteRepository.AddStationSiteHardwareInfosAsync([
-            //    new StationSiteAndHardwareInfo
-            //    {
-            //        StationId = _stationId,
-            //        HardwareId = hardwareId
-            //    }
-            //]);
+            var signalInfo = await _deviceInfoRepository.GetSignalInterfaceByIdAsync(signalId);
+            if (signalInfo == null) return;
+            if (signalInfo.BelongToControllerId <= 0) return;
+            var parentInfo = await _deviceInfoRepository.GetDeviceByIdAsync(signalInfo.BelongToControllerId);
+            var hardwareInfo = await _deviceInfoRepository.GetDeviceByIdAsync(signalInfo.ConnectedDeviceId);
+            StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
+            {
+                ControllerName = parentInfo.DeviceName,
+                SignalId = signalInfo.Id,
+                SignalName = signalInfo.SignalName,
+                HardwareName = hardwareInfo?.DeviceName ?? "",
+                HardwareId = hardwareInfo?.Id ?? 0
+            });
+            foreach (var controller in HardwareListItems)
+            {
+                var itemToRemove = controller.ChildItems.FirstOrDefault(item => item.SignalId == signalId);
+                if (itemToRemove != null)
+                {
+                    itemToRemove.IsSelectable = false;
+                }
+            }
+            await _stationSiteRepository.AddStationSiteHardwareInfosAsync([
+                new StationSiteAndHardwareInfo
+                {
+                    StationId = _stationId,
+                    SignalId = signalId,
+                    HardwareId = hardwareInfo?.Id ?? 0
+                }
+            ]);
         }
 
         private async Task ExecuteLoadCommand()
@@ -96,55 +101,58 @@ namespace MCCS.ViewModels.Pages.StationSites
             HardwareListItems.Clear();
             // var devices = await _deviceInfoRepository.GetAllDevicesAsync();
             if (_stationId == -1) throw new ArgumentNullException("StationId is invalid!");
-            var staionSelectedHardware = await _stationSiteRepository.GetStationSiteDevices(_stationId); 
-            // 右侧所有的设备
+            var stationSelectedHardware = await _stationSiteRepository.GetStationSiteDevices(_stationId);  
             var allDevices = await _deviceInfoRepository.GetAllDevicesAsync();
+            var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => allDevices.Select(s => s.Id).Contains(c.ConnectedDeviceId));
             // 左侧选中的设备
-            //foreach (var item in staionSelectedHardware)
-            //{
-            //    var parentInfo = allDevices.FirstOrDefault(c => c.DeviceId == item.MainDeviceId);
-            //    StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
-            //    {
-            //        ControllerName = parentInfo?.DeviceName ?? string.Empty,
-            //        HardwareName = item.DeviceName,
-            //        HardwareId = item.Id
-            //    });
-            //}
-            //var parentIds = allDevices
-            //    .Where(s => s.MainDeviceId != null)
-            //    .Select(s => s.MainDeviceId)
-            //    .Distinct()
-            //    .ToList();
-            //var parentInfos = allDevices
-            //    .Where(c => parentIds.Contains(c.DeviceId))
-            //    .ToList();
-            //foreach (var parentInfo in parentInfos)
-            //{
-            //    var hardwareListItem = new HardwareListItemViewModel
-            //    {
-            //        ControllerId = parentInfo.Id,
-            //        ControllerName = parentInfo.DeviceName,
-            //    };
-            //    var childItems = allDevices
-            //        .Where(c => c.MainDeviceId == parentInfo.DeviceId)
-            //        .Select(c =>
-            //        {
-            //            var isSelected = staionSelectedHardware.Any(h => h.Id == c.Id);
-            //            return new HardwareChildItemViewModel
-            //            {
-            //                HardwareId = c.Id,
-            //                HardwareName = c.DeviceName,
-            //                IsSelectable = !isSelected,
-            //                IsSelected = isSelected,
-            //                DeviceStatus = DeviceStatusEnum.Connected,
-            //            };
-            //        }).ToList();
-            //    foreach (var item in childItems)
-            //    {
-            //        hardwareListItem.ChildItems.Add(item);
-            //    }
-            //    HardwareListItems.Add(hardwareListItem);
-            //}
+            foreach (var item in stationSelectedHardware)
+            {
+                var parentInfo = allDevices.FirstOrDefault(c => c.Id == item.BelongToControllerId);
+                var connectedDevice = allDevices.FirstOrDefault(c => c.Id == item.ConnectedDeviceId);
+                StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
+                {
+                    ControllerName = parentInfo?.DeviceName ?? string.Empty,
+                    HardwareName = connectedDevice?.DeviceName ?? "",
+                    HardwareId = connectedDevice?.Id ?? 0,
+                    SignalId = item.Id,
+                    SignalName = item.SignalName
+                });
+            }
+            // 右侧所有的设备
+            var parentInfos = allDevices
+                .Where(s => s.DeviceType == DeviceTypeEnum.Controller)
+                .Distinct()
+                .ToList(); 
+            foreach (var parentInfo in parentInfos)
+            {
+                var hardwareListItem = new HardwareListItemViewModel
+                {
+                    ControllerId = parentInfo.Id,
+                    ControllerName = parentInfo.DeviceName,
+                };
+                var childItems = allSignals
+                    .Where(c => c.BelongToControllerId == parentInfo.Id)
+                    .Select(c =>
+                    {
+                        var isSelected = StationSiteHardwareItems.Any(h => h.SignalId == c.Id);
+                        var device = allDevices.FirstOrDefault(d => d.Id == c.ConnectedDeviceId);
+                        return new HardwareChildItemViewModel
+                        {
+                            HardwareId = device?.Id ?? 0,
+                            HardwareName = device?.DeviceName ?? "",
+                            SignalId = c.Id,
+                            SignalName = c.SignalName,
+                            IsSelectable = !isSelected,
+                            IsSelected = isSelected,
+                            DeviceStatus = DeviceStatusEnum.Connected,
+                        };
+                    }).ToList();
+                foreach (var item in childItems)
+                {
+                    hardwareListItem.ChildItems.Add(item);
+                }
+                HardwareListItems.Add(hardwareListItem);
+            }
         }
         #endregion
     }

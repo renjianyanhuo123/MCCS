@@ -4,9 +4,213 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages.StationSites.ControlChannels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controlChannels="clr-namespace:MCCS.ViewModels.Pages.StationSites.ControlChannels"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=controlChannels:EditControlChannelPageViewModel}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+    </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction 
+            Command="{Binding LoadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <Grid Height="800" Width="1000">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="#C5C5C5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="80"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"  Text="编辑控制通道"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Margin="20"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"></TextBlock>
+                <Border Grid.Column="1" Width="30" Height="30" 
+                    Margin="20"
+                    HorizontalAlignment="Right"
+                    Background="Transparent"
+                    Cursor="Hand">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseDown">
+                            <b:InvokeCommandAction 
+                            Command="{Binding CloseCommand}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Viewbox>
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Viewbox>
+                </Border>
+            </Grid>
+        </Border>
+        <ScrollViewer  Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="15">
+                    <TextBlock Text="通道名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <TextBox Width="Auto" Text="{Binding ChannelName}"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="0" Margin="15">
+                    <TextBlock Text="通道内部ID" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <TextBlock FontSize="15" Width="Auto" Text="{Binding InternalId}" Foreground="#A5A5A5"></TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="1" Margin="15">
+                    <TextBlock Text="是否可见" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <ToggleButton HorizontalAlignment="Left" IsChecked="{Binding IsShowable}"></ToggleButton>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
+                    <TextBlock Text="是否开启试样保护"  FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <ToggleButton FontSize="15" HorizontalAlignment="Left" IsChecked="{Binding IsOpenSpecimenProtected}" Foreground="#A5A5A5"></ToggleButton>
+                </StackPanel>
+                <Border Grid.Row="2" Grid.Column="0" Background="#F9FAFB"
+                    Grid.ColumnSpan="2"
+                    Margin="15"
+                    Height="Auto"
+                    Width="Auto">
+                    <StackPanel>
+                        <TextBlock Text="控制参数" FontSize="16"
+                   Margin="10"></TextBlock>
+                        <UniformGrid Columns="3">
+                            <StackPanel Margin="15">
+                                <TextBlock Text="控制周期(ms)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                <TextBox Width="Auto" Text="{Binding ControlCycle}"></TextBox>
+                            </StackPanel>
+                            <StackPanel Margin="15">
+                                <TextBlock Text="控制模式" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                <ComboBox Width="Auto" SelectedIndex="{Binding ControlMode}">
+                                    <ComboBoxItem TabIndex="0">开环控制</ComboBoxItem>
+                                    <ComboBoxItem TabIndex="1">位移/力闭环控制</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Margin="15">
+                                <TextBlock Text="输出限制1~100(%)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                                <materialDesign:NumericUpDown Maximum="100" Minimum="1" Value="{Binding OutputLimit}"></materialDesign:NumericUpDown>
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Border>
+                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="反馈信号配置" FontSize="16" ></TextBlock>
+                    <Border Grid.Column="1" Cursor="Hand" Margin="0,0,15,0">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="MouseDown">
+                                <b:InvokeCommandAction 
+                                Command="{Binding AddSignalCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Viewbox>
+                                <materialDesign:PackIcon Kind="PlusThick" Foreground="BlueViolet" />
+                            </Viewbox>
+                            <TextBlock Text="添加反馈信号"  Foreground="BlueViolet"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <ItemsControl Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding SignalModels}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="2" BorderBrush="Gray" Background="#F9FAFB"
+                                CornerRadius="5"
+                                Margin="15">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                                        <ColumnDefinition Width="1*"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="15" Orientation="Vertical">
+                                        <TextBlock Text="反馈信号种类" FontSize="14" Margin="0,0,0,5"></TextBlock>
+                                        <ComboBox Width="Auto"  Height="Auto" SelectedIndex="{Binding SignalType}">
+                                            <ComboBoxItem TabIndex="0">位移反馈</ComboBoxItem>
+                                            <ComboBoxItem TabIndex="1">负荷反馈</ComboBoxItem>
+                                            <ComboBoxItem TabIndex="2">输出信号</ComboBoxItem>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="15" Orientation="Vertical">
+                                        <TextBlock Text="反馈信号" FontSize="14" Margin="0,0,0,5"></TextBlock>
+                                        <ComboBox Width="Auto" 
+                                              Height="Auto"
+                                              SelectedItem="{Binding SelectedSignalModel}"
+                                              ItemsSource="{Binding DataContext.SelectableControlChannels, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                            <b:Interaction.Triggers>
+                                                <b:EventTrigger EventName="SelectionChanged">
+                                                    <b:InvokeCommandAction 
+                                                    Command="{Binding DataContext.SelectionChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" PassEventArgsToCommand="True"/>
+                                                </b:EventTrigger>
+                                            </b:Interaction.Triggers>
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <UniformGrid Columns="4" >
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding SignalName}" FontWeight="Bold"/>
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding ControllerName}" Foreground="Gray" />
+                                                        <TextBlock HorizontalAlignment="Center" Text="{Binding DeviceName}" Foreground="Gray" />
+                                                        <materialDesign:PackIcon HorizontalAlignment="Center" Kind="Link" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                    </UniformGrid>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Grid.Row="0" Width="32" Height="32" Cursor="Hand"
+                                        Margin="15">
+                                        <b:Interaction.Triggers>
+                                            <b:EventTrigger EventName="MouseDown">
+                                                <b:InvokeCommandAction 
+                                                Command="{Binding DataContext.DeleteSignalCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding TempId}"/>
+                                            </b:EventTrigger>
+                                        </b:Interaction.Triggers>
+                                        <Viewbox>
+                                            <materialDesign:PackIcon Kind="DeleteForever" Foreground="OrangeRed" />
+                                        </Viewbox>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </ScrollViewer>
+        <Border Grid.Row="2" Grid.Column="0" 
+            BorderThickness="0,2,0,0" BorderBrush="#C5C5C5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button 
+                Content="取消" 
+                Width="80"
+                Command="{Binding CloseCommand}"
+                Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" />
+                <Button
+                Width="80"
+                Content="提交" 
+                Margin="30,0,30,0"
+                Command="{Binding SaveCommand}"
+                Style="{StaticResource MaterialDesignFlatMidBgButton}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

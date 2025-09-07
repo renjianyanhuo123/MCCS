@@ -1,9 +1,12 @@
 ﻿using MCCS.Core.Repositories;
 using MCCS.Models.Stations;
 using System.Collections.ObjectModel;
+using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
+using MCCS.Events.Common;
 using MCCS.Events.StationSites;
 using MCCS.Events.StationSites.ControlChannels;
+using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Pages.StationSites.ControlChannels;
 
 namespace MCCS.ViewModels.Pages.StationSites
@@ -27,6 +30,8 @@ namespace MCCS.ViewModels.Pages.StationSites
             _containerProvider = containerProvider;
             _eventAggregator.GetEvent<NotificationAddControlChannelEvent>()
                 .Subscribe(async param => await ExecuteLoadCommand());
+            _eventAggregator.GetEvent<NotificationUpdateControlChannelEvent>()
+                .Subscribe(async param => await ExecuteLoadCommand());
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -40,16 +45,37 @@ namespace MCCS.ViewModels.Pages.StationSites
         #endregion
 
         #region Command
+        //public AsyncDelegateCommand<long> DeleteChannelCommand => new(ExecuteDeleteControlChannelCommand);
         public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
         public AsyncDelegateCommand AddControlChannelCommand => new(ExecuteAddControlChannelCommand);
-        public DelegateCommand<string> DeleteControlChannelCommand => new(ExecuteDeleteControlChannelCommand);
+        public AsyncDelegateCommand<long> DeleteControlChannelCommand => new(ExecuteDeleteControlChannelCommand);
+        public AsyncDelegateCommand<long> EditControlChannelCommand => new(ExecuteEditControlChannelCommand);
         #endregion
 
         #region Private Method 
-        private void ExecuteDeleteControlChannelCommand(string channelId)
+        private async Task ExecuteEditControlChannelCommand(long channelId)
         {
-            var controlChannel = ControlChannels.FirstOrDefault(c => c.ChannelId == channelId);
-            if(controlChannel != null) ControlChannels.Remove(controlChannel);
+            var editPage = _containerProvider.Resolve<EditControlChannelPage>();
+            _eventAggregator.GetEvent<SendEditChannelStationSiteIdEvent>().Publish(new SendEditChannelStationSiteIdEventParam()
+            {
+                StationId = _stationId,
+                ChannelId = channelId
+            });
+            await DialogHost.Show(editPage, "RootDialog");
+        }
+        private async Task ExecuteDeleteControlChannelCommand(long channelId)
+        {
+            var confirmDialog = _containerProvider.Resolve<DeleteConfirmDialog>();
+            var result = await DialogHost.Show(confirmDialog, "RootDialog");
+            if (result is DialogConfirmEvent { IsConfirmed: true })
+            {
+                var controlChannel = ControlChannels.FirstOrDefault(c => c.Id == channelId);
+                if (controlChannel != null)
+                {
+                    ControlChannels.Remove(controlChannel);
+                    await _stationSiteAggregateRepository.DeleteStationSiteControlChannelAsync(channelId);
+                }
+            }
         }
 
         private async Task ExecuteAddControlChannelCommand()
@@ -69,64 +95,37 @@ namespace MCCS.ViewModels.Pages.StationSites
             HardwareListItems.Clear();
             ControlChannels.Clear();
             var allDevices = await _deviceInfoRepository.GetAllDevicesAsync();
-            var allStationSiteHardwares = await _stationSiteAggregateRepository.GetStationSiteDevices(_stationId);
+            var allStationSiteSignals = await _stationSiteAggregateRepository.GetStationSiteDevices(_stationId);
             var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId);
             var controlChannelSignals = await _stationSiteAggregateRepository.GetControlChannelAndSignalInfosAsync(s => controlChannels.Select(c => c.Id).Contains(s.ChannelId));
-            foreach (var controlChannel in controlChannels)
+            foreach (var controlChannelItem in from controlChannel in controlChannels let signals = controlChannelSignals
+                         .Where(s => s.ChannelId == controlChannel.Id)
+                         .Select(s =>
+                         {
+                             var signal = allStationSiteSignals.FirstOrDefault(c => c.Id == s.SignalId);
+                             var controllerInfo = allDevices.FirstOrDefault(c => c.Id == signal?.BelongToControllerId);
+                             var connectedDevice = allDevices.FirstOrDefault(c => c.Id == signal?.ConnectedDeviceId);
+                             return new StationSiteControlChannelSignalViewModel
+                             {
+                                 SignalId = s.SignalId,
+                                 SignalName = signal?.SignalName ?? "",
+                                 SignalType = s.SignalType,
+                                 ControllerName = controllerInfo?.DeviceName ?? "",
+                                 DeviceName = connectedDevice?.DeviceName ?? ""
+                                 //Address = s.Address
+                             };
+                         })
+                         .ToList() select new StationSiteControlChannelItemViewModel
+                         {
+                             Id = controlChannel.Id,
+                             ChannelId = controlChannel.ChannelId,
+                             ChannelName = controlChannel.ChannelName,
+                             ControlMode = controlChannel.ControlMode,
+                             Signals = new ObservableCollection<StationSiteControlChannelSignalViewModel>(signals)
+                         })
             {
-                var signals = controlChannelSignals
-                    .Where(s => s.ChannelId == controlChannel.Id)
-                    .Select(s => new StationSiteControlChannelSignalViewModel
-                    {
-                        SignalId = s.SignalId,
-                        //SignalName = s.SignalName,
-                        SignalType = s.SignalType,
-                        //Address = s.Address
-                    })
-                    .ToList();
-                var controlChannelItem = new StationSiteControlChannelItemViewModel
-                {
-                    Id = controlChannel.Id,
-                    ChannelId = controlChannel.ChannelId,
-                    ChannelName = controlChannel.ChannelName,
-                    ControlMode = controlChannel.ControlMode,
-                };
-                // controlChannelItem.Signals
                 ControlChannels.Add(controlChannelItem);
             }
-            // 所有的控制通道
-            //var parentIds = allDevices
-            //    .Where(s => s.MainDeviceId != null)
-            //    .Select(s => s.MainDeviceId)
-            //    .Distinct()
-            //    .ToList();
-            //var parentInfos = allDevices
-            //    .Where(c => parentIds.Contains(c.DeviceId))
-            //    .ToList();
-            //foreach (var parentInfo in parentInfos)
-            //{
-            //    var hardwareListItem = new ControlChannelHardwareListItemViewModel()
-            //    {
-            //        ControllerId = parentInfo.Id,
-            //        ControllerName = parentInfo.DeviceName,
-            //    };
-            //    var childItems = allDevices
-            //        .Where(c => c.MainDeviceId == parentInfo.DeviceId 
-            //                    && allStationSiteHardwares
-            //                        .Select(s => s.Id)
-            //                        .Contains(c.Id))
-            //        .ToList();
-            //    foreach (var item in childItems)
-            //    {
-            //        hardwareListItem.ChildItems.Add(new ControlChannelHardwareChildItemViewModel
-            //        {
-            //            HardwareId = item.Id,
-            //            HardwareName = item.DeviceName,
-            //            Address = "TCU.1 MCU2.1 9232"
-            //        });
-            //    }
-            //    HardwareListItems.Add(hardwareListItem);
-            //}
         }
         #endregion
     }
