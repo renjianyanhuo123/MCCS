@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Windows.Media.Media3D;
 
 namespace MCCS.Models.Model3D
 {

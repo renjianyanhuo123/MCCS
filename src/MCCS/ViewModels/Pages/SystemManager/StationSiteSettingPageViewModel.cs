@@ -37,9 +37,16 @@ namespace MCCS.ViewModels.Pages.SystemManager
         public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
         public AsyncDelegateCommand AddStationCommand => new(ExecuteAddStationCommand);
         public DelegateCommand<object> EditStationCommand => new(ExecuteEditStationCommand);
+        public AsyncDelegateCommand<long> OperationCheckedCommand => new(ExecuteOperationCheckedCommand);
         #endregion
 
         #region Private Method
+        private async Task ExecuteOperationCheckedCommand(long stationId)
+        {
+            var success = await _stationSiteRepository.UpdateCurrentUseStationSiteAsync(stationId);
+            if (success) await ExecuteLoadCommand();
+        }
+
         private void ExecuteEditStationCommand(object stationId)
         {
             var paramters = new NavigationParameters { { "StationId", stationId } };
@@ -70,6 +77,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
                     StationName = item.StationName,
                     Description = item.Description,
                     IsUsing = item.IsUsing,
+                    IsEnable = !item.IsUsing,
                     CreateTime = item.CreateTime.ToString("yyyy-MM-dd hh:mm:ss"),
                     UpdateTime = item.UpdateTime.ToString("yyyy-MM-dd hh:mm:ss")
                 });

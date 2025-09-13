@@ -15,6 +15,8 @@ namespace MCCS.Core.Repositories
             long stationId,
             CancellationToken cancellationToken = default);
 
+        Task<bool> UpdateCurrentUseStationSiteAsync(long stationId, CancellationToken cancellationToken = default);
+
         Task<List<ControlChannelInfo>> GetStationSiteControlChannels(long stationId, CancellationToken cancellationToken = default);
 
         Task<List<PseudoChannelInfo>> GetStationSitePseudoChannels(long stationId, CancellationToken cancellationToken = default);
@@ -34,5 +36,11 @@ namespace MCCS.Core.Repositories
         Task<bool> DeleteStationSiteControlChannelAsync(long channelId,CancellationToken cancellationToken = default);
 
         Task<List<ControlChannelAndSignalInfo>> GetControlChannelAndSignalInfosAsync(Expression<Func<ControlChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default);
+
+        Task<List<ControlChannelAndModel3DInfo>> GetControlChannelAndModelInfoByModelIdAsync(long modelId,
+            CancellationToken cancellationToken = default);
+
+        List<ControlChannelInfo> GetControlChannelByModelFileId(string modelFileId);
+        Task<bool> AddControlChannelAndModelInfoAsync(List<ControlChannelAndModel3DInfo> controlChannelAndModel3DInfos, CancellationToken cancellationToken = default);
     }
 }

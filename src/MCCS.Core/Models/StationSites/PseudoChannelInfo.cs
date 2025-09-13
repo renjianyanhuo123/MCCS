@@ -17,5 +17,22 @@ namespace MCCS.Core.Models.StationSites
 
         [Column(IsNullable = false, StringLength = 100)]
         public required string ChannelName { get; set; }
+        /// <summary>
+        /// 范围最小值
+        /// </summary>
+        public double RangeMin { get; set; }
+        /// <summary>
+        /// 范围最大值
+        /// </summary>
+        public double RangeMax { get; set; }
+        /// <summary>
+        /// 计算公式
+        /// </summary>
+        [Column(IsNullable = false, StringLength = -2)]
+        public string Formula { get; set; } = string.Empty;
+        /// <summary>
+        /// 是否可校准
+        /// </summary>
+        public bool HasTare { get; set; }
     }
 }

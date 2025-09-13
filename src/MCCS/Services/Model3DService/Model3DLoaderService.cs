@@ -38,7 +38,7 @@ namespace MCCS.Services.Model3DService
         {
             //var groupKey = _configuration["AppSettings:ModelKey"]
             //               ?? throw new ArgumentNullException("AppSettings:ModelKey");
-            var modelAggregate = await _modelRepository.GetCurrentUseModelAggregateAsync(cancellationToken);
+            var modelAggregate = await _modelRepository.GetCurrentUseModelAggregateAsync(0, cancellationToken);
             var modelInfos = modelAggregate.Model3DDataList;
             var viewModels = new List<Model3DViewModel>();
 

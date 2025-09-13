@@ -40,18 +40,17 @@ namespace MCCS.ViewModels.Dialogs
 
         private async Task ExecuteOkCommand()
         {
-            if (string.IsNullOrWhiteSpace(ModelName)) return;
-            var addModel = new Model3DBaseInfo()
-            {
-                Name = ModelName,
-                IsUse = IsUse
-            };
-            var modelId = await _model3DDataRepository.AddModel3DAsync(addModel);
-            if (modelId > 0)
-            {
-                DialogHost.CloseDialogCommand.Execute(false, null);
-                _eventAggregator.GetEvent<NotificationAddModel3DEvent>().Publish(new NotificationAddModel3DEventParam(modelId));
-            }
+            //if (string.IsNullOrWhiteSpace(ModelName)) return;
+            //var addModel = new Model3DBaseInfo()
+            //{
+            //    Name = ModelName
+            //};
+            //var modelId = await _model3DDataRepository.AddModel3DAsync(addModel);
+            //if (modelId > 0)
+            //{
+            //    DialogHost.CloseDialogCommand.Execute(false, null);
+            //    _eventAggregator.GetEvent<NotificationAddModel3DEvent>().Publish(new NotificationAddModel3DEventParam(modelId));
+            //}
         }
 
         private void ExecuteCancelCommand()

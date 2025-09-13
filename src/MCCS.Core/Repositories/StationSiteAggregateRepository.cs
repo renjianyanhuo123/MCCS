@@ -2,11 +2,17 @@
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.StationSites;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace MCCS.Core.Repositories
 {
     public class StationSiteAggregateRepository(IFreeSql freeSql) : IStationSiteAggregateRepository
     {
+        public async Task<bool> AddControlChannelAndModelInfoAsync(List<ControlChannelAndModel3DInfo> controlChannelAndModel3DInfos, CancellationToken cancellationToken)
+        {
+            return await freeSql.Insert(controlChannelAndModel3DInfos).ExecuteAffrowsAsync(cancellationToken) > 0;
+        }
+
         public async Task<long> AddStationInfoAsync(StationSiteInfo stationSiteInfo, CancellationToken cancellationToken)
         {
             var addId = await freeSql.Insert(stationSiteInfo).ExecuteIdentityAsync(cancellationToken);
@@ -64,6 +70,22 @@ namespace MCCS.Core.Repositories
             return await freeSql.Select<ControlChannelInfo>()
                 .Where(c => c.Id == channelId)
                 .FirstAsync(cancellationToken);
+        }
+
+        public List<ControlChannelInfo> GetControlChannelByModelFileId(string modelFileId)
+        {
+            return freeSql.Select<ControlChannelAndModel3DInfo, ControlChannelInfo>()
+                .LeftJoin((a, b) => a.ControlChannelId == a.Id)
+                .Where((a, b) => a.ModelFileId == modelFileId)
+                .ToList((a, b) => b);
+        }
+
+        public async Task<List<ControlChannelAndModel3DInfo>> GetControlChannelAndModelInfoByModelIdAsync(long modelId,
+            CancellationToken cancellationToken)
+        {
+            return await freeSql.Select<ControlChannelAndModel3DInfo>()
+                .Where(a => a.ModelId == modelId)
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<StationSiteAggregate> GetStationSiteAggregateAsync(long stationId, CancellationToken cancellationToken = default)
@@ -143,6 +165,21 @@ namespace MCCS.Core.Repositories
             }
             uow.Commit();
             return count1 >= 0 && count2 >= 0 && count3 >= 0;
+        }
+
+        public async Task<bool> UpdateCurrentUseStationSiteAsync(long stationId, CancellationToken cancellationToken = default)
+        {
+            using var uow = freeSql.CreateUnitOfWork();
+            await uow.Orm.Update<StationSiteInfo>()
+                .Set(c => c.IsUsing, false)
+                .Where(c => c.IsUsing)
+                .ExecuteAffrowsAsync(cancellationToken);
+            await uow.Orm.Update<StationSiteInfo>()
+                .Set(c => c.IsUsing, true)
+                .Where(c => c.Id == stationId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            uow.Commit();
+            return true;
         }
     }
 }

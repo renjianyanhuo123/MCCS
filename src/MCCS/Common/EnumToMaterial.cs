@@ -1,5 +1,4 @@
-﻿using HelixToolkit.SharpDX.Core.Model.Scene;
-using HelixToolkit.Wpf.SharpDX;
+﻿using HelixToolkit.Wpf.SharpDX;
 using MCCS.Core.Models.Model3D;
 using Color = SharpDX.Color;
 

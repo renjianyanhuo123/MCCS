@@ -18,7 +18,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                 new StationMenuItemModel { Name = "硬件概述", Id = 1 },
                 new StationMenuItemModel { Name = "控制通道", Id = 2 },
                 new StationMenuItemModel { Name = "液压子站", Id = 3 },
-                new StationMenuItemModel { Name = "虚拟通道", Id = 4 }
+                new StationMenuItemModel { Name = "虚拟通道", Id = 4 },
+                new StationMenuItemModel { Name = "模型配置", Id = 5 }
             ];
             _regionManager = regionManager;
         }
@@ -44,6 +45,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     2 => StationSiteControlChannelPageViewModel.Tag,
                     3 => StationSiteHydraulicPageViewModel.Tag,
                     4 => StationSitePseudoChannelPageViewModel.Tag,
+                    5 => StationSiteModel3DSettingPageViewModel.Tag,
                     _ => "",
                 };
                 var paramters = new NavigationParameters { { "StationId", _stationId } };
@@ -54,10 +56,10 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         #region Command
         // public DelegateCommand ItemClickCommand => new(ExecuteItemClickCommand);
-        public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
+        public DelegateCommand LoadCommand => new(ExecuteLoadCommand); 
         #endregion
 
-        #region Provate Method
+        #region Provate Method 
         private void ExecuteLoadCommand()
         {
             SelectedMenuItem = MenuItems[0]; // 默认选中第一个菜单项

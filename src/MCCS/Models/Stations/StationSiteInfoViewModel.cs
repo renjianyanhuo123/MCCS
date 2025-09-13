@@ -11,7 +11,20 @@
         public bool IsUsing 
         { 
             get => _isUsing;
-            set => SetProperty(ref _isUsing, value);
+            set
+            {
+                if (SetProperty(ref _isUsing, value))
+                {
+                    IsEnable = !_isUsing;
+                }
+            }
+        }
+
+        private bool _isEnable = false;
+        public bool IsEnable
+        {
+            get => _isEnable;
+            set => SetProperty(ref _isEnable, value);
         }
 
         private string _createTime = string.Empty;

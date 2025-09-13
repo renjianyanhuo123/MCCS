@@ -11,7 +11,7 @@ namespace MCCS.Core.Models.Model3D
         [Column(IsNullable = false, StringLength = 100)]
         public required string Name { get; set; }
         /// <summary>
-        /// 
+        /// 基础信息ID
         /// </summary>
         [Column(IsNullable = false)]
         public long GroupKey { get; set; }
@@ -52,14 +52,7 @@ namespace MCCS.Core.Models.Model3D
         public string? DeviceId { get; set; }
 
         [Column(IsNullable = true, StringLength = 50)]
-        public string? Orientation { get; set; }
-
-        // 边界框信息
-        public double BoundMinX { get; set; }
-        public double BoundMinY { get; set; }  
-        public double BoundMaxX { get; set; }
-        public double BoundMaxY { get; set; }
-        public double BoundMaxZ { get; set; }
+        public string? Orientation { get; set; } 
 
         [Column(IsNullable = true, StringLength = 200)]
         public string? Description { get; set; }

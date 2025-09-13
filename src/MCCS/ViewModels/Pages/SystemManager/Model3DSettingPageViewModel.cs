@@ -44,8 +44,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
                     Id = item.Id,
                     CreateTime = item.CreateTime,
                     UpdateTime = item.UpdateTime,
-                    Name = item.Name,
-                    IsUse = item.IsUse
+                    Name = item.Name
                 });
             }
         }
@@ -67,8 +66,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
                     Id = item.Id,
                     CreateTime = item.CreateTime,
                     UpdateTime = item.UpdateTime,
-                    Name = item.Name,
-                    IsUse = item.IsUse
+                    Name = item.Name
                 });
             }
         }

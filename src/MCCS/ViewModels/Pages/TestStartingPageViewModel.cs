@@ -282,7 +282,7 @@ namespace MCCS.ViewModels.Pages
 
         private void ExecuteLoadCommand() 
         {
-            // _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(ControllerMainPageViewModel.Tag, UriKind.Relative));
+             
         }
 
         private void ExecuteStartTestCommand()
@@ -380,17 +380,17 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         public void InitializeDataSubscriptions()
         {
-            var actor1 = _deviceManager.GetDevice("1b7914d074794b5990f97df4ccdc65ae")?.DataStream 
-                ?? throw new ArgumentNullException($"Device id {"1b7914d074794b5990f97df4ccdc65ae"} is not exist！");
-            var actor2 = _deviceManager.GetDevice("ff8db91959a64338b80dba86b16c92c7")?.DataStream 
-                ?? throw new ArgumentNullException($"Device id {"ff8db91959a64338b80dba86b16c92c7"} is not exist！");
-            actor1
-                .Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(OnDeviceDataReceived);
+            //var actor1 = _deviceManager.GetDevice("1b7914d074794b5990f97df4ccdc65ae")?.DataStream 
+            //    ?? throw new ArgumentNullException($"Device id {"1b7914d074794b5990f97df4ccdc65ae"} is not exist！");
+            //var actor2 = _deviceManager.GetDevice("ff8db91959a64338b80dba86b16c92c7")?.DataStream 
+            //    ?? throw new ArgumentNullException($"Device id {"ff8db91959a64338b80dba86b16c92c7"} is not exist！");
+            //actor1
+            //    .Sample(TimeSpan.FromSeconds(1))
+            //    .Subscribe(OnDeviceDataReceived);
 
-            actor2
-                .Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(OnDeviceDataReceived);
+            //actor2
+            //    .Sample(TimeSpan.FromSeconds(1))
+            //    .Subscribe(OnDeviceDataReceived);
         } 
 
         /// <summary>

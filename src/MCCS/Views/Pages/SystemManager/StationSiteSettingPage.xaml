@@ -40,7 +40,10 @@
                 <DataGridTemplateColumn Header="是否正在使用" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ToggleButton 
+                            <ToggleButton   
+                                Click="ToggleButton_Click" 
+                                IsEnabled="{Binding IsEnable}"
+                                Tag="{Binding StationId}"
                                 IsChecked="{Binding IsUsing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

@@ -111,6 +111,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSiteHydraulicPage>(StationSiteHydraulicPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteControlChannelPage>(StationSiteControlChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSitePseudoChannelPage>(StationSitePseudoChannelPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<StationSiteModel3DSettingPage>(StationSiteModel3DSettingPageViewModel.Tag);
         }
 
         /// <summary>

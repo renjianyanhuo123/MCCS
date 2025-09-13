@@ -219,7 +219,7 @@ namespace MCCS.ViewModels.Others
         /// <summary>
         /// 创建好当前模型中的连接线
         /// </summary>
-        /// <param name="modelCenter"></param>
+        /// <param name="center"></param>
         /// <param name="labelOffset"></param>
         private void CreateConnectionLines(Vector3 center, Vector3 labelOffset)
         {
