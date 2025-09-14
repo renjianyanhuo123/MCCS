@@ -40,8 +40,8 @@ namespace MCCS
         /// <returns></returns>
         protected override Window CreateShell()
         {
-            var splashView = Container.Resolve<SplashWindow>();
-            return splashView;
+            var shell = Container.Resolve<MainWindow>();
+            return shell;
         }
         /// <summary>
         /// (2)
@@ -76,10 +76,8 @@ namespace MCCS
             var configuration = builder.Build();
             // 注册服务
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
-            containerRegistry.Register<SplashWindow>();
-            containerRegistry.Register<SplashWindowViewModel>();
-            containerRegistry.RegisterSingleton<MainWindow>();
-            containerRegistry.RegisterSingleton<MainWindowViewModel>();
+            containerRegistry.RegisterForNavigation<SplashPage>(SplashPageViewModel.Tag); 
+            containerRegistry.RegisterForNavigation<MainContentPage>(MainContentPageViewModel.Tag); 
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);

@@ -4,8 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MCCS"
-        ResizeMode="NoResize"
+        xmlns:local="clr-namespace:MCCS" 
         xmlns:components="clr-namespace:MCCS.Components.GlobalNotification"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -14,76 +13,22 @@
         xmlns:viewmodels="clr-namespace:MCCS.ViewModels"
         d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{DynamicResource AppName}"
+        Title="{DynamicResource AppName}" 
+        WindowStartupLocation="CenterScreen"
         mc:Ignorable="d"
-        Width="{Binding MainPageWidth}"
-        Height="{Binding MainPageHeight}" >
-    <mah:MetroWindow.Resources>
-        <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type mah:HamburgerMenuIconItem}">
-            <Grid Height="48">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:HamburgerMenu}}, Path=CompactPaneLength, Mode=OneWay}" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Viewbox Grid.Column="0" 
-                         Width="24" 
-                         Height="24"
-                         Stretch="Uniform"
-                         StretchDirection="Both"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center">
-                    <ContentControl  
-                        Content="{Binding Icon}" />
-                </Viewbox>
-                <TextBlock Grid.Column="1"
-                           VerticalAlignment="Center"
-                           FontSize="16"
-                           Text="{Binding Label}" />
-            </Grid>
-        </DataTemplate>
-
-        <Style BasedOn="{StaticResource {x:Type Frame}}" TargetType="{x:Type Frame}">
-            <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-            <Setter Property="ClipToBounds" Value="True" />
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <mah:TransitioningContentControl Content="{Binding}"
-                                          RestartTransitionOnContentChange="True"
-                                          Transition="Custom">
-                            <mah:TransitioningContentControl.CustomVisualStates>
-                                <VisualState x:Name="CustomTransition">
-                                    <Storyboard>
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                           Storyboard.TargetName="CurrentContentPresentationSite"
-                                           Storyboard.TargetProperty="(UIElement.Opacity)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00.150" Value="1" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                           Storyboard.TargetName="CurrentContentPresentationSite"
-                                           Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="200" />
-                                            <SplineDoubleKeyFrame KeySpline="0.1, 0.9, 0.2, 1"
-                                    KeyTime="00:00:00.300"
-                                    Value="0" />
-                                        </DoubleAnimationUsingKeyFrames>
-
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                           Storyboard.TargetName="PreviousContentPresentationSite"
-                                           Storyboard.TargetProperty="(UIElement.Opacity)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </mah:TransitioningContentControl.CustomVisualStates>
-                        </mah:TransitioningContentControl>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </mah:MetroWindow.Resources>
-
+        ShowCloseButton="{Binding ShowCloseButton}"
+        ShowTitleBar="{Binding ShowTitleBar}"
+        Width="600"
+        Height="400"
+        WindowStyle="{Binding WindowStyle}"
+        WindowState="{Binding WindowState}"
+        ResizeMode="{Binding ResizeMode}">
+    <i:Interaction.Triggers>  
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction 
+                Command="{Binding LoadCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button ToolTip="Open up the GitHub site"> 
