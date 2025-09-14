@@ -24,6 +24,8 @@ using MCCS.Views.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.ViewModels.Pages.StationSites.ControlChannels;
 using MCCS.Views.Pages.StationSites.ControlChannels;
+using MCCS.Services.StartInitial;
+using MCCS.ViewModels;
 
 namespace MCCS
 {
@@ -31,20 +33,15 @@ namespace MCCS
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App
-    {
-
+    { 
         /// <summary>
         /// (3)
         /// </summary>
         /// <returns></returns>
         protected override Window CreateShell()
         {
-            var shell = Container.Resolve<MainWindow>();
-            // 在创建Shell后立即设置全屏
-            shell.WindowStyle = WindowStyle.None;
-            shell.WindowState = WindowState.Maximized;
-            shell.ResizeMode = ResizeMode.NoResize;
-            return shell;
+            var splashView = Container.Resolve<SplashWindow>();
+            return splashView;
         }
         /// <summary>
         /// (2)
@@ -77,7 +74,12 @@ namespace MCCS
             Log.Logger = logger;
             containerRegistry.RegisterInstance<ILogger>(logger);
             var configuration = builder.Build();
-
+            // 注册服务
+            containerRegistry.RegisterSingleton<ISplashService, SplashService>();
+            containerRegistry.Register<SplashWindow>();
+            containerRegistry.Register<SplashWindowViewModel>();
+            containerRegistry.RegisterSingleton<MainWindow>();
+            containerRegistry.RegisterSingleton<MainWindowViewModel>();
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);

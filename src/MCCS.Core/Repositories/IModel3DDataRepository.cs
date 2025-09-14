@@ -11,10 +11,7 @@ namespace MCCS.Core.Repositories
 
         Task<List<Model3DBaseInfo>> GetModelBaseInfosAsync(Expression<Func<Model3DBaseInfo, bool>> expression, CancellationToken cancellationToken = default);
 
-        List<Model3DBaseInfo> GetModelBaseInfos(Expression<Func<Model3DBaseInfo, bool>> expression);
-         
-
-        Task<Model3DAggregate> GetCurrentUseModelAggregateAsync(CancellationToken cancellationToken);
+        List<Model3DBaseInfo> GetModelBaseInfos(Expression<Func<Model3DBaseInfo, bool>> expression); 
 
         Task<Model3DAggregate?> GetModelAggregateByStationIdAsync(long stationId, CancellationToken cancellationToken = default);
 

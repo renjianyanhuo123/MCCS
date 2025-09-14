@@ -1,4 +1,4 @@
-﻿namespace MCCS.Core.Infrastructure.HardwareDevices
+﻿namespace MCCS.Collecter.HardwareDevices
 {
     public enum SignalDirection
     {

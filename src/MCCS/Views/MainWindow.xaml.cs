@@ -13,15 +13,8 @@ namespace MCCS.Views
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
-            Closed += MainWindow_Closed;
-            HamburgerMenuControl.Width = 48;
-        }
-
-        private void HamburgerMenuControl_HamburgerButtonClick(object sender, System.Windows.RoutedEventArgs e)
-        {
-            HamburgerMenuControl.Width = HamburgerMenuControl.IsPaneOpen ? 48 : 200;
-            //var t = HamburgerMenuControl.ActualHeight;
-        }
+            Closed += MainWindow_Closed; 
+        } 
 
         private const int WmSyscommand = 0x0112;
         private const int ScMinimize = 0xF020;
@@ -44,7 +37,7 @@ namespace MCCS.Views
         {
             if (msg == WmSyscommand)
             {
-                int command = wParam.ToInt32() & 0xFFF0;
+                var command = wParam.ToInt32() & 0xFFF0;
 
                 if (command == ScMinimize)
                 {

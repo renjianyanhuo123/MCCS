@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="MCCS.Views.Pages.MainContentPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.Views.Pages"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:globalNotification="clr-namespace:MCCS.Components.GlobalNotification"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:regions="http://prismlibrary.com/"
+             xmlns:mccs="clr-namespace:MCCS"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <mah:MetroContentControl />
+            <mah:HamburgerMenu 
+              Grid.Row="0"
+              Grid.Column="0" 
+              x:Name="HamburgerMenuControl" 
+              DisplayMode="CompactInline"
+              CompactPaneLength="48"
+              HamburgerWidth="48"
+              HamburgerHeight="48"
+              HamburgerButtonClick="HamburgerMenuControl_HamburgerButtonClick"
+              IsPaneOpen="False"
+              SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
+              ItemCommand="{Binding JumpToCommand}"
+              ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
+              ItemTemplate="{StaticResource MenuItemTemplate}"
+              ItemsSource="{Binding Menus}"
+              OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+              OptionsItemsSource="{Binding OptionsMenus}">
+            </mah:HamburgerMenu>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ContentControl Grid.Row="1" regions:RegionManager.RegionName="{x:Static mccs:GlobalConstant.MainContentRegionName}" 
+                Focusable="True" IsTabStop="False">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Loaded">
+                            <b:InvokeCommandAction Command="{Binding MainRegionLoadedCommand}" CommandParameter="{Binding ElementName=TestDesignCanvas}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </ContentControl>
+            </Grid>
+            <StatusBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                <StatusBarItem>Application</StatusBarItem>
+                <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
+                <StatusBarItem>Time: 2025-02-26</StatusBarItem>
+                <StatusBarItem Content="{DynamicResource Company}" />
+            </StatusBar> 
+            <globalNotification:NotificationContainer Height="Auto" Width="Auto" 
+                                          Grid.Row="0" 
+                                          Grid.Column="0"
+                                          Grid.ColumnSpan="2"
+                                          HorizontalAlignment="Right"
+                                          VerticalAlignment="Top"
+                                          Margin="0,10,10,0"></globalNotification:NotificationContainer>
+        </Grid>
+    </materialDesign:DialogHost>
+</UserControl>

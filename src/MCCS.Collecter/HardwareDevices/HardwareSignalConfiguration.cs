@@ -1,10 +1,10 @@
-﻿namespace MCCS.Core.Infrastructure.HardwareDevices
+﻿namespace MCCS.Collecter.HardwareDevices
 {
     /// <summary>
     /// Bw控制器所有的信号接口信息
     /// 物理接口
     /// </summary>
-    public class HardwareSignal
+    public record HardwareSignalConfiguration
     {
         public string SignalId { get; set; } = string.Empty;          // 信号物理ID，如 "AI0", "AO1"
         public string SignalName { get; set; } = string.Empty;        // 信号名称
@@ -16,5 +16,7 @@
         public string Description { get; set; } = string.Empty;        // 信号描述
         public bool IsEnabled { get; set; } = true;                    // 是否启用
         public long DeviceId { get; set; } = 0;                         // 所属设备ID
+        public int SampleRate { get; set; } = 1000; 
+        public int BufferSize { get; set; } = 1000; // 每个信号独立的缓冲区大小
     }
 }
