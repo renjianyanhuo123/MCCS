@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 
 namespace MCCS.Collecter.HardwareDevices
 {
-    public abstract class ControllerHardwareDeviceBase : IDisposable
+    public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice, IDisposable
     {
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
@@ -22,11 +22,15 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
+            foreach (var item in configuration.Signals)
+            {
+                AddSignal(item);
+            }
         }
 
         // 抽象方法 
-        protected abstract Task<bool> ConnectToHardwareAsync();
-        protected abstract Task<bool> DisconnectFromHardwareAsync();
+        public abstract Task<bool> ConnectToHardwareAsync();
+        public abstract Task<bool> DisconnectFromHardwareAsync();
 
         // public virtual List<HardwareSignalChannel> GetSupportedSignals() => [.._signals.Values];
         public HardwareSignalChannel GetSignal(string signalId) => _signals.GetValueOrDefault(signalId);

@@ -74,17 +74,18 @@ namespace MCCS
             Log.Logger = logger;
             containerRegistry.RegisterInstance<ILogger>(logger);
             var configuration = builder.Build();
-            // 注册服务
-            containerRegistry.RegisterSingleton<ISplashService, SplashService>();
-            containerRegistry.RegisterForNavigation<SplashPage>(SplashPageViewModel.Tag); 
-            containerRegistry.RegisterForNavigation<MainContentPage>(MainContentPageViewModel.Tag); 
+            // 注册服务 
+            
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
+            containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
+            containerRegistry.RegisterForNavigation<SplashPage>(SplashPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MainContentPage>(MainContentPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
             // containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);

@@ -22,9 +22,12 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
+using MCCS.Common.DataManagers;
 using MCCS.Core.Repositories;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
+using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
+using Serilog.Events;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -46,6 +49,7 @@ namespace MCCS.ViewModels.Pages
         private readonly IRegionManager _regionManager;
         private readonly IContainerProvider _containerProvider;
         private readonly ICurveAggregateRepository _curveAggregateRepository;
+        private readonly IModel3DDataRepository _model3DDataRepository;
 
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress = new(); 
@@ -88,23 +92,16 @@ namespace MCCS.ViewModels.Pages
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
+            IModel3DDataRepository model3DDataRepository,
             ICurveAggregateRepository curveAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
             _containerProvider = containerProvider;
             _deviceManager = deviceManager;
-            _model3DLoaderService = model3DLoaderService; 
+            _model3DLoaderService = model3DLoaderService;
+            _model3DDataRepository = model3DDataRepository;
             _curveAggregateRepository = curveAggregateRepository;
-            // Initialize camera
-            _camera = new HelixToolkit.Wpf.SharpDX.PerspectiveCamera()
-            {
-                LookDirection = new Vector3D(-100, -100, -100),
-                Position = new Point3D(100, 100, 100),
-                UpDirection = new Vector3D(0, 1, 0),
-                FarPlaneDistance = 10000,
-                NearPlaneDistance = 0.1f
-            };
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(ReceivedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
             _eventAggregator.GetEvent<UnLockCommandEvent>().Subscribe(ReceivedUnLockEvent);
@@ -219,12 +216,24 @@ namespace MCCS.ViewModels.Pages
         {
             _loadingCancellation = new CancellationTokenSource();
             IsLoading = true;
+            if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
+            var modelAggregate = await _model3DDataRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id);
+            if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL");
+            Camera = new OrthographicCamera()
+            {
+                LookDirection = modelAggregate.BaseInfo.CameraLookDirection.ToVector<Vector3D>(),
+                Position = modelAggregate.BaseInfo.CameraPosition.ToVector<Point3D>(),
+                UpDirection = modelAggregate.BaseInfo.CameraUpDirection.ToVector<Vector3D>(),
+                FarPlaneDistance = modelAggregate.BaseInfo.FarPlaneDistance,
+                NearPlaneDistance = modelAggregate.BaseInfo.NearPlaneDistance,
+                Width = modelAggregate.BaseInfo.FieldViewWidth
+            };
             try
             {
                 // 清理旧模型
                 ClearModels();
                 var progress = new Progress<ImportProgressEventArgs>(p => LoadingProgress = p);
-                var wrappers = await _model3DLoaderService.ImportModelsAsync(progress, _loadingCancellation.Token); 
+                var wrappers = await _model3DLoaderService.ImportModelsAsync(modelAggregate.Model3DDataList, progress, _loadingCancellation.Token); 
                 var positions = new Vector3Collection();
                 var connectionIndexs = new IntCollection();
                 // 替换连接线创建方式
@@ -334,46 +343,46 @@ namespace MCCS.ViewModels.Pages
         /// <exception cref="ArgumentNullException"></exception>
         public async Task InitialCurves()
         {
-            var curveInfos = await _curveAggregateRepository.GetCurvesAsync();
-            var devices= Models
-                .Where(s => s.Model3DData.DeviceId != null)
-                .Select(s => s.Model3DData).ToList();
-            _currentTime = DateTime.Now;
-            foreach (var device in devices) 
-            {
-                var displacementModel = new CurveShowModel("Time(s)", "kN")
-                {
-                    DeviceId = device.DeviceId ?? string.Empty,
-                    ExpanderHeaderName = $"{device.Name}_时间-位移曲线",
-                };
-                var forceModel = new CurveShowModel("Time(s)", "mm")
-                {
-                    DeviceId = device.DeviceId ?? string.Empty,
-                    ExpanderHeaderName = $"{device.Name}_时间-力曲线",
-                };
-                CurveModels.Add(displacementModel);
-                CurveModels.Add(forceModel);
-                var actor = _deviceManager.GetDevice(device.DeviceId ?? string.Empty)?.DataStream
-                ?? throw new ArgumentNullException($"Device id {device.DeviceId} is not exist！"); 
-                actor.Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(x => {
-                    displacementModel.ObservableValues.Add(new CurveMeasureValueModel
-                    {
-                        XValue = (DateTime.Now - _currentTime).TotalSeconds,
-                        YValue = x.Value is MockActuatorCollection v ? v.Displacement : 0
-                    });
-                    if (displacementModel.ObservableValues.Count > MaxPoints) displacementModel.ObservableValues.RemoveAt(0);
-                });
-                actor.Sample(TimeSpan.FromSeconds(1))
-                .Subscribe(x => {
-                    forceModel.ObservableValues.Add(new CurveMeasureValueModel
-                    {
-                        XValue = (DateTime.Now - _currentTime).TotalSeconds,
-                        YValue = x.Value is MockActuatorCollection v ? v.Force : 0
-                    });
-                    if (forceModel.ObservableValues.Count > MaxPoints) forceModel.ObservableValues.RemoveAt(0);
-                });
-            }
+            //var curveInfos = await _curveAggregateRepository.GetCurvesAsync();
+            //var devices= Models
+            //    .Where(s => s.Model3DData.DeviceId != null)
+            //    .Select(s => s.Model3DData).ToList();
+            //_currentTime = DateTime.Now;
+            //foreach (var device in devices) 
+            //{
+            //    var displacementModel = new CurveShowModel("Time(s)", "kN")
+            //    {
+            //        DeviceId = device.DeviceId ?? string.Empty,
+            //        ExpanderHeaderName = $"{device.Name}_时间-位移曲线",
+            //    };
+            //    var forceModel = new CurveShowModel("Time(s)", "mm")
+            //    {
+            //        DeviceId = device.DeviceId ?? string.Empty,
+            //        ExpanderHeaderName = $"{device.Name}_时间-力曲线",
+            //    };
+            //    CurveModels.Add(displacementModel);
+            //    CurveModels.Add(forceModel);
+            //    var actor = _deviceManager.GetDevice(device.DeviceId ?? string.Empty)?.DataStream
+            //    ?? throw new ArgumentNullException($"Device id {device.DeviceId} is not exist！"); 
+            //    actor.Sample(TimeSpan.FromSeconds(1))
+            //    .Subscribe(x => {
+            //        displacementModel.ObservableValues.Add(new CurveMeasureValueModel
+            //        {
+            //            XValue = (DateTime.Now - _currentTime).TotalSeconds,
+            //            YValue = x.Value is MockActuatorCollection v ? v.Displacement : 0
+            //        });
+            //        if (displacementModel.ObservableValues.Count > MaxPoints) displacementModel.ObservableValues.RemoveAt(0);
+            //    });
+            //    actor.Sample(TimeSpan.FromSeconds(1))
+            //    .Subscribe(x => {
+            //        forceModel.ObservableValues.Add(new CurveMeasureValueModel
+            //        {
+            //            XValue = (DateTime.Now - _currentTime).TotalSeconds,
+            //            YValue = x.Value is MockActuatorCollection v ? v.Force : 0
+            //        });
+            //        if (forceModel.ObservableValues.Count > MaxPoints) forceModel.ObservableValues.RemoveAt(0);
+            //    });
+            //}
         }
         /// <summary>
         /// 初始化数据订阅
@@ -601,8 +610,8 @@ namespace MCCS.ViewModels.Pages
             if ((e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl) && !_isCtrlPressed)
             {
                 _isCtrlPressed = true;
-                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(_eventAggregator); 
-            }
+                _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(_eventAggregator);
+            } 
 
             e.Handled = true;
         }

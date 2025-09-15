@@ -17,7 +17,7 @@
             var viewModel = DataContext as ViewModels.Pages.TestStartingPageViewModel;
             viewModel?.InitializeDataSubscriptions();
             await viewModel?.LoadModelsCommand.Execute()!;
-            await viewModel.InitialCurves();
+            // await viewModel.InitialCurves();
         }
           
     }

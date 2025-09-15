@@ -111,12 +111,10 @@ namespace MCCS.ViewModels.Pages
         private async Task LoadApplicationAsync()
         {
             var loadingSteps = new (string Status, int Progress, Func<Task> Action)[]
-            {
-                ("初始化配置...", 20, () => _splashService.InitializeConfigurationAsync()),
-                ("加载数据库...", 40, () => _splashService.InitializeDatabaseAsync()),
-                ("注册服务...", 60, () => _splashService.RegisterServicesAsync()),
-                ("加载模块...", 80, () => _splashService.LoadModulesAsync()),
-                ("准备就绪...", 100, () => _splashService.FinalizeAsync())
+            {  
+                ("初始化...", 60, () => _splashService.InitialHardwareDevicesAsync()),
+                ("加载模块...", 80, () => Task.Delay(100)),
+                ("准备就绪...", 100, () => Task.Delay(100))
             };
 
             foreach (var (status, progress, action) in loadingSteps)
@@ -124,10 +122,7 @@ namespace MCCS.ViewModels.Pages
                 StatusText = status;
 
                 // 执行加载步骤
-                await action();
-
-                // 更新进度（添加动画效果）
-                await AnimateProgressAsync(progress);
+                await action(); 
 
                 // 短暂延迟以显示状态
                 await Task.Delay(300);
@@ -138,26 +133,6 @@ namespace MCCS.ViewModels.Pages
             {
                 IsSuccess = true
             });
-        }
-
-        /// <summary>
-        /// 进度动画
-        /// </summary>
-        private async Task AnimateProgressAsync(double targetProgress)
-        {
-            const int steps = 20;
-            const int delay = 15;
-
-            var currentProgress = Progress;
-            var increment = (targetProgress - currentProgress) / steps;
-
-            for (int i = 0; i < steps; i++)
-            {
-                Progress += increment;
-                await Task.Delay(delay);
-            }
-
-            Progress = targetProgress;
         }
 
         /// <summary>

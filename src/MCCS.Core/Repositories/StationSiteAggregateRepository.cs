@@ -3,6 +3,8 @@ using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.StationSites;
 using System.Linq.Expressions;
 using System.Threading;
+using MCCS.Core.Domain;
+using MCCS.Core.Models.Model3D;
 
 namespace MCCS.Core.Repositories
 {
@@ -100,16 +102,28 @@ namespace MCCS.Core.Repositories
             var controlChannels = await freeSql.Select<ControlChannelInfo>()
                 .Where(cc => cc.StationId == stationId && cc.IsDeleted == false)
                 .ToListAsync(cancellationToken);
-            var devices = await freeSql.Select<StationSiteAndHardwareInfo, DeviceInfo>()
-                .LeftJoin((a, b) => a.HardwareId == b.Id)
+            var signals = await freeSql.Select<StationSiteAndHardwareInfo, SignalInterfaceInfo>()
+                .LeftJoin((a, b) => a.SignalId == b.Id)
                 .Where((a, b) => a.StationId == stationId)
                 .ToListAsync((a, b) => b, cancellationToken);
+            var modelAggregate = new Model3DAggregate();
+            var modelBaseInfo = await freeSql.Select<Model3DBaseInfo>()
+                .Where(m => m.StationId == stationId && m.IsDeleted == false)
+                .FirstAsync(cancellationToken);
+            modelAggregate.BaseInfo = modelBaseInfo;
+            if (modelBaseInfo != null)
+            {
+                modelAggregate.Model3DDataList = await freeSql.Select<Model3DData>()
+                    .Where(c => c.GroupKey == modelBaseInfo.Id)
+                    .ToListAsync(cancellationToken);
+            }
             var aggregate = new StationSiteAggregate
             {
                 StationSiteInfo = stationSite,
                 ControlChannelInfos = controlChannels,
                 PseudoChannelInfos = pseudoChannels,
-                DeviceInfos = devices
+                Signals = signals,
+                Model3DAggregate = modelAggregate
             };
             return aggregate;
         }
@@ -180,6 +194,44 @@ namespace MCCS.Core.Repositories
                 .ExecuteAffrowsAsync(cancellationToken);
             uow.Commit();
             return true;
+        }
+
+        public async Task<StationSiteAggregate> GetCurrentStationSiteAggregateAsync(CancellationToken cancellationToken = default)
+        {
+            var stationSite = await freeSql.Select<StationSiteInfo>()
+                .Where(s => s.IsUsing && s.IsDeleted == false)
+                .FirstAsync(cancellationToken);
+            if (stationSite == null) throw new KeyNotFoundException($"StationSiteInfo with Id {stationSite} not found.");
+            var pseudoChannels = await freeSql.Select<PseudoChannelInfo>()
+                .Where(pc => pc.StationId == stationSite.Id && pc.IsDeleted == false)
+                .ToListAsync(cancellationToken);
+            var controlChannels = await freeSql.Select<ControlChannelInfo>()
+                .Where(cc => cc.StationId == stationSite.Id && cc.IsDeleted == false)
+                .ToListAsync(cancellationToken);
+            var signals = await freeSql.Select<StationSiteAndHardwareInfo, SignalInterfaceInfo>()
+                .LeftJoin((a, b) => a.SignalId == b.Id)
+                .Where((a, b) => a.StationId == stationSite.Id)
+                .ToListAsync((a, b) => b, cancellationToken);
+            var modelAggregate = new Model3DAggregate();
+            var modelBaseInfo = await freeSql.Select<Model3DBaseInfo>()
+                .Where(m => m.StationId == stationSite.Id && m.IsDeleted == false)
+                .FirstAsync(cancellationToken);
+            modelAggregate.BaseInfo = modelBaseInfo;
+            if (modelBaseInfo != null)
+            {
+                modelAggregate.Model3DDataList = await freeSql.Select<Model3DData>()
+                    .Where(c => c.GroupKey == modelBaseInfo.Id)
+                    .ToListAsync(cancellationToken);
+            }
+            var aggregate = new StationSiteAggregate
+            {
+                StationSiteInfo = stationSite,
+                ControlChannelInfos = controlChannels,
+                PseudoChannelInfos = pseudoChannels,
+                Signals = signals,
+                Model3DAggregate = modelAggregate
+            };
+            return aggregate;
         }
     }
 }

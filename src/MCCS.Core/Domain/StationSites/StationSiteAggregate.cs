@@ -11,7 +11,9 @@ namespace MCCS.Core.Domain.StationSites
 
         public List<PseudoChannelInfo> PseudoChannelInfos { get; set; } = [];
 
-        public List<DeviceInfo> DeviceInfos { get; set; } = [];
+        public List<SignalInterfaceInfo> Signals { get; set; } = [];
+
+        public Model3DAggregate? Model3DAggregate { get; set; }
 
         public List<ControlChannelAndSignalInfo> ControlChannelsAndSignalInfos { get; set;} = [];
     }

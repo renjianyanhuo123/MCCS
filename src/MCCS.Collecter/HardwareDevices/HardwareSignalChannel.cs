@@ -75,7 +75,7 @@ namespace MCCS.Collecter.HardwareDevices
         } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static DataPoint AcquireReading()
+        private DataPoint AcquireReading()
         {
             try
             {
@@ -101,13 +101,13 @@ namespace MCCS.Collecter.HardwareDevices
                 };
             }
         }
-        private static bool ValidateReading(double value)
+        private bool ValidateReading(double value)
         {
             return !double.IsNaN(value) && value >= _signalConfig.MinValue && value <= _signalConfig.MaxValue;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double SimulateHardwareRead()
+        private double SimulateHardwareRead()
         {
             // 模拟实际硬件读取逻辑
             return Math.Sin(DateTime.Now.Ticks * 0.00001) * (_signalConfig.MaxValue - _signalConfig.MinValue) / 2

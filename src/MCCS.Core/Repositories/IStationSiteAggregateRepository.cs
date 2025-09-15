@@ -15,6 +15,8 @@ namespace MCCS.Core.Repositories
             long stationId,
             CancellationToken cancellationToken = default);
 
+        Task<StationSiteAggregate> GetCurrentStationSiteAggregateAsync(CancellationToken cancellationToken = default);
+
         Task<bool> UpdateCurrentUseStationSiteAsync(long stationId, CancellationToken cancellationToken = default);
 
         Task<List<ControlChannelInfo>> GetStationSiteControlChannels(long stationId, CancellationToken cancellationToken = default);

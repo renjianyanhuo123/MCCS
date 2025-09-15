@@ -3,45 +3,33 @@ using HelixToolkit.SharpDX.Core.Assimp;
 using MCCS.Core.Models.Model3D;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
-using MCCS.Core.Repositories;
 using Microsoft.Extensions.Configuration;
 using MCCS.Common;
 using SharpDX;
 
 namespace MCCS.Services.Model3DService
 {
-    public class Model3DLoaderService : IModel3DLoaderService
+    public class Model3DLoaderService(
+        IEffectsManager effectsManager, 
+        IConfiguration configuration)
+        : IModel3DLoaderService
     {
-        private readonly SemaphoreSlim _importSemaphore;
+        private readonly SemaphoreSlim _importSemaphore = new(MaxConcurrentImports, MaxConcurrentImports);
         // private CancellationTokenSource _cancellationTokenSource;
         // private readonly SynchronizationContext? _uiContext;
-        private readonly  IEffectsManager _effectsManager; 
-        private const int MaxConcurrentImports = 4;
-        private readonly IModel3DDataRepository _modelRepository;
-        private readonly IConfiguration _configuration;
+        private readonly  IEffectsManager _effectsManager = effectsManager ?? throw new ArgumentNullException(nameof(effectsManager)); 
+        private const int MaxConcurrentImports = 4; 
+        private readonly IConfiguration _configuration = configuration;
         private readonly object _lock = new();
 
-        public Model3DLoaderService( 
-            IEffectsManager effectsManager,
-            IModel3DDataRepository model3DDataRepository,
-            IConfiguration configuration)
-        {
-            _importSemaphore = new SemaphoreSlim(MaxConcurrentImports, MaxConcurrentImports); 
-            _effectsManager = effectsManager ?? throw new ArgumentNullException(nameof(effectsManager));
-            _modelRepository = model3DDataRepository;
-            _configuration = configuration;
-        } 
-
         public async Task<IList<Model3DViewModel>> ImportModelsAsync(
+            List<Model3DData> modelInfos,
             IProgress<ImportProgressEventArgs> progress,
             CancellationToken cancellationToken)
         {
-            //var groupKey = _configuration["AppSettings:ModelKey"]
-            //               ?? throw new ArgumentNullException("AppSettings:ModelKey");
-            var modelAggregate = await _modelRepository.GetModelAggregateByStationIdAsync(0, cancellationToken);
-            var modelInfos = modelAggregate.Model3DDataList;
-            var viewModels = new List<Model3DViewModel>();
-
+            //if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
+            //var modelAggregate = await _modelRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id, cancellationToken); 
+            var viewModels = new List<Model3DViewModel>(); 
             var progressInfo = new ImportProgressEventArgs
             {
                 CompletedCount = 0,

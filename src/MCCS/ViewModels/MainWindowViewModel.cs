@@ -92,6 +92,7 @@ namespace MCCS.ViewModels
             if (param.IsSuccess)
             {
                 ShowTitleBar = true;
+                // 注意: 这里的顺序不能乱
                 WindowState = WindowState.Maximized;
                 ShowCloseButton = true; 
                 _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(MainContentPageViewModel.Tag, UriKind.Relative));
