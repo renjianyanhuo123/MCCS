@@ -7,5 +7,9 @@ namespace MCCS.Core.Domain
         public Model3DBaseInfo BaseInfo { get; set; }
 
         public List<Model3DData> Model3DDataList { get; set; }
+        /// <summary>
+        /// 所有的广告牌信息
+        /// </summary>
+        public List<ModelBillboardInfo> BillboardInfos { get; set; }
     }
 }

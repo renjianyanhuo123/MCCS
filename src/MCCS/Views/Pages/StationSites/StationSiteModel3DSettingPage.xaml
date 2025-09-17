@@ -13,11 +13,12 @@
              xmlns:modelSetttings="clr-namespace:MCCS.Converters.ModelSetttings"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=stationSites:StationSiteModel3DSettingPageViewModel}">
+             d:DesignHeight="1080" d:DesignWidth="1920" d:DataContext="{d:DesignInstance Type=stationSites:StationSiteModel3DSettingPageViewModel}">
     <UserControl.Resources> 
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
         <hardwares:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
         <modelSetttings:ModelFileIsNullToVisilityConverter x:Key="ModelFileIsNullToVisilityConverter" />
+        <modelSetttings:BillBoradInfoIsNullToVisilityConverter x:Key="BillBoradInfoIsNullToVisilityConverter"/>
     </UserControl.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
@@ -36,13 +37,20 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical" Background="DarkGray">
             <Border Width="Auto" BorderBrush="Gray" BorderThickness="0,0,0,2">
-                <Button
-                    Width="200"
-                    HorizontalAlignment="Left"
-                    Margin="20"
-                    Content="选择导入模型文件" 
-                    Command="{Binding ImportModelFileCommand}"
-                    Style="{StaticResource MaterialDesignFlatSecondaryLightBgButton}" />
+                <StackPanel Orientation="Horizontal">
+                    <Button
+                        Width="200"
+                        HorizontalAlignment="Left"
+                        Margin="20"
+                        Content="选择导入模型文件" 
+                        Command="{Binding ImportModelFileCommand}"
+                        Style="{StaticResource MaterialDesignFlatSecondaryLightBgButton}" />
+                    <Button Style="{StaticResource MaterialDesignFlatSecondaryLightBgButton}"
+                            Width="150"
+                            Content="新增广告牌文本"
+                            Command="{Binding AddBillboardTextCommand}"
+                            ></Button>
+                </StackPanel>
             </Border>
             <Border
                 Height="Auto"
@@ -189,13 +197,30 @@
                 <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
                 <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
                 <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
-                <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="LeftClick" />
+                <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="Control+LeftClick" />
             </hx:Viewport3DX.InputBindings>
+            <b:Interaction.Triggers>
+                <b:EventTrigger EventName="MouseDown3D">
+                    <b:InvokeCommandAction Command="{Binding TextInfoMouseDownCommand}" PassEventArgsToCommand="True" />
+                </b:EventTrigger>
+            </b:Interaction.Triggers>
             <hx:AmbientLight3D Color="#363636" />
             <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
             <!--<hx:EnvironmentMap3D IsRendering="{Binding RenderEnvironmentMap}" Texture="{Binding EnvironmentMap}" />-->
             <hx:Element3DPresenter Content="{Binding GroupModel}" />
             <hx:PostEffectMeshBorderHighlight EffectName="highlight" />
+            <!-- 绑定Billboard文本集合 -->
+            <hx:TopMostGroup3D x:Name="TopMostGroup" EnableTopMost="True">
+                <!--动态文本: FixedSize: 是否固定大小 Geometry: 绑定到 ViewModel 中的 BatchedText 属性 IsHitTestVisible: 是否可被鼠标事件检测到-->
+                <hx:BillboardTextModel3D
+                    FixedSize="True"
+                    Geometry="{Binding CollectionDataLabels}"  />
+            </hx:TopMostGroup3D>
+            <!-- 连线 -->
+            <hx:LineGeometryModel3D 
+                Geometry="{Binding ConnectionLineGeometry}" 
+                Color="Blue"
+                IsHitTestVisible="False"/>
             <hx:AxisPlaneGridModel3D
                 x:Name="AxisPlane" 
                 Offset="0" />
@@ -316,6 +341,40 @@
                             </ItemsControl.ItemsPanel>
                         </ItemsControl>
                     </StackPanel> 
+                </StackPanel>
+            </Expander>
+            <Expander Header="广告牌信息" HorizontalAlignment="Stretch" Visibility="{Binding SelectedBillBoradInfo, Converter={StaticResource BillBoradInfoIsNullToVisilityConverter}}">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <TextBox Text="{Binding ModelName, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌背景颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <materialDesign:ColorPicker Height="200"
+                                                    Color="{Binding SelectedBillBoradInfo.BackgroundColor, Delay=25}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌字体颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <materialDesign:ColorPicker Height="200"
+                                                    Color="{Binding SelectedBillBoradInfo.FontColor, Delay=25}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌字体大小" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <mah:NumericUpDown Value="{Binding SelectedBillBoradInfo.FontSize}"></mah:NumericUpDown>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌位置(X方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <mah:NumericUpDown Value="{Binding XDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌位置(Y方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <mah:NumericUpDown Value="{Binding YDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="15">
+                        <TextBlock Text="广告牌位置(Z方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <mah:NumericUpDown Value="{Binding ZDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                    </StackPanel>
                 </StackPanel>
             </Expander>
         </StackPanel>

@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using Assimp;
+using DryIoc;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
@@ -45,6 +47,14 @@ namespace MCCS.ViewModels.Pages.StationSites
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
             _model3DDataRepository = model3DDataRepository;
             _notificationService = notificationService;
+            LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
+            ImportModelFileCommand = new AsyncDelegateCommand(ExecuteImportModelFileCommand);
+            DeleteFileCommand = new DelegateCommand<string>(ExecuteDeleteFileCommand);
+            SelectMaterialCommand = new DelegateCommand(ExecuteSelectMaterialCommand);
+            SaveModelCommand = new AsyncDelegateCommand(ExecuteSaveModelCommand);
+            CheckBoxSelectionChangedCommand = new DelegateCommand(ExecuteCheckBoxSelectionChangedCommand);
+            AddBillboardTextCommand = new DelegateCommand(ExecuteAddBillboardTextCommand);
+            TextInfoMouseDownCommand = new DelegateCommand<MouseDown3DEventArgs>(ExecuteTextInfoMouseDownCommand);
         }
 
         #region Property
@@ -154,17 +164,98 @@ namespace MCCS.ViewModels.Pages.StationSites
         }
 
         public ObservableCollection<BindingControlChannelItemModel> BindingControlChannels { get; private set; } = [];
-         
+        
         public ObservableCollection<Model3DFileItemModel> Model3DFiles { get; private set; } = [];
+
+        public List<BindedChannelModelBillboardTextInfo> BindedChannelModelBillboardTextInfos { get; private set; } = [];
+        /// <summary>
+        /// 采集数据显示的标签
+        /// </summary>
+        public BillboardText3D CollectionDataLabels { get; } = new()
+        {
+            IsDynamic = true
+        };
+
+        public LineGeometry3D ConnectionLineGeometry { get; } = new()
+        {
+            IsDynamic = true
+        };
+
+        #region BillboradInfo  
+        private double _xDistance;
+        public double XDistance
+        {
+            get => _xDistance;
+            set
+            {
+                if (SetProperty(ref _xDistance, value))
+                {
+                    if (SelectedBillBoradInfo == null) return;
+                    SelectedBillBoradInfo.XDistance = _xDistance;
+                    var temp = CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin;
+                    CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin =
+                        new Vector3((float)_xDistance, temp.Y, temp.Z);
+                    CollectionDataLabels.Invalidate();
+                }
+            }
+        }
+
+        private double _yDistance;
+        public double YDistance
+        {
+            get => _yDistance;
+            set
+            {
+                if (SetProperty(ref _yDistance, value))
+                {
+                    if (SelectedBillBoradInfo == null) return;
+                    SelectedBillBoradInfo.YDistance = _yDistance;
+                    var temp = CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin;
+                    CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin =
+                        new Vector3(temp.X, (float)_yDistance, temp.Z);
+                    CollectionDataLabels.Invalidate();
+                }
+            }
+        }
+
+        private double _zDistance;
+        public double ZDistance
+        {
+            get => _zDistance;
+            set
+            {
+                if (SetProperty(ref _zDistance, value))
+                {
+                    if (SelectedBillBoradInfo == null) return;
+                    SelectedBillBoradInfo.ZDistance = _zDistance;
+                    var temp = CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin;
+                    CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin =
+                        new Vector3(temp.X, temp.Y, (float)_zDistance);
+                    CollectionDataLabels.Invalidate();
+                }
+            }
+        }
+
+        private BindedChannelModelBillboardTextInfo _selectedBillBoradInfo;
+        public BindedChannelModelBillboardTextInfo SelectedBillBoradInfo
+        {
+            get => _selectedBillBoradInfo;
+            set => SetProperty(ref _selectedBillBoradInfo, value);
+        }
+
+        #endregion
         #endregion
 
-        #region Command
-        public AsyncDelegateCommand LoadCommand => new(ExecuteLoadCommand);
-        public AsyncDelegateCommand ImportModelFileCommand => new(ExecuteImportModelFileCommand);
-        public DelegateCommand<string> DeleteFileCommand => new(ExecuteDeleteFileCommand);
-        public DelegateCommand SelectMaterialCommand => new(ExecuteSelectMaterialCommand);
-        public AsyncDelegateCommand SaveModelCommand => new(ExecuteSaveModelCommand);
-        public DelegateCommand CheckBoxSelectionChangedCommand => new(ExecuteCheckBoxSelectionChangedCommand);
+        #region Command 
+        public AsyncDelegateCommand LoadCommand { get; }
+        public AsyncDelegateCommand ImportModelFileCommand { get; }
+        public DelegateCommand<string> DeleteFileCommand { get; }
+        public DelegateCommand SelectMaterialCommand { get; }
+        public AsyncDelegateCommand SaveModelCommand { get; }
+        public DelegateCommand CheckBoxSelectionChangedCommand { get; }
+        public DelegateCommand AddBillboardTextCommand { get; }
+        public DelegateCommand<MouseDown3DEventArgs> TextInfoMouseDownCommand { get; }
+
         #endregion
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -172,7 +263,25 @@ namespace MCCS.ViewModels.Pages.StationSites
             _stationId = navigationContext.Parameters.GetValue<long>("StationId");
         }
 
-        #region Private Method
+        #region Private Method 
+        private void ExecuteTextInfoMouseDownCommand(MouseDown3DEventArgs eventArgs)
+        {
+            if (eventArgs.HitTestResult.ModelHit is not BillboardTextModel3D model ||
+                eventArgs.HitTestResult is not BillboardHitResult res) return;
+            if (model.Geometry != CollectionDataLabels) return;
+            if (res.TextInfo is not TextInfoExt clickedTextInfoModel) return;
+            for (var i = 0; i < CollectionDataLabels.TextInfo.Count; i++)
+            {
+                CollectionDataLabels.TextInfo[i].Background = BindedChannelModelBillboardTextInfos[i].BackgroundColor;
+                CollectionDataLabels.TextInfo[i].Foreground = BindedChannelModelBillboardTextInfos[i].FontColor;
+            }
+            clickedTextInfoModel.Background = SharpDX.Color.Yellow;
+            clickedTextInfoModel.Foreground = SharpDX.Color.Black; 
+            SelectedBillBoradInfo = BindedChannelModelBillboardTextInfos[res.TextInfoIndex];
+            SelectedBillBoradInfo.Index = res.TextInfoIndex;
+            CollectionDataLabels.Invalidate();
+        }
+
         private static Material ColorConvertPhongMaterial(Color color)
         {
             return new PhongMaterial
@@ -269,6 +378,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             if (_stationId == -1) throw new ArgumentNullException("StationId is null");
             var modelInfo = await _model3DDataRepository.GetModelAggregateByStationIdAsync(_stationId);
             Model3DFiles.Clear();
+            GroupModel.Clear();
             if (modelInfo != null)
             {
                 var bindedChannels =
@@ -303,17 +413,12 @@ namespace MCCS.ViewModels.Pages.StationSites
                             .ToList()
                     });
                 }
-
-                if (GroupModel.GroupNode.Items.Count <= 0)
-                {
-                    GroupModel.Clear();
-                    await LoadFileAsync(Model3DFiles.Select(s => s.FilePath).ToArray());
-                    UpdateMaterial(GroupModel.SceneNode, ColorConvertPhongMaterial(_materialColor));
-                } 
+                await LoadFileAsync(Model3DFiles.Select(s => s.FilePath).ToArray());
+                UpdateMaterial(GroupModel.SceneNode, ColorConvertPhongMaterial(_materialColor));
             }
             else
             {
-                GroupModel.Clear();
+                _isAdded = false;
                 ModelName = "";
                 Desprition = "";
                 Id = 0;
@@ -475,7 +580,33 @@ namespace MCCS.ViewModels.Pages.StationSites
             }
             HaveData = Model3DFiles.Count > 0;
             await LoadFileAsync(openFileDialog.FileNames);
-        } 
+        }
+
+        private void ExecuteAddBillboardTextCommand()
+        {
+            var textInfo = new TextInfoExt()
+            {
+                Text = $"DefaultName{CollectionDataLabels.TextInfo.Count + 1}",
+                Scale = 1.0f,
+                Background = SharpDX.Color.Black,
+                Foreground = SharpDX.Color.White,
+                Origin = new Vector3(1, 1, 1),
+                Padding = new Vector4(5),
+                Size = 14
+            };
+            BindedChannelModelBillboardTextInfos.Add(new BindedChannelModelBillboardTextInfo
+            {
+                Id = -1,
+                BackgroundColor = SharpDX.Color.Black,
+                FontColor = SharpDX.Color.White,
+                BillboardName = $"DefaultName{CollectionDataLabels.TextInfo.Count + 1}",
+                BindedControlChannelId = -1,
+                BindedModelFileId = -1,
+                BindedModelId = -1,
+                FontSize = 14
+            });
+            CollectionDataLabels.TextInfo.Add(textInfo);
+        }
         #endregion
     }
 }

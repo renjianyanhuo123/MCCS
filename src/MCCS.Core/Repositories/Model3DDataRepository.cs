@@ -85,10 +85,14 @@ namespace MCCS.Core.Repositories
             var modelList = await freeSql.Select<Model3DData>()
                 .Where(x => x.GroupKey == modelBase.Id)
                 .ToListAsync(cancellationToken);
+            var billboardInfos = await freeSql.Select<ModelBillboardInfo>()
+                .Where(x => x.ModelId == modelBase.Id)
+                .ToListAsync(cancellationToken);
             var res = new Model3DAggregate
             {
                 BaseInfo = modelBase,
-                Model3DDataList = modelList
+                Model3DDataList = modelList,
+                BillboardInfos = billboardInfos
             };
             return res;
         }
