@@ -6,6 +6,7 @@ using MCCS.ViewModels.Others;
 using Microsoft.Extensions.Configuration;
 using MCCS.Common;
 using SharpDX;
+using Color = System.Windows.Media.Color;
 
 namespace MCCS.Services.Model3DService
 {
@@ -25,10 +26,9 @@ namespace MCCS.Services.Model3DService
         public async Task<IList<Model3DViewModel>> ImportModelsAsync(
             List<Model3DData> modelInfos,
             IProgress<ImportProgressEventArgs> progress,
+            Color materialColor,
             CancellationToken cancellationToken)
         {
-            //if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
-            //var modelAggregate = await _modelRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id, cancellationToken); 
             var viewModels = new List<Model3DViewModel>(); 
             var progressInfo = new ImportProgressEventArgs
             {
@@ -42,7 +42,7 @@ namespace MCCS.Services.Model3DService
                 await _importSemaphore.WaitAsync(cancellationToken);
                 try
                 {
-                    var result = await ImportSingleModelAsync(modelInfo, cancellationToken);
+                    var result = await ImportSingleModelAsync(modelInfo, materialColor, cancellationToken);
                     //await Task.Delay(3000, cancellationToken); // 测试使用
                     lock (_lock)
                     {
@@ -71,6 +71,7 @@ namespace MCCS.Services.Model3DService
 
         public async Task<Model3DViewModel> ImportSingleModelAsync(
             Model3DData modelInfo,
+            Color material,
             CancellationToken cancellationToken = default)
         {
             var result = await Task.Run(() =>
@@ -91,7 +92,7 @@ namespace MCCS.Services.Model3DService
                 scene.Root.Attach(_effectsManager);
                 scene.Root.UpdateAllTransformMatrix();
                 loader.Dispose();
-                return new Model3DViewModel(scene.Root, modelInfo);
+                return new Model3DViewModel(scene.Root, modelInfo, material);
             }, cancellationToken);
 
             return result;

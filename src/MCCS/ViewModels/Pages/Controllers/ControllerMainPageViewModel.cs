@@ -4,7 +4,6 @@ using MCCS.Events.Controllers;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
-using System.Windows.Controls;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
@@ -18,7 +17,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         private bool _isParticipateControl = false; 
 
         private bool _isSelected = false;  
-        private string _currentChannelId = string.Empty;
+        private long _currentModelId = -1;
 
         private ControlTypeEnum _controlType = ControlTypeEnum.Single; 
         private int _selectedControlMode = 0; 
@@ -27,22 +26,18 @@ namespace MCCS.ViewModels.Pages.Controllers
         private CommandExecuteStatusEnum _currentCommandStatus;
 
         public ControllerMainPageViewModel(
-            IEventAggregator eventAggregator,
-            IDeviceManager deviceManager)
+            IEventAggregator eventAggregator )
         {
-            _eventAggregator = eventAggregator;
-            _deviceManager = deviceManager;  
+            _eventAggregator = eventAggregator;  
         }
 
         public ControllerMainPageViewModel(
-            string channelId,
-            string channelName,
-            IEventAggregator eventAggregator,
-            IDeviceManager deviceManager) : this(eventAggregator, deviceManager)
+            long modelId, 
+            IEventAggregator eventAggregator) : this(eventAggregator)
         {
             IsParticipateControl = true;
-            CurrentChannelId = channelId;
-            CurrentChannelName = channelName;
+            CurrentModelId = modelId;
+            CurrentChannelName = "力/位移控制通道";
         }
 
         #region Proterty
@@ -88,12 +83,12 @@ namespace MCCS.ViewModels.Pages.Controllers
             set => SetProperty(ref _controlType, value);
         }
         /// <summary>
-        /// 当前通道Id
+        /// 当前模型Id
         /// </summary>
-        public string CurrentChannelId
+        public long CurrentModelId
         {
-            get => _currentChannelId;
-            set => SetProperty(ref _currentChannelId, value);
+            get => _currentModelId;
+            set => SetProperty(ref _currentModelId, value);
         }
         /// <summary>
         /// 当前通道名称
@@ -117,7 +112,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 是否参与控制
         /// </summary>
-        public DelegateCommand<string> ParticipateControlCommand => new(ExecuteParticipateControlCommand);
+        public DelegateCommand<long?> ParticipateControlCommand => new(ExecuteParticipateControlCommand);
         /// <summary>
         /// 控制模式切换命令
         /// </summary>
@@ -149,7 +144,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             //{
             //    res.ChannelIds.Add(CurrentChannelId);
             //}
-            //else 
+            //else
             //{
             //    var combineInfo = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
             //    if (combineInfo != null)
@@ -158,7 +153,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             //    }
             //}
             //_eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(res);
-            //_eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Subscribe(res => 
+            //_eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Subscribe(res =>
             //{
             //    var success = _controlInfoDic.TryGetValue(res.CommandId, out var controlInfo);
             //    if (!success || controlInfo == null) return;
@@ -219,17 +214,18 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void ExecuteControlModeSelectionChangedCommand()
         {
             SetView();
-        }  
+        }
         /// <summary>
         /// 是否参与控制CheckBox
         /// </summary>
-        /// <param name="channelId"></param>
-        private void ExecuteParticipateControlCommand(string channelId) 
+        /// <param name="modelId"></param>
+        private void ExecuteParticipateControlCommand(long? modelId)
         {
+            if (modelId == null) return;
             IsParticipateControl = false;
             _eventAggregator.GetEvent<InverseControlEvent>().Publish(new InverseControlEventParam
             {
-                DeviceId = channelId
+                ModelId = (long)modelId
             });
         } 
         #endregion

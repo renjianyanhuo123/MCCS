@@ -2,7 +2,6 @@
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
-using System.Windows.Controls;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
@@ -12,7 +11,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         private bool _isParticipateControl = false;
 
         private bool _isSelected = false;
-        private string _currentChannelId = string.Empty;
+        private long _currentModelId = -1;
 
         private ControlTypeEnum _controlType = ControlTypeEnum.Single;
         private int _selectedControlMode = 0;
@@ -21,11 +20,10 @@ namespace MCCS.ViewModels.Pages.Controllers
         private CommandExecuteStatusEnum _currentCommandStatus;
          
         public MultipleControllerChildPageViewModel(
-            string channelId,
-            string channelName)
+            long currentModelId)
         {
-            CurrentChannelId = channelId;
-            CurrentChannelName = channelName;
+            CurrentModelId = currentModelId;
+            CurrentChannelName = "多力/位移控制通道";
         }
 
         #region Proterty
@@ -55,12 +53,12 @@ namespace MCCS.ViewModels.Pages.Controllers
             set => SetProperty(ref _selectedControlMode, value);
         }  
         /// <summary>
-        /// 当前通道Id
+        /// 当前模型Id
         /// </summary>
-        public string CurrentChannelId
+        public long CurrentModelId
         {
-            get => _currentChannelId;
-            set => SetProperty(ref _currentChannelId, value);
+            get => _currentModelId;
+            set => SetProperty(ref _currentModelId, value);
         }
         /// <summary>
         /// 当前通道名称

@@ -2,6 +2,6 @@
 {
     public record InverseControlEventParam
     {
-        public required string DeviceId { get; init; }
+        public required long ModelId { get; init; }
     }
 }

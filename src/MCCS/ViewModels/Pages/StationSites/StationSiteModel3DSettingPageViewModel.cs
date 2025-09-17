@@ -17,6 +17,8 @@ using MCCS.Models.Stations.Model3DSettings;
 using MCCS.Services.NotificationService;
 using Microsoft.Win32;
 using Serilog;
+using SharpDX;
+using Color = System.Windows.Media.Color;
 using EnumToMaterial = MCCS.Common.EnumToMaterial;
 using Material = HelixToolkit.Wpf.SharpDX.Material;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
@@ -212,7 +214,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 Key = s.Key,
                 Name = s.FileName,
                 FilePath = s.FilePath,
-                Type = ModelType.Other,
+                Type = s.BindedControlChannelIds.Count == 0 ? ModelType.Other : ModelType.Actuator,
                 PositionStr = "0,0,0",
                 RotationStr = "",
                 RotateAngle = 90,

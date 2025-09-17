@@ -21,13 +21,18 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using MCCS.Common.DataManagers;
 using MCCS.Core.Repositories;
+using MCCS.ViewModels.Dialogs;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using Serilog.Events;
+using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
+using Prism.Modularity;
+using Prism.Dialogs;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -82,7 +87,8 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
         public AsyncDelegateCommand<string> SetCurveCommand => new(ExecuteSetCurveCommand);
         public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand => new(OnCtrlKeyDownCommand);
-        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand); 
+        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand);
+        public DelegateCommand ShowCurveCommand => new(ExecuteShowCurveCommand);
         #endregion
 
         public TestStartingPageViewModel(
@@ -96,7 +102,7 @@ namespace MCCS.ViewModels.Pages
             ICurveAggregateRepository curveAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
+            // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
             _containerProvider = containerProvider;
             _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService;
@@ -147,6 +153,13 @@ namespace MCCS.ViewModels.Pages
             get => _camera;
             set => SetProperty(ref _camera, value);
         }
+
+        private Color _backgroundColor;
+        public Color BackgroundColor
+        {
+            get => _backgroundColor;
+            set => SetProperty(ref _backgroundColor, value);
+        }  
 
         public IEffectsManager EffectsManager
         {
@@ -212,6 +225,12 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region private method
+        private void ExecuteShowCurveCommand()
+        {
+            var parameters = new DialogParameters() { { "title", "曲线图像" } };
+            _dialogService.Show(SetCurveDialogViewModel.Tag, parameters, res => { });
+        }
+
         private async Task LoadModelsAsync()
         {
             _loadingCancellation = new CancellationTokenSource();
@@ -228,12 +247,17 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = modelAggregate.BaseInfo.NearPlaneDistance,
                 Width = modelAggregate.BaseInfo.FieldViewWidth
             };
+            BackgroundColor = (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.CameraBackgroundColor); 
             try
             {
                 // 清理旧模型
                 ClearModels();
                 var progress = new Progress<ImportProgressEventArgs>(p => LoadingProgress = p);
-                var wrappers = await _model3DLoaderService.ImportModelsAsync(modelAggregate.Model3DDataList, progress, _loadingCancellation.Token); 
+                var wrappers = await _model3DLoaderService.ImportModelsAsync(
+                    modelAggregate.Model3DDataList, 
+                    progress, 
+                    (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.MaterialColor), 
+                    _loadingCancellation.Token); 
                 var positions = new Vector3Collection();
                 var connectionIndexs = new IntCollection();
                 // 替换连接线创建方式
@@ -241,7 +265,7 @@ namespace MCCS.ViewModels.Pages
                 lineBuilder.ToLineGeometry3D();
                 // UI线程更新
                 foreach (var wrapper in wrappers)
-                {
+                { 
                     Models.Add(wrapper);
                     GroupModel.AddNode(wrapper.SceneNode);
 
@@ -258,7 +282,7 @@ namespace MCCS.ViewModels.Pages
                             connectionIndexs.Add(connectionIndexs.Count);
                         }
                     }
-                }
+                } 
                 // 渲染时机很重要,这里相当于首次设置
                 ConnectionLineGeometry.Positions = positions;
                 ConnectionLineGeometry.Indices = connectionIndexs;
@@ -307,12 +331,12 @@ namespace MCCS.ViewModels.Pages
         {
             if (param == null) return;
             // 处理控制事件
-            var targetModel = Models.FirstOrDefault(m => m.Model3DData.DeviceId == param.DeviceId);
+            var targetModel = Models.FirstOrDefault(m => m.Model3DData.Id == param.ModelId);
             if (targetModel != null)
             {
                 targetModel.IsSelected = false; 
             }
-            var removeObj = Controllers.FirstOrDefault(c => c is ControllerMainPageViewModel vm && vm.CurrentChannelId == param.DeviceId);
+            var removeObj = Controllers.FirstOrDefault(c => c is ControllerMainPageViewModel vm && vm.CurrentModelId == param.ModelId);
             if (removeObj != null)
             {
                 Controllers.Remove(removeObj);
@@ -331,7 +355,7 @@ namespace MCCS.ViewModels.Pages
             if (multipleControllerMainPageViewModel == null) return;
             foreach (var item in multipleControllerMainPageViewModel.Children)
             {
-                Controllers.Add(new ControllerMainPageViewModel(item.CurrentChannelId, item.CurrentChannelName, _eventAggregator, _deviceManager));
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _eventAggregator));
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
@@ -578,13 +602,10 @@ namespace MCCS.ViewModels.Pages
             }
             // 切换当前模型的选中状态
             clickedModel.IsSelected = true;
-            var channelId = clickedModel.Model3DData.DeviceId ??
-                            throw new ArgumentNullException("ControlEvent no ChannelId");
-            var channelName = clickedModel.Model3DData.Name;
-            if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentChannelId != channelId)
-                && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentChannelId == channelId)))
+            if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
+                && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentModelId == clickedModel.Model3DData.Id)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(channelId, channelName, _eventAggregator, _deviceManager));
+                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _eventAggregator));
                 IsShowController = Controllers.Count > 0;
             }
         }
@@ -598,7 +619,7 @@ namespace MCCS.ViewModels.Pages
             model.IsMultipleSelected = true;
             if (_multipleControllerMainPageViewModel != null)
             {
-                _multipleControllerMainPageViewModel.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.DeviceId ?? string.Empty, model.Model3DData.Name));
+                _multipleControllerMainPageViewModel.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.Id));
             }
         }
         /// <summary>
@@ -660,10 +681,10 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         private async Task ExecuteSetCurveCommand(string id)
         {
-            var curveModel = CurveModels.FirstOrDefault(c => c.DeviceId == id);
-            if(curveModel == null) return;
-            var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
-            var result = await DialogHost.Show(setCurveView,"RootDialog");
+            //var curveModel = CurveModels.FirstOrDefault(c => c.DeviceId == id);
+            //if(curveModel == null) return;
+            //var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
+            //var result = await DialogHost.Show(setCurveView,"RootDialog");
             // Debug.WriteLine("Test!!!");
         }
 

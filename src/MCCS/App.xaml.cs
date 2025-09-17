@@ -99,6 +99,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
             // Dialogs
+            containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);

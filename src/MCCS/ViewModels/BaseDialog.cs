@@ -2,6 +2,13 @@
 
 public class BaseDialog : BindableBase, IDialogAware
 {
+    private string _title = string.Empty;
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
     public bool CanCloseDialog()
     {
         return true;

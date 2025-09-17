@@ -38,12 +38,12 @@
                     Text="{Binding CurrentChannelName, Mode=TwoWay}" Cursor="" />
                 <CheckBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="5 5 5 8"
-                    Tag="{Binding CurrentChannelId}"
+                    Tag="{Binding CurrentModelId}"
                     IsChecked="{Binding IsParticipateControl, Mode=TwoWay}"
                     Content="{StaticResource IsParticipateControl}"
                     Style="{StaticResource MaterialDesignCheckBox}"
                     Command="{Binding ParticipateControlCommand}"
-                    CommandParameter="{Binding Tag, RelativeSource={RelativeSource Self}}"/>
+                    CommandParameter="{Binding CurrentModelId}"/>
                 <!--<GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                     Margin="{StaticResource GroupMargin}" 
                     Style="{StaticResource MaterialDesignCardGroupBox}"

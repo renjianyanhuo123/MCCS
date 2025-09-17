@@ -4,42 +4,84 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Dialogs"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"  
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF" xmlns:dialogs="clr-namespace:MCCS.ViewModels.Dialogs"
              prism:ViewModelLocator.AutoWireViewModel="True"
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=local:SetCurveDialog}">
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=dialogs:SetCurveDialogViewModel}">
     <UserControl.Resources>
         <Thickness x:Key="TextBottomThickness">0,0,0,5</Thickness>
         <Thickness x:Key="StackPanelBottomThickness">0,0,0,10</Thickness>
     </UserControl.Resources>
-    <GroupBox
-        Width="500"
-        Height="Auto"
-        Margin="16"
-        Header="设置曲线"
-        Style="{StaticResource MaterialDesignCardGroupBox}"> 
-        <StackPanel>
-            <StackPanel Margin="{StaticResource StackPanelBottomThickness}">
-                <TextBlock Text="Y轴" Margin="{StaticResource TextBottomThickness}" />
-                <ComboBox>
-                    <ComboBoxItem Content="通道1试验力"></ComboBoxItem>
-                    <ComboBoxItem Content="通道1位移"></ComboBoxItem>
-                    <ComboBoxItem Content="通道2试验力"></ComboBoxItem>
-                    <ComboBoxItem Content="通道2位移"></ComboBoxItem>
+    <Grid MaxHeight="2160" MaxWidth="3840" MinHeight="400" MinWidth="600">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 控制面板 -->
+        <StackPanel Grid.Row="0"  VerticalAlignment="Center" Width="Auto">
+             <StackPanel Orientation="Vertical" Width="Auto" Margin="15">
+                 <TextBlock Text="显示的图表数目" />
+                <ComboBox 
+                    ItemsSource="{Binding CountOptions}"
+                    SelectedItem="{Binding SelectedCount, Mode=TwoWay}" >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <i:InvokeCommandAction Command="{Binding CurveSelectionChangedCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Loaded">
+                            <i:InvokeCommandAction Command="{Binding CurveSelectionChangedCommand}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ComboBox.ItemTemplate>
+                         <DataTemplate>
+                             <TextBlock Text="{Binding StringFormat={}{0}个}"/>
+                         </DataTemplate>
+                     </ComboBox.ItemTemplate>
                 </ComboBox>
-            </StackPanel>
-            <StackPanel Margin="{StaticResource StackPanelBottomThickness}">
-                <TextBlock Text="X轴" Margin="0,0,5,0" />
-                <ComboBox>
-                    <ComboBoxItem Content="时间"></ComboBoxItem>
-                    <ComboBoxItem Content="通道1位移"></ComboBoxItem>
-                </ComboBox>
-            </StackPanel>
-            <Separator Margin="{StaticResource StackPanelBottomThickness}"></Separator>
-            <StackPanel  HorizontalAlignment="Center" Orientation="Horizontal">
-                <Button Content="确定" Style="{StaticResource MaterialDesignRaisedSecondaryButton}" Margin="0,0,15, 0"></Button>
-                <Button Content="取消" Command="{Binding CancelCommand}"></Button>
-            </StackPanel>
+             </StackPanel>
         </StackPanel>
-    </GroupBox>
+
+        <!-- 动态表格容器 -->
+        <ScrollViewer Grid.Row="1" Margin="10" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding CurveModels}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Gray" BorderThickness="1" Margin="5" CornerRadius="4">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="15">
+                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" 
+                                               FontSize="14"
+                                               Margin="{StaticResource TextBottomThickness}" 
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="X轴：" Margin="80,0,0,0"></TextBlock>
+                                    <ComboBox Width="120"></ComboBox>
+                                    <TextBlock Text="Y轴：" Margin="15,0,0,0"></TextBlock>
+                                    <ComboBox Width="120"></ComboBox>
+                                </StackPanel>
+                                <lvc:CartesianChart
+                                    Grid.Row="1"
+                                    Title="{Binding Title}" 
+                                    Series="{Binding CurveSeries}"
+                                    XAxes="{Binding XAxes}"
+                                    YAxes="{Binding YAxes}">
+                                </lvc:CartesianChart>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid  Margin="5" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl> 
+        </ScrollViewer>
+    </Grid>
 </UserControl>

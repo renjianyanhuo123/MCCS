@@ -61,15 +61,16 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
             <Button
             Width="100"
+            Margin="15"
             Content="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" 
             Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
             Command="{Binding StartTestCommand}"
             ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
-            <!--<Button
-                Width="100"
-                Style="{StaticResource MaterialDesignRaisedLightButton}"
-                Content="测试移动"
-                Command="{Binding TestModelMoveCommand}" />-->
+            <Button
+                Width="200"
+                Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                Content="展示曲线图像"
+                Command="{Binding ShowCurveCommand}" />
         </StackPanel>
         <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">
@@ -101,7 +102,7 @@
                 Grid.Column="0"
                 Grid.ColumnSpan="{Binding IsShowController, Converter={StaticResource BoolToColumnSpanConverter}}"
                 Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibleConverter}}"
-                BackgroundColor="#595959"
+                BackgroundColor="{Binding BackgroundColor}"
                 EffectsManager="{Binding EffectsManager}"
                 Camera="{Binding Camera}" 
                 IsHitTestVisible="True"

@@ -34,8 +34,7 @@ namespace MCCS.Models.Model3D
         /// <summary>
         /// 曲线ID
         /// </summary>
-        public string CurveId { get; private set; } = Guid.NewGuid().ToString("N");
-
+        public string CurveId { get; private set; } = Guid.NewGuid().ToString("N"); 
         /// <summary>
         /// 是否显示
         /// </summary>
@@ -44,20 +43,11 @@ namespace MCCS.Models.Model3D
         {
             get => _isShow;
             set => SetProperty(ref _isShow, value);
-        }
-
+        } 
         /// <summary>
         /// 曲线标题
         /// </summary>
-        public string Title { get; set; } = string.Empty;
-        /// <summary>
-        /// 设备Id
-        /// </summary>
-        public required string DeviceId { get; set; }
-        /// <summary>
-        /// Expander头部名称
-        /// </summary>
-        public string ExpanderHeaderName { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty; 
         /// <summary>
         /// 曲线内容集合(可以有多种不同的图表)
         /// </summary>

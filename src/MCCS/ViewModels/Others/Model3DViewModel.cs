@@ -3,6 +3,7 @@ using HelixToolkit.SharpDX.Core.Model.Scene;
 using MCCS.Common;
 using HelixToolkit.SharpDX.Core;
 using SharpDX;
+using HelixToolkit.Wpf.SharpDX;
 
 namespace MCCS.ViewModels.Others
 {
@@ -24,10 +25,11 @@ namespace MCCS.ViewModels.Others
         private const string ForceFormat = "Force: {0:F2} kN";
         private const string DisplacementFormat = "Displacement: {0:F2} mm";
 
-        public Model3DViewModel(SceneNode sceneNode, Model3DData model3DData)
+        public Model3DViewModel(SceneNode sceneNode, Model3DData model3DData, System.Windows.Media.Color material)
         {
             _model3DData = model3DData;
             _sceneNode = sceneNode;
+            MaterialColor = material;
             UpdateMaterial();
             if (model3DData.Type == ModelType.Actuator)
             {
@@ -137,6 +139,13 @@ namespace MCCS.ViewModels.Others
             }
         }
 
+        private System.Windows.Media.Color _materialColor;
+        public System.Windows.Media.Color MaterialColor
+        {
+            get => _materialColor;
+            set => SetProperty(ref _materialColor, value);
+        }
+
         /// <summary>
         /// (模拟模型移动)位移默认偏移值 = 0.0
         ///</summary>
@@ -211,9 +220,25 @@ namespace MCCS.ViewModels.Others
                 }
                 else
                 {
-                    m.Material = EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Original);
+                    m.Material = ColorConvertPhongMaterial(MaterialColor);
                 }
             }
+        }
+
+        /// <summary>
+        /// 颜色转换为Phong材质
+        /// </summary>
+        /// <param name="color"></param>
+        /// <returns></returns>
+        private static HelixToolkit.Wpf.SharpDX.Material ColorConvertPhongMaterial(System.Windows.Media.Color color)
+        {
+            return new PhongMaterial
+            {
+                DiffuseColor =
+                    new SharpDX.Color(color.R, color.G, color.B, color.A),
+                SpecularColor = SharpDX.Color.White,
+                SpecularShininess = 32
+            };
         }
 
         /// <summary>
