@@ -15,9 +15,9 @@ namespace MCCS.Core.Repositories
 
         Task<Model3DAggregate?> GetModelAggregateByStationIdAsync(long stationId, CancellationToken cancellationToken = default);
 
-        Task<long> AddModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, CancellationToken cancellationToken = default);
-
-        Task<bool> UpdateModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, List<ControlChannelAndModel3DInfo> channelsAndModels, CancellationToken cancellationToken = default);
+        Task<long> AddModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, List<ControlChannelAndModel3DInfo> controlChannelAndModels, List<ModelBillboardInfo> billboardInfos, CancellationToken cancellationToken = default);
+        
+        Task<bool> UpdateModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, List<ControlChannelAndModel3DInfo> channelsAndModels, List<ModelBillboardInfo> billboardInfos, CancellationToken cancellationToken = default);
         List<Model3DData> GetModel(long groupKey);
     }
 }

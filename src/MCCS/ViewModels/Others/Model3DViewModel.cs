@@ -36,7 +36,7 @@ namespace MCCS.ViewModels.Others
                 DataLabels = [];
                 ConnectPoints = [];
                 ConnectCollection = [];
-                InitializeDataLabels();
+                // InitializeDataLabels();
             }
             // 为场景节点设置Tag，以便在点击时识别
             _sceneNode.Tag = model3DData.Key;

@@ -9,6 +9,13 @@
             set => SetProperty(ref _id, value);
         }
 
+        private string _key;
+        public string Key
+        {
+            get => _key;
+            set => SetProperty(ref _key, value);
+        }
+
         private string _controlChannelName = string.Empty;
         public string ControlChannelName
         {

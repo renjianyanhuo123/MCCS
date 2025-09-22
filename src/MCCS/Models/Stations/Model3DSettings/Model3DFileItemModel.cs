@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
 using MCCS.Models.Model3D;
 
 namespace MCCS.Models.Stations.Model3DSettings
@@ -39,10 +40,16 @@ namespace MCCS.Models.Stations.Model3DSettings
             get => _materialColor;
             set => SetProperty(ref _materialColor, value);
         }
+
         /// <summary>
         /// 绑定的控制通道ID集合
-        /// </summary>
-        public List<long> BindedControlChannelIds { get; set; } = []; 
+        /// </summary> 
+        private ObservableCollection<BindingControlChannelItemModel> _bindedControlChannelIds = [];
+        public ObservableCollection<BindingControlChannelItemModel> BindedControlChannelIds 
+        { 
+            get => _bindedControlChannelIds; 
+            set => SetProperty(ref _bindedControlChannelIds, value);
+        }
     }
 
     public class BindedChannelModelBillboardTextInfo : BindableBase
@@ -55,27 +62,13 @@ namespace MCCS.Models.Stations.Model3DSettings
             get => _id;
             set => SetProperty(ref _id, value);
         }
-
-        private long _bindedControlChannelId;
-        public long BindedControlChannelId
-        {
-            get => _bindedControlChannelId; 
-            set => SetProperty(ref _bindedControlChannelId, value);
-        }
-
+         
         private long _bindedModelId;
         public long BindedModelId
         {
             get => _bindedModelId; 
             set => SetProperty(ref _bindedModelId, value);
-        }
-
-        private long _bindedModelFileId;
-        public long BindedModelFileId
-        {
-            get => _bindedModelFileId;
-            set => SetProperty(ref _bindedModelFileId, value);
-        }
+        } 
 
         private SharpDX.Color _backgroundColor = SharpDX.Color.Black; 
         public SharpDX.Color BackgroundColor
@@ -84,6 +77,33 @@ namespace MCCS.Models.Stations.Model3DSettings
             set => SetProperty(ref _backgroundColor, value);
         }
 
+        private Color _backgroundColor1;
+        public Color BackgroundColor1
+        {
+            get => _backgroundColor1;
+            set
+            {
+                if (SetProperty(ref _backgroundColor1, value))
+                {
+                    BackgroundColor = new SharpDX.Color(_backgroundColor1.R, _backgroundColor1.G, _backgroundColor1.B,
+                        _backgroundColor1.A);
+                }
+            }
+        }
+
+        private Color _fontColor1;
+        public Color FontColor1
+        {
+            get => _fontColor1;
+            set
+            {
+                if (SetProperty(ref _fontColor1, value))
+                {
+                    FontColor = new SharpDX.Color(_fontColor1.R, _fontColor1.G, _fontColor1.B,
+                        _fontColor1.A);
+                }
+            }
+        }
         /// <summary>
         /// 看板名称
         /// </summary> 
@@ -133,6 +153,20 @@ namespace MCCS.Models.Stations.Model3DSettings
         {
             get => _zDistance;
             set => SetProperty(ref _zDistance, value);
+        }
+
+        private Model3DFileItemModel _selectedModel;
+        public Model3DFileItemModel SelectedModel
+        {
+            get => _selectedModel;
+            set => SetProperty(ref _selectedModel, value);
+        }
+
+        private BindingControlChannelItemModel _selectedBindedChannel; 
+        public BindingControlChannelItemModel SelectedBindedChannel
+        {
+            get => _selectedBindedChannel;
+            set => SetProperty(ref _selectedBindedChannel, value);
         }
     }
 }

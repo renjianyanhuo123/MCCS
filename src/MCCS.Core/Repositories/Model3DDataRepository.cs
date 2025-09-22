@@ -60,7 +60,12 @@ namespace MCCS.Core.Repositories
                 .ToList();
         }
 
-        public async Task<long> AddModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, CancellationToken cancellationToken = default)
+        public async Task<long> AddModel3DAsync(
+            Model3DBaseInfo baseInfo, 
+            List<Model3DData> modelFiles, 
+            List<ControlChannelAndModel3DInfo> controlChannelAndModels, 
+            List<ModelBillboardInfo> billboardInfos, 
+            CancellationToken cancellationToken = default)
         {
             using var uow = freeSql.CreateUnitOfWork();
             var modelId = await uow.Orm.Insert(baseInfo).ExecuteIdentityAsync(cancellationToken);
@@ -69,8 +74,18 @@ namespace MCCS.Core.Repositories
                 foreach (var file in modelFiles)
                 {
                     file.GroupKey = modelId;
+                } 
+                foreach (var billboardInfo in billboardInfos)
+                {
+                    billboardInfo.ModelId = modelId;
+                } 
+                foreach (var controlChannelAndModel in controlChannelAndModels)
+                {
+                    controlChannelAndModel.ModelId = modelId;
                 }
-                var count = await uow.Orm.Insert(modelFiles).ExecuteAffrowsAsync(cancellationToken);
+                if (modelFiles.Count != 0) await uow.Orm.Insert(modelFiles).ExecuteAffrowsAsync(cancellationToken);
+                if (billboardInfos.Count != 0) await uow.Orm.Insert(billboardInfos).ExecuteAffrowsAsync(cancellationToken);
+                if (controlChannelAndModels.Count != 0) await uow.Orm.Insert(controlChannelAndModels).ExecuteAffrowsAsync(cancellationToken);
             }
             uow.Commit();
             return modelId;
@@ -97,7 +112,7 @@ namespace MCCS.Core.Repositories
             return res;
         }
 
-        public async Task<bool> UpdateModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, List<ControlChannelAndModel3DInfo> channelsAndModels, CancellationToken cancellationToken = default)
+        public async Task<bool> UpdateModel3DAsync(Model3DBaseInfo baseInfo, List<Model3DData> modelFiles, List<ControlChannelAndModel3DInfo> channelsAndModels, List<ModelBillboardInfo> billboardInfos, CancellationToken cancellationToken = default)
         {
             using var uow = freeSql.CreateUnitOfWork();
             var count1 = await uow.Orm.Update<Model3DBaseInfo>()
@@ -117,8 +132,12 @@ namespace MCCS.Core.Repositories
             var count3 = await uow.Orm.Delete<ControlChannelAndModel3DInfo>()
                 .Where(c => c.ModelId == baseInfo.Id)
                 .ExecuteAffrowsAsync(cancellationToken);
+            var count4 = await uow.Orm.Delete<ModelBillboardInfo>()
+                .Where(c => c.ModelId == baseInfo.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
             await uow.Orm.Insert(modelFiles).ExecuteAffrowsAsync(cancellationToken);
-            await uow.Orm.Insert(channelsAndModels).ExecuteAffrowsAsync(cancellationToken); 
+            await uow.Orm.Insert(channelsAndModels).ExecuteAffrowsAsync(cancellationToken);
+            await uow.Orm.Insert(billboardInfos).ExecuteAffrowsAsync(cancellationToken);
             uow.Commit();
             return true;
         } 

@@ -33,6 +33,8 @@ using Serilog.Events;
 using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
 using Prism.Modularity;
 using Prism.Dialogs;
+using SharpDX;
+using Color = System.Windows.Media.Color;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -258,34 +260,51 @@ namespace MCCS.ViewModels.Pages
                     progress, 
                     (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.MaterialColor), 
                     _loadingCancellation.Token); 
-                var positions = new Vector3Collection();
-                var connectionIndexs = new IntCollection();
+                // var positions = new Vector3Collection();
+                // var connectionIndexs = new IntCollection();
                 // 替换连接线创建方式
-                var lineBuilder = new LineBuilder();
-                lineBuilder.ToLineGeometry3D();
+                // var lineBuilder = new LineBuilder();
+                // lineBuilder.ToLineGeometry3D();
                 // UI线程更新
                 foreach (var wrapper in wrappers)
                 { 
                     Models.Add(wrapper);
                     GroupModel.AddNode(wrapper.SceneNode);
 
-                    if (wrapper.DataLabels?.Count > 0)
-                        CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
+                    // if (wrapper.DataLabels?.Count > 0)
+                    //    CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
                     // 重新整合线段; 默认没有一个点连接两条线的情况.
-                    if (wrapper.ConnectPoints?.Count > 0
-                        && wrapper.ConnectCollection?.Count > 0
-                        && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count)
+                    //if (wrapper.ConnectPoints?.Count > 0
+                    //    && wrapper.ConnectCollection?.Count > 0
+                    //    && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count)
+                    //{
+                    //    foreach (var index in wrapper.ConnectCollection)
+                    //    {
+                    //        positions.Add(wrapper.ConnectPoints[index]);
+                    //        connectionIndexs.Add(connectionIndexs.Count);
+                    //    }
+                    //}
+                }
+
+                foreach (var billboardInfo in modelAggregate.BillboardInfos)
+                {
+                    var temp1 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfo.BackgroundColor);
+                    var temp2 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfo.FontColor);
+                    var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
+                    var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
+                    CollectionDataLabels.TextInfo.Add(new TextInfoExt()
                     {
-                        foreach (var index in wrapper.ConnectCollection)
-                        {
-                            positions.Add(wrapper.ConnectPoints[index]);
-                            connectionIndexs.Add(connectionIndexs.Count);
-                        }
-                    }
-                } 
+                        Text = billboardInfo.BillboardName,
+                        Origin = billboardInfo.PositionStr.ToVector<SharpDX.Vector3>(),
+                        Padding = new Vector4(5),
+                        Foreground = fontColor,
+                        Background = backgroundColor,
+                        Size = billboardInfo.FontSize
+                    });
+                }
                 // 渲染时机很重要,这里相当于首次设置
-                ConnectionLineGeometry.Positions = positions;
-                ConnectionLineGeometry.Indices = connectionIndexs;
+                //ConnectionLineGeometry.Positions = positions;
+                //ConnectionLineGeometry.Indices = connectionIndexs;
             }
             catch (OperationCanceledException)
             {

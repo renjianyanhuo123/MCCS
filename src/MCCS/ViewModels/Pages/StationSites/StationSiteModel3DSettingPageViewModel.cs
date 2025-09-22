@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Drawing;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Windows.Media;
@@ -9,6 +10,7 @@ using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
+using MahApps.Metro.Controls;
 using MCCS.Common;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Models.Model3D;
@@ -55,6 +57,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             CheckBoxSelectionChangedCommand = new DelegateCommand(ExecuteCheckBoxSelectionChangedCommand);
             AddBillboardTextCommand = new DelegateCommand(ExecuteAddBillboardTextCommand);
             TextInfoMouseDownCommand = new DelegateCommand<MouseDown3DEventArgs>(ExecuteTextInfoMouseDownCommand);
+            DeleteBillboardCommand = new DelegateCommand(ExecuteDeleteBillboardCommand);
         }
 
         #region Property
@@ -155,7 +158,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     CommonMathNode(GroupModel.SceneNode, value.Key, UpdateMaterial, EnumToMaterial.GetMaterialFromEnum(MaterialEnum.Selected));
                     foreach (var bindedChannel in BindingControlChannels)
                     {
-                        bindedChannel.IsSelected = value.BindedControlChannelIds.Any(c => c == bindedChannel.Id);
+                        bindedChannel.IsSelected = value.BindedControlChannelIds.Any(c => c.Id == bindedChannel.Id);
                     }
                 }
 
@@ -242,7 +245,6 @@ namespace MCCS.ViewModels.Pages.StationSites
             get => _selectedBillBoradInfo;
             set => SetProperty(ref _selectedBillBoradInfo, value);
         }
-
         #endregion
         #endregion
 
@@ -255,6 +257,7 @@ namespace MCCS.ViewModels.Pages.StationSites
         public DelegateCommand CheckBoxSelectionChangedCommand { get; }
         public DelegateCommand AddBillboardTextCommand { get; }
         public DelegateCommand<MouseDown3DEventArgs> TextInfoMouseDownCommand { get; }
+        public DelegateCommand DeleteBillboardCommand { get; }
 
         #endregion
 
@@ -263,7 +266,15 @@ namespace MCCS.ViewModels.Pages.StationSites
             _stationId = navigationContext.Parameters.GetValue<long>("StationId");
         }
 
-        #region Private Method 
+        #region Private Method
+        private void ExecuteDeleteBillboardCommand()
+        {
+            if (SelectedBillBoradInfo == null) return;
+            CollectionDataLabels.TextInfo.RemoveAt(SelectedBillBoradInfo.Index);
+            BindedChannelModelBillboardTextInfos.Remove(SelectedBillBoradInfo);
+            SelectedBillBoradInfo = null;
+        }
+
         private void ExecuteTextInfoMouseDownCommand(MouseDown3DEventArgs eventArgs)
         {
             if (eventArgs.HitTestResult.ModelHit is not BillboardTextModel3D model ||
@@ -278,8 +289,54 @@ namespace MCCS.ViewModels.Pages.StationSites
             clickedTextInfoModel.Background = SharpDX.Color.Yellow;
             clickedTextInfoModel.Foreground = SharpDX.Color.Black; 
             SelectedBillBoradInfo = BindedChannelModelBillboardTextInfos[res.TextInfoIndex];
+            XDistance = SelectedBillBoradInfo.XDistance;
+            YDistance = SelectedBillBoradInfo.YDistance;
+            ZDistance = SelectedBillBoradInfo.ZDistance;
             SelectedBillBoradInfo.Index = res.TextInfoIndex;
             CollectionDataLabels.Invalidate();
+        }
+
+        private void AddBillboardTextInfo(List<ModelBillboardInfo> billboardInfos)
+        {
+            CollectionDataLabels.TextInfo.Clear();
+            BindedChannelModelBillboardTextInfos.Clear();
+            for (var i = 0; i < billboardInfos.Count; i++)
+            {
+                var position = billboardInfos[i].PositionStr.ToVector<Vector3>();
+                var temp1 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfos[i].BackgroundColor);
+                var temp2 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfos[i].FontColor);
+                var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
+                var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
+                var selectedModel = Model3DFiles.FirstOrDefault(c => c.Key == billboardInfos[i].ModelFileId);
+                var selectedBindChannel = selectedModel?.BindedControlChannelIds.FirstOrDefault(c => c.Id == billboardInfos[i].ControlChannelId);
+                CollectionDataLabels.TextInfo.Add(new TextInfoExt()
+                {
+                    Background = backgroundColor,
+                    Foreground = fontColor,
+                    Origin = position,
+                    Padding = new Vector4(5),
+                    Scale = billboardInfos[i].FontSize / 14.0f,
+                    Size = billboardInfos[i].FontSize,
+                    Text = billboardInfos[i].BillboardName
+                });
+                
+                BindedChannelModelBillboardTextInfos.Add(new BindedChannelModelBillboardTextInfo
+                {
+                    Index = i,
+                    BackgroundColor = backgroundColor,
+                    BackgroundColor1 = temp1,
+                    FontColor1 = temp2,
+                    BillboardName = billboardInfos[i].BillboardName,
+                    SelectedBindedChannel = selectedBindChannel,
+                    SelectedModel = selectedModel,
+                    FontColor = fontColor,
+                    XDistance = position.X,
+                    YDistance = position.Y,
+                    ZDistance = position.Z,
+                    FontSize = billboardInfos[i].FontSize
+                });
+                
+            }
         }
 
         private static Material ColorConvertPhongMaterial(Color color)
@@ -296,7 +353,7 @@ namespace MCCS.ViewModels.Pages.StationSites
         private void ExecuteCheckBoxSelectionChangedCommand()
         {
             SelectedModel3DFile.BindedControlChannelIds.Clear();
-            SelectedModel3DFile.BindedControlChannelIds.AddRange(BindingControlChannels.Where(s => s.IsSelected).Select(c => c.Id));
+            SelectedModel3DFile.BindedControlChannelIds.AddRange(BindingControlChannels.Where(s => s.IsSelected));
         }
 
         private async Task ExecuteSaveModelCommand()
@@ -323,6 +380,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 Key = s.Key,
                 Name = s.FileName,
                 FilePath = s.FilePath,
+                GroupKey = modelBaseInfo.Id,
                 Type = s.BindedControlChannelIds.Count == 0 ? ModelType.Other : ModelType.Actuator,
                 PositionStr = "0,0,0",
                 RotationStr = "",
@@ -331,11 +389,22 @@ namespace MCCS.ViewModels.Pages.StationSites
                 DeviceId = null,
                 Orientation = "0,-1,0"
             }).ToList();
-            var channelAndModels = (from item in Model3DFiles
-                    from controlChannelId in item.BindedControlChannelIds
+            var billboardTextInfos = BindedChannelModelBillboardTextInfos.Select(s => new ModelBillboardInfo()
+            {
+                ModelFileId = s.SelectedModel.Key,
+                ModelId = modelBaseInfo.Id,
+                ControlChannelId = s.SelectedBindedChannel.Id,
+                BackgroundColor = $"#{s.BackgroundColor.A:X2}{s.BackgroundColor.R:X2}{s.BackgroundColor.G:X2}{s.BackgroundColor.B:X2}",
+                FontColor = $"#{s.FontColor.A:X2}{s.FontColor.R:X2}{s.FontColor.G:X2}{s.FontColor.B:X2}",
+                BillboardName = s.BillboardName,
+                FontSize = s.FontSize,
+                PositionStr = $"{s.XDistance},{s.YDistance},{s.ZDistance}"
+            }).ToList(); 
+            var controlChannelAndModelInfos = (from item in Model3DFiles
+                    from controlChannel in item.BindedControlChannelIds
                     select new ControlChannelAndModel3DInfo
                     {
-                        ControlChannelId = controlChannelId,
+                        ControlChannelId = controlChannel.Id,
                         ModelFileId = item.Key,
                         ModelId = modelBaseInfo.Id
                     })
@@ -343,24 +412,12 @@ namespace MCCS.ViewModels.Pages.StationSites
             var isSuccess = false;
             if (_isAdded)
             {
-                var success =
-                    await _model3DDataRepository.UpdateModel3DAsync(modelBaseInfo, modelList, channelAndModels);
-                isSuccess = success; 
+                isSuccess = await _model3DDataRepository.UpdateModel3DAsync(modelBaseInfo, modelList, controlChannelAndModelInfos, billboardTextInfos); 
             }
             else
             {
-                var addId = await _model3DDataRepository.AddModel3DAsync(modelBaseInfo, modelList);
-                var addList = (from item in Model3DFiles
-                        from controlChannelId in item.BindedControlChannelIds
-                        select new ControlChannelAndModel3DInfo
-                        {
-                            ControlChannelId = controlChannelId,
-                            ModelFileId = item.Key,
-                            ModelId = addId
-                        })
-                    .ToList();
-                var success = await _stationSiteAggregateRepository.AddControlChannelAndModelInfoAsync(addList);
-                isSuccess = addId > 0 && success;
+                var addId = await _model3DDataRepository.AddModel3DAsync(modelBaseInfo, modelList, controlChannelAndModelInfos, billboardTextInfos);
+                isSuccess = addId > 0;
             }
             if (isSuccess)
             {
@@ -377,19 +434,29 @@ namespace MCCS.ViewModels.Pages.StationSites
         {
             if (_stationId == -1) throw new ArgumentNullException("StationId is null");
             var modelInfo = await _model3DDataRepository.GetModelAggregateByStationIdAsync(_stationId);
+            var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId); 
             Model3DFiles.Clear();
             GroupModel.Clear();
+            BindingControlChannels.Clear();
+            foreach (var controlChannel in controlChannels)
+            {
+                BindingControlChannels.Add(new BindingControlChannelItemModel
+                {
+                    ControlChannelName = controlChannel.ChannelName,
+                    Id = controlChannel.Id,
+                    Key = controlChannel.ChannelId,
+                    IsSelected = false
+                });
+            }
             if (modelInfo != null)
             {
-                var bindedChannels =
-                    await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(modelInfo.BaseInfo
-                        .Id);
+                var bindedChannels = await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(modelInfo.BaseInfo.Id);
                 _isAdded = true;
                 Id = modelInfo.BaseInfo.Id;
                 ModelName = modelInfo.BaseInfo.Name;
-                MaterialColor = (Color)ColorConverter.ConvertFromString(modelInfo.BaseInfo.MaterialColor);
+                MaterialColor = (Color)System.Windows.Media.ColorConverter.ConvertFromString(modelInfo.BaseInfo.MaterialColor);
                 Desprition = modelInfo.BaseInfo.Description ?? "";
-                CameraBackground = (Color)ColorConverter.ConvertFromString(modelInfo.BaseInfo.CameraBackgroundColor); 
+                CameraBackground = (Color)System.Windows.Media.ColorConverter.ConvertFromString(modelInfo.BaseInfo.CameraBackgroundColor); 
                 Camera = new HelixToolkit.Wpf.SharpDX.OrthographicCamera
                 {
                     Position = modelInfo.BaseInfo.CameraPosition.ToVector<Point3D>(),
@@ -401,19 +468,30 @@ namespace MCCS.ViewModels.Pages.StationSites
                 };
                 foreach (var item in modelInfo.Model3DDataList)
                 {
-                    Model3DFiles.Add(new Model3DFileItemModel
+                    var addModel = new Model3DFileItemModel
                     {
                         FilePath = item.FilePath,
                         Id = item.Id,
                         Key = item.Key,
-                        FileName = item.Name,
-                        BindedControlChannelIds = bindedChannels
-                            .Where(c => c.ModelFileId == item.Key)
-                            .Select(s => s.ControlChannelId)
-                            .ToList()
-                    });
+                        FileName = item.Name, 
+                    };
+                    var temp = bindedChannels
+                        .Where(c => c.ModelFileId == item.Key).ToList(); 
+                    for (var i = 0; i < temp.Count; i++)
+                    {
+                        var controInfo = controlChannels.FirstOrDefault(c => c.Id == temp[i].ControlChannelId);
+                        addModel.BindedControlChannelIds.Add(new BindingControlChannelItemModel
+                        {
+                            Id = temp[i].ControlChannelId,
+                            ControlChannelName = controInfo?.ChannelName ?? "",
+                            IsSelected = true
+                        });
+                    }
+                    Model3DFiles.Add(addModel);
+
                 }
                 await LoadFileAsync(Model3DFiles.Select(s => s.FilePath).ToArray());
+                AddBillboardTextInfo(modelInfo.BillboardInfos);
                 UpdateMaterial(GroupModel.SceneNode, ColorConvertPhongMaterial(_materialColor));
             }
             else
@@ -433,17 +511,6 @@ namespace MCCS.ViewModels.Pages.StationSites
                 };
             }
             HaveData = Model3DFiles.Count > 0;
-            BindingControlChannels.Clear();
-            var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId);
-            foreach (var controlChannel in controlChannels)
-            {
-                BindingControlChannels.Add(new BindingControlChannelItemModel
-                {
-                    ControlChannelName = controlChannel.ChannelName,
-                    Id = controlChannel.Id,
-                    IsSelected = false
-                });
-            }
         }
 
         private void ExecuteSelectMaterialCommand()
@@ -599,9 +666,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 Id = -1,
                 BackgroundColor = SharpDX.Color.Black,
                 FontColor = SharpDX.Color.White,
-                BillboardName = $"DefaultName{CollectionDataLabels.TextInfo.Count + 1}",
-                BindedControlChannelId = -1,
-                BindedModelFileId = -1,
+                BillboardName = $"DefaultName{CollectionDataLabels.TextInfo.Count + 1}", 
                 BindedModelId = -1,
                 FontSize = 14
             });

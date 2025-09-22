@@ -8,7 +8,8 @@ namespace MCCS.Core.Models.Model3D
         /// <summary>
         /// 绑定的3D模型文件ID
         /// </summary>
-        public long ModelFileId { get; set; }
+        [Column(IsNullable = false, StringLength = 100)]
+        public string ModelFileId { get; set; }
         /// <summary>
         /// 绑定的控制通道ID
         /// </summary>
@@ -35,7 +36,7 @@ namespace MCCS.Core.Models.Model3D
         /// <summary>
         /// 字体大小
         /// </summary>
-        public double Scale { get; set; }
+        public int FontSize { get; set; }
 
         [Column(IsNullable = false, StringLength = 50)]
         public string PositionStr { get; set; } = string.Empty;

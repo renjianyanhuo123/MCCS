@@ -195,6 +195,8 @@
                 <KeyBinding Key="L" Command="hx:ViewportCommands.LeftView" />
                 <KeyBinding Key="R" Command="hx:ViewportCommands.RightView" />
                 <KeyBinding Command="hx:ViewportCommands.ZoomExtents" Gesture="Control+E" />
+                <!-- 新增 Delete 键绑定 -->
+                <KeyBinding Key="Delete" Command="{Binding DeleteBillboardCommand}" />
                 <MouseBinding Command="hx:ViewportCommands.Rotate" Gesture="RightClick" />
                 <MouseBinding Command="hx:ViewportCommands.Zoom" Gesture="MiddleClick" />
                 <MouseBinding Command="hx:ViewportCommands.Pan" Gesture="Control+LeftClick" />
@@ -225,158 +227,168 @@
                 x:Name="AxisPlane" 
                 Offset="0" />
         </hx:Viewport3DX>
-        <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
-            <StackPanel Orientation="Horizontal" Margin="15">
-                <Button 
-                    Content="保存模型"
-                    Command="{Binding SaveModelCommand}"
-                    Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"></Button>
+        <ScrollViewer Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="15">
+                    <Button 
+                        Content="保存模型"
+                        Command="{Binding SaveModelCommand}"
+                        Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"></Button>
+                </StackPanel>
+                <Expander Header="相机和背景属性" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="背景颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <materialDesign:ColorPicker x:Name="ColorPicker" 
+                                            Height="200"
+                                            Color="{Binding CameraBackground, Delay=25}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="相机位置" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding Camera.Position, StringFormat=\{0:0.0\}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="观察方向" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding Camera.LookDirection, StringFormat=\{0:0.0\}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="上方向" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding Camera.UpDirection, StringFormat=\{0:0.0\}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="近裁剪平面" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding Camera.NearPlaneDistance}" Maximum="500"></mah:NumericUpDown>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="远裁剪平面" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding Camera.FarPlaneDistance}" Maximum="1000000000"></mah:NumericUpDown>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="视野宽度" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding Camera.Width}"></mah:NumericUpDown>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+                <Expander Header="模型属性" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="模型名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding ModelName, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="模型描述" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding Desprition, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="模型材质" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <materialDesign:ColorPicker Height="200"
+                                            Color="{Binding MaterialColor, Delay=25}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+                <Expander 
+                    Header="模型绑定"
+                    Visibility="{Binding SelectedModel3DFile, Converter={StaticResource ModelFileIsNullToVisilityConverter}}"
+                    HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="绑定控制通道" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <ItemsControl
+                                    Margin="12,0,12,0"
+                                    Grid.IsSharedSizeScope="True"
+                                    ItemsSource="{Binding BindingControlChannels}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border
+                                            x:Name="Border"
+                                            Padding="8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition SharedSizeGroup="Checkerz" />
+                                                    <ColumnDefinition />
+                                                </Grid.ColumnDefinitions>
+                                                <CheckBox
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding DataContext.CheckBoxSelectionChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    IsChecked="{Binding IsSelected}" />
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    Margin="8,0,0,0">
+                                                    <TextBlock
+                                                        FontWeight="Bold"
+                                                        FontSize="14"
+                                                        Text="{Binding ControlChannelName}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger
+                                                    Binding="{Binding IsSelected}"
+                                                    Value="True">
+                                                <Setter
+                                                    TargetName="Border"
+                                                    Property="Background"
+                                                    Value="{DynamicResource MaterialDesignSelection}" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel  />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
+                <Expander Header="广告牌信息" HorizontalAlignment="Stretch" Visibility="{Binding SelectedBillBoradInfo, Converter={StaticResource BillBoradInfoIsNullToVisilityConverter}}">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <TextBox Text="{Binding SelectedBillBoradInfo.BillboardName, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="绑定模型" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <ComboBox ItemsSource="{Binding Model3DFiles}"
+                                      SelectedItem="{Binding SelectedBillBoradInfo.SelectedModel}"
+                                      DisplayMemberPath="FileName"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="绑定控制通道" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <ComboBox ItemsSource="{Binding SelectedBillBoradInfo.SelectedModel.BindedControlChannelIds}"
+                                      SelectedItem="{Binding SelectedBillBoradInfo.SelectedBindedChannel}"
+                                      DisplayMemberPath="ControlChannelName"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌背景颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <materialDesign:ColorPicker Height="200"
+                                            Color="{Binding SelectedBillBoradInfo.BackgroundColor1, Delay=25}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌字体颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <materialDesign:ColorPicker Height="200"
+                                            Color="{Binding SelectedBillBoradInfo.FontColor1, Delay=25}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌字体大小" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding SelectedBillBoradInfo.FontSize}"></mah:NumericUpDown>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌位置(X方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding XDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌位置(Y方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding YDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌位置(Z方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <mah:NumericUpDown Value="{Binding ZDistance, Mode=TwoWay}"></mah:NumericUpDown>
+                        </StackPanel>
+                    </StackPanel>
+                </Expander>
             </StackPanel>
-            <Expander Header="相机和背景属性"
-                      HorizontalAlignment="Stretch">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="背景颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <materialDesign:ColorPicker x:Name="ColorPicker" 
-                                                    Height="200"
-                                                    Color="{Binding CameraBackground, Delay=25}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="相机位置" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding Camera.Position, StringFormat=\{0:0.0\}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="观察方向" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding Camera.LookDirection, StringFormat=\{0:0.0\}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="上方向" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding Camera.UpDirection, StringFormat=\{0:0.0\}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="近裁剪平面" FontSize="14" Margin="0,0,0,15"></TextBlock>  
-                        <mah:NumericUpDown Value="{Binding Camera.NearPlaneDistance}" Maximum="500"></mah:NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="远裁剪平面" FontSize="14" Margin="0,0,0,15"></TextBlock> 
-                        <mah:NumericUpDown Value="{Binding Camera.FarPlaneDistance}" Maximum="1000000000"></mah:NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="视野宽度" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <mah:NumericUpDown Value="{Binding Camera.Width}"></mah:NumericUpDown>
-                    </StackPanel>
-                </StackPanel> 
-            </Expander>
-            <Expander 
-                Header="模型属性"
-                HorizontalAlignment="Stretch">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="模型名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding ModelName, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="模型描述" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding Desprition, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="模型材质" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <materialDesign:ColorPicker Height="200"
-                                                    Color="{Binding MaterialColor, Delay=25}" />
-                    </StackPanel>
-                </StackPanel>
-            </Expander>
-            <Expander 
-                Header="模型绑定"
-                Visibility="{Binding SelectedModel3DFile, Converter={StaticResource ModelFileIsNullToVisilityConverter}}"
-                HorizontalAlignment="Stretch">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="绑定控制通道" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <ItemsControl
-                            Margin="12,0,12,0"
-                            Grid.IsSharedSizeScope="True"
-                            ItemsSource="{Binding BindingControlChannels}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border
-                                        x:Name="Border"
-                                        Padding="8">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition
-                                                    SharedSizeGroup="Checkerz" />
-                                                <ColumnDefinition />
-                                            </Grid.ColumnDefinitions>
-                                            <CheckBox
-                                                VerticalAlignment="Center"
-                                                Command="{Binding DataContext.CheckBoxSelectionChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                IsChecked="{Binding IsSelected}" />
-                                            <StackPanel
-                                                Grid.Column="1"
-                                                Margin="8,0,0,0">
-                                                <TextBlock
-                                                    FontWeight="Bold"
-                                                    FontSize="14"
-                                                    Text="{Binding ControlChannelName}" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger
-                                            Binding="{Binding IsSelected}"
-                                            Value="True">
-                                            <Setter
-                                                TargetName="Border"
-                                                Property="Background"
-                                                Value="{DynamicResource MaterialDesignSelection}" />
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel  />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </StackPanel> 
-                </StackPanel>
-            </Expander>
-            <Expander Header="广告牌信息" HorizontalAlignment="Stretch" Visibility="{Binding SelectedBillBoradInfo, Converter={StaticResource BillBoradInfoIsNullToVisilityConverter}}">
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <TextBox Text="{Binding ModelName, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌背景颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <materialDesign:ColorPicker Height="200"
-                                                    Color="{Binding SelectedBillBoradInfo.BackgroundColor, Delay=25}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌字体颜色" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <materialDesign:ColorPicker Height="200"
-                                                    Color="{Binding SelectedBillBoradInfo.FontColor, Delay=25}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌字体大小" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <mah:NumericUpDown Value="{Binding SelectedBillBoradInfo.FontSize}"></mah:NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌位置(X方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <mah:NumericUpDown Value="{Binding XDistance, Mode=TwoWay}"></mah:NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌位置(Y方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <mah:NumericUpDown Value="{Binding YDistance, Mode=TwoWay}"></mah:NumericUpDown>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical" Margin="15">
-                        <TextBlock Text="广告牌位置(Z方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                        <mah:NumericUpDown Value="{Binding ZDistance, Mode=TwoWay}"></mah:NumericUpDown>
-                    </StackPanel>
-                </StackPanel>
-            </Expander>
-        </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>
