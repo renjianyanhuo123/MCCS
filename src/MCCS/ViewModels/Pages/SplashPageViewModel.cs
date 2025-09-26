@@ -113,8 +113,8 @@ namespace MCCS.ViewModels.Pages
             var loadingSteps = new (string Status, int Progress, Func<Task> Action)[]
             {  
                 ("初始化...", 60, () => _splashService.InitialHardwareDevicesAsync()),
-                ("加载模块...", 80, () => Task.Delay(100)),
-                ("准备就绪...", 100, () => Task.Delay(100))
+                ("加载模块...", 80, () => Task.Delay(1000)),
+                ("准备就绪...", 100, () => Task.Delay(1000))
             };
 
             foreach (var (status, progress, action) in loadingSteps)

@@ -26,6 +26,10 @@ using MCCS.ViewModels.Pages.StationSites.ControlChannels;
 using MCCS.Views.Pages.StationSites.ControlChannels;
 using MCCS.Services.StartInitial;
 using MCCS.ViewModels;
+using MCCS.ViewModels.MethodManager;
+using MCCS.Views.ProjectManager;
+using MCCS.ViewModels.ProjectManager;
+using MCCS.Views.MethodManager;
 
 namespace MCCS
 {
@@ -114,6 +118,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSiteControlChannelPage>(StationSiteControlChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSitePseudoChannelPage>(StationSitePseudoChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteModel3DSettingPage>(StationSiteModel3DSettingPageViewModel.Tag);
+            // Projects
+            containerRegistry.RegisterForNavigation<ProjectMainPage>(ProjectMainPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
         }
 
         /// <summary>

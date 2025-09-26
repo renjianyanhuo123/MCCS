@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="MCCS.Views.ProjectManager.ProjectMainPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.Views.ProjectManager"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:prism="http://prismlibrary.com/" 
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+            <StackPanel Width="Auto"  Orientation="Horizontal" Margin="30,20,30,20">
+                <TextBlock Text="创建时间：" FontSize="14"  VerticalAlignment="Center"></TextBlock>
+                <DatePicker
+                    Width="140"
+                    materialDesign:HintAssist.Hint="开始时间"
+                    Style="{StaticResource MaterialDesignFilledDatePicker}" />
+                <TextBlock Text=" - "  VerticalAlignment="Center"></TextBlock>
+                <DatePicker
+                    Width="140"
+                    materialDesign:HintAssist.Hint="结束时间"
+                    Style="{StaticResource MaterialDesignFilledDatePicker}" />
+            </StackPanel>
+            <StackPanel Width="Auto"  Orientation="Horizontal" Margin="30,25,30,25">
+                <TextBlock Text="项目名称：" FontSize="14"  VerticalAlignment="Center"></TextBlock>
+                <TextBox Width="100" FontSize="14"/>
+            </StackPanel>
+            <StackPanel Width="Auto"  Orientation="Horizontal" Margin="30,20,30,20">
+                <Button
+                    Width="80"
+                    Content="查询" 
+                    Style="{StaticResource MaterialDesignFlatLightBgButton}"
+                    ToolTip="查询" />
+                <Button
+                    Width="80"
+                    Margin="15,0,0,0"
+                    Content="重置" 
+                    Style="{StaticResource MaterialDesignPaperButton}"
+                    ToolTip="重置" />
+            </StackPanel>
+        </StackPanel>
+        <DataGrid
+             Grid.Row="1"
+             CanUserAddRows="False"
+             ColumnWidth="*"
+             ItemsSource="{Binding StationSites}"
+             SelectionMode="Extended"
+             AutoGenerateColumns="False"
+             SelectionUnit="Cell" >
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding StationId}" Visibility="Hidden"></DataGridTextColumn>
+                <DataGridTextColumn Header="项目名称" Binding="{Binding StationName}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="描述" Binding="{Binding StationName}" IsReadOnly="True" Width="*"/>
+                <DataGridTemplateColumn Header="是否正在使用" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ToggleButton    
+                                IsEnabled="{Binding IsEnable}"
+                                Tag="{Binding StationId}"
+                                IsChecked="{Binding IsUsing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="创建时间" IsReadOnly="True" Binding="{Binding CreateTime}" Width="*"/>
+                <DataGridTextColumn Header="更新时间" IsReadOnly="True" Binding="{Binding UpdateTime}" Width="*"/>
+                <DataGridTemplateColumn Header="操作"  Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="编辑" Width="100"
+                                    Command="{Binding DataContext.EditStationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                    CommandParameter="{Binding StationId}"></Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

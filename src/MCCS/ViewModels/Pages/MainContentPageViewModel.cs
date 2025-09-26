@@ -98,21 +98,9 @@ namespace MCCS.ViewModels.Pages
             var item = iconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
             _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative));
         }
-        private void OnOpenTabPage(OpenTestOperationEventParam param)
-        {
-            var addItem = _tabs.FirstOrDefault(c => c.Id == param.TabId);
-            if (addItem == null)
-            {
-                addItem = new MainTabsViewModel
-                {
-                    Id = param.TabId,
-                    Content = param.TestName,
-                    IsEnableClose = Visibility.Visible,
-                    IsEnable = true
-                };
-                _tabs.Add(addItem);
-            }
-            SelectedTabItem = addItem;
+        private void OnCancelSelectedMenu(NotificationCancelSelectedEventParam param)
+        { 
+            SelectedMenuItem = null;
         }
         #endregion
          
@@ -122,7 +110,7 @@ namespace MCCS.ViewModels.Pages
             IRegionManager regionManager,
             IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
         {
-            eventAggregator.GetEvent<OpenTestOperationEvent>().Subscribe(OnOpenTabPage);
+            _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu);
             _containerProvider = containerProvider;
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;

@@ -1,55 +1,45 @@
 ﻿using MCCS.Core.Repositories;
 using MCCS.Events;
+using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.Others;
+using MCCS.ViewModels.ProjectManager;
 
 namespace MCCS.ViewModels.Pages
 {
     public class HomePageViewModel : BaseViewModel
     {
         public const string Tag = "HomePage";
-        public HomePageViewModel(
-            ITestInfoRepository testInfoRepository,
-            IEventAggregator eventAggregator, 
+
+        private readonly IRegionManager _regionManager;
+
+        public HomePageViewModel( 
+            IEventAggregator eventAggregator,
+            IRegionManager regionManager,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            _testList = testInfoRepository.GetTests(c => c.IsDeleted == false)
-                .Select(s => new TestViewModel 
-                {
-                    Id = s.Id,
-                    Name = s.Name ?? string.Empty,
-                    Code = s.Code,
-                    Standard = s.Standard,
-                    Person = s.Person,
-                    FilePath = s.FilePath,
-                    Status = s.Status,
-                    StartTime = s.StartTime?.UtcDateTime,
-                    EndTime = s.EndTime?.UtcDateTime,
-                    CreateTime = s.CreateTime.UtcDateTime,
-                }).ToList();
+            _regionManager = regionManager;
+            JumpToProjectCommand = new DelegateCommand(ExecuteJumpToProjectCommand);
+            JumpToMethodCommand = new DelegateCommand(ExecuteJumpToMethodCommand);
         }
 
-        #region 页面属性
-        private List<TestViewModel> _testList;
-        public List<TestViewModel> TestList
+        #region 页面属性 
+        #endregion
+
+        #region 命令 
+        public DelegateCommand JumpToProjectCommand { get; }
+        public DelegateCommand JumpToMethodCommand { get; }
+        #endregion
+
+        #region 私有方法 
+        private void ExecuteJumpToProjectCommand()
         {
-            get => _testList;
-            set => SetProperty(ref _testList, value);
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(ProjectMainPageViewModel.Tag, UriKind.Relative));
+            _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Publish(new NotificationCancelSelectedEventParam());
         }
-        #endregion
-
-        #region 命令
-        public DelegateCommand<TestViewModel> TestOperationCommand => new(ExecuteTestOperationCommand);
-        #endregion
-
-        #region 私有方法
-        private void ExecuteTestOperationCommand(TestViewModel param) 
+        private void ExecuteJumpToMethodCommand()
         {
-            _eventAggregator.GetEvent<OpenTestOperationEvent>().Publish(new OpenTestOperationEventParam 
-            {
-                Status = param.Status,
-                TestName = param.Name,
-                TabId = HomeTestOperationPageViewModel.Tag
-            });
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(MethodMainPageViewModel.Tag, UriKind.Relative));
+            _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Publish(new NotificationCancelSelectedEventParam());
         }
         #endregion
     }

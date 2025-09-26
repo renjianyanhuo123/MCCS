@@ -7,15 +7,66 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:convert="clr-namespace:MCCS.Converters"
              xmlns:prism="http://prismlibrary.com/"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" d:DataContext="{d:DesignInstance Type=pages:HomePageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <!-- TestOperationConverter-->
-        <convert:TestStatusConverter x:Key="TestStatusConverter"/>
-        <convert:TestOperationConverter x:Key="TestOperationConverter"/>
+    <UserControl.Resources> 
+        <!--<convert:TestStatusConverter x:Key="TestStatusConverter"/>
+        <convert:TestOperationConverter x:Key="TestOperationConverter"/>-->
+        <Style x:Key="ChangeBorderStyle" TargetType="Border">
+            <Setter Property="Width" Value="600" />
+            <Setter Property="Height" Value="800" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="#dbdbdb" />
+            <Setter Property="Margin" Value="40" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <!-- 静态效果 -->
+                    <Setter Property="BorderBrush" Value="DodgerBlue"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="DodgerBlue" 
+                                              BlurRadius="15" 
+                                              ShadowDepth="3" 
+                                              Opacity="0.6"/>
+                        </Setter.Value>
+                    </Setter>
+
+                    <!-- 动画效果 -->
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
+                                                 To="1.03" Duration="0:0:0.15"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
+                                                 To="1.03" Duration="0:0:0.15"/>
+                                <ColorAnimation Storyboard.TargetProperty="Background.Color" 
+                                                To="LightGray" Duration="0:0:0.15"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" 
+                                                 To="1.0" Duration="0:0:0.15"/>
+                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" 
+                                                 To="1.0" Duration="0:0:0.15"/>
+                                <ColorAnimation Storyboard.TargetProperty="Background.Color" 
+                                                To="#dbdbdb" Duration="0:0:0.15"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
-    <GroupBox
+    <!--<GroupBox
         Width="Auto"
         materialDesign:ColorZoneAssist.Mode="Light"
         Style="{StaticResource MaterialDesignCardGroupBox}">
@@ -42,8 +93,7 @@
                  HorizontalScrollBarVisibility="Auto"
                  VerticalScrollBarVisibility="Auto"
                  RowHeaderWidth="0" >
-            <DataGrid.Columns>
-                <!--Binding="{Binding Title}"-->
+            <DataGrid.Columns> 
                 <DataGridTextColumn Binding="{Binding Code}" Header="{DynamicResource TestCode}" />
                 <DataGridTextColumn Binding="{Binding Name}" Header="{DynamicResource TestName}" />
                 <DataGridTextColumn Binding="{Binding Standard}" Header="{DynamicResource TestStandard}" />
@@ -71,5 +121,60 @@
                 <DataGridTextColumn IsReadOnly="True" Binding="{Binding CreateTime}" Header="{DynamicResource TestCreateTime}" />
             </DataGrid.Columns>
         </DataGrid>
-    </GroupBox>
+    </GroupBox>-->
+    <Grid>
+        <!-- 主内容区域 -->
+        <UniformGrid Columns="2" VerticalAlignment="Center" 
+                     HorizontalAlignment="Center"
+                     Background="Transparent"> 
+            <!-- 左侧卡片：测试 -->
+            <Border x:Name="LeftCard" Style="{StaticResource ChangeBorderStyle}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="MouseDown">
+                        <b:InvokeCommandAction Command="{Binding JumpToProjectCommand}" />
+                    </b:EventTrigger> 
+                </b:Interaction.Triggers>
+                <Border.RenderTransform>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Border.RenderTransform> 
+                <StackPanel>
+                    <Image Source="/Resources/mainpagetest.png" 
+                           Stretch="Fill"
+                           Width="600" Height="600" />
+                    <TextBlock Text="测试" FontSize="24"
+                               Foreground="#1296db"
+                               Width="Auto" Margin="30,15,0,15" />
+                    <TextBlock Text="创建新的样品并开始试验或者继续使用现有试样" FontSize="18" 
+                               Foreground="#515151"
+                               Width="Auto" Margin="30,15,0,15" />
+                </StackPanel>
+            </Border> 
+            <!-- 右侧卡片：方法 -->
+            <Border x:Name="RightCard" Style="{StaticResource ChangeBorderStyle}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="MouseDown">
+                        <b:InvokeCommandAction Command="{Binding JumpToMethodCommand}" />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+                <Border.RenderTransform>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Border.RenderTransform>
+                <StackPanel>
+                    <Border Width="600" Height="600" 
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <Image Source="/Resources/mainpagemethod.png" 
+                               Stretch="Fill"
+                               Width="300" Height="300" />
+                    </Border>
+                    <TextBlock Text="方法" FontSize="24"
+                               Foreground="#1296db"
+                               Width="Auto" Margin="30,15,0,15" />
+                    <TextBlock Text="编辑试验方法并创建新方法" FontSize="18" 
+                               Foreground="#515151"
+                               Width="Auto" Margin="30,15,0,15" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+    </Grid>
 </UserControl>
