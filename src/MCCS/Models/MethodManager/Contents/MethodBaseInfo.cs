@@ -1,50 +1,45 @@
-﻿namespace MCCS.Models.MethodManager
+﻿namespace MCCS.Models.MethodManager.Contents
 {
-    public class MethodItemViewModel : BindableBase
+    public class MethodBaseInfo
     {
-        private long _id;
-        public long Id
-        {
-            get => _id;
-            set => SetProperty(ref _id, value);
-        }
+        public long Id { get;  set; }
 
         /// <summary>
         /// 方法名称
         /// </summary> 
         private string _name;
-        public string Name 
-        { 
-            get => _name; 
+        public string Name
+        {
+            get => _name;
             set => SetProperty(ref _name, value);
         }
 
         /// <summary>
         /// 方法类型
         /// </summary>
-        private string _methodType; 
+        private string _methodType;
         public string MethodType
         {
-            get => _methodType; 
+            get => _methodType;
             set => SetProperty(ref _methodType, value);
         }
 
         /// <summary>
         /// 试验类型
         /// </summary>
-        private string _testType; 
+        private string _testType;
         public string TestType
         {
-            get => _testType; 
+            get => _testType;
             set => SetProperty(ref _testType, value);
-        } 
+        }
         /// <summary>
         /// 方法标准
         /// </summary> 
         private string _standard;
         public string Standard
         {
-            get => _standard; 
+            get => _standard;
             set => SetProperty(ref _standard, value);
         }
 
@@ -54,11 +49,11 @@
         private string _filePath;
         public string FilePath
         {
-            get => _filePath; 
+            get => _filePath;
             set => SetProperty(ref _filePath, value);
         }
 
-        private string _createTime; 
+        private string _createTime;
         public string CreateTime
         {
             get => _createTime;

@@ -37,19 +37,21 @@ namespace MCCS.ViewModels.Pages.StationSites
         {
             get => _selectedMenuItem;
             set
-            { 
-                SetProperty(ref _selectedMenuItem, value);
-                var targetView = _selectedMenuItem.Id switch
+            {
+                if (SetProperty(ref _selectedMenuItem, value))
                 {
-                    1 => StationSiteHardwarePageViewModel.Tag,
-                    2 => StationSiteControlChannelPageViewModel.Tag,
-                    3 => StationSiteHydraulicPageViewModel.Tag,
-                    4 => StationSitePseudoChannelPageViewModel.Tag,
-                    5 => StationSiteModel3DSettingPageViewModel.Tag,
-                    _ => "",
-                };
-                var paramters = new NavigationParameters { { "StationId", _stationId } };
-                _regionManager.RequestNavigate(GlobalConstant.StationSiteNavigateRegionName, new Uri(targetView, UriKind.Relative), paramters);
+                    var targetView = _selectedMenuItem.Id switch
+                    {
+                        1 => StationSiteHardwarePageViewModel.Tag,
+                        2 => StationSiteControlChannelPageViewModel.Tag,
+                        3 => StationSiteHydraulicPageViewModel.Tag,
+                        4 => StationSitePseudoChannelPageViewModel.Tag,
+                        5 => StationSiteModel3DSettingPageViewModel.Tag,
+                        _ => "",
+                    };
+                    var paramters = new NavigationParameters { { "StationId", _stationId } };
+                    _regionManager.RequestNavigate(GlobalConstant.StationSiteNavigateRegionName, new Uri(targetView, UriKind.Relative), paramters);
+                }
             }
         }
         #endregion

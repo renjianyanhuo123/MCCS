@@ -1,5 +1,6 @@
 ﻿using FreeSql;
 using MCCS.Core.Repositories;
+using MCCS.Core.Repositories.Method;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 
@@ -26,6 +27,8 @@ namespace MCCS.Modules
             //containerRegistry.Register<IChannelAggregateRepository, ChannelAggregateRepository>();
             containerRegistry.Register<IStationSiteAggregateRepository, StationSiteAggregateRepository>();
             containerRegistry.Register<ICurveAggregateRepository, CurveAggregateRepository>();
+
+            containerRegistry.Register<IMethodRepository, MethodRepository>();
             SeedData.InitialData(freesql);
         }
     }

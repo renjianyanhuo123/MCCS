@@ -166,11 +166,9 @@
             </Border>
             <ComboBox 
                 x:Name="SelectPageSize"
-                Tag="条/页"
+                Tag="条/页" 
                 SelectedItem="{Binding PageSize, Mode=TwoWay, Converter={StaticResource ComboBoxItemToIntConverter},ConverterParameter=条/页}"
                 Style="{StaticResource CustomComboBoxWithItemStyle}"
-                Width="78" 
-                Height="28" 
                 Margin="5 0 15 0">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="SelectionChanged">

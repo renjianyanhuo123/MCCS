@@ -7,10 +7,18 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
              xmlns:methodmanager="clr-namespace:MCCS.ViewModels.MethodManager" 
              d:DataContext="{d:DesignInstance Type=methodmanager:MethodMainPageViewModel}"
-             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:pagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction 
+                Command="{Binding LoadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
@@ -29,21 +37,24 @@
                     <DatePicker
                         Width="140"
                         materialDesign:HintAssist.Hint="开始时间"
+                        SelectedDate="{Binding StartTime, Mode=TwoWay}"
                         Style="{StaticResource MaterialDesignFilledDatePicker}" />
                     <TextBlock Text=" - "  VerticalAlignment="Center"></TextBlock>
                     <DatePicker
                         Width="140"
+                        SelectedDate="{Binding EndTime, Mode=TwoWay}"
                         materialDesign:HintAssist.Hint="结束时间"
                         Style="{StaticResource MaterialDesignFilledDatePicker}" />
                 </StackPanel>
                 <StackPanel Width="Auto"  Orientation="Horizontal" Margin="30,25,30,25">
-                    <TextBlock Text="项目名称：" FontSize="14"  VerticalAlignment="Center"></TextBlock>
-                    <TextBox Width="100" FontSize="14"/>
+                    <TextBlock Text="方法名称：" FontSize="14"  VerticalAlignment="Center"></TextBlock>
+                    <TextBox Text="{Binding MethodName}" Width="100" FontSize="14"/>
                 </StackPanel>
                 <StackPanel Width="Auto"  Orientation="Horizontal" Margin="30,20,30,20">
                     <Button
                         Width="80"
                         Content="查询" 
+                        Command="{Binding SearchCommand}"
                         Style="{StaticResource MaterialDesignFlatLightBgButton}"
                         ToolTip="查询" />
                     <Button
@@ -59,12 +70,14 @@
                         VerticalAlignment="Center">
                 <Button
                     Content="{materialDesign:PackIcon Plus}"
-                    ToolTip="Icon" 
+                    Command="{Binding AddMethodCommand}"
+                    ToolTip="添加方法" 
                     Margin="0,0,15,0"/>
                 <Button
                     Content="{materialDesign:PackIcon Import}"
+                    Command="{Binding ImportMethod}"
                     Style="{StaticResource MaterialDesignOutlinedButton}"
-                    ToolTip="Icon" /> 
+                    ToolTip="导入方法" /> 
             </StackPanel>
         </Grid>
         <DataGrid
@@ -86,13 +99,34 @@
                 <DataGridTemplateColumn Header="操作"  Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="编辑" Width="100"
-                                Command="{Binding DataContext.EditStationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                CommandParameter="{Binding StationId}"></Button>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="编辑" Width="100"
+                                        Command="{Binding DataContext.EditMethodCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding Id}" />
+                                <Button Content="删除" Width="100"
+                                        Margin="15,0,0,0"
+                                        Click="Delete_OnClick"
+                                        Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                                        Tag="{Binding Id}" />
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
+
+        <StackPanel Grid.Row="2" 
+                    Margin="15"
+                    HorizontalAlignment="Right">
+            <pagination:PaginationUserControl 
+                x:Name="PaginationUserControl" 
+                ShowTotal="True"
+                Width="Auto" 
+                Height="Auto" 
+                Total="{Binding DataContext.TotalCount, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                DefaultPageSize="10"
+                DefaultCurrentPage="6"
+                PageChangedCommand="{Binding DataContext.PageChangedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+        </StackPanel>
     </Grid>
 </UserControl>

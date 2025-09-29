@@ -14,9 +14,13 @@
         <ListBox
             Grid.Column="0">
             <TextBlock
-                Text="普通试验员" />
+                Text="普通试验员"
+                FontSize="14" 
+                Margin="25,8,8,8"/>
             <TextBlock
-                Text="试验管理员" />
+                Text="试验管理员"
+                FontSize="14" 
+                Margin="25,8,8,8"/>
         </ListBox>
         <StackPanel Grid.Column="1">
             <Expander Header="系统管理"></Expander>

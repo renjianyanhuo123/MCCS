@@ -17,5 +17,7 @@
         public static readonly string StationSiteMainPageRegionName = "StationSiteMainPageRegion";
 
         public static readonly string StationSiteNavigateRegionName = "StationSiteNavigateRegion";
+
+        public static readonly string MethodNavigateRegionName = "MethodNavigateRegion";
     }
 }

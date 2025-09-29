@@ -43,21 +43,22 @@
     <!-- Custom Style for the ComboBox -->
     <Style x:Key="CustomComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Foreground" Value="#666"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="12"/> 
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
                         <ToggleButton Name="ToggleButton"
+                                      Width="80"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 Background="{TemplateBinding Background}"
                                 IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                 Focusable="False">
                             <ToggleButton.Template>
                                 <ControlTemplate TargetType="ToggleButton">
-                                    <Border x:Name="SelectorBorder"
+                                    <Border x:Name="SelectorBorder" 
                                         CornerRadius="5"
-                                        BorderThickness="1"
+                                        BorderThickness="1" 
                                         BorderBrush="#EFEFEF"
                                         Background="White">
                                         <Grid>

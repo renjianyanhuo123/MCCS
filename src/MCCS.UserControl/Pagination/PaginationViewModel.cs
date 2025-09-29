@@ -31,8 +31,8 @@ namespace MCCS.UserControl.Pagination
         }
         public int CurrentPage
         {
-            get;
-            set;
+            get => _currentPage;
+            set => SetProperty(ref _currentPage, value);
         }
 
         public int PageSize
@@ -53,7 +53,7 @@ namespace MCCS.UserControl.Pagination
             {
                 if (_total == value) return;
                 SetProperty(ref _total, value);
-                // UpdateSelectorUnits();
+                UpdateSelectorUnits();
             }
         }
 
@@ -129,7 +129,7 @@ namespace MCCS.UserControl.Pagination
             {
                 CurrentPage = 1;
             }
-            _selectorUnits.Clear();
+            SelectorUnits.Clear();
             for (var i = 1; i <= TotalPages; i++)
             {
                 // 以当前页为中心，前后各显示2页;总共为5页
@@ -139,7 +139,7 @@ namespace MCCS.UserControl.Pagination
                     {
                         for (var j = i; j <= CurrentPage; j++)
                         {
-                            _selectorUnits.Add(new SelectorUnitViewModel
+                            SelectorUnits.Add(new SelectorUnitViewModel
                             {
                                 IsSelected = j == CurrentPage,
                                 Num = j,
@@ -149,20 +149,20 @@ namespace MCCS.UserControl.Pagination
                     }
                     else
                     {
-                        _selectorUnits.Add(new SelectorUnitViewModel
+                        SelectorUnits.Add(new SelectorUnitViewModel
                         {
                             IsSelected = i == CurrentPage,
                             Num = 1,
                             Type = UnitTypeEnum.TextBlock
                         });
-                        _selectorUnits.Add(new SelectorUnitViewModel
+                        SelectorUnits.Add(new SelectorUnitViewModel
                         {
                             IsSelected = false,
                             Type = UnitTypeEnum.Image
                         });
                         for (var j = CurrentPage - 2; j <= CurrentPage; j++)
                         {
-                            _selectorUnits.Add(new SelectorUnitViewModel
+                            SelectorUnits.Add(new SelectorUnitViewModel
                             {
                                 IsSelected = j == CurrentPage,
                                 Num = j,
@@ -178,20 +178,20 @@ namespace MCCS.UserControl.Pagination
                     {
                         for (var j = i; j <= CurrentPage + 2; j++)
                         {
-                            _selectorUnits.Add(new SelectorUnitViewModel
+                            SelectorUnits.Add(new SelectorUnitViewModel
                             {
                                 IsSelected = i == CurrentPage,
                                 Num = j,
                                 Type = UnitTypeEnum.TextBlock
                             });
                         }
-                        _selectorUnits.Add(new SelectorUnitViewModel
+                        SelectorUnits.Add(new SelectorUnitViewModel
                         {
                             IsSelected = false,
                             Num = i,
                             Type = UnitTypeEnum.Image
                         });
-                        _selectorUnits.Add(new SelectorUnitViewModel
+                        SelectorUnits.Add(new SelectorUnitViewModel
                         {
                             IsSelected = false,
                             Num = _totalPages,
@@ -202,7 +202,7 @@ namespace MCCS.UserControl.Pagination
                     {
                         for (var j = i; j <= _totalPages; j++)
                         {
-                            _selectorUnits.Add(new SelectorUnitViewModel
+                            SelectorUnits.Add(new SelectorUnitViewModel
                             {
                                 IsSelected = j == CurrentPage,
                                 Num = j,

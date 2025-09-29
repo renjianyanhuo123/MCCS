@@ -26,10 +26,14 @@ using MCCS.ViewModels.Pages.StationSites.ControlChannels;
 using MCCS.Views.Pages.StationSites.ControlChannels;
 using MCCS.Services.StartInitial;
 using MCCS.ViewModels;
+using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.MethodManager;
+using MCCS.ViewModels.MethodManager.Contents;
 using MCCS.Views.ProjectManager;
 using MCCS.ViewModels.ProjectManager;
+using MCCS.Views.Dialogs.Method;
 using MCCS.Views.MethodManager;
+using MCCS.Views.MethodManager.Contents;
 
 namespace MCCS
 {
@@ -103,7 +107,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
             // Dialogs
-            containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
+            // containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);
@@ -111,6 +115,8 @@ namespace MCCS
             containerRegistry.RegisterDialog<AddHardwareDialog>(AddHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditHardwareDialog>(EditHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditControlChannelPage>(EditControlChannelPageViewModel.Tag);
+            // Dialog  Methods
+            containerRegistry.RegisterDialog<AddMethodDialog>(AddMethodDialogViewModel.Tag);
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);
@@ -120,7 +126,10 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSiteModel3DSettingPage>(StationSiteModel3DSettingPageViewModel.Tag);
             // Projects
             containerRegistry.RegisterForNavigation<ProjectMainPage>(ProjectMainPageViewModel.Tag);
+            // Methods
             containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MethodContentPage>(MethodContentPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
         }
 
         /// <summary>
