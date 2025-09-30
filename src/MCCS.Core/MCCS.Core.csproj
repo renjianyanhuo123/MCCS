@@ -13,6 +13,7 @@
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.108" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <PackageReference Include="WorkflowCore" Version="3.16.0" />
   </ItemGroup>
 
   <ItemGroup>

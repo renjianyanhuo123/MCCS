@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows;
 using Serilog;
 using System.Windows.Threading;
+using DryIoc.Microsoft.DependencyInjection;
 using MCCS.Core.Repositories;
 using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
@@ -34,6 +35,7 @@ using MCCS.ViewModels.ProjectManager;
 using MCCS.Views.Dialogs.Method;
 using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MCCS
 {
@@ -83,7 +85,11 @@ namespace MCCS
             containerRegistry.RegisterInstance<ILogger>(logger);
             var configuration = builder.Build();
             // 注册服务 
-            
+            var container = containerRegistry.GetContainer();
+            // 创建 IServiceCollection
+            var services = new ServiceCollection(); 
+            services.AddWorkflow();
+            container.Populate(services);
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
             containerRegistry.AddRepository(configuration);

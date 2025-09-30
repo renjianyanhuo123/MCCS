@@ -2,18 +2,13 @@
 
 namespace MCCS.Common.DataManagers.StationSites
 {
-    public sealed class StationSiteControllerSignalInfo
+    [method: JsonConstructor]
+    public sealed class StationSiteControllerSignalInfo(
+        long id,
+        string name)
     {
-        [JsonConstructor]
-        public StationSiteControllerSignalInfo(long id,
-            string name)
-        {
-            Id = id;
-            Name = name;
-        }
-
-        public long Id { get; }
-        public string Name { get; }
+        public long Id { get; } = id;
+        public string Name { get; } = name;
 
         public StationSiteDeviceInfo? LinkedDevice { get; private set; }
 

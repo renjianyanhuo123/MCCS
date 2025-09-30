@@ -19,6 +19,13 @@ namespace MCCS.Core.Repositories.Method
             return rows > 0;
         }
 
+        public async Task<MethodModel> GetMethodAsync(long id)
+        {
+            return await freeSql.Select<MethodModel>()
+                .Where(c => c.Id == id)
+                .ToOneAsync();
+        }
+
         public async Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression)
         {
             return await freeSql.Select<MethodModel>()

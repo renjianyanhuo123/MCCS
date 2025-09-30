@@ -6,6 +6,8 @@ namespace MCCS.Core.Repositories.Method
 {
     public interface IMethodRepository
     {
+        Task<MethodModel> GetMethodAsync(long id);
+
         Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression);
 
         Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression);

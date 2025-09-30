@@ -1,4 +1,5 @@
 ﻿using MCCS.Collecter.HardwareDevices;
+using MCCS.Common.DataManagers.Methods;
 using MCCS.Common.DataManagers.StationSites;
 
 namespace MCCS.Common.DataManagers
@@ -15,6 +16,10 @@ namespace MCCS.Common.DataManagers
         /// </summary>
         public StationSiteInfo? StationSiteInfo { get; private set; }
         /// <summary>
+        /// 当前编辑的方法信息
+        /// </summary>
+        public MethodContentItemModel? MethodInfo { get; private set; }
+        /// <summary>
         /// 所有硬件的连接状态
         /// </summary>
         public List<IControllerHardwareDevice>? HardwareDevices { get; private set; }
@@ -25,6 +30,9 @@ namespace MCCS.Common.DataManagers
             {
                 case StationSiteInfo stationSiteInfo:
                     StationSiteInfo = stationSiteInfo;
+                    break;
+                case MethodContentItemModel methodContentItemModel:
+                    MethodInfo = methodContentItemModel;
                     break;
                 case List<IControllerHardwareDevice> hardwareDevices:
                     HardwareDevices = hardwareDevices;

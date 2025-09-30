@@ -5,34 +5,109 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.MethodManager"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:prism="http://prismlibrary.com/" 
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:contents="clr-namespace:MCCS.ViewModels.MethodManager.Contents"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:methods="clr-namespace:MCCS.Converters.Methods"
+             d:DataContext="{d:DesignInstance Type=contents:MethodBaseInfoPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <UserControl.Resources>
+        <methods:TestTypeEnumToStringConverter x:Key="TestTypeEnumToStringConverter" />
+    </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction 
+                Command="{Binding LoadCommand}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <Grid Margin="30">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="0.4*"></ColumnDefinition>
             <ColumnDefinition Width="0.6*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBlock
             Grid.Row="0"
             Grid.Column="0"
             Padding="0,16"
             VerticalAlignment="Center"
-            Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
-            Text="试验类型: " />
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="方法编号: " />
         <TextBlock
             Grid.Row="0"
             Grid.Column="1"
             Padding="0,16"
             VerticalAlignment="Center"
-            Style="{StaticResource MaterialDesignHeadlineMediumTextBlock}"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="{Binding Code}" />
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            Padding="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="方法名称: " />
+        <TextBox
+            Grid.Row="1"
+            Grid.Column="1" 
+            materialDesign:HintAssist.Hint=""
+            Style="{StaticResource MaterialDesignFilledTextBox}"
+            Text="{Binding Name}"/>
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="0"
+            Padding="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
             Text="试验类型: " />
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="1"
+            Padding="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="{Binding TestType, Converter={StaticResource TestTypeEnumToStringConverter}}"/>
+        <TextBlock
+            Grid.Row="3"
+            Grid.Column="0"
+            Padding="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="标准: " />
+        <TextBox
+            Grid.Row="3"
+            Grid.Column="1" 
+            materialDesign:HintAssist.Hint=""
+            Style="{StaticResource MaterialDesignFilledTextBox}"
+            Text="{Binding Standard, Mode=TwoWay}"/>
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Padding="0,16"
+            VerticalAlignment="Center"
+            Style="{StaticResource MaterialDesignTitleMediumTextBlock}"
+            Text="备注: " />
+        <TextBox 
+            Grid.Row="5"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Height="300"
+            VerticalAlignment="Center" 
+            AcceptsReturn="True" 
+            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+            TextWrapping="Wrap"
+            VerticalScrollBarVisibility="Auto"
+            Text="{Binding Remark}"/>
         <!--<TextBox
             Grid.Row="0"
             Grid.Column="1"
