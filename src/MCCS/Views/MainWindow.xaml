@@ -48,5 +48,19 @@
             </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
+
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl x:Name="FlyoutsControl">
+            <mah:Flyout x:Name="TestCommandFlyout"
+                        IsOpen="{Binding IsOpenFlyout}"
+                        Header="{Binding RightFlyoutName, Mode=OneWay}"
+                        Position="Right"
+                        Theme="Adapt">
+                <Grid Width="400" Margin="10">
+                    <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.RightFlyoutRegionName}" />
+                </Grid>
+            </mah:Flyout>
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
     <ContentControl prism:RegionManager.RegionName="{x:Static local:GlobalConstant.StartUpRegionName}"></ContentControl>
 </mah:MetroWindow>

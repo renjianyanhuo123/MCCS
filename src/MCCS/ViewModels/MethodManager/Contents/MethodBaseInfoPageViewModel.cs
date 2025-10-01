@@ -1,4 +1,5 @@
-﻿using MCCS.Common.DataManagers;
+﻿using MaterialDesignThemes.Wpf;
+using MCCS.Common.DataManagers;
 using MCCS.Core.Models.MethodManager;
 using MCCS.Core.Repositories.Method;
 
@@ -83,7 +84,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         {
             get => _code;
             set => SetProperty(ref _code, value);
-        }
+        } 
 
         private string _remark;
         public string Remark

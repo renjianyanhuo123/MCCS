@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MCCS.ViewModels.MethodManager.Contents
+﻿namespace MCCS.ViewModels.MethodManager.Contents
 {
-    internal class MethodWorkflowSettingPageViewModel
+    public sealed class MethodWorkflowSettingPageViewModel : BaseViewModel
     {
+        public const string Tag = "MethodWorkflowSettingPage";
+
+        public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        {
+        }
     }
 }

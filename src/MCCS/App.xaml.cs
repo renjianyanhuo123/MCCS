@@ -13,6 +13,7 @@ using MCCS.Core.Devices;
 using MCCS.Core.Devices.Connections;
 using MCCS.Core.Devices.Manager;
 using MCCS.Core.Models.Devices;
+using MCCS.Core.WorkflowSettings;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Common;
 using MCCS.ViewModels.Pages.StationSites;
@@ -30,11 +31,13 @@ using MCCS.ViewModels;
 using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
+using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.Views.ProjectManager;
 using MCCS.ViewModels.ProjectManager;
 using MCCS.Views.Dialogs.Method;
 using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
+using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MCCS
@@ -83,12 +86,11 @@ namespace MCCS
             // 确保是
             Log.Logger = logger;
             containerRegistry.RegisterInstance<ILogger>(logger);
-            var configuration = builder.Build();
-            // 注册服务 
-            var container = containerRegistry.GetContainer();
+            var configuration = builder.Build(); 
             // 创建 IServiceCollection
-            var services = new ServiceCollection(); 
-            services.AddWorkflow();
+            var container = containerRegistry.GetContainer();
+            var services = new ServiceCollection();
+            services.AddWorkflowSteps(configuration); 
             container.Populate(services);
             // 2. 将 IConfiguration 注册到容器
             containerRegistry.RegisterInstance<IConfiguration>(configuration);
@@ -136,6 +138,8 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodContentPage>(MethodContentPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
         }
 
         /// <summary>

@@ -27,7 +27,7 @@ namespace MCCS.ViewModels.MethodManager
                 new MethodMenuItemModel { Name = "试样", Id = 2 },
                 new MethodMenuItemModel { Name = "测量变量", Id = 3 },
                 new MethodMenuItemModel { Name = "计算和结果变量", Id = 4 },
-                new MethodMenuItemModel { Name = "工作流配置", Id = 5 }
+                new MethodMenuItemModel { Name = "工作流配置", Id = 5, Url = MethodWorkflowSettingPageViewModel.Tag }
             ];
             _regionManager = regionManager;
             _methodRepository = methodRepository;

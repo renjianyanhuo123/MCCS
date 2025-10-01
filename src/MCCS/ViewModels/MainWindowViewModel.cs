@@ -1,7 +1,11 @@
 ﻿using System.Windows;
+using MahApps.Metro.Controls;
 using MCCS.Core.Repositories;
+using MCCS.Events.Common;
 using MCCS.Events.StartUp;
 using MCCS.ViewModels.Pages;
+using MCCS.ViewModels.Pages.WorkflowSteps;
+using Prism.Navigation.Regions;
 
 namespace MCCS.ViewModels
 {
@@ -61,10 +65,25 @@ namespace MCCS.ViewModels
             set => SetProperty(ref _showCloseButton, value);
         }
 
+        private bool _isOpenFlyout = false;
+        public bool IsOpenFlyout
+        {
+            get => _isOpenFlyout;
+            set => SetProperty(ref _isOpenFlyout, value);
+        }
+
+        private string _rightFlyoutName = string.Empty;
+        public string RightFlyoutName
+        {
+            get => _rightFlyoutName;
+            set => SetProperty(ref _rightFlyoutName, value);
+        }
         #endregion
 
         #region Command 
-        public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
+        public DelegateCommand LoadCommand { get; }
+
+        public DelegateCommand<Flyout> OpenTestFlyoutCommand { get; }
         #endregion
 
         #region PrivateMethod 
@@ -73,7 +92,36 @@ namespace MCCS.ViewModels
             ShowTitleBar = false;
             ShowCloseButton = false; 
             _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(SplashPageViewModel.Tag, UriKind.Relative));
-        } 
+        }
+        private void JumpToMainPage(FinishStartUpNotificationEventParam param)
+        {
+            if (param.IsSuccess)
+            {
+                ShowTitleBar = true;
+                // 注意: 这里的顺序不能乱
+                WindowState = WindowState.Maximized;
+                ShowCloseButton = true;
+                _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(MainContentPageViewModel.Tag, UriKind.Relative));
+            }
+        }
+
+        /// <summary>
+        /// 打开右侧Modal
+        /// </summary>
+        /// <param name="param"></param>
+        private void OnOpenRightFlyout(OpenRightFlyoutEventParam param)
+        {
+            IsOpenFlyout = true;
+            switch (param.Type)
+            {
+                case RightFlyoutTypeEnum.WorkflowSetting: 
+                    RightFlyoutName = "工作流配置";
+                    _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative));
+                    break;
+                default:
+                    break;
+            }
+        }
         #endregion
 
         public MainWindowViewModel(
@@ -85,18 +133,9 @@ namespace MCCS.ViewModels
             ShowCloseButton = false;
             _regionManager = regionManager; 
             _eventAggregator.GetEvent<FinishStartUpNotificationEvent>().Subscribe(JumpToMainPage);
-        }
-
-        private void JumpToMainPage(FinishStartUpNotificationEventParam param)
-        {
-            if (param.IsSuccess)
-            {
-                ShowTitleBar = true;
-                // 注意: 这里的顺序不能乱
-                WindowState = WindowState.Maximized;
-                ShowCloseButton = true; 
-                _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(MainContentPageViewModel.Tag, UriKind.Relative));
-            }
-        }
+            _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
+            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
+            OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
+        } 
     }
 }

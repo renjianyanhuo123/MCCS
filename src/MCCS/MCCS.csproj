@@ -9,13 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Views\Pages\新文件夹\**" />
     <Compile Remove="Views\新文件夹\**" />
-    <EmbeddedResource Remove="Views\Pages\新文件夹\**" />
     <EmbeddedResource Remove="Views\新文件夹\**" />
-    <None Remove="Views\Pages\新文件夹\**" />
     <None Remove="Views\新文件夹\**" />
-    <Page Remove="Views\Pages\新文件夹\**" />
     <Page Remove="Views\新文件夹\**" />
   </ItemGroup>
 
