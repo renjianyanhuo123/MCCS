@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using MCCS.WorkflowSetting.Models.Nodes;
+using System.Windows;
+using MCCS.WorkflowSetting;
+using System.Windows.Controls;
+using MCCS.WorkflowSetting.Models.Edges;
 
 namespace MCCS.Example
 {
@@ -11,5 +15,14 @@ namespace MCCS.Example
         { 
             InitializeComponent();
         }
+
+
+        private void BtnRender_OnClick(object sender, RoutedEventArgs e)
+        {
+            var graph = new WorkflowGraph(workflowCanvas.Width, workflowCanvas.Height);
+            // 6. 渲染
+            var renderer = new WorkflowCanvasRenderer(workflowCanvas);
+            renderer.RenderWorkflow(graph);
+        } 
     }
 }

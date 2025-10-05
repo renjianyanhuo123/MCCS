@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="MCCS.WorkflowSetting.Components.WorkflowAddOperationNode"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Border Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+            CornerRadius="50"
+            MouseLeftButtonDown="OnMouseLeftButtonDown">
+        <Border.Style>
+            <Style TargetType="Border">
+                <!-- 设置默认背景色 -->
+                <Setter Property="Background" Value="#CCCCCC"/>
+                <Setter Property="Cursor" Value="Hand" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#757575"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <!-- 加号图片 -->
+        <Image Source="/MCCS.WorkflowSetting;component/Resources/plus.png" 
+               Width="16" Height="16" 
+               VerticalAlignment="Center" 
+               HorizontalAlignment="Center" />
+    </Border>
+</UserControl>

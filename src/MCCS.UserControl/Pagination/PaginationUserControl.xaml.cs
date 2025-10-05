@@ -7,7 +7,7 @@ namespace MCCS.UserControl.Pagination
     /// <summary>
     /// PaginationUserControl.xaml 的交互逻辑
     /// </summary>
-    public partial class PaginationUserControl : System.Windows.Controls.UserControl
+    public partial class PaginationUserControl
     {
         private PaginationViewModel _viewModel;
 

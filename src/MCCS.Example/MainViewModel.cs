@@ -59,5 +59,6 @@ namespace MCCS.Example
         ];
 
         public ObservableCollection<TransferItemModel> TargetList { get; } = [];
+
     }
 }
