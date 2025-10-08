@@ -93,7 +93,8 @@
                             <!-- 点击事件行为 -->
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="MouseLeftButtonUp">
-                                    <i:InvokeCommandAction Command="{Binding DataContext.JumpToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding Num}"/>
+                                    <i:InvokeCommandAction Command="{Binding DataContext.JumpToPageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                           CommandParameter="{Binding Num}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                             <Border.Style>

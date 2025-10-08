@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Components.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:WorkflowStepNodeViewModel}"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Models.Nodes" d:DataContext="{d:DesignInstance Type=viewmodels:StepNode}"
              mc:Ignorable="d" 
              x:Name="WorkflowStepNodeRoot"
              d:DesignHeight="110" d:DesignWidth="260">
@@ -48,8 +48,8 @@
             CornerRadius="8" 
             BorderBrush="#E0E0E0" 
             BorderThickness="1"
-            Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            Width="{Binding Width}" 
+            Height="{Binding Height}">
         <Border.Effect>
             <DropShadowEffect Color="Gray" 
                             Opacity="0.2" 
@@ -155,7 +155,7 @@
             </Popup>
             <!-- 橙色标题栏 -->
             <Border Grid.Row="0" 
-                    Background="{Binding TitleBackground, ElementName=WorkflowStepNodeRoot}" 
+                    Background="{Binding TitleBackground}" 
                     CornerRadius="8,8,0,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -164,8 +164,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- 右上角三个点 -->
-                    <StackPanel 
-                                Grid.Row="0"
+                    <StackPanel Grid.Row="0"
                                 Orientation="Horizontal" 
                                 HorizontalAlignment="Right"  
                                 Cursor="Hand" 
@@ -183,7 +182,7 @@
                     </StackPanel>
 
                     <!-- 标题文本 -->
-                    <TextBlock Grid.Row="1" Text="{Binding Title, ElementName=WorkflowStepNodeRoot}" 
+                    <TextBlock Grid.Row="1" Text="{Binding Title}" 
                                Foreground="White" 
                                FontSize="14" 
                                FontWeight="Bold"
@@ -211,7 +210,7 @@
             <!-- 图标内容 (文件图标) -->
             <Path Grid.Row="0"
                   Data="M12,2 L12,8 L18,8 L18,20 L6,20 L6,2 Z M12,2 L18,8 L12,8 Z"
-                  Fill="{Binding TitleBackground, ElementName=WorkflowStepNodeRoot}"
+                  Fill="{Binding TitleBackground}"
                   Stretch="Uniform"
                   Panel.ZIndex="4"
                   Width="20"

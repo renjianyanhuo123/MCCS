@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
              mc:Ignorable="d" 
-             d:DesignHeight="85" d:DesignWidth="260">
+             xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
+             d:DesignHeight="85" d:DesignWidth="260" d:DataContext="{d:DesignInstance localViewModel:BranchNode}">
     <UserControl.Resources>
         <!-- 卡片样式 -->
         <Style x:Key="CardStyle" TargetType="Border">
@@ -44,8 +45,8 @@
         </Style>
     </UserControl.Resources>
     <Border Style="{StaticResource CardStyle}" 
-            Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}">
+            Width="{Binding Width}" 
+            Height="{Binding Height}">
         <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

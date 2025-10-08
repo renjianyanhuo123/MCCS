@@ -1,18 +1,7 @@
 ﻿namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class DecisionNode : BaseNode
-    {
-        public DecisionNode(string name, 
-            NodeTypeEnum type, 
-            double width,  
-            double height,
-            int level = 0, 
-            int order = -1) : base(name, type, width, height, level, order)
-        {
-            VirtualWidth = width;
-            VirtualHeight = height;
-        }
-
+    { 
         /// <summary>
         /// 虚拟宽度
         /// </summary>

@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="新文件夹\**" />
+    <EmbeddedResource Remove="新文件夹\**" />
+    <None Remove="新文件夹\**" />
+    <Page Remove="新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\ellipse.png" />
     <None Remove="Resources\plus.png" />
     <None Remove="Resources\WorkflowEnd.png" />

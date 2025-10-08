@@ -1,4 +1,6 @@
-﻿namespace MCCS.WorkflowSetting.Components
+﻿using MCCS.WorkflowSetting.Models.Nodes;
+
+namespace MCCS.WorkflowSetting.Components
 {
     /// <summary>
     /// WorkflowStartAndEndNode.xaml 的交互逻辑
@@ -8,6 +10,7 @@
         public WorkflowEndNode()
         {
             InitializeComponent();
+            DataContext = new EndNode();
         }
     }
 }

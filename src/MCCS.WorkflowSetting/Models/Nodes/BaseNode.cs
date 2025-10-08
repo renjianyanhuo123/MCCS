@@ -5,37 +5,8 @@ using MCCS.WorkflowSetting.Components.ViewModels;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class BaseNode : BindingBase
-    {
-        public BaseNode(
-            string name, 
-            NodeTypeEnum type, 
-            double width, 
-            double height, 
-            int level = 0,
-            int order = -1):this(name, width, height, level, order)
-        {  
-            Type = type;
-            Content = CreateContent();
-            Content.Width = width;
-            Content.Height = height;
-        }
-
-        public BaseNode(
-            string name, 
-            double width,
-            double height,
-            int level = 0,
-            int order = -1)
-        {
-            Id = Guid.NewGuid().ToString("N");
-            Name = name; 
-            Width = width;
-            Height = height;
-            Order = order;
-            Level = level; 
-        }
-
-        public string Id { get; private set; }
+    {  
+        public string Id { get; private set; } = Guid.NewGuid().ToString("N");
         public int Index { get; set; }
         public bool IsRender { get; set; }
 
@@ -48,9 +19,20 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// 000001
         /// </summary>
         public string Code { get; set; } = string.Empty;
-        public string Name { get; private set; }
-        public double Width { get; private set; }
-        public double Height { get; private set; }
+        public string Name { get; set; } = string.Empty;
+
+        private double _width = 0; 
+        public double Width
+        {
+            get => _width; 
+            set => SetProperty(ref _width, value);
+        }
+
+        private double _height = 0;
+        public double Height { 
+            get => _height; 
+            set => SetProperty(ref _height, value);
+        }
         /// <summary>
         /// 根节点默认为-1，其他节点表示其自身在同一父级中的顺序；从1开始
         /// </summary>
@@ -67,12 +49,10 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _position;
             set
             {
-                if (_position != value)
+                if (SetProperty(ref _position, value))
                 {
-                    _position = value;
                     CenterPoint = new Point(_position.X + Width / 2, _position.Y + Height / 2);
-                }
-
+                } 
             }
         }
 
@@ -80,26 +60,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// 中心点坐标
         /// </summary>
         public Point CenterPoint { get; private set; }
-        public NodeTypeEnum Type { get; set; } 
-        public FrameworkElement Content { get; protected set; }
-
-        private FrameworkElement CreateContent()
-        {
-            switch (Type)
-            {
-                case NodeTypeEnum.Start:
-                    return new WorkflowStartNode();
-                case NodeTypeEnum.End:
-                    return new WorkflowEndNode();
-                case NodeTypeEnum.Process:
-                    return new WorkflowStepNode();
-                case NodeTypeEnum.Decision:
-                    return new WorkflowDecisionNode();
-                case NodeTypeEnum.Action:
-                    return new WorkflowAddOperationNode();
-                default:
-                    return new WorkflowStepNode();
-            }
-        }
+        public NodeTypeEnum Type { get; set; }  
     }
 }

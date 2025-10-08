@@ -1,5 +1,4 @@
 ﻿using System.Windows.Controls;
-using MahApps.Metro.Controls;
 using MCCS.Events.Common;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting;
@@ -49,9 +48,9 @@ namespace MCCS.ViewModels.MethodManager.Contents
             if (_methodId == -1) throw new ArgumentNullException("No MethodId!"); 
             if (param is Canvas designCanvas)
             {
-                var graph = new WorkflowGraph(designCanvas.Width, designCanvas.Height, ExecuteShowSteps);
-                _workflowCanvasRenderer.Initialize(designCanvas);
-                _workflowCanvasRenderer.RenderWorkflow(graph);
+                //var graph = new WorkflowGraph(designCanvas.Width, designCanvas.Height, ExecuteShowSteps);
+                //_workflowCanvasRenderer.Initialize(designCanvas);
+                //_workflowCanvasRenderer.RenderWorkflow(graph);
             }
         }
         #endregion

@@ -4,13 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
+             xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
              mc:Ignorable="d" 
-             d:DesignHeight="34" d:DesignWidth="34">
+             d:DesignHeight="34" d:DesignWidth="34" d:DataContext="{d:DesignInstance localViewModel:DecisionNode}">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <!-- 中心节点：旋转的Border内含图片 -->
         <Border 
-            Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+            Width="{Binding Width}" 
+            Height="{Binding Height}" 
             BorderBrush="#2196F3" 
             BorderThickness="2"
             CornerRadius="5"

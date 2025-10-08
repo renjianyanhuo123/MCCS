@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.WorkflowSetting.Components
 {
@@ -11,25 +10,7 @@ namespace MCCS.WorkflowSetting.Components
         public WorkflowAddOperationNode()
         {
             InitializeComponent();
-        }
-
-        #region Command Event
-        public static readonly DependencyProperty AddOpCommandProperty =
-            DependencyProperty.Register(
-                nameof(AddOpCommand),
-                typeof(ICommand),
-                typeof(WorkflowAddOperationNode));
-
-        public ICommand AddOpCommand
-        {
-            get => (ICommand)GetValue(AddOpCommandProperty);
-            set => SetValue(AddOpCommandProperty, value);
-        }
-        #endregion
-
-        private void OnMouseLeftButtonDown(object sender, RoutedEventArgs e)
-        {
-            AddOpCommand?.Execute(null);
+            DataContext = new AddOpNode();
         }
     }
 }

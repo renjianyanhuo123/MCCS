@@ -5,11 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Border Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-            CornerRadius="50"
-            MouseLeftButtonDown="OnMouseLeftButtonDown">
+             xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance localViewModel:AddOpNode}">
+    <Border Width="{Binding Width}" 
+            Height="{Binding Height}" 
+            CornerRadius="50" >
         <Border.Style>
             <Style TargetType="Border">
                 <!-- 设置默认背景色 -->

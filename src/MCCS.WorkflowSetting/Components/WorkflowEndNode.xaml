@@ -4,10 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
+             xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
              mc:Ignorable="d" 
-             d:DesignHeight="80" d:DesignWidth="112">
-    <Grid  Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-           Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}" >
+             d:DesignHeight="80" d:DesignWidth="112" d:DataContext="{d:DesignInstance localViewModel:EndNode}">
+    <Grid  Width="{Binding Width}" 
+           Height="{Binding Height}" >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

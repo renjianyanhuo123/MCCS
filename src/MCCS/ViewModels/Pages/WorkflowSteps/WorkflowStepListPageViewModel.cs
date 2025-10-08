@@ -1,8 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Media;
 using MCCS.Models.MethodManager;
 using MCCS.WorkflowSetting;
-using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.ViewModels.Pages.WorkflowSteps
 {
@@ -54,7 +52,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
         #region Private Method 
         private void ExecuteSelectStepCommand(WorkflowSettingItemModel param)
         {
-            _workflowCanvasRenderer.AddProcessNodeRender(new StepNode("StepNode", param.Name, new SolidColorBrush(Color.FromRgb(255, 163, 64)), 260, 110));
+            // _workflowCanvasRenderer.AddProcessNodeRender(new StepNode("StepNode", param.Name, new SolidColorBrush(Color.FromRgb(255, 163, 64)), 260, 110));
         }
         #endregion
     }

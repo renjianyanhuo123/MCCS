@@ -2,7 +2,7 @@
 
 namespace MCCS.Example
 {
-    public class PageChangedParamTest:BindingBase
+    public class PageChangedParamTest : BindingBase
     {
         private int _pageSize;
         private int _currentPage;

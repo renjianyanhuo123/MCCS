@@ -35,8 +35,7 @@ namespace MCCS.Example
             set => SetProperty(ref _sourceName, value);
         }
 
-        private string _targetName = "2132131";
-
+        private string _targetName = "2132131"; 
         public string TargetName
         {
             get => _targetName;

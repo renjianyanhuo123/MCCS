@@ -1,5 +1,4 @@
 ﻿using System.Windows.Input;
-using MCCS.UserControl;
 
 namespace MCCS.WorkflowSetting.Components.ViewModels
 {
