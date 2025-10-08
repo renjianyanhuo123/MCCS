@@ -19,9 +19,10 @@ namespace MCCS.Example
 
         private void BtnRender_OnClick(object sender, RoutedEventArgs e)
         {
-            var graph = new WorkflowGraph(workflowCanvas.Width, workflowCanvas.Height);
+            var graph = new WorkflowGraph(workflowCanvas.Width, workflowCanvas.Height, () => { });
             // 6. 渲染
-            var renderer = new WorkflowCanvasRenderer(workflowCanvas);
+            var renderer = new WorkflowCanvasRenderer();
+            renderer.Initialize(workflowCanvas);
             renderer.RenderWorkflow(graph);
         } 
     }

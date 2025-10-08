@@ -120,7 +120,7 @@ namespace MCCS.ViewModels.MethodManager
             var result = await DialogHost.Show(addMethodDialog, "RootDialog");
         } 
 
-        private async Task SearchData( )
+        private async Task SearchData()
         {
             Methods.Clear();
             Expression<Func<MethodModel, bool>> expression = c => c.IsDeleted == false;

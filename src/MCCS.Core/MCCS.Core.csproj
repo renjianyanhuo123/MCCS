@@ -21,4 +21,8 @@
     <Folder Include="Repositories\Project\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MCCS.WorkflowSetting\MCCS.WorkflowSetting.csproj" />
+  </ItemGroup>
+
 </Project>

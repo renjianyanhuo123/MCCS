@@ -1,9 +1,10 @@
 ﻿using System.Windows;
 using MCCS.WorkflowSetting.Components;
+using MCCS.WorkflowSetting.Components.ViewModels;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public class BaseNode
+    public class BaseNode : BindingBase
     {
         public BaseNode(
             string name, 
@@ -11,23 +12,42 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             double width, 
             double height, 
             int level = 0,
-            int order = -1)
-        {
-            Id = Guid.NewGuid().ToString("N");
-            Name = name;
+            int order = -1):this(name, width, height, level, order)
+        {  
             Type = type;
-            Width = width;
-            Height = height;
-            Order = order;
-            Level = level;
-            VirtualWidth = width;
-            VirtualHeight = height;
             Content = CreateContent();
             Content.Width = width;
             Content.Height = height;
         }
 
+        public BaseNode(
+            string name, 
+            double width,
+            double height,
+            int level = 0,
+            int order = -1)
+        {
+            Id = Guid.NewGuid().ToString("N");
+            Name = name; 
+            Width = width;
+            Height = height;
+            Order = order;
+            Level = level; 
+        }
+
         public string Id { get; private set; }
+        public int Index { get; set; }
+        public bool IsRender { get; set; }
+
+        /// <summary>
+        /// 用于快速查找父级节点
+        /// 000001-000002,000004-000008-000009
+        /// 最后一个表示数字表示自身的ID
+        /// 前面的表示其分支节点号
+        /// 默认伪6位数
+        /// 000001
+        /// </summary>
+        public string Code { get; set; } = string.Empty;
         public string Name { get; private set; }
         public double Width { get; private set; }
         public double Height { get; private set; }
@@ -60,22 +80,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// 中心点坐标
         /// </summary>
         public Point CenterPoint { get; private set; }
-        public NodeTypeEnum Type { get; set; }
-        /// <summary>
-        /// 所有的子节点
-        /// </summary>
-        public List<BaseNode> Children { get; set; }
-
-        /// <summary>
-        /// 虚拟宽度
-        /// </summary>
-        public double VirtualWidth { get; private set; }
-        /// <summary>
-        /// 虚拟高度
-        /// </summary>
-        public double VirtualHeight { get; private set; }
-
-        public FrameworkElement Content { get; private set; }
+        public NodeTypeEnum Type { get; set; } 
+        public FrameworkElement Content { get; protected set; }
 
         private FrameworkElement CreateContent()
         {

@@ -6,9 +6,11 @@
              xmlns:local="clr-namespace:MCCS.Views.MethodManager.Contents"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:localViewModel="clr-namespace:MCCS.ViewModels.MethodManager.Contents"
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance localViewModel:MethodWorkflowSettingPageViewModel}">
     <Grid>
         <!-- 滚动区域 -->
         <ScrollViewer Name="CanvasScrollViewer"
@@ -17,19 +19,18 @@
                       Background="LightGray">
             <Canvas Name="DrawingCanvas" 
                     Background="White"
-                    Width="Auto" 
+                    Width="1500" 
                     Height="2000">
                 <Canvas.RenderTransform>
                     <ScaleTransform x:Name="CanvasScaleTransform" 
                                     ScaleX="1" ScaleY="1" 
                                     CenterX="0" CenterY="0"/>
                 </Canvas.RenderTransform>
-
-                <Rectangle Fill="Red" Width="100" Height="100" Canvas.Left="50" Canvas.Top="50"/>
-                <Rectangle Fill="Blue" Width="100" Height="100" Canvas.Left="200" Canvas.Top="200"/>
-                <Rectangle Fill="Green" Width="100" Height="100" Canvas.Left="400" Canvas.Top="400"/>
-                <Rectangle Fill="Orange" Width="100" Height="100" Canvas.Left="600" Canvas.Top="600"/>
-                <Rectangle Width="2000" Height="2000" Fill="Transparent" Stroke="LightBlue" StrokeThickness="1" StrokeDashArray="10,10"/>
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="Loaded">
+                        <b:InvokeCommandAction Command="{Binding LoadCommand}" CommandParameter="{Binding ElementName=DrawingCanvas}"/>
+                    </b:EventTrigger> 
+                </b:Interaction.Triggers> 
             </Canvas>
         </ScrollViewer>
 

@@ -1,6 +1,6 @@
 ﻿namespace MCCS.WorkflowSetting.EventParams
 {
-    public class AddOpEventArgs : EventArgs
+    public class AddOpEventArgs
     {
         public required string NodeId { get; set; }
     }

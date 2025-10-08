@@ -39,6 +39,8 @@ using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
 using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
+using HelixToolkit.SharpDX.Core;
+using MCCS.Common.DataManagers;
 
 namespace MCCS
 {
@@ -189,7 +191,8 @@ namespace MCCS
         {
             Log.CloseAndFlush();
             base.OnExit(e);
-
+            // 关闭主窗口后则释放所有设备连接
+            GlobalDataManager.Instance.HardwareDevices?.ForEach(c => c.Dispose());
         }
 
         #region private method

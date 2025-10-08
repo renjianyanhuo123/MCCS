@@ -1,0 +1,35 @@
+﻿namespace MCCS.Models.MethodManager
+{
+    public class WorkflowSettingItemModel : BindableBase
+    {
+        public long Id { get; set; }
+
+        private string _name; 
+        public string Name
+        {
+            get => _name; 
+            set => SetProperty(ref _name, value);
+        }
+
+        private string _description;
+        public string Description
+        {
+            get => _description; 
+            set => SetProperty(ref _description, value);
+        }
+
+        private string _iconStr;
+        public string IconStr
+        {
+            get => _iconStr;
+            set => SetProperty(ref _iconStr, value);
+        }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
+        }
+    }
+}

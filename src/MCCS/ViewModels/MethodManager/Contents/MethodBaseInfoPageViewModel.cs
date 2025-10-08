@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Common.DataManagers;
+﻿using MCCS.Common.DataManagers;
 using MCCS.Core.Models.MethodManager;
 using MCCS.Core.Repositories.Method;
 

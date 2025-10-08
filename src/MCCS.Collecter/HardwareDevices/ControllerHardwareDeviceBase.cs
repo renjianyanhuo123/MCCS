@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 
 namespace MCCS.Collecter.HardwareDevices
 {
-    public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice, IDisposable
+    public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice
     {
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;

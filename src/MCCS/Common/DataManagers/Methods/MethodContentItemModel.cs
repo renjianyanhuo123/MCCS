@@ -14,6 +14,7 @@ namespace MCCS.Common.DataManagers.Methods
         {
             Id = id;
         }
+
         /// <summary>
         /// 方法基础信息
         /// </summary>

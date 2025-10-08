@@ -1,5 +1,7 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
+using MCCS.WorkflowSetting.Components.ViewModels;
 
 namespace MCCS.WorkflowSetting.Components
 {
@@ -11,13 +13,14 @@ namespace MCCS.WorkflowSetting.Components
         public WorkflowStepNode()
         {
             InitializeComponent();
+            DataContext = new WorkflowStepNodeViewModel();
         }
 
         #region 依赖属性
         public Brush TitleBackground
         {
-            get => (Brush)this.GetValue(TitleBackgroundProperty);
-            set => this.SetValue(TitleBackgroundProperty, (object)value);
+            get => (Brush)GetValue(TitleBackgroundProperty);
+            set => SetValue(TitleBackgroundProperty, value);
         }
 
         public static readonly DependencyProperty TitleBackgroundProperty =
@@ -25,6 +28,17 @@ namespace MCCS.WorkflowSetting.Components
                 typeof(Brush),
                 typeof(WorkflowStepNode),
                 new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9955"))));
-        #endregion
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
+        }
+        public static readonly DependencyProperty TitleProperty =
+            DependencyProperty.Register(nameof(Title),
+                typeof(string),
+                typeof(WorkflowStepNode),
+                new PropertyMetadata(string.Empty));
+        #endregion  
     }
 }

@@ -4,11 +4,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class AddOpNode : BaseNode
     {
-        public AddOpNode(string name, NodeTypeEnum type, double width, double height, EventHandler<AddOpEventArgs> handle, int level = 0, int order = -1) : base(name, type, width, height, level, order)
+        public AddOpNode(string name, NodeTypeEnum type, double width, double height, Action<AddOpEventArgs> handle, int level = 0, int order = -1) : base(name, type, width, height, level, order)
         {
             Content.MouseLeftButtonDown += (sender, e) =>
             {
-                handle?.Invoke(sender, new AddOpEventArgs { NodeId = Id});
+                handle?.Invoke(new AddOpEventArgs { NodeId = Id});
             };
         }
          

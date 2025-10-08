@@ -3,7 +3,6 @@ using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
-using System.Collections.Generic;
 using MCCS.Collecter.HardwareDevices.BwController;
 using MCCS.Collecter.HardwareDevices;
 
@@ -50,6 +49,8 @@ namespace MCCS.Services.StartInitial
                 .Where(c => c.DeviceType == DeviceTypeEnum.Controller));
             GlobalDataManager.Instance.SetValue(stationSiteInfo);
         }
+
+
         /// <summary>
         /// 启动所有控制器
         /// </summary>

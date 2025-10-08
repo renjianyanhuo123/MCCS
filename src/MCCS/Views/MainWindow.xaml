@@ -19,7 +19,7 @@
         ShowCloseButton="{Binding ShowCloseButton}"
         ShowTitleBar="{Binding ShowTitleBar}"
         Width="600"
-        Height="400"
+        Height="400" 
         WindowStyle="{Binding WindowStyle}"
         WindowState="{Binding WindowState}"
         ResizeMode="{Binding ResizeMode}">
