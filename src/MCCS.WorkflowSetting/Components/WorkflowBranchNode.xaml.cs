@@ -9,8 +9,7 @@ namespace MCCS.WorkflowSetting.Components
     {
         public WorkflowBranchNode()
         {
-            InitializeComponent();
-            DataContext = new BranchNode();
+            InitializeComponent(); 
         }
     }
 }

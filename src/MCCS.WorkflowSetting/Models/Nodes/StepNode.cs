@@ -1,6 +1,8 @@
 ﻿using System.Windows.Input;
 using System.Windows.Media;
+using MCCS.Infrastructure;
 using MCCS.WorkflowSetting.Components.ViewModels;
+using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
@@ -59,7 +61,10 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         private void ExecuteConfigueDeleteCommand(object? param)
         {
-
+            EventMediator.Instance.Publish(new DeleteNodeEvent
+            {
+                NodeId = Id
+            });
         }
 
         private void ExecuteOperationNodeClickedCommand(object? param)

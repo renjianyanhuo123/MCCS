@@ -2,6 +2,6 @@
 {
     public class BranchNode : BaseNode 
     {
-        public LinkedList<BaseNode> LinkNodes { get; } = [];
+        public List<BaseNode> Nodes { get; } = [];
     }
 }

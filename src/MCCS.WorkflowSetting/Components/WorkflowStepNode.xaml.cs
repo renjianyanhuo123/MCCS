@@ -11,8 +11,7 @@ namespace MCCS.WorkflowSetting.Components
     {
         public WorkflowStepNode()
         {
-            InitializeComponent();
-            DataContext = new StepNode();
+            InitializeComponent(); 
         }
 
         //#region 依赖属性

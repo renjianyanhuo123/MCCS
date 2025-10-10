@@ -44,18 +44,18 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public int Level { get; set; }
 
         private Point _position;
-        public Point Position 
-        { 
+        public Point Position
+        {
             get => _position;
             set
             {
-                if (SetProperty(ref _position, value))
+                if (_position != value)
                 {
+                    SetProperty(ref _position, value);
                     CenterPoint = new Point(_position.X + Width / 2, _position.Y + Height / 2);
-                } 
+                }
             }
-        }
-
+        } 
         /// <summary>
         /// 中心点坐标
         /// </summary>

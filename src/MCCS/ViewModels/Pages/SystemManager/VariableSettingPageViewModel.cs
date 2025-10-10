@@ -1,8 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using MCCS.Components.GlobalNotification.Models;
-using MCCS.Core.Models.SystemManager;
-using MCCS.Core.Repositories;
-using MCCS.Events.SystemManager;
 using MCCS.Services.NotificationService;
 using MCCS.UserControl.Transfer;
 

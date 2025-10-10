@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using MCCS.WorkflowSetting.EventParams;
+﻿using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Edges;
 using MCCS.WorkflowSetting.Models.Nodes;
 

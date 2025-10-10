@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Microsoft.Xaml.Behaviors">
       <HintPath>C:\Users\kai.zheng\.nuget\packages\microsoft.xaml.behaviors.wpf\1.1.135\lib\net6.0-windows7.0\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>

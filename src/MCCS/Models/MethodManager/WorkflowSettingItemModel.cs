@@ -1,4 +1,6 @@
-﻿namespace MCCS.Models.MethodManager
+﻿using System.Windows.Media;
+
+namespace MCCS.Models.MethodManager
 {
     public class WorkflowSettingItemModel : BindableBase
     {
@@ -30,6 +32,13 @@
         {
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
+        }
+
+        private Brush _iconBackground; 
+        public Brush IconBackground
+        {
+            get => _iconBackground;
+            set => SetProperty(ref _iconBackground, value);
         }
     }
 }

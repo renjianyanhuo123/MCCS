@@ -1,7 +1,9 @@
 ﻿using System.Windows.Controls;
 using MCCS.Events.Common;
+using MCCS.Infrastructure;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting;
+using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.ViewModels.MethodManager.Contents
 {
@@ -13,13 +15,20 @@ namespace MCCS.ViewModels.MethodManager.Contents
         private readonly IWorkflowCanvasRenderer _workflowCanvasRenderer;
         private readonly IRegionManager _regionManager;
 
+        private readonly EventHandler<AddOpEventArgs> _showMenuEventHandler;
+
         public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator,
             IWorkflowCanvasRenderer workflowCanvasRenderer,
             IRegionManager regionManager) : base(eventAggregator)
         {
             _workflowCanvasRenderer = workflowCanvasRenderer;
             _regionManager = regionManager;
-            LoadCommand = new DelegateCommand<object>(ExecuteLoadCommand);
+            _showMenuEventHandler = (sender, args) =>
+            {
+                ExecuteShowStepsCommand(args);
+            };
+            EventMediator.Instance.Subscribe(_showMenuEventHandler);
+            LoadCommand = new DelegateCommand<object>(ExecuteLoadCommand); 
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -28,12 +37,12 @@ namespace MCCS.ViewModels.MethodManager.Contents
         }
 
         #region Command 
-        public DelegateCommand<object> LoadCommand { get; }
+        public DelegateCommand<object> LoadCommand { get; }  
         #endregion
 
         #region Private Method
 
-        private void ExecuteShowSteps()
+        private void ExecuteShowStepsCommand(AddOpEventArgs opEventArgs)
         {
             _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Publish(new OpenRightFlyoutEventParam
             {
