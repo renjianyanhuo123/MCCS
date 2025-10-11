@@ -147,7 +147,7 @@ namespace MCCS
         /// <summary>
         /// (4)初始化应用程序
         /// </summary>
-        protected override async void OnInitialized()
+        protected override void OnInitialized()
         {
             try
             {

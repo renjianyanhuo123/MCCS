@@ -37,6 +37,7 @@ namespace MCCS.WorkflowSetting.Behaviors
         private static void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var element = sender as FrameworkElement;
+            if (element == null) throw new ArgumentNullException("element is null!");
             var command = GetNodeClickCommand(element);
             if (command?.CanExecute(element.DataContext) == true)
             {

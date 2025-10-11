@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Components.ViewModels;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -34,7 +33,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             set => SetProperty(ref _height, value);
         }
         /// <summary>
-        /// 根节点默认为-1，其他节点表示其自身在同一父级中的顺序；从1开始
+        /// 根节点默认为-1，其他节点表示其自身在同一父级中的顺序;从1开始
         /// </summary>
         public int Order { get; set; }
 
@@ -49,11 +48,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _position;
             set
             {
-                if (_position != value)
-                {
-                    SetProperty(ref _position, value);
-                    CenterPoint = new Point(_position.X + Width / 2, _position.Y + Height / 2);
-                }
+                SetProperty(ref _position, value);
+                CenterPoint = new Point(_position.X + Width / 2, _position.Y + Height / 2);
             }
         } 
         /// <summary>

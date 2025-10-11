@@ -7,23 +7,61 @@
              xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
              mc:Ignorable="d" 
              d:DesignHeight="34" d:DesignWidth="34" d:DataContext="{d:DesignInstance localViewModel:DecisionNode}">
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid Width="{Binding Width}" Height="{Binding Height}"> 
+        
+        <Border BorderBrush="#CCCCCC"
+                Background="Transparent"
+                HorizontalAlignment="Left" 
+                Margin="{Binding BorderLeftMargin}"
+                BorderThickness="0,1.5,0,1.5"
+                Width="{Binding BorderWidth}"
+                Height="{Binding BorderHeight}"/>
+        <ItemsControl ItemsSource="{Binding Children}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="FrameworkElement.Margin" 
+                            Value="{Binding DataContext.ItemMargin, 
+                            RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}">
+                        <!--<ContentControl.InputBindings>
+                            <MouseBinding MouseAction="LeftClick" 
+                                          Command="{Binding DataContext.NodeClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                          CommandParameter="{Binding}" />
+                        </ContentControl.InputBindings>-->
+                    </ContentControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
         <!-- 中心节点：旋转的Border内含图片 -->
         <Border 
-            Width="{Binding Width}" 
-            Height="{Binding Height}" 
-            BorderBrush="#2196F3" 
-            BorderThickness="2"
+            Grid.Row="0"
+            Width="34" 
+            Height="34"  
             CornerRadius="5"
             Background="White"
-            HorizontalAlignment="Center">
+            HorizontalAlignment="Center"
+            Margin="0,-17,0,0"
+            VerticalAlignment="Top">
+            <Border.Effect>
+                <DropShadowEffect Color="Gray" 
+                                  Opacity="0.2" 
+                                  BlurRadius="10" 
+                                  ShadowDepth="2"/>
+            </Border.Effect>
             <Border.RenderTransform>
                 <RotateTransform Angle="45" CenterX="20" CenterY="20"/>
             </Border.RenderTransform>
-
             <!-- 内部图片 -->
-            <Image Margin="6" Source="/Resources/ellipse.png"> 
-            </Image>
+            <Image Width="Auto" Height="Auto"  Margin="6" Source="/MCCS.WorkflowSetting;component/Resources/ellipse.png" />
         </Border>
     </Grid>
 </UserControl>

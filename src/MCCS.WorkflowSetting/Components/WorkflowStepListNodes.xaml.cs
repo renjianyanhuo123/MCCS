@@ -1,6 +1,4 @@
 ﻿using MCCS.WorkflowSetting.Models.Nodes;
-using System.Windows;
-using System.Windows.Input;
 
 namespace MCCS.WorkflowSetting.Components
 {
@@ -12,7 +10,10 @@ namespace MCCS.WorkflowSetting.Components
         public WorkflowStepListNodes()
         {
             InitializeComponent();
-            DataContext = new StepListNodes();
+            DataContext = new StepListNodes
+            {
+                Type = NodeTypeEnum.StepList
+            };
         } 
     }
 }

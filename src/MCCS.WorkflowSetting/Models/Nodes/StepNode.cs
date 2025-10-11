@@ -7,9 +7,12 @@ using MCCS.WorkflowSetting.EventParams;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class StepNode : BaseNode
-    { 
-        public StepNode()
+    {
+        private readonly string _soureId;
+
+        public StepNode(string sourceId)
         {
+            _soureId = sourceId;
             OperationNodeClickedCommand = new RelayCommand(ExecuteOperationNodeClickedCommand, _ => true);
             DeleteNodeCommand = new RelayCommand(ExecuteDeleteNodeCommand, _ => true);
             CancelCommand = new RelayCommand(ExecuteCancelCommand, _ => true);
@@ -63,6 +66,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             EventMediator.Instance.Publish(new DeleteNodeEvent
             {
+                Source = _soureId,
                 NodeId = Id
             });
         }

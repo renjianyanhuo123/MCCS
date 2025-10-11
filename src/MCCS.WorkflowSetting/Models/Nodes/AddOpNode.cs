@@ -8,6 +8,7 @@
             //{
             //    handle?.Invoke(new AddOpEventArgs { NodeId = Id});
             //};
+            Type = NodeTypeEnum.Action;
         }
          
     }

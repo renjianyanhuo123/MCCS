@@ -1,19 +1,19 @@
 ﻿using System.Windows;
 using MahApps.Metro.Controls;
-using MCCS.Core.Repositories;
 using MCCS.Events.Common;
 using MCCS.Events.StartUp;
+using MCCS.Infrastructure;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.WorkflowSteps;
-using Prism.Navigation.Regions;
+using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly IRegionManager _regionManager;
-        private readonly ISystemMenuRepository _systemMenuRepository;
-        private readonly IContainerProvider _containerProvider; 
+
+        private readonly EventHandler<AddOpEventArgs> _showMenuEventHandler;
 
         #region 页面属性 
         private double _mainPageWidth; 
@@ -111,21 +111,19 @@ namespace MCCS.ViewModels
         /// <param name="param"></param>
         private void OnOpenRightFlyout(OpenRightFlyoutEventParam param)
         {
-            IsOpenFlyout = true;
-            switch (param.Type)
-            {
-                case RightFlyoutTypeEnum.WorkflowSetting: 
-                    RightFlyoutName = "工作流配置";
-                    _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative));
-                    break;
-                default:
-                    break;
-            }
+            
+        }
+
+        private void ExecuteShowStepsCommand(AddOpEventArgs opEventArgs)
+        {
+             IsOpenFlyout = true;
+             RightFlyoutName = "工作流配置";
+             var paramters = new NavigationParameters { { "OpEventArgs", opEventArgs } }; 
+             _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative), paramters);
         }
         #endregion
 
-        public MainWindowViewModel(
-            IContainerProvider containerProvider, 
+        public MainWindowViewModel( 
             IRegionManager regionManager, 
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
@@ -135,6 +133,11 @@ namespace MCCS.ViewModels
             _eventAggregator.GetEvent<FinishStartUpNotificationEvent>().Subscribe(JumpToMainPage);
             _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
+            _showMenuEventHandler = (sender, args) =>
+            {
+                ExecuteShowStepsCommand(args);
+            };
+            EventMediator.Instance.Subscribe(_showMenuEventHandler);
             OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 
     }

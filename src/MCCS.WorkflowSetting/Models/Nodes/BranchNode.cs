@@ -2,6 +2,9 @@
 {
     public class BranchNode : BaseNode 
     {
-        public List<BaseNode> Nodes { get; } = [];
+        public BranchNode()
+        {
+            Type = NodeTypeEnum.Branch;
+        }
     }
 }

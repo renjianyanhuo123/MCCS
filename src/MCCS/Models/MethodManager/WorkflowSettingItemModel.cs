@@ -2,6 +2,13 @@
 
 namespace MCCS.Models.MethodManager
 {
+    public enum StepTypeEnum
+    {
+        Cycle,
+        Decision,
+        Delay
+    }
+
     public class WorkflowSettingItemModel : BindableBase
     {
         public long Id { get; set; }
@@ -39,6 +46,13 @@ namespace MCCS.Models.MethodManager
         {
             get => _iconBackground;
             set => SetProperty(ref _iconBackground, value);
+        }
+
+        private StepTypeEnum _stepType;
+        public StepTypeEnum StepType
+        {
+            get => _stepType;
+            set => SetProperty(ref _stepType, value);
         }
     }
 }

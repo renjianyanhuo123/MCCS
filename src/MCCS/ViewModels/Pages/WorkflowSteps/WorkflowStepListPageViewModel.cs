@@ -2,7 +2,7 @@
 using System.Windows.Media;
 using MCCS.Infrastructure;
 using MCCS.Models.MethodManager;
-using MCCS.WorkflowSetting;
+using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.ViewModels.Pages.WorkflowSteps
@@ -11,12 +11,9 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
     {
         public const string Tag = "WorkflowStepListPage";
 
-        private readonly IWorkflowCanvasRenderer _workflowCanvasRenderer;
 
-        public WorkflowStepListPageViewModel(IEventAggregator eventAggregator,
-            IWorkflowCanvasRenderer workflowCanvasRenderer) : base(eventAggregator)
+        public WorkflowStepListPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _workflowCanvasRenderer = workflowCanvasRenderer;
             Steps = 
             [
                 new WorkflowSettingItemModel()
@@ -25,6 +22,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     Name = "循环",
                     Description = "添加一个固定次数或在指定条件下结束的循环流程",
                     IconStr = "RecycleVariant",
+                    StepType = StepTypeEnum.Cycle,
                     IconBackground = new SolidColorBrush(Color.FromRgb(76,125,158))
                 },
                 new WorkflowSettingItemModel()
@@ -33,6 +31,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     Name = "分支",
                     Description = "向流程中添加分支，按不同条件分别处理",
                     IconStr = "SourceBranch",
+                    StepType = StepTypeEnum.Decision,
                     IconBackground = new SolidColorBrush(Color.FromRgb(22,119,255))
                 },
                 new WorkflowSettingItemModel()
@@ -41,10 +40,19 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     Name = "延时",
                     Description = "暂停运行当前流程，并在到达指定时间后继续执行",
                     IconStr = "TimerSandComplete",
+                    StepType = StepTypeEnum.Delay,
                     IconBackground = new SolidColorBrush(Color.FromRgb(76,125,158))
                 }
             ];
             SelectStepCommand = new DelegateCommand<WorkflowSettingItemModel>(ExecuteSelectStepCommand);
+        }
+
+        private string _sourceId = string.Empty;
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            var paramters = navigationContext.Parameters.GetValue<AddOpEventArgs>("OpEventArgs");
+            _sourceId = paramters.Source as string ?? throw new ArgumentNullException(nameof(paramters.Source));
         }
 
         #region Property 
@@ -58,15 +66,29 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
         #region Private Method 
         private void ExecuteSelectStepCommand(WorkflowSettingItemModel param)
         {
-            // _workflowCanvasRenderer.AddProcessNodeRender();
             if (param == null) return;
-            EventMediator.Instance.Publish(new StepNode
+            BaseNode? res = null;
+            switch (param.StepType)
             {
-                Name = "StepNode", 
-                Title = param.Name, 
-                TitleBackground = param.IconBackground, 
-                Width = 260, 
-                Height = 110
+                case StepTypeEnum.Cycle:
+                case StepTypeEnum.Delay:
+                    res = new StepNode(_sourceId)
+                    {
+                        Name = "StepNode",
+                        Title = param.Name,
+                        TitleBackground = param.IconBackground,
+                        Width = 260,
+                        Height = 110
+                    };
+                    break;
+                case StepTypeEnum.Decision:
+                    res = new DecisionNode();
+                    break;
+            }
+            if (res != null) EventMediator.Instance.Publish(new AddNodeEvent
+            {
+                Source = _sourceId,
+                Node = res
             });
         }
         #endregion

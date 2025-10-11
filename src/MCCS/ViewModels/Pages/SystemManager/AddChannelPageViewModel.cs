@@ -1,5 +1,4 @@
 ﻿using MCCS.Components.GlobalNotification.Models;
-using MCCS.Core.Helper;
 using MCCS.Events.SystemManager;
 using MCCS.Services.NotificationService;
 

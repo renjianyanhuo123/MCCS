@@ -1,33 +1,18 @@
-﻿using System.Windows.Controls;
-using MCCS.Events.Common;
-using MCCS.Infrastructure;
-using MCCS.ViewModels.Pages.WorkflowSteps;
-using MCCS.WorkflowSetting;
-using MCCS.WorkflowSetting.EventParams;
-
-namespace MCCS.ViewModels.MethodManager.Contents
+﻿namespace MCCS.ViewModels.MethodManager.Contents
 {
     public sealed class MethodWorkflowSettingPageViewModel : BaseViewModel
     {
         public const string Tag = "MethodWorkflowSettingPage";
 
-        private long _methodId = -1;
-        private readonly IWorkflowCanvasRenderer _workflowCanvasRenderer;
+        private long _methodId = -1; 
         private readonly IRegionManager _regionManager;
 
-        private readonly EventHandler<AddOpEventArgs> _showMenuEventHandler;
+        
 
-        public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator,
-            IWorkflowCanvasRenderer workflowCanvasRenderer,
+        public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator, 
             IRegionManager regionManager) : base(eventAggregator)
         {
-            _workflowCanvasRenderer = workflowCanvasRenderer;
-            _regionManager = regionManager;
-            _showMenuEventHandler = (sender, args) =>
-            {
-                ExecuteShowStepsCommand(args);
-            };
-            EventMediator.Instance.Subscribe(_showMenuEventHandler);
+            _regionManager = regionManager; 
             LoadCommand = new DelegateCommand<object>(ExecuteLoadCommand); 
         }
 
@@ -40,27 +25,10 @@ namespace MCCS.ViewModels.MethodManager.Contents
         public DelegateCommand<object> LoadCommand { get; }  
         #endregion
 
-        #region Private Method
-
-        private void ExecuteShowStepsCommand(AddOpEventArgs opEventArgs)
-        {
-            _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Publish(new OpenRightFlyoutEventParam
-            {
-                Title = "添加处理节点",
-                Type = RightFlyoutTypeEnum.WorkflowSetting
-            });
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative));
-        }
-
+        #region Private Method  
         private void ExecuteLoadCommand(object param)
         {
-            if (_methodId == -1) throw new ArgumentNullException("No MethodId!"); 
-            if (param is Canvas designCanvas)
-            {
-                //var graph = new WorkflowGraph(designCanvas.Width, designCanvas.Height, ExecuteShowSteps);
-                //_workflowCanvasRenderer.Initialize(designCanvas);
-                //_workflowCanvasRenderer.RenderWorkflow(graph);
-            }
+            if (_methodId == -1) throw new ArgumentNullException("No MethodId!");  
         }
         #endregion
     }
