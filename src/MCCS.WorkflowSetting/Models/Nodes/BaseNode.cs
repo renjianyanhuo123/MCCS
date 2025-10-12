@@ -1,14 +1,28 @@
 ﻿using System.Windows;
 using MCCS.WorkflowSetting.Components.ViewModels;
+using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public class BaseNode : BindingBase
+    public abstract class BaseNode : BindingBase
     {  
         public string Id { get; private set; } = Guid.NewGuid().ToString("N");
         public int Index { get; set; }
         public bool IsRender { get; set; }
+        private BaseNode? _parent;
+        /// <summary>
+        /// 父节点
+        /// </summary>
+        public BaseNode? Parent
+        {
+            get => _parent;
+            set => SetProperty(ref _parent, value);
+        }
 
+        /// <summary>
+        /// 节点变更事件
+        /// </summary>
+        public event EventHandler<NodeChangedEventArgs> NodeChanged;
         /// <summary>
         /// 用于快速查找父级节点
         /// 000001-000002,000004-000008-000009
@@ -56,6 +70,56 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// 中心点坐标
         /// </summary>
         public Point CenterPoint { get; private set; }
-        public NodeTypeEnum Type { get; set; }  
+        public NodeTypeEnum Type { get; set; }
+
+        /// <summary>
+        /// 触发变更事件（从当前节点开始向上冒泡）
+        /// </summary>
+        protected void RaiseNodeChanged(string changeType, object changeData = null)
+        {
+            var args = new NodeChangedEventArgs(this, changeType, changeData);
+            OnNodeChanged(args);
+        }
+
+        /// <summary>
+        /// 处理节点变更事件
+        /// </summary>
+        protected virtual void OnNodeChanged(NodeChangedEventArgs e)
+        {
+            // 先执行当前节点的处理逻辑
+            ProcessNodeChange(e);
+
+            // 触发事件给外部订阅者
+            NodeChanged?.Invoke(this, e);
+
+            // 如果事件未被标记为已处理，继续向上传播
+            if (!e.Handled && Parent != null)
+            {
+                Parent.OnNodeChanged(e);
+            }
+        }
+
+        /// <summary>
+        /// 处理节点变更的核心逻辑（子类可重写）
+        /// </summary>
+        protected virtual void ProcessNodeChange(NodeChangedEventArgs e)
+        {
+            // 基类默认不做处理
+        }
+
+        /// <summary>
+        /// 父节点改变时的回调
+        /// </summary>
+        protected virtual void OnParentChanged()
+        {
+        }
+
+        /// <summary>
+        /// 更新节点内部状态（可被子类重写）
+        /// </summary>
+        public virtual void UpdateInternalState()
+        {
+            // 基类默认实现
+        }
     }
 }

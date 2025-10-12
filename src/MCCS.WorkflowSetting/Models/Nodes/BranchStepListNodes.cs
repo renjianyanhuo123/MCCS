@@ -3,6 +3,7 @@ using MCCS.WorkflowSetting.Components.ViewModels;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Edges;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 
@@ -12,20 +13,19 @@ namespace MCCS.WorkflowSetting.Models.Nodes
     {
         public const double _addActionDistance = 35.0;
 
-        public ObservableCollection<WorkflowConnection> Connections { get; private set; } = [];
+        public ObservableCollection<WorkflowConnection> Connections { get; } = [];
 
-        public ObservableCollection<BaseNode> Nodes { get; private set; } = [];
+        public ObservableCollection<BaseNode> Nodes { get; } = [];
 
         private readonly EventHandler<AddNodeEvent> _addNodeEventHandler;
-        private readonly EventHandler<DeleteNodeEvent> _deleteNodeEventHandler;
-        private readonly EventHandler<NotificationBranchChangedEvent> _branchChangedEventHandler;
+        private readonly EventHandler<DeleteNodeEvent> _deleteNodeEventHandler; 
 
         /// <summary>
         /// 待插入节点的位置后面 
         /// </summary>
         public BaseNode? InsertBeforeNode { get; private set; }
 
-        public BranchStepListNodes(EventHandler<NotificationBranchChangedEvent> branchChangedEventHandler)
+        public BranchStepListNodes()
         {
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;
@@ -45,8 +45,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 {
                     ExecuteDeleteNode(@event);
                 }
-            };
-            _branchChangedEventHandler = branchChangedEventHandler;
+            }; 
             EventMediator.Instance.Subscribe(_deleteNodeEventHandler);
             EventMediator.Instance.Subscribe(_addNodeEventHandler);
         }
@@ -63,10 +62,12 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             var addOpNode = new AddOpNode
             {
                 Name = "Add",
+                Parent = this,
                 Type = NodeTypeEnum.Action,
                 Width = 20,
                 Height = 20
             };
+            node.Parent = this;
             if (InsertBeforeNode == null)
             {
                 Nodes.Add(node);
@@ -77,8 +78,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Nodes.Insert(InsertBeforeNode.Index, node);
                 Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
             }
-            UpdateNodePosition();
-            UpdateConnection();
+            // 触发更新; 因为会先更新自己的节点变更
+            RaiseNodeChanged("UIChanged", "");
         }
 
         private void ExecuteDeleteNode(DeleteNodeEvent deleteEvent)
@@ -89,8 +90,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
                 Nodes.Remove(deleteNodeInfo);
                 if (deleteAddNode != null) Nodes.Remove(deleteAddNode);
-                UpdateNodePosition();
-                UpdateConnection();
+                // 触发更新
+                RaiseNodeChanged("UIChanged", "");
             }
         }
 
@@ -101,17 +102,18 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Nodes.Add(new BranchNode
             {
                 Name = "Branch",
+                Parent = this,
                 Width = 260,
                 Height = 85
             });
             Nodes.Add(new AddOpNode
             {
                 Name = "Add",
+                Parent = this,
                 Width = 20,
                 Height = 20
             });
-            UpdateNodePosition();
-            UpdateConnection();
+            RenderChanged();
         }
 
         private void ExecuteNodeClickCommand(object? param)
@@ -141,12 +143,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 var yDistance = i == 0 ? _addActionDistance : Nodes[i - 1].Position.Y + Nodes[i - 1].Height + _addActionDistance;
                 Nodes[i].Position = new Point((maxLength - Nodes[i].Width) / 2.0, yDistance);
             }
-            Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height;
-            // 通知分支内其他节点发生了变化
-            _branchChangedEventHandler.Invoke(null, new NotificationBranchChangedEvent
+            var tempHight = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + _addActionDistance;
+            if (tempHight > Height)
             {
-                Source = ""
-            });
+                Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + _addActionDistance;
+            }
         }
 
         public void UpdateConnection()
@@ -193,7 +194,22 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Connections.RemoveAt(i);
             }
         }
+        #endregion
 
+        #region 节点更新
+        public void RenderChanged()
+        {
+            UpdateNodePosition();
+            UpdateConnection();
+        }
+
+        protected override void ProcessNodeChange(NodeChangedEventArgs e)
+        {
+#if DEBUG
+            Debug.WriteLine($"===分支子流程更新:{Id}===");
+#endif
+            RenderChanged();
+        } 
         #endregion
     }
 }

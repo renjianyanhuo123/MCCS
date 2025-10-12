@@ -1,27 +1,27 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
-using MCCS.Infrastructure;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class DecisionNode : BaseNode
-    { 
+    {
+        #region Property
         /// <summary>
         /// 所有的子节点
         /// </summary>
         public ObservableCollection<BaseNode> Children { get; } = [];
 
-        private readonly EventHandler<NotificationBranchChangedEvent> _branchChanged;
-
         private double _borderWidth;
+
         public double BorderWidth
         {
             get => _borderWidth;
             set => SetProperty(ref _borderWidth, value);
         }
 
-        private double _borderHeight; 
+        private double _borderHeight;
         public double BorderHeight
         {
             get => _borderHeight;
@@ -48,11 +48,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _borderLeftSpacing;
             set
             {
-                SetProperty(ref _borderLeftSpacing, value); 
+                SetProperty(ref _borderLeftSpacing, value);
                 BorderLeftMargin = new Thickness(value, 0, 0, 0);
             }
         }
-         
+
         private double _itemSpacing = 10;
         public double ItemSpacing
         {
@@ -64,21 +64,24 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 ItemMargin = new Thickness(temp, 0, temp, 0);
             }
         }
+        #endregion
 
         public DecisionNode()
         {
-            ItemSpacing = 10;
-            var node1 = new BranchStepListNodes(_branchChanged);
-            var node2 = new BranchStepListNodes(_branchChanged);
-            Width = ItemSpacing * 2 + node1.Width + node2.Width;
-            Height = Math.Max(node1.Height, node2.Height);
-            _branchChanged = (sender, @event) =>
+            ItemSpacing = 10; 
+            var node1 = new BranchStepListNodes
             {
-                if(@event.Source == this) ExecuteChildrenChanged();
+                Parent = this
             };
+            var node2 = new BranchStepListNodes
+            {
+                Parent = this
+            };
+            Width = ItemSpacing * 2 + node1.Width + node2.Width;
+            Height = Math.Max(node1.Height, node2.Height); 
             Children.Add(node1);
             Children.Add(node2);
-            EventMediator.Instance.Subscribe(_branchChanged);
+            ExecuteChildrenChanged();
         }
 
         private void ExecuteChildrenChanged()
@@ -93,11 +96,32 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             BorderHeight = maxHeight;
             if (Children.Count > 1)
             {
-                var leftSpace = ItemSpacing / 2.0 + Children[^1].Width / 2.0;
-                var rightSpace = ItemSpacing / 2.0 + Children[0].Width / 2.0;
+                var rightSpace = ItemSpacing / 2.0 + Children[^1].Width / 2.0;
+                var leftSpace = ItemSpacing / 2.0 + Children[0].Width / 2.0;
                 BorderLeftSpacing = leftSpace;
                 BorderWidth = Width - leftSpace - rightSpace;
             }
         }
+
+        #region 更新 
+        protected override void ProcessNodeChange(NodeChangedEventArgs e)
+        {
+            // 所有子流程节点更新以及整体更新
+#if DEBUG 
+            Debug.WriteLine($"===决策节点更新:{Id}===");
+#endif
+            ExecuteChildrenChanged();
+            // 重新更新所有的直系子流程
+            foreach (var child in Children)
+            {
+                // 排除已经更新过的节点
+                if (child == e.SourceNode) continue;
+                if (child is BranchStepListNodes node)
+                {
+                    node.RenderChanged();
+                }
+            }
+        } 
+        #endregion
     }
 }

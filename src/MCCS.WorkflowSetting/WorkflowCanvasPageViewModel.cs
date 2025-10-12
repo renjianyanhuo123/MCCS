@@ -1,5 +1,4 @@
-﻿using System.Windows.Input;
-using MCCS.WorkflowSetting.Components.ViewModels;
+﻿using MCCS.WorkflowSetting.Components.ViewModels;
 using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.WorkflowSetting

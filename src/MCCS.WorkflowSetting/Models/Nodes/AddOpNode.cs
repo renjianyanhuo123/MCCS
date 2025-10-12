@@ -4,10 +4,6 @@
     {
         public AddOpNode( )  
         {
-            //Content.MouseLeftButtonDown += (sender, e) =>
-            //{
-            //    handle?.Invoke(new AddOpEventArgs { NodeId = Id});
-            //};
             Type = NodeTypeEnum.Action;
         }
          

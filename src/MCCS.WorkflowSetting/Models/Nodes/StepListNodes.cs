@@ -2,6 +2,7 @@
 using MCCS.WorkflowSetting.Components.ViewModels;
 using MCCS.WorkflowSetting.Models.Edges;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using MCCS.WorkflowSetting.EventParams;
@@ -44,8 +45,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             };
             EventMediator.Instance.Subscribe(_deleteNodeEventHandler);
             EventMediator.Instance.Subscribe(_addNodeEventHandler);
-        } 
-
+        }  
         #region Command 
         public ICommand LoadedCommand { get; }
 
@@ -58,9 +58,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             var addOpNode = new AddOpNode
             {
                 Name = "Add",
+                Parent = this,
                 Width = 20,
                 Height = 20
-            };
+            };  
+            node.Parent = this;
             if (InsertBeforeNode == null)
             {
                 Nodes.Add(node);
@@ -71,8 +73,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Nodes.Insert(InsertBeforeNode.Index, node);
                 Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
             }
-            UpdateNodePosition();
-            UpdateConnection();
+            RenderChanged();
         }
 
         private void ExecuteDeleteNode(DeleteNodeEvent deleteEvent)
@@ -83,8 +84,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
                 Nodes.Remove(deleteNodeInfo);
                 if(deleteAddNode != null) Nodes.Remove(deleteAddNode);
-                UpdateNodePosition();
-                UpdateConnection();
+                RenderChanged();
             }
         }
 
@@ -96,12 +96,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             {
                 Width = 60,
                 Height = 60,
+                Parent = this,
                 Type = NodeTypeEnum.Start,
                 Name = "Start"
             });
             Nodes.Add(new AddOpNode
             {
                 Name = "Add",
+                Parent = this,
                 Type = NodeTypeEnum.Action,
                 Width = 20,
                 Height = 20
@@ -109,12 +111,12 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Nodes.Add(new EndNode
             {
                 Name = "End",
+                Parent = this,
                 Type = NodeTypeEnum.End,
                 Width = 56,
                 Height = 80
             });
-            UpdateNodePosition();
-            UpdateConnection();
+            RenderChanged();
         }
 
         private void ExecuteNodeClickCommand(object? param)
@@ -172,6 +174,27 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             {
                 Connections.RemoveAt(i);
             }
+        } 
+        #endregion
+
+        #region 处理节点变更 
+        /// <summary>
+        /// 渲染更新
+        /// </summary>
+        private void RenderChanged()
+        {
+            UpdateNodePosition();
+            UpdateConnection();
+        }
+
+        protected override void ProcessNodeChange(NodeChangedEventArgs e)
+        {
+#if DEBUG
+            Debug.WriteLine($"===主列表节点更新:{Id}===");
+#endif
+            RenderChanged();
+            // 根节点处理完成后，可以标记事件为已处理，停止进一步传播
+            e.Handled = true;
         }
 
         #endregion
