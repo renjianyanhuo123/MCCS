@@ -1,94 +1,20 @@
-﻿using MCCS.Infrastructure;
-using MCCS.WorkflowSetting.Components.ViewModels;
-using MCCS.WorkflowSetting.Models.Edges;
-using System.Collections.ObjectModel;
+﻿using MCCS.WorkflowSetting.Models.Edges;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Input;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public class StepListNodes : BaseNode
-    { 
-        public const double _addActionDistance = 35.0; 
-
-        public ObservableCollection<WorkflowConnection> Connections { get; private set; } = [];
-
-        public ObservableCollection<BaseNode> Nodes { get; private set; } = [];
-
-        private readonly EventHandler<AddNodeEvent> _addNodeEventHandler;
-        private readonly EventHandler<DeleteNodeEvent> _deleteNodeEventHandler;
-
-        /// <summary>
-        /// 待插入节点的位置后面
-        /// </summary>
-        public BaseNode? InsertBeforeNode { get; private set; }
-
-        public StepListNodes()
+    public class StepListNodes : BoxListNodes
+    {
+        public StepListNodes(IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            LoadedCommand = new RelayCommand(ExecuteLoadedCommand, _ => true);
-            NodeClickCommand = new RelayCommand(ExecuteNodeClickCommand, _ => true);
-            _addNodeEventHandler = (sender, obj) =>
-            {
-                if (obj.Source == Id)
-                {
-                    ExecuteAddNode(obj.Node);
-                } 
-            };
-            _deleteNodeEventHandler = (sender, @event) =>
-            {
-                if (@event.Source == Id)
-                {
-                    ExecuteDeleteNode(@event);
-                } 
-            };
-            EventMediator.Instance.Subscribe(_deleteNodeEventHandler);
-            EventMediator.Instance.Subscribe(_addNodeEventHandler);
-        }  
-        #region Command 
-        public ICommand LoadedCommand { get; }
+            Type = NodeTypeEnum.StepList; 
+            LoadedCommand = new DelegateCommand(ExecuteLoadedCommand); 
+        }   
 
-        public ICommand NodeClickCommand { get; } 
-        #endregion
-
-        #region Private Method 
-        private void ExecuteAddNode(BaseNode node)
-        {
-            var addOpNode = new AddOpNode
-            {
-                Name = "Add",
-                Parent = this,
-                Width = 20,
-                Height = 20
-            };  
-            node.Parent = this;
-            if (InsertBeforeNode == null)
-            {
-                Nodes.Add(node);
-                Nodes.Add(addOpNode);
-            }
-            else
-            {
-                Nodes.Insert(InsertBeforeNode.Index, node);
-                Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
-            }
-            RenderChanged();
-        }
-
-        private void ExecuteDeleteNode(DeleteNodeEvent deleteEvent)
-        {
-            var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Id == deleteEvent.NodeId); 
-            if (deleteNodeInfo != null)
-            {
-                var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
-                Nodes.Remove(deleteNodeInfo);
-                if(deleteAddNode != null) Nodes.Remove(deleteAddNode);
-                RenderChanged();
-            }
-        }
-
-        private void ExecuteLoadedCommand(object? param)
+        #region Private Method  
+        private void ExecuteLoadedCommand()
         { 
             Nodes.Clear();
             Connections.Clear();
@@ -119,37 +45,21 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             RenderChanged();
         }
 
-        private void ExecuteNodeClickCommand(object? param)
-        {
-            if (param is BaseNode node)
-            {
-                if (node.Type == NodeTypeEnum.Action)
-                {
-                    InsertBeforeNode = node;
-                    EventMediator.Instance.Publish(new AddOpEventArgs
-                    {
-                        Source = Id,
-                        NodeId = node.Id
-                    });
-                }
-            }
-        }
-
-        public void UpdateNodePosition()
+        protected override void UpdateNodePosition()
         {
             var maxLength = Nodes.Max(c => c.Width);
-            Width = maxLength; 
+            Width = maxLength;
             var count = Nodes.Count;
             for (var i = 0; i < count; i++)
             {
                 Nodes[i].Index = i + 1;
-                var yDistance = i == 0 ? 0 : Nodes[i - 1].Position.Y + Nodes[i - 1].Height + _addActionDistance; 
+                var yDistance = i == 0 ? 0 : Nodes[i - 1].Position.Y + Nodes[i - 1].Height + AddActionDistance;
                 Nodes[i].Position = new Point((maxLength - Nodes[i].Width) / 2.0, yDistance);
             } 
-            Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height;
+            Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + AddActionDistance;
         }
 
-        public void UpdateConnection()
+        protected override void UpdateConnection()
         {
             for (var i = 1; i < Nodes.Count; i++)
             {
@@ -177,26 +87,21 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         } 
         #endregion
 
-        #region 处理节点变更 
-        /// <summary>
-        /// 渲染更新
-        /// </summary>
-        private void RenderChanged()
-        {
-            UpdateNodePosition();
-            UpdateConnection();
-        }
-
+        #region 处理节点变更  
         protected override void ProcessNodeChange(NodeChangedEventArgs e)
         {
 #if DEBUG
             Debug.WriteLine($"===主列表节点更新:{Id}===");
 #endif
             RenderChanged();
+            _eventAggregator.GetEvent<NotificationWorkflowChangedEvent>().Publish(new NotificationWorkflowChangedEventParam()
+            {
+                Width = Width,
+                Height = Height
+            });
             // 根节点处理完成后，可以标记事件为已处理，停止进一步传播
             e.Handled = true;
-        }
-
+        } 
         #endregion
     }
 }

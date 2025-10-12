@@ -9,16 +9,34 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
+             xmlns:localConst="clr-namespace:MCCS"
              xmlns:localViewModel="clr-namespace:MCCS.ViewModels.MethodManager.Contents"
              xmlns:workflowSetting="clr-namespace:MCCS.WorkflowSetting;assembly=MCCS.WorkflowSetting"
+             xmlns:components="clr-namespace:MCCS.WorkflowSetting.Components;assembly=MCCS.WorkflowSetting"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance localViewModel:MethodWorkflowSettingPageViewModel}">
-    <Grid>
+    <Grid x:Name="Container">
+        <b:Interaction.Triggers>
+            <b:EventTrigger EventName="Loaded">
+                <b:InvokeCommandAction 
+                    Command="{Binding LoadCommand}"
+                    CommandParameter="{Binding ElementName=Container}"/>
+            </b:EventTrigger>
+        </b:Interaction.Triggers>
         <!-- 滚动区域 -->
         <ScrollViewer Name="CanvasScrollViewer"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Auto" 
-                      Background="LightGray">
-            <workflowSetting:WorkflowCanvasPage />
+                      Background="LightGray"> 
+            <!-- Canvas with Scale/Translate transforms for zoom/pan -->
+            <Grid x:Name="WorkflowCanvas" Width="{Binding Width}" Height="{Binding Height}"
+                  Background="White"
+                  RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform>
+                    <ScaleTransform ScaleX="{Binding ElementName=ScaleSlider, Path=Value}" 
+                                    ScaleY="{Binding ElementName=ScaleSlider, Path=Value}" />
+                </Grid.RenderTransform>
+                <components:WorkflowStepListNodes />
+            </Grid>
         </ScrollViewer>
 
         <!-- 固定在顶部的工具栏（覆盖在 ScrollViewer 上方） -->
@@ -30,8 +48,10 @@
             <materialDesign:NumericUpDown 
                 Margin="30,10,10,10" 
                 materialDesign:TextFieldAssist.SuffixText="%" 
-                Value="100"
-                Maximum="100" Minimum="0" />
+                Value="0.5"  
+                IncreaseContent="0.1"
+                x:Name="ScaleSlider"
+                Maximum="0.25" Minimum="1.0" />
         </StackPanel>
     </Grid>
 </UserControl>

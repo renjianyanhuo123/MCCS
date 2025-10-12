@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 

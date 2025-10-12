@@ -1,21 +1,11 @@
-﻿using System.Windows;
-using MCCS.WorkflowSetting.Components.ViewModels;
+﻿using System.Windows; 
 
 namespace MCCS.WorkflowSetting.Models.Edges
 {
-    public class WorkflowConnection : BindingBase
+    public class WorkflowConnection : BindableBase
     {
-        public WorkflowConnection()
-        {  
-        } 
-
-        public string Id { get; set; } 
-        public ConnectionTypeEnum Type { get; set; } 
-        /// <summary>
-        /// 是否已渲染
-        /// </summary>
-        public bool IsRender { get; set; } = false; 
-
+        public string Id { get; set; } = string.Empty;
+        public ConnectionTypeEnum Type { get; set; }  
         private List<Point> _points = [];
         public List<Point> Points { 
             get => _points;

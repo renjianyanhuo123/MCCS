@@ -1,7 +1,4 @@
-﻿using System.Windows.Input;
-using System.Windows.Media;
-using MCCS.Infrastructure;
-using MCCS.WorkflowSetting.Components.ViewModels;
+﻿using System.Windows.Media;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -9,31 +6,32 @@ namespace MCCS.WorkflowSetting.Models.Nodes
     public class StepNode : BaseNode
     {
         private readonly string _soureId;
+        private readonly IEventAggregator _eventAggregator;
 
-        public StepNode(string sourceId)
+        public StepNode(string sourceId, IEventAggregator eventAggregator)
         {
             _soureId = sourceId;
-            OperationNodeClickedCommand = new RelayCommand(ExecuteOperationNodeClickedCommand, _ => true);
-            DeleteNodeCommand = new RelayCommand(ExecuteDeleteNodeCommand, _ => true);
-            CancelCommand = new RelayCommand(ExecuteCancelCommand, _ => true);
-            ConfigueDeleteCommand = new RelayCommand(ExecuteConfigueDeleteCommand, _ => true);
+            OperationNodeClickedCommand = new DelegateCommand(ExecuteOperationNodeClickedCommand);
+            DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
+            CancelCommand = new DelegateCommand(ExecuteCancelCommand);
+            ConfigueDeleteCommand = new DelegateCommand(ExecuteConfigueDeleteCommand);
             TitleBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9955"));
+            _eventAggregator = eventAggregator;
         }
-
-        public bool IsSettingNode { get; set; } = false;
-
+        #region Property
         /// <summary>
         /// 节点标题
         /// </summary>
         private string _title = string.Empty;
-        public string Title { 
-            get => _title; 
+        public string Title
+        {
+            get => _title;
             set => SetProperty(ref _title, value);
         }
         /// <summary>
         /// 节点背景色
         /// </summary>
-        private Brush _titleBackground; 
+        private Brush _titleBackground;
         public Brush TitleBackground
         {
             get => _titleBackground;
@@ -53,36 +51,38 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _isShowShade;
             set => SetProperty(ref _isShowShade, value);
         }
+        #endregion
 
-        public ICommand OperationNodeClickedCommand { get; }
+        public DelegateCommand OperationNodeClickedCommand { get; }
 
-        public ICommand DeleteNodeCommand { get; }
+        public DelegateCommand DeleteNodeCommand { get; }
 
-        public ICommand CancelCommand { get; }
+        public DelegateCommand CancelCommand { get; }
 
-        public ICommand ConfigueDeleteCommand { get; }
+        public DelegateCommand ConfigueDeleteCommand { get; }
 
-        private void ExecuteConfigueDeleteCommand(object? param)
+        private void ExecuteConfigueDeleteCommand()
         {
-            EventMediator.Instance.Publish(new DeleteNodeEvent
-            {
-                Source = _soureId,
-                NodeId = Id
-            });
+            _eventAggregator.GetEvent<DeleteNodeEvent>()
+                .Publish(new DeleteNodeEventParam
+                {
+                    Source = _soureId,
+                    NodeId = Id
+                });
         }
 
-        private void ExecuteOperationNodeClickedCommand(object? param)
+        private void ExecuteOperationNodeClickedCommand()
         {
             IsOpen = true;
         }
 
-        private void ExecuteDeleteNodeCommand(object? param)
+        private void ExecuteDeleteNodeCommand()
         {
             IsShowShade = true;
             IsOpen = false;
         }
 
-        private void ExecuteCancelCommand(object? param)
+        private void ExecuteCancelCommand()
         {
             IsShowShade = false;
         }

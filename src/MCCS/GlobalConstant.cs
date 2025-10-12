@@ -19,5 +19,7 @@
         public static readonly string StationSiteNavigateRegionName = "StationSiteNavigateRegion";
 
         public static readonly string MethodNavigateRegionName = "MethodNavigateRegion";
+
+        // public static readonly string WorkflowSettingRegionName = "WorkflowSettingRegion";
     }
 }

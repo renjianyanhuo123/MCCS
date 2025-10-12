@@ -1,8 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using MCCS.WorkflowSetting.Models.Nodes;
-
-namespace MCCS.WorkflowSetting.Components
+﻿namespace MCCS.WorkflowSetting.Components
 {
     /// <summary>
     /// WorkflowStepNode.xaml 的交互逻辑

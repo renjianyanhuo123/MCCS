@@ -1,6 +1,4 @@
-﻿using MCCS.WorkflowSetting.Models.Nodes;
-
-namespace MCCS.WorkflowSetting.Components
+﻿namespace MCCS.WorkflowSetting.Components
 {
     /// <summary>
     /// WorkflowStepListNodes.xaml 的交互逻辑
@@ -10,10 +8,6 @@ namespace MCCS.WorkflowSetting.Components
         public WorkflowStepListNodes()
         {
             InitializeComponent();
-            DataContext = new StepListNodes
-            {
-                Type = NodeTypeEnum.StepList
-            };
         } 
     }
 }

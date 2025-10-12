@@ -19,7 +19,7 @@
         <ItemsControl ItemsSource="{Binding Children}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" />
+                    <StackPanel Orientation="Horizontal"  />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemContainerStyle>
@@ -31,7 +31,7 @@
             </ItemsControl.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <ContentControl Content="{Binding}">
+                    <ContentControl Content="{Binding}" VerticalAlignment="Top">
                         <!--<ContentControl.InputBindings>
                             <MouseBinding MouseAction="LeftClick" 
                                           Command="{Binding DataContext.NodeClickCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"

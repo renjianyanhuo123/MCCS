@@ -41,6 +41,8 @@ using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
 using HelixToolkit.SharpDX.Core;
 using MCCS.Common.DataManagers;
+using MCCS.WorkflowSetting.Components;
+using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS
 {
@@ -142,6 +144,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
+            // Workflow Setting
+            // 指定ViewModel创建
+            containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>();
         }
 
         /// <summary>

@@ -1,14 +1,13 @@
-﻿using System.Windows;
-using MCCS.WorkflowSetting.Components.ViewModels;
+﻿using System.Windows; 
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public abstract class BaseNode : BindingBase
+    public abstract class BaseNode : BindableBase
     {  
         public string Id { get; private set; } = Guid.NewGuid().ToString("N");
-        public int Index { get; set; }
-        public bool IsRender { get; set; }
+        public int Index { get; set; } 
+
         private BaseNode? _parent;
         /// <summary>
         /// 父节点

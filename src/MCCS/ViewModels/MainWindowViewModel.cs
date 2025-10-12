@@ -11,9 +11,7 @@ namespace MCCS.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
-        private readonly IRegionManager _regionManager;
-
-        private readonly EventHandler<AddOpEventArgs> _showMenuEventHandler;
+        private readonly IRegionManager _regionManager; 
 
         #region 页面属性 
         private double _mainPageWidth; 
@@ -83,7 +81,7 @@ namespace MCCS.ViewModels
         #region Command 
         public DelegateCommand LoadCommand { get; }
 
-        public DelegateCommand<Flyout> OpenTestFlyoutCommand { get; }
+        // public DelegateCommand<Flyout> OpenTestFlyoutCommand { get; }
         #endregion
 
         #region PrivateMethod 
@@ -114,7 +112,7 @@ namespace MCCS.ViewModels
             
         }
 
-        private void ExecuteShowStepsCommand(AddOpEventArgs opEventArgs)
+        private void ExecuteShowStepsCommand(AddOpEventParam opEventArgs)
         {
              IsOpenFlyout = true;
              RightFlyoutName = "工作流配置";
@@ -132,13 +130,9 @@ namespace MCCS.ViewModels
             _regionManager = regionManager; 
             _eventAggregator.GetEvent<FinishStartUpNotificationEvent>().Subscribe(JumpToMainPage);
             _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
+            _eventAggregator.GetEvent<AddOpEvent>().Subscribe(ExecuteShowStepsCommand);
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
-            _showMenuEventHandler = (sender, args) =>
-            {
-                ExecuteShowStepsCommand(args);
-            };
-            EventMediator.Instance.Subscribe(_showMenuEventHandler);
-            OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
+            // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 
     }
 }

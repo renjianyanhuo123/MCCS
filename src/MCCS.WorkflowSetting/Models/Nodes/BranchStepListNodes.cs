@@ -1,101 +1,21 @@
-﻿using MCCS.Infrastructure;
-using MCCS.WorkflowSetting.Components.ViewModels;
-using MCCS.WorkflowSetting.EventParams;
+﻿using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Edges;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
-using System.Windows.Input;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public class BranchStepListNodes : BaseNode
+    public class BranchStepListNodes : BoxListNodes
     {
-        public const double _addActionDistance = 35.0;
-
-        public ObservableCollection<WorkflowConnection> Connections { get; } = [];
-
-        public ObservableCollection<BaseNode> Nodes { get; } = [];
-
-        private readonly EventHandler<AddNodeEvent> _addNodeEventHandler;
-        private readonly EventHandler<DeleteNodeEvent> _deleteNodeEventHandler; 
-
-        /// <summary>
-        /// 待插入节点的位置后面 
-        /// </summary>
-        public BaseNode? InsertBeforeNode { get; private set; }
-
-        public BranchStepListNodes()
+        public BranchStepListNodes(IEventAggregator eventAggregator) : base(eventAggregator)
         {
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;
-            Height = 200;
-            LoadedCommand = new RelayCommand(ExecuteLoadedCommand, _ => true);
-            NodeClickCommand = new RelayCommand(ExecuteNodeClickCommand, _ => true);
-            _addNodeEventHandler = (sender, obj) =>
-            {
-                if (obj.Source == Id)
-                {
-                    ExecuteAddNode(obj.Node);
-                }
-            };
-            _deleteNodeEventHandler = (sender, @event) =>
-            {
-                if (@event.Source == Id)
-                {
-                    ExecuteDeleteNode(@event);
-                }
-            }; 
-            EventMediator.Instance.Subscribe(_deleteNodeEventHandler);
-            EventMediator.Instance.Subscribe(_addNodeEventHandler);
-        }
-
-        #region Command 
-        public ICommand LoadedCommand { get; }
-
-        public ICommand NodeClickCommand { get; }
-        #endregion
-
-        #region Private Method  
-        private void ExecuteAddNode(BaseNode node)
-        {
-            var addOpNode = new AddOpNode
-            {
-                Name = "Add",
-                Parent = this,
-                Type = NodeTypeEnum.Action,
-                Width = 20,
-                Height = 20
-            };
-            node.Parent = this;
-            if (InsertBeforeNode == null)
-            {
-                Nodes.Add(node);
-                Nodes.Add(addOpNode);
-            }
-            else
-            {
-                Nodes.Insert(InsertBeforeNode.Index, node);
-                Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
-            }
-            // 触发更新; 因为会先更新自己的节点变更
-            RaiseNodeChanged("UIChanged", "");
-        }
-
-        private void ExecuteDeleteNode(DeleteNodeEvent deleteEvent)
-        {
-            var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Id == deleteEvent.NodeId);
-            if (deleteNodeInfo != null)
-            {
-                var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
-                Nodes.Remove(deleteNodeInfo);
-                if (deleteAddNode != null) Nodes.Remove(deleteAddNode);
-                // 触发更新
-                RaiseNodeChanged("UIChanged", "");
-            }
-        }
-
-        private void ExecuteLoadedCommand(object? param)
+            Height = 200; 
+            LoadedCommand = new DelegateCommand(ExecuteLoadedCommand); 
+        } 
+        #region Private Method
+        private void ExecuteLoadedCommand()
         {
             Nodes.Clear();
             Connections.Clear();
@@ -115,24 +35,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             });
             RenderChanged();
         }
-
-        private void ExecuteNodeClickCommand(object? param)
-        {
-            if (param is BaseNode node)
-            {
-                if (node.Type == NodeTypeEnum.Action)
-                {
-                    InsertBeforeNode = node;
-                    EventMediator.Instance.Publish(new AddOpEventArgs
-                    {
-                        Source = Id,
-                        NodeId = node.Id
-                    });
-                }
-            }
-        }
-
-        public void UpdateNodePosition()
+        
+        protected override void UpdateNodePosition()
         {
             var maxLength = Nodes.Max(c => c.Width);
             Width = maxLength;
@@ -140,17 +44,23 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             for (var i = 0; i < count; i++)
             {
                 Nodes[i].Index = i + 1;
-                var yDistance = i == 0 ? _addActionDistance : Nodes[i - 1].Position.Y + Nodes[i - 1].Height + _addActionDistance;
+                var yDistance = i == 0 ? AddActionDistance : Nodes[i - 1].Position.Y + Nodes[i - 1].Height + AddActionDistance;
                 Nodes[i].Position = new Point((maxLength - Nodes[i].Width) / 2.0, yDistance);
             }
-            var tempHight = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + _addActionDistance;
-            if (tempHight > Height)
+            var tempHeight = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + AddActionDistance;  
+            if (tempHeight > Height)
             {
-                Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + _addActionDistance;
+                Height = Nodes[count - 1].Position.Y + Nodes[count - 1].Height + AddActionDistance;
             }
+            //if (Parent is DecisionNode parentNode)
+            //{
+            //    Height = parentNode.Children.Max(c => c.Height); 
+            //}
         }
 
-        public void UpdateConnection()
+        public double GetCurrentHeight => Nodes[^1].Position.Y + Nodes[^1].Height + AddActionDistance;
+
+        protected override void UpdateConnection()
         {
             var xDistance = Nodes[0].CenterPoint.X;
             for (var i = 0; i <= Nodes.Count; i++)
@@ -196,13 +106,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         }
         #endregion
 
-        #region 节点更新
-        public void RenderChanged()
-        {
-            UpdateNodePosition();
-            UpdateConnection();
-        }
-
+        #region 节点更新 
         protected override void ProcessNodeChange(NodeChangedEventArgs e)
         {
 #if DEBUG

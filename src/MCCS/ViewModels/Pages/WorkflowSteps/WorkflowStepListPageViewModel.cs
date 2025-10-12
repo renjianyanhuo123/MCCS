@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
-using MCCS.Infrastructure;
 using MCCS.Models.MethodManager;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;
@@ -10,8 +9,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
     public sealed class WorkflowStepListPageViewModel : BaseViewModel
     {
         public const string Tag = "WorkflowStepListPage";
-
-
+         
         public WorkflowStepListPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
             Steps = 
@@ -51,7 +49,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
-            var paramters = navigationContext.Parameters.GetValue<AddOpEventArgs>("OpEventArgs");
+            var paramters = navigationContext.Parameters.GetValue<AddOpEventParam>("OpEventArgs");
             _sourceId = paramters.Source as string ?? throw new ArgumentNullException(nameof(paramters.Source));
         }
 
@@ -72,7 +70,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
             {
                 case StepTypeEnum.Cycle:
                 case StepTypeEnum.Delay:
-                    res = new StepNode(_sourceId)
+                    res = new StepNode(_sourceId, _eventAggregator)
                     {
                         Name = "StepNode",
                         Title = param.Name,
@@ -82,10 +80,10 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     };
                     break;
                 case StepTypeEnum.Decision:
-                    res = new DecisionNode();
+                    res = new DecisionNode(_eventAggregator);
                     break;
             }
-            if (res != null) EventMediator.Instance.Publish(new AddNodeEvent
+            if (res != null) _eventAggregator.GetEvent<AddNodeEvent>().Publish(new AddNodeEventParam
             {
                 Source = _sourceId,
                 Node = res

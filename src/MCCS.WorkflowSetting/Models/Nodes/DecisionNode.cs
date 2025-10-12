@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+using System.Xml.Linq;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -63,17 +64,18 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 var temp = value / 2.0;
                 ItemMargin = new Thickness(temp, 0, temp, 0);
             }
-        }
+        } 
+
         #endregion
 
-        public DecisionNode()
+        public DecisionNode(IEventAggregator eventAggregator)
         {
             ItemSpacing = 10; 
-            var node1 = new BranchStepListNodes
+            var node1 = new BranchStepListNodes(eventAggregator)
             {
                 Parent = this
             };
-            var node2 = new BranchStepListNodes
+            var node2 = new BranchStepListNodes(eventAggregator)
             {
                 Parent = this
             };
@@ -89,10 +91,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             var maxHeight = Children.Max(c => c.Height);
             Width = ItemSpacing * Children.Count + Children.Sum(c => c.Width);
             Height = maxHeight;
-            foreach (var node in Children)
-            {
-                node.Height = maxHeight;
-            }
             BorderHeight = maxHeight;
             if (Children.Count > 1)
             {
@@ -111,15 +109,27 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Debug.WriteLine($"===决策节点更新:{Id}===");
 #endif
             ExecuteChildrenChanged();
-            // 重新更新所有的直系子流程
+            // 先找出最大高度 
+            var maxHeight = 0.0;
             foreach (var child in Children)
-            {
-                // 排除已经更新过的节点
-                if (child == e.SourceNode) continue;
+            { 
                 if (child is BranchStepListNodes node)
                 {
-                    node.RenderChanged();
+                    if (maxHeight < node.GetCurrentHeight)
+                    {
+                        maxHeight = node.GetCurrentHeight;
+                    }
                 }
+            } 
+            Height = maxHeight;
+            BorderHeight = maxHeight;
+            foreach (var child in Children)
+            {
+                if (child is BranchStepListNodes node)
+                {
+                    node.Height = maxHeight;
+                    node.RenderChanged();
+                } 
             }
         } 
         #endregion
