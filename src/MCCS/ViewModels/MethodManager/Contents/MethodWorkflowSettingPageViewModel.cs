@@ -36,6 +36,27 @@ namespace MCCS.ViewModels.MethodManager.Contents
             get => _height;
             set => SetProperty(ref _height, value);
         }
+
+        private int _perect = 100;
+        public int Perect
+        {
+            get => _perect;
+            set
+            {
+                if (SetProperty(ref _perect, value))
+                {
+                    Scale = _perect / 100.0;
+                }
+            }
+        }
+
+        private double _scale = 1.0;
+        public double Scale
+        {
+            get => _scale;
+            set => SetProperty(ref _scale, value);
+        }
+
         #endregion
 
         #region Command 
