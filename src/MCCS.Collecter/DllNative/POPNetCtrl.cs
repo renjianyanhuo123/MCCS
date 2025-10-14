@@ -5,11 +5,7 @@ namespace MCCS.Collecter.DllNative
 {
     public static class POPNetCtrl
     {
-        #region DLL名称
-        // private const string DllName = "POPNETCtrl01.dll";
-        // 使用常量
-        private const string DllName = @"POPNETCtrl01.dll";
-        #endregion
+        
 
         #region DLL函数导入
 
@@ -19,7 +15,7 @@ namespace MCCS.Collecter.DllNative
         /// 应用程序启动时，仅调用一次
         /// </summary>
         /// <returns>错误号 =0 无错误  其他预留</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Init();
 
         /// <summary>
@@ -27,7 +23,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hInstance">设备号</param>
         /// <returns>错误号 =0 无错误  其他预留</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_PopNet_Init(int hInstance);
 
         /// <summary>
@@ -36,7 +32,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hInstance">设备号 0…n   第一个控制器为0 ，依次类推</param>
         /// <param name="hDevice">设备句柄---返回值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备打开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_ConnectToDev(int hInstance, ref IntPtr hDevice);
 
         /// <summary>
@@ -44,7 +40,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0 操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_DisConnectToDev(IntPtr hDevice);
 
         /// <summary>
@@ -53,7 +49,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="outValue">通讯状态值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_ReadConectState(IntPtr hDevice, ref uint outValue);
 
         /// <summary>
@@ -62,7 +58,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="nRult">数据组数  =0   表示无数据</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_GetAD_HDataCount(IntPtr hDevice, ref uint nRult);
 
         /// <summary>
@@ -72,7 +68,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="inBytes1">数据结构   TAD_HInfo</param>
         /// <param name="inBytesSize1">数据结构的字节数</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_GetAD_HInfo(IntPtr hDevice, ref byte inBytes1, uint inBytesSize1);
 
         /// <summary>
@@ -82,7 +78,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="addr">参数地址</param>
         /// <param name="fVal">需要写入的数值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_fWriteAddr(IntPtr hDevice, uint addr, float fVal);
 
         /// <summary>
@@ -92,7 +88,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="addr">参数地址</param>
         /// <param name="nVal">需要写入的数值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_nWriteAddr(IntPtr hDevice, uint addr, int nVal);
 
         /// <summary>
@@ -102,7 +98,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="addr">参数地址</param>
         /// <param name="nVal">需要写入的数值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_bWriteAddr(IntPtr hDevice, uint addr, byte nVal);
 
         /// <summary>
@@ -113,7 +109,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="sVal">需要写入的字符串</param>
         /// <param name="sLen">字符串长度</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int NetCtrl01_StrWriteAddr(IntPtr hDevice, uint addr, string sVal, uint sLen);
 
         /// <summary>
@@ -122,7 +118,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="addr">需要查询参数的地址</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_AskReadAddr(IntPtr hDevice, uint addr);
 
         /// <summary>
@@ -130,7 +126,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_AskReadAllReg(IntPtr hDevice);
 
         /// <summary>
@@ -140,7 +136,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="addr">需要查询的参数地址</param>
         /// <param name="fRult">对应参数在控制器中的值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_fReadAddrVal(IntPtr hDevice, uint addr, ref float fRult);
 
         /// <summary>
@@ -150,7 +146,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="inAddr">需要查询的参数地址</param>
         /// <param name="nSult">对应参数在控制器中的值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_nReadAddrVal(IntPtr hDevice, uint inAddr, ref int nSult);
 
         /// <summary>
@@ -160,7 +156,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="inAddr">需要查询的参数地址</param>
         /// <param name="nSult">对应参数在控制器中的值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_bReadAddrVal(IntPtr hDevice, uint inAddr, ref byte nSult);
 
         /// <summary>
@@ -171,7 +167,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="sRult">对应参数在控制器中的值</param>
         /// <param name="sLen">需要读取字符串长度</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern int NetCtrl01_strReadAddrVal(IntPtr hDevice, uint addr, StringBuilder sRult, uint sLen);
 
         /// <summary>
@@ -179,7 +175,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_WriteToFlash(IntPtr hDevice);
 
         /// <summary>
@@ -190,7 +186,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="tmpVelo">速度 mm或kN/秒</param>
         /// <param name="tmpPos">目标值 kN 或mm</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_S_SetCtrlMod(IntPtr hDevice, uint tmpCtrlMode, float tmpVelo, float tmpPos);
 
         /// <summary>
@@ -199,7 +195,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="tmpSysCtrlState">控制方式</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Set_SysCtrlstate(IntPtr hDevice, byte tmpSysCtrlState);
 
         /// <summary>
@@ -209,7 +205,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="onOffState">阀台状态</param>
         /// <param name="tmpDOValue">DO操作值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Set_StationCtrl(IntPtr hDevice, uint onOffState, uint tmpDOValue);
 
         /// <summary>
@@ -218,7 +214,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="tmpStartState">=0 停止 =1开始</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Set_TestStartState(IntPtr hDevice, byte tmpStartState);
 
         /// <summary>
@@ -227,7 +223,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="tmpCtrlMode">0=位移通道   1=试验力通道</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Set_offSet(IntPtr hDevice, byte tmpCtrlMode);
 
         /// <summary>
@@ -236,7 +232,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hDevice">设备句柄</param>
         /// <param name="tmpDoVal">输出值    Bit 0  或1</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_DigOut(IntPtr hDevice, int tmpDoVal);
 
         /// <summary>
@@ -244,7 +240,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Soft_Ext(IntPtr hDevice);
 
         /// <summary>
@@ -252,7 +248,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Recovery(IntPtr hDevice);
 
         #endregion
@@ -272,7 +268,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="tmpCountSet">循环次数</param>
         /// <param name="tmpCtrlOpt">控制过程选项  是否中值调整 起停振过程</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Osci_SetWaveInfo(int hInstance, float tmpMeanA, float tmpA,
             float tmpFreq, byte tmpWaveShap, byte tmpCtrlMode, float tmpAP, float tmpPH,
             int tmpCountSet, int tmpCtrlOpt);
@@ -283,7 +279,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hInstance">设备号</param>
         /// <param name="aPercent">幅值百分比</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Osci_SetAP(int hInstance, float aPercent);
 
         /// <summary>
@@ -292,7 +288,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hInstance">设备号</param>
         /// <param name="tmpDu">相位角度</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Osci_SetPH(int hInstance, float tmpDu);
 
         /// <summary>
@@ -301,7 +297,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hInstance">设备号</param>
         /// <param name="tmpEndActMode">0=立即停止    1=停振过程停止</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Osci_SetEndState(int hInstance, byte tmpEndActMode);
 
         /// <summary>
@@ -311,7 +307,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="tmpActMode">0=当前位置暂停     1=有停振 起振过程</param>
         /// <param name="tmpHaltState">1=暂停      0=取消暂停</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_Osci_SetHaltState(int hInstance, byte tmpActMode, byte tmpHaltState);
 
         /// <summary>
@@ -335,7 +331,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="hInstance">设备句柄</param>
         /// <param name="tmpMaxDataCount">最大点数</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_SetWaveFMaxDataCount(IntPtr hInstance, int tmpMaxDataCount);
 
         /// <summary>
@@ -345,7 +341,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="tmpDataCount">指定点号</param>
         /// <param name="tmpVal">对应波形值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_SetWaveFDataVal(IntPtr hInstance, int tmpDataCount, float tmpVal);
 
         /// <summary>
@@ -355,7 +351,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="tmpDataCount">指定点号</param>
         /// <param name="tmpfVal">返回值</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_GetWaveFDataVal(IntPtr hDevice, int tmpDataCount, ref float tmpfVal);
 
         /// <summary>
@@ -366,7 +362,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="nOperation">操作状态</param>
         /// <param name="fPercentage">下载数据百分比</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_GetWaveDownloadState(IntPtr hDevice, ref int nOperation, ref float fPercentage);
 
         /// <summary>
@@ -374,7 +370,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_SetWaveFStart(IntPtr hDevice);
 
         /// <summary>
@@ -382,7 +378,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_SetWaveFEnd(IntPtr hDevice);
 
         /// <summary>
@@ -390,7 +386,7 @@ namespace MCCS.Collecter.DllNative
         /// </summary>
         /// <param name="hDevice">设备句柄</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
-        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_ValleyPeak_Clear(IntPtr hDevice);
 
         #endregion

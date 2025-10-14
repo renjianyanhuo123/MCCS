@@ -1,4 +1,4 @@
-﻿namespace MCCS.Core.Helper
+﻿namespace MCCS.Infrastructure.Helper
 {
     public static class HighPerformanceRandomHash
     {

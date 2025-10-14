@@ -1,5 +1,4 @@
-﻿using MCCS.Core.Helper;
-using MCCS.Core.Repositories;
+﻿using MCCS.Core.Repositories;
 using MCCS.Events.StationSites;
 using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
@@ -7,6 +6,7 @@ using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using MCCS.Core.Models.StationSites;
 using MCCS.Events.StationSites.ControlChannels;
+using MCCS.Infrastructure.Helper;
 
 namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
 {

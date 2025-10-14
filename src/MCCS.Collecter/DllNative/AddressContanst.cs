@@ -2,6 +2,12 @@
 {
     public static class AddressContanst
     {
+        #region DLL名称
+        // private const string DllName = "POPNETCtrl01.dll";
+        // 使用常量
+        public const string DllName = @"POPNETCtrl01.dll";
+        #endregion
+
         // POPNet基本参数
         public const int POPPowerONState = 542;        // byte    POPNet 上电状态  上电=0   2024-12-17
         public const int Addr_AI_SampleRate = 20;      // integer 通道采样频率 次/秒

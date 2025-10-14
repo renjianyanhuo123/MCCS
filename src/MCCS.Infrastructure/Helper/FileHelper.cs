@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace MCCS.Core.Helper
+namespace MCCS.Infrastructure.Helper
 {
     /// <summary>
     /// 高性能文件读写库

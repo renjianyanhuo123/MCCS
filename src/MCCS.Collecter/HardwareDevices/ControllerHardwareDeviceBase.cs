@@ -8,7 +8,10 @@ namespace MCCS.Collecter.HardwareDevices
     {
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
-
+        /// <summary>
+        /// 当前设备句柄
+        /// </summary>
+        private IntPtr _deviceHandle = IntPtr.Zero;
         public long DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }

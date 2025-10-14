@@ -8,16 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\**" />
+    <EmbeddedResource Remove="Common\**" />
+    <None Remove="Common\**" />
+    <Page Remove="Common\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FreeSql" Version="3.5.213" />
     <PackageReference Include="FreeSql.DbContext" Version="3.5.213" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.108" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="WorkflowCore" Version="3.16.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\" />
     <Folder Include="Repositories\Project\" />
   </ItemGroup>
 
