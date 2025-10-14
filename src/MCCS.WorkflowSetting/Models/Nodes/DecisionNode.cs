@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
-using System.Xml.Linq;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -84,6 +83,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Children.Add(node1);
             Children.Add(node2);
             ExecuteChildrenChanged();
+            MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
+            MouseEnterCommand = new DelegateCommand(ExecuteMouseEnterCommand);
         }
 
         private void ExecuteChildrenChanged()
@@ -100,6 +101,25 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 BorderWidth = Width - leftSpace - rightSpace;
             }
         }
+
+        #region Command
+        public DelegateCommand MouseLeaveCommand { get; }
+        public DelegateCommand MouseEnterCommand { get; }
+        #endregion
+
+        #region Private Method
+
+        private void ExecuteMouseEnterCommand()
+        {
+
+        }
+
+        private void ExecuteMouseLeaveCommand()
+        {
+
+        }
+
+        #endregion
 
         #region 更新 
         protected override void ProcessNodeChange(NodeChangedEventArgs e)
