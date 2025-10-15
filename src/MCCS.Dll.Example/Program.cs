@@ -9,56 +9,6 @@ namespace POPNetCtrlConsoleTest
         private static IntPtr deviceHandle = IntPtr.Zero;
         private static bool isRunning = false;
         private static Thread dataMonitorThread;
-        // Windows API
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr LoadLibrary(string dllToLoad);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool FreeLibrary(IntPtr hModule);
-        public static void Example()
-        {
-            // 构建 DLL 完整路径
-            string dllPath = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "Dlls",
-                "POPNETCtrl01.dll"
-            );
-
-            // 检查文件是否存在
-            if (!File.Exists(dllPath))
-            {
-                Console.WriteLine($"DLL 文件不存在: {dllPath}");
-                return;
-            }
-
-            // 加载 DLL
-            IntPtr dllHandle = LoadLibrary(dllPath);
-            if (dllHandle == IntPtr.Zero)
-            {
-                Console.WriteLine($"无法加载 DLL: {Marshal.GetLastWin32Error()}");
-                return;
-            }
-
-            try
-            {
-                // 获取函数指针
-                IntPtr funcPtr = GetProcAddress(dllHandle, "POPNetCtrl.NetCtrl01_Init");
-                if (funcPtr == IntPtr.Zero)
-                {
-                    Console.WriteLine("找不到函数 NetCtrl01_Init");
-                    return;
-                } 
-                Console.WriteLine($"找到函数NetCtrl01_Init");
-            }
-            finally
-            {
-                // 卸载 DLL
-                FreeLibrary(dllHandle);
-            }
-        }
 
         static void Main(string[] args)
         {
@@ -67,7 +17,6 @@ namespace POPNetCtrlConsoleTest
             Console.WriteLine("POPNet控制器 C# 控制台测试程序");
             Console.WriteLine("版本: 1.0");
             Console.WriteLine("========================================\n");
-            Example();
             try
             {
                 // 初始化DLL

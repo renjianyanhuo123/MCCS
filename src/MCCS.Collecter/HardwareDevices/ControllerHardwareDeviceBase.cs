@@ -8,11 +8,16 @@ namespace MCCS.Collecter.HardwareDevices
     {
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
+
         /// <summary>
         /// 当前设备句柄
         /// </summary>
-        private IntPtr _deviceHandle = IntPtr.Zero;
-        public long DeviceId { get; }
+        protected IntPtr _deviceHandle = IntPtr.Zero;
+
+        /// <summary>
+        /// 设备ID
+        /// </summary>
+        public int DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
         public HardwareConnectionStatus Status => _statusSubject.Value;
@@ -32,8 +37,8 @@ namespace MCCS.Collecter.HardwareDevices
         }
 
         // 抽象方法 
-        public abstract Task<bool> ConnectToHardwareAsync();
-        public abstract Task<bool> DisconnectFromHardwareAsync();
+        public abstract bool ConnectToHardware();
+        public abstract bool DisconnectFromHardware();
 
         // public virtual List<HardwareSignalChannel> GetSupportedSignals() => [.._signals.Values];
         public HardwareSignalChannel GetSignal(string signalId) => _signals.GetValueOrDefault(signalId);

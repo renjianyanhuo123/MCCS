@@ -64,7 +64,7 @@ namespace MCCS.Services.StartInitial
             {
                 var configuration = new HardwareDeviceConfiguration
                 {
-                    DeviceId = item.Id,
+                    DeviceId = (int)item.Id,
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
                     ConnectionString = ""

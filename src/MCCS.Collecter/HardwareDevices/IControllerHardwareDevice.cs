@@ -2,8 +2,8 @@
 {
     public interface IControllerHardwareDevice : IDisposable
     {
-        Task<bool> ConnectToHardwareAsync();
-        Task<bool> DisconnectFromHardwareAsync();
+        bool ConnectToHardware();
+        bool DisconnectFromHardware();
         IObservable<DataPoint> GetSignalStream(string signalId);
         void StartDataAcquisition();
         void StopDataAcquisition(); 

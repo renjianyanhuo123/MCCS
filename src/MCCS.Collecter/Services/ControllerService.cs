@@ -7,22 +7,22 @@ namespace MCCS.Collecter.Services
     {
         private static volatile bool _isDllInitialized = false;
 
-        public ControllerService() { }
+        public ControllerService()
+        {
+
+        }
 
         public bool InitializeDll()
         {
             if (_isDllInitialized) return true;
-            if (!FileHelper.FileExists(AddressContanst.DllName)) return false;
+            if (!FileHelper.FileExists(AddressContanst.DllName)) throw new DllNotFoundException("DLL文件不存在");
             var result = POPNetCtrl.NetCtrl01_Init();
             if (result == AddressContanst.OP_SUCCESSFUL)
-            { 
+            {
+                _isDllInitialized = true;
                 return true;
             }
-            else
-            {
-                throw new Exception($"DLL初始化失败,错误码:{result}");
-            }
-            _isDllInitialized = true;
+            throw new Exception($"DLL初始化失败,错误码:{result}"); 
         }
     }
 }
