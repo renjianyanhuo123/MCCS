@@ -6,6 +6,8 @@
         public string DeviceName { get; init; } = string.Empty;          // 设备名称
         public string DeviceType { get; init; } = string.Empty;          // 设备类型
         public string ConnectionString { get; init; } = string.Empty;    // 连接字符串或地址
+        public bool IsSimulation { get; set; } = false;                // 是否为模拟设备
+        public int StatusInterval { get; init; } = 3;                  // 状态检查间隔，单位秒，0表示不检查
         public List<HardwareSignalConfiguration> Signals { get; init; } = [];
     }
 }

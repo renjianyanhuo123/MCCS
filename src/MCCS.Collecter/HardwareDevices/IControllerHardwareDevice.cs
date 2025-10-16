@@ -3,8 +3,7 @@
     public interface IControllerHardwareDevice : IDisposable
     {
         bool ConnectToHardware();
-        bool DisconnectFromHardware();
-        IObservable<DataPoint> GetSignalStream(string signalId);
+        bool DisconnectFromHardware(); 
         void StartDataAcquisition();
         void StopDataAcquisition(); 
     }

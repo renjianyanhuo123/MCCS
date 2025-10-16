@@ -9,6 +9,8 @@ namespace MCCS.Collecter.HardwareDevices
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected IDisposable? _statusSubscription;
+        // 是否正在采集数据
+        protected bool _isRunning = false;
 
         /// <summary>
         /// 当前设备句柄
@@ -40,18 +42,9 @@ namespace MCCS.Collecter.HardwareDevices
         // 抽象方法 
         public abstract bool ConnectToHardware();
         public abstract bool DisconnectFromHardware();
-
-        // public virtual List<HardwareSignalChannel> GetSupportedSignals() => [.._signals.Values];
+         
         public HardwareSignalChannel GetSignal(string signalId) => _signals.GetValueOrDefault(signalId);
-        public bool IsSignalAvailable(string signalId) => _signals.ContainsKey(signalId);
-
-        /// <summary>
-        /// 获取单个信号的独立数据流 - 高性能，无额外开销
-        /// </summary>
-        public IObservable<DataPoint> GetSignalStream(string signalId)
-        {
-            return _signals.TryGetValue(signalId, out var channel) ? channel.DataStream : Observable.Empty<DataPoint>();
-        } 
+        public bool IsSignalAvailable(string signalId) => _signals.ContainsKey(signalId); 
 
         public virtual void StartDataAcquisition()
         {
@@ -59,11 +52,12 @@ namespace MCCS.Collecter.HardwareDevices
             {
                 throw new InvalidOperationException("设备未连接");
             }
+            _isRunning = true;
         }
 
         public virtual void StopDataAcquisition()
         {
-
+            _isRunning = false;
         }
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)

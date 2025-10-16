@@ -2,12 +2,16 @@
 
 namespace MCCS.Collecter.Services
 {
-    public interface IControllerService
+    public interface IControllerService : IDisposable
     {
-        bool InitializeDll();
+        bool InitializeDll(bool isMock = false);
 
         bool CreateController(HardwareDeviceConfiguration configuration);
 
         bool RemoveController(int deviceId);
+
+        void StartAllControllers();
+
+        void StopAllControllers();
     }
 }

@@ -3,8 +3,9 @@ using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
-using MCCS.Collecter.HardwareDevices.BwController;
 using MCCS.Collecter.HardwareDevices;
+using MCCS.Collecter.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace MCCS.Services.StartInitial
 {
@@ -12,11 +13,18 @@ namespace MCCS.Services.StartInitial
     {
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
         private readonly IDeviceInfoRepository _deviceInfoRepository;
+        private readonly IControllerService _controllerService;
+        private readonly IConfiguration _configuration;
+
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository,
-            IDeviceInfoRepository deviceInfoRepository)
+            IDeviceInfoRepository deviceInfoRepository,
+            IControllerService controllerService,
+            IConfiguration configuration)
         {
+            _configuration = configuration;
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
             _deviceInfoRepository = deviceInfoRepository;
+            _controllerService = controllerService;
         }
 
         public async Task InitialHardwareDevicesAsync()
@@ -52,14 +60,15 @@ namespace MCCS.Services.StartInitial
 
 
         /// <summary>
-        /// 启动所有控制器
+        /// 注册并启动所有控制器
         /// </summary>
         /// <param name="controllerInfos"></param>
         /// <returns></returns>
         private async Task StartUpAllControllers(IEnumerable<DeviceInfo> controllerInfos)
         {
-            var signals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => c.IsDeleted == false);
-            var hardwareDevices = new List<IControllerHardwareDevice>();
+            var isMock = Convert.ToBoolean(_configuration["AppSettings:IsMock"]);
+            _controllerService.InitializeDll(isMock);
+            var signals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => c.IsDeleted == false); 
             foreach (var item in controllerInfos)
             {
                 var configuration = new HardwareDeviceConfiguration
@@ -67,6 +76,7 @@ namespace MCCS.Services.StartInitial
                     DeviceId = (int)item.Id,
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
+                    IsSimulation = isMock,
                     ConnectionString = ""
                 };
                 configuration.Signals.AddRange(signals
@@ -78,9 +88,11 @@ namespace MCCS.Services.StartInitial
                         SignalType = SignalType.AnalogInput,
                         MinValue = s.DownLimitRange,
                         MaxValue = s.UpLimitRange
-                    })); 
+                    }));
+                _controllerService.CreateController(configuration);
+
             }
-            GlobalDataManager.Instance.SetValue(hardwareDevices);
+            _controllerService.StartAllControllers();
         }
     }
 }

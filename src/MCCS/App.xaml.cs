@@ -43,6 +43,7 @@ using HelixToolkit.SharpDX.Core;
 using MCCS.Common.DataManagers;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
+using MCCS.Collecter.Services;
 
 namespace MCCS
 {
@@ -101,6 +102,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
+            containerRegistry.RegisterSingleton<IControllerService, ControllerService>();
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();

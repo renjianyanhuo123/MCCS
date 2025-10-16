@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using MCCS.Collecter.DllNative.Models;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MCCS.Collecter.DllNative
@@ -69,7 +70,7 @@ namespace MCCS.Collecter.DllNative
         /// <param name="inBytesSize1">数据结构的字节数</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
         [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int NetCtrl01_GetAD_HInfo(IntPtr hDevice, ref byte inBytes1, uint inBytesSize1);
+        public static extern int NetCtrl01_GetAD_HInfo(IntPtr hDevice, IntPtr InBytes1, uint inBytesSize1);
 
         /// <summary>
         /// 向某个地址写浮点类型数据
@@ -389,6 +390,26 @@ namespace MCCS.Collecter.DllNative
         [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int NetCtrl01_ValleyPeak_Clear(IntPtr hDevice);
 
+        /// <summary>
+        /// 字节数组转结构体
+        /// </summary>
+        public static T BytesToStruct<T>(byte[] bytes) where T : struct
+        {
+            int size = Marshal.SizeOf<T>();
+            if (bytes.Length < size)
+                throw new ArgumentException($"Array ({bytes.Length}) < ({size})");
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            try
+            {
+                Marshal.Copy(bytes, 0, ptr, size);
+                return Marshal.PtrToStructure<T>(ptr);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+        }
         #endregion
     }
 }

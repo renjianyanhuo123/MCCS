@@ -1,6 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using MCCS.Collecter.DllNative;
+using MCCS.Collecter.DllNative.Models;
+using Newtonsoft.Json;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
-using MCCS.Collecter.DllNative;
 
 namespace POPNetCtrlConsoleTest
 {
@@ -1115,7 +1118,32 @@ namespace POPNetCtrlConsoleTest
             dataMonitorThread.IsBackground = true;
             dataMonitorThread.Start();
         }
+        // 打印数组数据
+        private static void PrintADInfoArray(TNet_ADHInfo[] infoArray)
+        {
+            for (int i = 0; i < infoArray.Length; i++)
+            {
+                Console.WriteLine($"\n=== AD信息 #{i + 1} ===");
+                PrintSingleADInfo(infoArray[i]);
+            }
+        }
 
+        private static void PrintSingleADInfo(TNet_ADHInfo info)
+        {
+            Console.WriteLine($"Net_AD_N: [{string.Join(", ", info.Net_AD_N)}]");
+            Console.WriteLine($"Net_AD_S: [{string.Join(", ", info.Net_AD_S)}]");
+            Console.WriteLine($"Net_PosVref: {info.Net_PosVref}");
+            Console.WriteLine($"Net_PosE: {info.Net_PosE}");
+            Console.WriteLine($"Net_CtrlDA: {info.Net_CtrlDA}");
+            Console.WriteLine($"Net_CycleCount: {info.Net_CycleCount}");
+            Console.WriteLine($"Net_SysState: {info.Net_SysState}");
+            Console.WriteLine($"Net_DIVal: {info.Net_DIVal}");
+            Console.WriteLine($"Net_DOVal: {info.Net_DOVal}");
+            Console.WriteLine($"NEt_D_PosVref: {info.Net_D_PosVref}");
+            Console.WriteLine($"Net_FeedLoadN: {info.Net_FeedLoadN}");
+            Console.WriteLine($"Net_PrtErrState: {info.Net_PrtErrState}");
+            Console.WriteLine($"Net_TimeCnt: {info.Net_TimeCnt}");
+        }
         /// <summary>
         /// 数据监控线程
         /// </summary>
@@ -1126,19 +1154,67 @@ namespace POPNetCtrlConsoleTest
                 try
                 {
                     // 检查是否有高速数据
+                    uint dataCount1 = 1;
+                    var stopwatch = Stopwatch.StartNew();
                     uint dataCount = 0;
                     int result = POPNetCtrl.NetCtrl01_GetAD_HDataCount(deviceHandle, ref dataCount);
+                    Console.WriteLine($"当前数据数量: {dataCount}, 返回码: {result}");
+                    //if (result == AddressContanst.OP_SUCCESSFUL && dataCount > 0)
+                    //{
 
-                    if (result == AddressContanst.OP_SUCCESSFUL && dataCount > 0)
+                    //}
+                    // 计算单个结构体大小
+                    int structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
+                    uint totalSize = (uint)(structSize * dataCount1);
+
+                    // 分配非托管内存
+                    IntPtr buffer = BufferPool.Rent();
+                    try
                     {
-                        // 这里可以读取高速数据
-                        // byte[] dataBuffer = new byte[bufferSize];
-                        // POPNetCtrl.NetCtrl01_GetAD_HInfo(deviceHandle, ref dataBuffer[0], (uint)bufferSize);
-                        Console.WriteLine();
-                        // 处理数据...
-                    }
+                        // 初始化内存
+                        for (int i = 0; i < dataCount1; i++)
+                        {
+                            TNet_ADHInfo initData = new TNet_ADHInfo();
+                            IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
+                            Marshal.StructureToPtr(initData, structPtr, false);
+                        }
+                        for (int j = 0; j < dataCount; j++)
+                        {
+                            // 调用DLL函数
+                            int result1 = POPNetCtrl.NetCtrl01_GetAD_HInfo(
+                                deviceHandle,
+                                buffer,
+                                totalSize
+                            );
+                            if (result1 == 0)
+                            {
+                                Console.WriteLine("操作成功");
 
-                    Thread.Sleep(10);
+                                // 从内存中读取数据
+                                TNet_ADHInfo[] resultArray = new TNet_ADHInfo[dataCount1];
+                                for (int i = 0; i < dataCount1; i++)
+                                {
+                                    IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
+                                    resultArray[i] = Marshal.PtrToStructure<TNet_ADHInfo>(structPtr);
+                                }
+                                Console.WriteLine($"当前接受数据：{dataCount1}");
+                                //PrintADInfoArray(resultArray);
+                            }
+                            else
+                            {
+                                // Console.WriteLine($"操作失败，错误码: {result}");
+                            }
+                        } 
+                    }
+                    finally
+                    {
+                        // 归还内存
+                        BufferPool.Return(buffer);
+                    }
+                    stopwatch.Stop();
+                    Console.WriteLine($"执行时间: {stopwatch.ElapsedMilliseconds}ms");
+
+                    Thread.Sleep(1);
                 }
                 catch (Exception ex)
                 {
