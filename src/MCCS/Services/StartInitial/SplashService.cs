@@ -78,9 +78,7 @@ namespace MCCS.Services.StartInitial
                         SignalType = SignalType.AnalogInput,
                         MinValue = s.DownLimitRange,
                         MaxValue = s.UpLimitRange
-                    }));
-                var controller = new BwControllerHardwareDevice(configuration);
-                hardwareDevices.Add(controller);
+                    })); 
             }
             GlobalDataManager.Instance.SetValue(hardwareDevices);
         }

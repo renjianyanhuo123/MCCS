@@ -27,9 +27,9 @@ namespace MCCS.Collecter.HardwareDevices
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
             _signalConfig = signalConfig; 
-            _highPriorityScheduler = CreateHighPriorityScheduler(); 
+            //_highPriorityScheduler = CreateHighPriorityScheduler(); 
             // 创建数据采集订阅
-            _acquisitionSubscription = CreateAcquisitionLoop();
+            //_acquisitionSubscription = CreateAcquisitionLoop();
             // 使用ReplaySubject以支持晚加入的订阅者获取最新数据
             _dataSubject = new ReplaySubject<DataPoint>(signalConfig.BufferSize);
         }

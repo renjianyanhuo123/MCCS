@@ -11,6 +11,10 @@
         /// </summary>
         Disconnected,
         /// <summary>
+        /// 连接错误
+        /// </summary>
+        Error,
+        /// <summary>
         /// 标定中
         /// </summary>
         Calibrating

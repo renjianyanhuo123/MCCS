@@ -14,7 +14,7 @@ namespace MCCS.Collecter.DllNative
 
         public int AdFrequency { get; private set; }
 
-        public List<string> IPAddrs { get; private set; }
+        public List<string> IPAddrs { get; } = [];
 
         public override string ToString()
         {

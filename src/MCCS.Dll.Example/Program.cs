@@ -1134,7 +1134,7 @@ namespace POPNetCtrlConsoleTest
                         // 这里可以读取高速数据
                         // byte[] dataBuffer = new byte[bufferSize];
                         // POPNetCtrl.NetCtrl01_GetAD_HInfo(deviceHandle, ref dataBuffer[0], (uint)bufferSize);
-
+                        Console.WriteLine();
                         // 处理数据...
                     }
 

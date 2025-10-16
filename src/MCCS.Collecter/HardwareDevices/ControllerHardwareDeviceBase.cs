@@ -8,6 +8,7 @@ namespace MCCS.Collecter.HardwareDevices
     {
         protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
+        protected IDisposable? _statusSubscription;
 
         /// <summary>
         /// 当前设备句柄
@@ -52,24 +53,17 @@ namespace MCCS.Collecter.HardwareDevices
             return _signals.TryGetValue(signalId, out var channel) ? channel.DataStream : Observable.Empty<DataPoint>();
         } 
 
-        public void StartDataAcquisition()
+        public virtual void StartDataAcquisition()
         {
             if (Status != HardwareConnectionStatus.Connected)
             {
                 throw new InvalidOperationException("设备未连接");
-            } 
-            foreach (var signal in _signals.Values)
-            {
-                signal.Start();
-            } 
+            }
         }
 
-        public void StopDataAcquisition()
+        public virtual void StopDataAcquisition()
         {
-            foreach (var signal in _signals.Values)
-            {
-                signal.Stop();
-            } 
+
         }
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)
@@ -90,7 +84,7 @@ namespace MCCS.Collecter.HardwareDevices
             {
                 channel.Dispose();
             }
-
+            _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
             _statusSubject.Dispose();
         }

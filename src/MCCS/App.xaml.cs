@@ -196,8 +196,7 @@ namespace MCCS
         {
             Log.CloseAndFlush();
             base.OnExit(e);
-            // 关闭主窗口后则释放所有设备连接
-            GlobalDataManager.Instance.HardwareDevices?.ForEach(c => c.Dispose());
+            // 关闭主窗口后则释放所有设备连接 
         }
 
         #region private method

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Linq;
 using MCCS.Collecter.DllNative;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
@@ -7,6 +8,23 @@ namespace MCCS.Collecter.HardwareDevices.BwController
     {
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
+            _statusSubscription = Observable.Interval(TimeSpan.FromSeconds(3))
+                .Subscribe(onNext:c =>
+                {
+                    uint t = 0;
+                    POPNetCtrl.NetCtrl01_ReadConectState(_deviceHandle, ref t);
+                    var res = t switch
+                    {
+                        0 => HardwareConnectionStatus.Connected,
+                        1 => HardwareConnectionStatus.Disconnected,
+                        2 => HardwareConnectionStatus.Error,
+                        _ => HardwareConnectionStatus.Disconnected
+                    };
+                    _statusSubject.OnNext(res);
+                }, onError: exception =>
+                {
+                    _statusSubject.OnNext(HardwareConnectionStatus.Disconnected);
+                });
         }
 
         public override bool ConnectToHardware()
@@ -17,6 +35,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 #if DEBUG
                 Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{DeviceId:X}");
 #endif
+                
                 return true;
             }
             else
@@ -51,5 +70,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 return false;
             }
         }
+
+        public IO
     }
 }
