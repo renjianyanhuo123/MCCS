@@ -23,7 +23,7 @@ namespace MCCS.Collecter.HardwareDevices
         public int DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
-        public HardwareConnectionStatus Status => _statusSubject.Value;
+        public HardwareConnectionStatus Status { get; protected set; }
 
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
 

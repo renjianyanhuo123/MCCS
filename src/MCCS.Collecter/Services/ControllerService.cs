@@ -38,8 +38,15 @@ namespace MCCS.Collecter.Services
 
         public bool CreateController(HardwareDeviceConfiguration configuration)
         {
-            if (_isMock) configuration.IsSimulation = true;
-            var controller = new BwControllerHardwareDevice(configuration);
+            ControllerHardwareDeviceBase controller;
+            if (_isMock)
+            {
+                controller = new MockControllerHardwareDevice(configuration);
+            }
+            else
+            {
+                controller = new BwControllerHardwareDevice(configuration);
+            } 
             controller.ConnectToHardware();
             _controllers.Add(controller);
             return true;

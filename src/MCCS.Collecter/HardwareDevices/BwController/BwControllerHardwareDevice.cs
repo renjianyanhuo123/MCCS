@@ -36,8 +36,9 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                         2 => HardwareConnectionStatus.Error,
                         _ => HardwareConnectionStatus.Disconnected
                     };
+                    Status = res;
                     _statusSubject.OnNext(res);
-                }, onError: exception =>
+                }, onError: _ =>
                 {
                     _statusSubject.OnNext(HardwareConnectionStatus.Disconnected);
                 });
@@ -104,8 +105,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     0L, // 初始状态
                     _ => _isRunning, // 继续条件
                     tick => tick + 1, // 状态更新
-                    tick => AcquireReading(), // 结果选择器
-                    tick => CalculateNextInterval()) // 时间选择器
+                    _ => AcquireReading(), // 结果选择器
+                    _ => CalculateNextInterval()) // 时间选择器
                 .ObserveOn(_highPriorityScheduler)
                 .Subscribe(
                     _dataSubject.OnNext,
@@ -130,7 +131,6 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private DataPoint AcquireReading()
         {
-            if (_hardwareDeviceConfiguration.IsSimulation) return MockAcquireReading();
             IntPtr buffer = IntPtr.Zero;
             try
             {
@@ -194,33 +194,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     BufferPool.Return(buffer);
                 }
             }
-        }
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint MockAcquireReading() 
-        {
-            // 模拟数据采集
-            var rand = new Random();
-            var res = new List<TNet_ADHInfo>();
-            var mockValue = new TNet_ADHInfo();
-            mockValue.Net_AD_N[0] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_N[1] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_N[2] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_N[3] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_N[4] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_N[5] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_S[0] = (float)(rand.NextDouble() * 100);
-            mockValue.Net_AD_S[1] = (float)(rand.NextDouble() * 100);
-            res.Add(mockValue);
-            return new DataPoint
-            {
-                DeviceId = DeviceId,
-                Value = res,
-                Timestamp = Stopwatch.GetTimestamp(),
-                DataQuality = DataQuality.Good
-            };
-        }
+        } 
         #endregion
 
         public override void Dispose()
