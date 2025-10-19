@@ -8,11 +8,6 @@ using System.Windows;
 using Serilog;
 using System.Windows.Threading;
 using DryIoc.Microsoft.DependencyInjection;
-using MCCS.Core.Repositories;
-using MCCS.Core.Devices;
-using MCCS.Core.Devices.Connections;
-using MCCS.Core.Devices.Manager;
-using MCCS.Core.Models.Devices;
 using MCCS.Core.WorkflowSettings;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Common;
@@ -27,7 +22,6 @@ using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.ViewModels.Pages.StationSites.ControlChannels;
 using MCCS.Views.Pages.StationSites.ControlChannels;
 using MCCS.Services.StartInitial;
-using MCCS.ViewModels;
 using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
@@ -39,11 +33,13 @@ using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
 using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
-using HelixToolkit.SharpDX.Core;
-using MCCS.Common.DataManagers;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
 using MCCS.Collecter.Services;
+using MCCS.Collecter.DllNative;
+using MCCS.Core.Repositories;
+using MCCS.ViewModels.Pages.TestModelOperations;
+using MCCS.Views.Pages.TestModelOperations;
 
 namespace MCCS
 {
@@ -110,7 +106,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MainContentPage>(MainContentPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomePage>(HomePageViewModel.Tag);
             containerRegistry.RegisterForNavigation<HomeTestOperationPage>(HomeTestOperationPageViewModel.Tag);
-            // containerRegistry.RegisterForNavigation<ControllerMainPage>(ControllerMainPageViewModel.Tag);
+            // Right Menu Test Operation
+            containerRegistry.RegisterForNavigation<RightMenuMainPage>(RightMenuMainPageViewModel.Tag);
+
             containerRegistry.RegisterForNavigation<TestStartingPage>(TestStartingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<SystemManager>(SystemManagerViewModel.Tag);
             containerRegistry.RegisterForNavigation<PermissionManagement>(PermissionManagementViewModel.Tag);
@@ -139,7 +137,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSitePseudoChannelPage>(StationSitePseudoChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteModel3DSettingPage>(StationSiteModel3DSettingPageViewModel.Tag);
             // Projects
-            containerRegistry.RegisterForNavigation<ProjectMainPage>(ProjectMainPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ProjectMainPage>(ProjectMainPageViewModel.Tag); 
             // Methods
             containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodContentPage>(MethodContentPageViewModel.Tag);
@@ -198,6 +196,9 @@ namespace MCCS
         {
             Log.CloseAndFlush();
             base.OnExit(e);
+            var controllerService = Container.Resolve<IControllerService>();
+            controllerService.StopAllControllers();
+            controllerService.Dispose();
             // 关闭主窗口后则释放所有设备连接 
         }
 

@@ -1,14 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using MCCS.Core.Models.StationSites;
+using Newtonsoft.Json;
 
 namespace MCCS.Common.DataManagers.StationSites
 {
     [method: JsonConstructor]
     public sealed class StationSiteControllerSignalInfo(
         long id,
+        long belongControllerId,
         string name)
     {
         public long Id { get; } = id;
         public string Name { get; } = name;
+
+        public long BelongControllerId { get; } = belongControllerId;
+        /// <summary>
+        /// 控制通道信号类型
+        /// </summary>
+        public SignalTypeEnum ControlChannelSignalType { get; set; }
 
         public StationSiteDeviceInfo? LinkedDevice { get; private set; }
 

@@ -16,6 +16,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private readonly EventLoopScheduler _highPriorityScheduler;
         private readonly int _sampleRate;
         private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
+        private IntPtr _singleBuffer = IntPtr.Zero;
+        private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo)); 
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
@@ -46,7 +48,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
         public override bool ConnectToHardware()
         {
-            var result = POPNetCtrl.NetCtrl01_ConnectToDev(DeviceId, ref _deviceHandle);
+            var result = POPNetCtrl.NetCtrl01_ConnectToDev(_hardwareDeviceConfiguration.DeviceAddressId, ref _deviceHandle);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
 #if DEBUG
@@ -84,9 +86,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 #endif
                 return false;
             }
-        }
-
-        public IObservable<DataPoint> DataStream => _dataSubject.AsObservable(); 
+        } 
         #region Private Method
         private EventLoopScheduler CreateHighPriorityScheduler()
         {
@@ -128,81 +128,55 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return TimeSpan.FromTicks(Stopwatch.Frequency / _sampleRate);
         }
 
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private DataPoint AcquireReading()
         {
-            IntPtr buffer = IntPtr.Zero;
-            try
+            uint count = 0;
+            if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
+                return CreateBadDataPoint(); 
+            if(_singleBuffer != IntPtr.Zero)
+                _singleBuffer = BufferPool.Rent();
+            var results = new List<BatchCollectItemModel>((int)count);
+            for (uint i = 0; i < count; i++)
             {
-                uint dataCount = 0;
-                int result = POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref dataCount);
-                if(result != AddressContanst.OP_SUCCESSFUL) throw new Exception("读取数据计数失败");
-                if( dataCount <= 0) return new DataPoint
-                {
-                    Value = 0,
-                    Timestamp = Stopwatch.GetTimestamp(),
-                    DataQuality = DataQuality.Bad
-                };
-                // 计算单个结构体大小
-                int structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
-                uint totalSize = (uint)(structSize * dataCount); 
-                // 分配非托管内存
-                buffer = BufferPool.Rent();
-                // 初始化内存
-                for (int i = 0; i < dataCount; i++)
-                {
-                    var initData = new TNet_ADHInfo();
-                    IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
-                    Marshal.StructureToPtr(initData, structPtr, false);
-                }
-                // 调用DLL函数
-                int result1 = POPNetCtrl.NetCtrl01_GetAD_HInfo(
-                    _deviceHandle,
-                    buffer,
-                    totalSize
-                );
-                if (result1 != AddressContanst.OP_SUCCESSFUL)
-                    throw new Exception($"读取数据失败，错误码: {result1}");
-                // 从内存中读取数据
-                var resultArray = new List<TNet_ADHInfo>();
-                for (int i = 0; i < dataCount; i++)
-                {
-                    IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
-                    resultArray.Add(Marshal.PtrToStructure<TNet_ADHInfo>(structPtr));
-                }
-                return new DataPoint
-                {
-                    DeviceId = DeviceId,
-                    Value = resultArray,
-                    Timestamp = Stopwatch.GetTimestamp(),
-                    DataQuality = DataQuality.Good
-                };
+                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
+                    return CreateBadDataPoint();
+                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer); 
+                results.Add(StructDataToCollectModel(tempValue));
             }
-            catch
-            { 
-                return new DataPoint
-                {
-                    Value = 0,
-                    Timestamp = Stopwatch.GetTimestamp(),
-                    DataQuality = DataQuality.Bad
-                };
-            }
-            finally
-            {
-                if (buffer != IntPtr.Zero)
-                {
-                    BufferPool.Return(buffer);
-                }
-            }
-        } 
-        #endregion
 
+            return new DataPoint
+            {
+                DeviceId = DeviceId,
+                Value = results,
+                Timestamp = Stopwatch.GetTimestamp(),
+                DataQuality = DataQuality.Good
+            };
+        }
+
+        private DataPoint CreateBadDataPoint() => new()
+        {
+            Value = 0,
+            Timestamp = Stopwatch.GetTimestamp(),
+            DataQuality = DataQuality.Bad
+        };
+        #endregion
+        public void CleanupResources()
+        {
+            if (_singleBuffer != IntPtr.Zero)
+            {
+                BufferPool.Return(_singleBuffer);
+                _singleBuffer = IntPtr.Zero;
+            }
+        }
         public override void Dispose()
         {
             base.Dispose();
             _highPriorityScheduler?.Dispose();
             _acquisitionSubscription?.Dispose();
             _dataSubject?.Dispose();
+            CleanupResources();
         }
     }
 }

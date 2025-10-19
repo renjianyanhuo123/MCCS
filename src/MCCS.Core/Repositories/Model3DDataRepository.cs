@@ -124,6 +124,7 @@ namespace MCCS.Core.Repositories
                 .Set(c => c.FarPlaneDistance, baseInfo.FarPlaneDistance)
                 .Set(c => c.NearPlaneDistance, baseInfo.NearPlaneDistance)
                 .Set(c => c.FieldViewWidth, baseInfo.FieldViewWidth)
+                .Set(c => c.MaterialColor, baseInfo.MaterialColor)
                 .Set(c => c.Name, baseInfo.Name)
                 .Where(c => c.Id == baseInfo.Id)
                 .ExecuteAffrowsAsync(cancellationToken);

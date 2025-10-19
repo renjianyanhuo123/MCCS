@@ -61,8 +61,8 @@
             set => SetProperty(ref _signalName, value);
         }
 
-        private string _address;
-        public string Address
+        private long _address;
+        public long Address
         {
             get => _address;
             set => SetProperty(ref _address, value);

@@ -102,6 +102,38 @@ namespace MCCS.Core.Repositories
             var controlChannels = await freeSql.Select<ControlChannelInfo>()
                 .Where(cc => cc.StationId == stationId && cc.IsDeleted == false)
                 .ToListAsync(cancellationToken);
+            var controlChannelIds = controlChannels.Select(s => s.Id).ToList();
+            var controlChannelSignals = await freeSql
+                .Select<ControlChannelAndSignalInfo, ControlChannelInfo, SignalInterfaceInfo, DeviceInfo>()
+                .LeftJoin((a,b,c,d) => a.ChannelId == b.Id)
+                .LeftJoin((a, b, c,d) => a.SignalId == c.Id)
+                .LeftJoin((a, b, c, d) => a.DeviceId == d.Id)
+                .Where((a, b, c, d) => controlChannelIds.Contains(a.ChannelId))
+                .ToListAsync((a, b, c, d) => new 
+                {
+                    ChannelId = b.Id,
+                    ControlChannelAndSignalInfo = a, 
+                    SignalInterfaceInfo = c,
+                    LinkDeviceInfo = d
+                }, cancellationToken);
+            var controlChannelAggregate = new List<ControlChannelBindSignalInfo>();
+            foreach (var controlChannel in controlChannels)
+            {
+                var item = new ControlChannelBindSignalInfo
+                {
+                    ControlChannelInfo = controlChannel
+                };
+                var tempSignals = controlChannelSignals.Where(s => s.ChannelId == controlChannel.Id)
+                    .Select(s => new ControlChannelSignal
+                    {
+                        SignalType = s.ControlChannelAndSignalInfo.SignalType,
+                        SignalInfo = s.SignalInterfaceInfo,
+                        LinkDeviceInfo = s.LinkDeviceInfo,
+                    })
+                    .ToList();
+                item.Signals = tempSignals;
+                controlChannelAggregate.Add(item);
+            }
             var signals = await freeSql.Select<StationSiteAndHardwareInfo, SignalInterfaceInfo>()
                 .LeftJoin((a, b) => a.SignalId == b.Id)
                 .Where((a, b) => a.StationId == stationId)
@@ -120,7 +152,7 @@ namespace MCCS.Core.Repositories
             var aggregate = new StationSiteAggregate
             {
                 StationSiteInfo = stationSite,
-                ControlChannelInfos = controlChannels,
+                ControlChannelSignalInfos = controlChannelAggregate,
                 PseudoChannelInfos = pseudoChannels,
                 Signals = signals,
                 Model3DAggregate = modelAggregate
@@ -216,6 +248,38 @@ namespace MCCS.Core.Repositories
             var modelBaseInfo = await freeSql.Select<Model3DBaseInfo>()
                 .Where(m => m.StationId == stationSite.Id && m.IsDeleted == false)
                 .FirstAsync(cancellationToken);
+            var controlChannelIds = controlChannels.Select(s => s.Id).ToList();
+            var controlChannelSignals = await freeSql
+                .Select<ControlChannelAndSignalInfo, ControlChannelInfo, SignalInterfaceInfo, DeviceInfo>()
+                .LeftJoin((a, b, c, d) => a.ChannelId == b.Id)
+                .LeftJoin((a, b, c, d) => a.SignalId == c.Id)
+                .LeftJoin((a, b, c, d) => a.DeviceId == d.Id)
+                .Where((a, b, c, d) => controlChannelIds.Contains(a.ChannelId))
+                .ToListAsync((a, b, c, d) => new
+                {
+                    ChannelId = b.Id,
+                    ControlChannelAndSignalInfo = a,
+                    SignalInterfaceInfo = c,
+                    LinkDeviceInfo = d
+                }, cancellationToken);
+            var controlChannelAggregate = new List<ControlChannelBindSignalInfo>();
+            foreach (var controlChannel in controlChannels)
+            {
+                var item = new ControlChannelBindSignalInfo
+                {
+                    ControlChannelInfo = controlChannel
+                };
+                var tempSignals = controlChannelSignals.Where(s => s.ChannelId == controlChannel.Id)
+                    .Select(s => new ControlChannelSignal
+                    {
+                        SignalType = s.ControlChannelAndSignalInfo.SignalType,
+                        SignalInfo = s.SignalInterfaceInfo,
+                        LinkDeviceInfo = s.LinkDeviceInfo,
+                    })
+                    .ToList();
+                item.Signals = tempSignals;
+                controlChannelAggregate.Add(item);
+            }
             modelAggregate.BaseInfo = modelBaseInfo;
             if (modelBaseInfo != null)
             {
@@ -226,9 +290,9 @@ namespace MCCS.Core.Repositories
             var aggregate = new StationSiteAggregate
             {
                 StationSiteInfo = stationSite,
-                ControlChannelInfos = controlChannels,
+                ControlChannelSignalInfos = controlChannelAggregate,
                 PseudoChannelInfos = pseudoChannels,
-                Signals = signals,
+                Signals = signals, 
                 Model3DAggregate = modelAggregate
             };
             return aggregate;

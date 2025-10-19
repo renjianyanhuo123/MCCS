@@ -1,16 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using System.Drawing;
 using System.IO;
-using System.Reflection.Metadata;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using Assimp;
-using DryIoc;
 using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
-using MahApps.Metro.Controls;
 using MCCS.Common;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Models.Model3D;
@@ -277,7 +273,7 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         private void ExecuteTextInfoMouseDownCommand(MouseDown3DEventArgs eventArgs)
         {
-            if (eventArgs.HitTestResult.ModelHit is not BillboardTextModel3D model ||
+            if (eventArgs.HitTestResult?.ModelHit is not BillboardTextModel3D model ||
                 eventArgs.HitTestResult is not BillboardHitResult res) return;
             if (model.Geometry != CollectionDataLabels) return;
             if (res.TextInfo is not TextInfoExt clickedTextInfoModel) return;

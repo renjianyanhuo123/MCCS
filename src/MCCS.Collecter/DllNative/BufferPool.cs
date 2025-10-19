@@ -5,7 +5,7 @@ namespace MCCS.Collecter.DllNative
 {
     public class BufferPool
     {
-        private static readonly ConcurrentBag<IntPtr> _pool = new ConcurrentBag<IntPtr>();
+        private static readonly ConcurrentBag<IntPtr> _pool = [];
         private static readonly int _bufferSize = 1024 * 1024; // 1MB固定大小
 
         public static IntPtr Rent()
@@ -27,7 +27,7 @@ namespace MCCS.Collecter.DllNative
 
         public static void Clear()
         {
-            while (_pool.TryTake(out IntPtr buffer))
+            while (_pool.TryTake(out var buffer))
             {
                 Marshal.FreeHGlobal(buffer);
             }

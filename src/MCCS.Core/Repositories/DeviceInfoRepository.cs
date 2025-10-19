@@ -79,6 +79,7 @@ namespace MCCS.Core.Repositories
         {
             var count = await freeSql.Update<SignalInterfaceInfo>()
                 .Set(c => c.Address, signalInterfaceInfo.Address)
+                .Set(c => c.SignalAddress, signalInterfaceInfo.SignalAddress)
                 .Set(c => c.DataType, signalInterfaceInfo.DataType)
                 .Set(c => c.SignalName, signalInterfaceInfo.SignalName)
                 .Set(c => c.UpdateCycle, signalInterfaceInfo.UpdateCycle)

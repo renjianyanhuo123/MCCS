@@ -23,7 +23,9 @@ using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
+using MCCS.Core.Models.StationSites;
 using MCCS.Core.Repositories;
 using MCCS.ViewModels.Dialogs;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
@@ -57,6 +59,8 @@ namespace MCCS.ViewModels.Pages
         private readonly IContainerProvider _containerProvider;
         private readonly ICurveAggregateRepository _curveAggregateRepository;
         private readonly IModel3DDataRepository _model3DDataRepository;
+        private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
+        private readonly IControllerService _controllerService;
 
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress = new(); 
@@ -77,20 +81,20 @@ namespace MCCS.ViewModels.Pages
         #endregion
 
         #region Command
-        public AsyncDelegateCommand LoadModelsCommand => new(LoadModelsAsync);
-        public DelegateCommand<object> Model3DMouseDownCommand => new(OnModel3DMouseDown);
-        public DelegateCommand<object> Model3DMouseMoveCommand => new(OnModel3DMouseMove);
-        public DelegateCommand ClearSelectionCommand => new(ClearSelection);
-        public DelegateCommand StartTestCommand => new(ExecuteStartTestCommand);
-        public DelegateCommand LoadCommand => new(ExecuteLoadCommand);
-        public DelegateCommand TestModelMoveCommand => new(ExecuteTestModelMoveCommand);
-        public DelegateCommand<MouseDown3DEventArgs> Model3DRightMouseDownCommand => new(ExecuteModel3DRightMouseDownCommand);
-        public DelegateCommand DisplacementClearCommand => new(ExecuteDisplacementClearCommand);
-        public DelegateCommand ForceClearCommand => new(ExecuteForceClearCommand);
-        public AsyncDelegateCommand<string> SetCurveCommand => new(ExecuteSetCurveCommand);
-        public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand => new(OnCtrlKeyDownCommand);
-        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand => new(OnCtrlKeyUpCommand);
-        public DelegateCommand ShowCurveCommand => new(ExecuteShowCurveCommand);
+        public AsyncDelegateCommand LoadModelsCommand { get; }
+        public DelegateCommand<object> Model3DMouseDownCommand { get; }
+        public DelegateCommand<object> Model3DMouseMoveCommand { get; }
+        public DelegateCommand ClearSelectionCommand { get; }
+        public DelegateCommand StartTestCommand { get; }
+        public DelegateCommand LoadCommand { get; }
+        public DelegateCommand TestModelMoveCommand { get; }
+        public DelegateCommand<MouseDown3DEventArgs> Model3DRightMouseDownCommand { get; }
+        public DelegateCommand DisplacementClearCommand { get; }
+        public DelegateCommand ForceClearCommand { get; }
+        public AsyncDelegateCommand<string> SetCurveCommand { get; }
+        public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand { get; }
+        public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand { get; }
+        public DelegateCommand ShowCurveCommand { get; }
         #endregion
 
         public TestStartingPageViewModel(
@@ -100,16 +104,36 @@ namespace MCCS.ViewModels.Pages
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
+            IControllerService controllerService,
             IModel3DDataRepository model3DDataRepository,
             ICurveAggregateRepository curveAggregateRepository,
+            IStationSiteAggregateRepository stationSiteAggregateRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
             _containerProvider = containerProvider;
             _deviceManager = deviceManager;
             _model3DLoaderService = model3DLoaderService;
+            _controllerService = controllerService;
             _model3DDataRepository = model3DDataRepository;
             _curveAggregateRepository = curveAggregateRepository;
+            _stationSiteAggregateRepository = stationSiteAggregateRepository;
+            _effectsManager = effectsManager;
+            _regionManager = regionManager;
+            LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
+            Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
+            Model3DMouseMoveCommand = new DelegateCommand<object>(OnModel3DMouseMove);
+            ClearSelectionCommand = new DelegateCommand(ClearSelection);
+            StartTestCommand = new DelegateCommand(ExecuteStartTestCommand);
+            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
+            TestModelMoveCommand = new DelegateCommand(ExecuteTestModelMoveCommand);
+            Model3DRightMouseDownCommand = new DelegateCommand<MouseDown3DEventArgs>(ExecuteModel3DRightMouseDownCommand);
+            DisplacementClearCommand = new DelegateCommand(ExecuteDisplacementClearCommand);
+            ForceClearCommand = new DelegateCommand(ExecuteForceClearCommand);
+            SetCurveCommand = new AsyncDelegateCommand<string>(ExecuteSetCurveCommand);
+            CtrlKeyDownCommand = new DelegateCommand<KeyEventArgs>(OnCtrlKeyDownCommand);
+            CtrlKeyUpCommand = new DelegateCommand<KeyEventArgs>(OnCtrlKeyUpCommand);
+            ShowCurveCommand = new DelegateCommand(ExecuteShowCurveCommand);
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(ReceivedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
             _eventAggregator.GetEvent<UnLockCommandEvent>().Subscribe(ReceivedUnLockEvent);
@@ -120,9 +144,7 @@ namespace MCCS.ViewModels.Pages
                 model.CancelModelMove.Cancel();
                 model.CancelModelMove.Dispose();
                 model.CancelModelMove = new CancellationTokenSource();
-            });
-            _effectsManager = effectsManager; 
-            _regionManager = regionManager;
+            }); 
         }
 
         #region Property
@@ -240,6 +262,10 @@ namespace MCCS.ViewModels.Pages
             if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
             var modelAggregate = await _model3DDataRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id);
             if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL");
+            var allBindControlChannel = modelAggregate.BillboardInfos.Select(s => s.ControlChannelId).ToList();
+            var controlChannels = await _stationSiteAggregateRepository.GetControlChannelAndSignalInfosAsync(c =>
+                c.IsDeleted == false
+                && allBindControlChannel.Contains(c.Id));
             Camera = new OrthographicCamera()
             {
                 LookDirection = modelAggregate.BaseInfo.CameraLookDirection.ToVector<Vector3D>(),
@@ -284,27 +310,37 @@ namespace MCCS.ViewModels.Pages
                     //        connectionIndexs.Add(connectionIndexs.Count);
                     //    }
                     //}
+                    
                 }
 
                 foreach (var billboardInfo in modelAggregate.BillboardInfos)
                 {
-                    var temp1 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfo.BackgroundColor);
-                    var temp2 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfo.FontColor);
+                    var temp1 = (Color)ColorConverter.ConvertFromString(billboardInfo.BackgroundColor);
+                    var temp2 = (Color)ColorConverter.ConvertFromString(billboardInfo.FontColor);
                     var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
                     var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
-                    CollectionDataLabels.TextInfo.Add(new TextInfoExt()
+                    CollectionDataLabels.TextInfo.Add(new TextInfoExt
                     {
                         Text = billboardInfo.BillboardName,
-                        Origin = billboardInfo.PositionStr.ToVector<SharpDX.Vector3>(),
+                        Origin = billboardInfo.PositionStr.ToVector<Vector3>(),
                         Padding = new Vector4(5),
                         Foreground = fontColor,
                         Background = backgroundColor,
                         Size = billboardInfo.FontSize
                     });
+                    // billboardInfo.ControlChannelId
+                    var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c =>
+                        c.Id == billboardInfo.ControlChannelId);
+                    BindSignals.FirstOrDefault(s => s.ControlChannelSignalType != SignalTypeEnum.Output);
+                    _controllerService.GetDataStreamByControllerId();
+                    //actor1
+                    //    .Sample(TimeSpan.FromSeconds(1))
+                    //    .Subscribe(OnDeviceDataReceived);
                 }
                 // 渲染时机很重要,这里相当于首次设置
                 //ConnectionLineGeometry.Positions = positions;
                 //ConnectionLineGeometry.Indices = connectionIndexs;
+
             }
             catch (OperationCanceledException)
             {

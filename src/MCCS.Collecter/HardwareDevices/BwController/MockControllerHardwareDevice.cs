@@ -10,15 +10,15 @@ namespace MCCS.Collecter.HardwareDevices.BwController
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase
     {
         private readonly ReplaySubject<DataPoint> _dataSubject;
-        private readonly IDisposable _acquisitionSubscription;
-
+        private readonly IDisposable _acquisitionSubscription; 
+        private readonly int _sampleRate;
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
-        {
+        { 
+            _sampleRate = configuration.Signals.Max(s => s.SampleRate);
             _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
             _acquisitionSubscription = CreateAcquisitionLoop();
-        } 
-
-        public IObservable<DataPoint> DataStream => _dataSubject.AsObservable();
+            DataStream = _dataSubject.AsObservable();
+        }  
 
         public override bool ConnectToHardware()
         {
@@ -34,7 +34,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
         private IDisposable CreateAcquisitionLoop()
         {
-            return Observable.Interval(TimeSpan.FromSeconds(1))
+            var t = 1.0 / _sampleRate * 1.0;
+            return Observable.Interval(TimeSpan.FromSeconds(t))
                 .Where(_ => _isRunning && Status == HardwareConnectionStatus.Connected)
                 .Subscribe(_ =>
                 {
@@ -57,7 +58,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         {
             // 模拟数据采集
             var rand = new Random();
-            var res = new List<TNet_ADHInfo>();
+            var res = new List<BatchCollectItemModel>();
             var mockValue = new TNet_ADHInfo
             {
                 Net_AD_N =
@@ -75,7 +76,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     [1] = (float)(rand.NextDouble() * 100)
                 }
             };
-            res.Add(mockValue);
+            res.Add(StructDataToCollectModel(mockValue));
             return new DataPoint
             {
                 DeviceId = DeviceId,

@@ -28,8 +28,13 @@ namespace MCCS.Core.Models.Devices
         /// <summary>
         /// 信号接口地址
         /// </summary>
-        [Column(IsNullable = false, StringLength = 50)]
+        [Column(IsNullable = false, StringLength = 50), Obsolete]
         public string Address { get; set; } = string.Empty;
+        /// <summary>
+        /// 信号地址, 是采集信号的数据的来源
+        /// </summary>
+        public long SignalAddress { get; set; }
+
         /// <summary>
         /// 更新周期(单位毫秒)
         /// </summary>

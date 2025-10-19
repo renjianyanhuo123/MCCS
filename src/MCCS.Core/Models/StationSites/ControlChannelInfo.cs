@@ -18,6 +18,10 @@ namespace MCCS.Core.Models.StationSites
         [Column(IsNullable = false, StringLength = 100)]
         public required string ChannelName { get; set; }
         /// <summary>
+        /// 通道类型
+        /// </summary>
+        public ChannelTypeEnum ChannelType { get; set; }
+        /// <summary>
         /// 控制模式
         /// </summary>
         public ControlChannelModeTypeEnum ControlMode { get; set; }

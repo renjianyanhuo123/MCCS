@@ -2,20 +2,14 @@
 
 namespace MCCS.Common.DataManagers.StationSites
 {
-    public sealed class StationSiteControllerInfo
+    [method: JsonConstructor]
+    public sealed class StationSiteControllerInfo(
+        long id,
+        string name)
     {
-        [JsonConstructor]
-        public StationSiteControllerInfo(long id,
-            string name)
-        {
-            Id = id;
-            Name = name;
-            Status = StationSiteControllerStatusEnum.DisConnected;
-        }
-
-        public long Id { get; } 
-        public string Name { get; }
-        public StationSiteControllerStatusEnum Status { get; }
+        public long Id { get; } = id;
+        public string Name { get; } = name;
+        public StationSiteControllerStatusEnum Status { get; } = StationSiteControllerStatusEnum.DisConnected;
         public List<StationSiteControllerSignalInfo> SignalInfos { get; } = []; 
     }
 }

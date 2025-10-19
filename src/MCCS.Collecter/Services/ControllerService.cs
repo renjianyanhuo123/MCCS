@@ -36,6 +36,18 @@ namespace MCCS.Collecter.Services
             throw new Exception($"DLL初始化失败,错误码:{result}"); 
         }
 
+        public IObservable<DataPoint> GetDataStreamByControllerId(long controllerId)
+        {
+            var controller = _controllers.FirstOrDefault(c => c.DeviceId == controllerId);
+            if (controller == null) throw new ArgumentNullException("controllerId is Null!");
+            return controller.DataStream;
+        }
+
+        /// <summary>
+        /// 创建控制器
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
         public bool CreateController(HardwareDeviceConfiguration configuration)
         {
             ControllerHardwareDeviceBase controller;
@@ -52,6 +64,11 @@ namespace MCCS.Collecter.Services
             return true;
         }
 
+        /// <summary>
+        /// 移除控制器
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <returns></returns>
         public bool RemoveController(int deviceId)
         {
             var controller = _controllers.FirstOrDefault(c => c.DeviceId == deviceId);

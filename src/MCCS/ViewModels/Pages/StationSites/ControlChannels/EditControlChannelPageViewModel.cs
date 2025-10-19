@@ -67,14 +67,19 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
 
         private bool _isShowable;
         public bool IsShowable { get => _isShowable; set => SetProperty(ref _isShowable, value); }
-        private bool _isOpenSpecimenProtected;
-
+        private bool _isOpenSpecimenProtected; 
         public bool IsOpenSpecimenProtected
         {
             get => _isOpenSpecimenProtected;
             set => SetProperty(ref _isOpenSpecimenProtected, value);
         }
 
+        private int _channelType;
+        public int ChannelType
+        {
+            get => _channelType;
+            set => SetProperty(ref _channelType, value);
+        }
         public ObservableCollection<ControlChannelSelectableItemModel> SelectableControlChannels { get; private set; } = [];
         public ObservableCollection<EditControlChannelFeedbackSignalItemModel> SignalModels { get; private set; } = [];
 

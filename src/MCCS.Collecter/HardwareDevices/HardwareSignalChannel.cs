@@ -1,15 +1,20 @@
 ﻿namespace MCCS.Collecter.HardwareDevices
 {
-    public class HardwareSignalChannel : IDisposable
+    public sealed class HardwareSignalChannel : IDisposable
     {
-        private readonly HardwareSignalConfiguration _signalConfig;  
-        public string SignalId => _signalConfig.SignalId;
-        public HardwareSignalConfiguration SignalConfig => _signalConfig; 
+        private readonly HardwareSignalConfiguration _configuration;
 
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
-            _signalConfig = signalConfig;  
-        } 
+            _configuration = signalConfig;
+            SignalAddressIndex = (long)signalConfig.SignalAddress;
+            SignalId = signalConfig.SignalId;
+        }
+
+        public long SignalId { get; private set; } 
+
+        public long SignalAddressIndex { get; private set; }
+         
         public void Start()
         { 
         } 

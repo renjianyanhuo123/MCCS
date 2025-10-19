@@ -9,7 +9,7 @@
 
     public record DataPoint
     {
-        public int DeviceId { get; init; } 
+        public long DeviceId { get; init; } 
         public long Timestamp { get; init; }
         public object Value { get; init; }
         public string Unit { get; init; }

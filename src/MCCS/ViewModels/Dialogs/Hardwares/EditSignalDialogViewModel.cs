@@ -70,7 +70,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
                 var success = await _deviceInfoRepository.UpdateSignalInfoAsync(new SignalInterfaceInfo()
                 {
                     Id = temp.Id,
-                    Address = temp.Address,
+                    SignalAddress = temp.Address,
                     DataType = (SignalDataTypeEnum)temp.DataType,
                     SignalName = temp.SignalName,
                     DownLimitRange = temp.DownLimitRange,
@@ -90,7 +90,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
             {
                 var newId = await _deviceInfoRepository.AddSignalInfoAsync(new SignalInterfaceInfo()
                 {
-                    Address = temp.Address,
+                    SignalAddress = temp.Address,
                     DataType = (SignalDataTypeEnum)temp.DataType,
                     SignalName = temp.SignalName,
                     DownLimitRange = temp.DownLimitRange,
@@ -162,7 +162,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
                 {
                     Id = signal.Id,
                     TempId = Guid.NewGuid().ToString("N"),
-                    Address = signal.Address,
+                    Address = signal.SignalAddress,
                     DataType = (int)signal.DataType,
                     SignalName = signal.SignalName,
                     IsCanEdit = false,

@@ -18,6 +18,10 @@
         /// <summary>
         /// 控制器
         /// </summary>
-        public List<StationSiteControllerInfo> ControllerInfos { get; } = []; 
+        public List<StationSiteControllerInfo> ControllerInfos { get; } = [];
+        /// <summary>
+        /// 控制通道
+        /// </summary>
+        public List<StationSiteControlChannelInfo> ControlChannels { get; } = [];
     }
 }

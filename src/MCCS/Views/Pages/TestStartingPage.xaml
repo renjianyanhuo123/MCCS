@@ -15,6 +15,7 @@
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
              xmlns:controllers="clr-namespace:MCCS.Views.Pages.Controllers"
              xmlns:vmControllers="clr-namespace:MCCS.ViewModels.Pages.Controllers"
+             xmlns:testModelOperations="clr-namespace:MCCS.Views.Pages.TestModelOperations"
              d:DataContext="{d:DesignInstance Type=pages:TestStartingPageViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              x:Name="TestStartingControl"
@@ -85,16 +86,7 @@
                     Placement="Mouse"
                     AllowsTransparency="True"
                     StaysOpen="False">
-                <Border Background="White" 
-                        BorderBrush="Gray" 
-                        BorderThickness="1"
-                        CornerRadius="5">
-                    <ItemsControl>
-                        <MenuItem Header="位移清零" Command="{Binding DisplacementClearCommand}" />
-                        <Separator/>
-                        <MenuItem Header="力清零" Command="{Binding ForceClearCommand}" />
-                    </ItemsControl>
-                </Border>
+                <testModelOperations:RightMenuMainPage />
             </Popup>
             <!-- 3D视窗  EnableSwapChainRendering="True"：是否使用GPU渲染 -->
             <hx:Viewport3DX  

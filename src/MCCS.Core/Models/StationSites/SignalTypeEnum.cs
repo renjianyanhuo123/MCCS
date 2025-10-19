@@ -1,5 +1,8 @@
 ﻿namespace MCCS.Core.Models.StationSites
 {
+    /// <summary>
+    /// 控制通道绑定
+    /// </summary>
     public enum SignalTypeEnum : int
     {
         /// <summary>

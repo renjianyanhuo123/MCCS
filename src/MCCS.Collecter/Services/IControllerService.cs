@@ -6,6 +6,8 @@ namespace MCCS.Collecter.Services
     {
         bool InitializeDll(bool isMock = false);
 
+        IObservable<DataPoint> GetDataStreamByControllerId(long controllerId);
+
         bool CreateController(HardwareDeviceConfiguration configuration);
 
         bool RemoveController(int deviceId);

@@ -2,7 +2,8 @@
 {
     public record HardwareDeviceConfiguration
     {
-        public int DeviceId { get; init; } = 0;                         // 设备ID
+        public long DeviceId { get; init; } = 0;                         // 设备ID
+        public int DeviceAddressId { get; init; }                        // 设备地址ID(0.......n 编号)
         public string DeviceName { get; init; } = string.Empty;          // 设备名称
         public string DeviceType { get; init; } = string.Empty;          // 设备类型
         public string ConnectionString { get; init; } = string.Empty;    // 连接字符串或地址

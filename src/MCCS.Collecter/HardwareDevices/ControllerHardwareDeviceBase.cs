@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using MCCS.Collecter.DllNative.Models;
+using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
@@ -6,7 +7,7 @@ namespace MCCS.Collecter.HardwareDevices
 {
     public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice
     {
-        protected readonly ConcurrentDictionary<string, HardwareSignalChannel> _signals = new();
+        protected readonly ConcurrentDictionary<long, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected IDisposable? _statusSubscription;
         // 是否正在采集数据
@@ -20,11 +21,12 @@ namespace MCCS.Collecter.HardwareDevices
         /// <summary>
         /// 设备ID
         /// </summary>
-        public int DeviceId { get; }
+        public long DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
         public HardwareConnectionStatus Status { get; protected set; }
 
+        public IObservable<DataPoint> DataStream { get; protected set; }
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
 
         protected ControllerHardwareDeviceBase(HardwareDeviceConfiguration configuration)
@@ -43,8 +45,8 @@ namespace MCCS.Collecter.HardwareDevices
         public abstract bool ConnectToHardware();
         public abstract bool DisconnectFromHardware();
          
-        public HardwareSignalChannel GetSignal(string signalId) => _signals.GetValueOrDefault(signalId);
-        public bool IsSignalAvailable(string signalId) => _signals.ContainsKey(signalId); 
+        public HardwareSignalChannel GetSignal(long signalId) => _signals.GetValueOrDefault(signalId);
+        public bool IsSignalAvailable(long signalId) => _signals.ContainsKey(signalId); 
 
         public virtual void StartDataAcquisition()
         {
@@ -66,10 +68,41 @@ namespace MCCS.Collecter.HardwareDevices
             _signals.TryAdd(signalConfiguration.SignalId, signalInfo);
         }
 
-        protected void RemoveSignal(string signalId)
+        protected void RemoveSignal(long signalId)
         {
             var success = _signals.TryGetValue(signalId, out var signal);
             if(success) signal?.Dispose();
+        }
+
+        protected BatchCollectItemModel StructDataToCollectModel(TNet_ADHInfo model)
+        {
+            var res = new BatchCollectItemModel
+            {
+                Net_PosVref = model.Net_PosVref,
+                Net_PosE = model.Net_PosE,
+                Net_CtrlDA = model.Net_CtrlDA,
+                Net_CycleCount = model.Net_CycleCount,
+                Net_SysState = model.Net_SysState,
+                Net_DIVal = model.Net_DIVal,
+                Net_DOVal = model.Net_DOVal,
+                Net_D_PosVref = model.Net_D_PosVref,
+                Net_FeedLoadN = model.Net_FeedLoadN,
+                Net_PrtErrState = model.Net_PrtErrState,
+                Net_TimeCnt = model.Net_TimeCnt
+            }; 
+            foreach (var signal in _signals.Values)
+            {
+                var t = signal.SignalAddressIndex;
+                if (t < 10 && t < model.Net_AD_N.Length)
+                {
+                    res.Net_AD_N.Add(signal.SignalId, model.Net_AD_N[t]);
+                    continue;
+                }
+                t %= 10;
+                if(t < model.Net_AD_S.Length)
+                    res.Net_AD_S.Add(signal.SignalId, model.Net_AD_S[t]);
+            }
+            return res;
         }
 
         public virtual void Dispose()
