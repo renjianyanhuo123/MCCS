@@ -57,7 +57,7 @@ namespace MCCS.Services.StartInitial
             // 创建所有的控制通道
             foreach (var ControlChannelSignalInfo in currentUseStation.ControlChannelSignalInfos)
             {
-                var tempChannel = new StationSiteControlChannelInfo(ControlChannelSignalInfo.ControlChannelInfo.Id, ControlChannelSignalInfo.ControlChannelInfo.ChannelName)
+                var tempChannel = new StationSiteControlChannelInfo(ControlChannelSignalInfo.ControlChannelInfo.Id, ControlChannelSignalInfo.ControlChannelInfo.ChannelName, ControlChannelSignalInfo.ControlChannelInfo.ChannelType)
                 {
                     BindSignals = ControlChannelSignalInfo.Signals.Select(s =>
                     {

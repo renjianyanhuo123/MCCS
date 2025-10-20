@@ -10,8 +10,7 @@ using System.Runtime.InteropServices;
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase
-    {
-        private readonly ReplaySubject<DataPoint> _dataSubject;
+    { 
         private readonly IDisposable _acquisitionSubscription;
         private readonly EventLoopScheduler _highPriorityScheduler;
         private readonly int _sampleRate;
@@ -21,8 +20,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
-            _hardwareDeviceConfiguration = configuration;
-            _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
+            _hardwareDeviceConfiguration = configuration; 
             _sampleRate = configuration.Signals.Max(s => s.SampleRate);
             _highPriorityScheduler = CreateHighPriorityScheduler();
             _acquisitionSubscription = CreateAcquisitionLoop();
@@ -43,7 +41,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 }, onError: _ =>
                 {
                     _statusSubject.OnNext(HardwareConnectionStatus.Disconnected);
-                });
+                }); 
         }
 
         public override bool ConnectToHardware()
@@ -110,7 +108,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 .ObserveOn(_highPriorityScheduler)
                 .Subscribe(
                     _dataSubject.OnNext,
-                    error =>
+                    _ =>
                     {
                         // 发送错误数据点而不是停止流
                         var errorReading = new DataPoint

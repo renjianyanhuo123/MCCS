@@ -9,6 +9,7 @@ namespace MCCS.Collecter.HardwareDevices
     {
         protected readonly ConcurrentDictionary<long, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
+        protected readonly ReplaySubject<DataPoint> _dataSubject;
         protected IDisposable? _statusSubscription;
         // 是否正在采集数据
         protected bool _isRunning = false;
@@ -28,6 +29,8 @@ namespace MCCS.Collecter.HardwareDevices
 
         public IObservable<DataPoint> DataStream { get; protected set; }
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
+        // 不预先展开，而是提供展开后的Observable;单个的数据流
+        public IObservable<BatchCollectItemModel> IndividualDataStream { get; protected set; }
 
         protected ControllerHardwareDeviceBase(HardwareDeviceConfiguration configuration)
         {
@@ -35,10 +38,14 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
+            _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
             foreach (var item in configuration.Signals)
             {
                 AddSignal(item);
             }
+            DataStream = _dataSubject.AsObservable();
+            IndividualDataStream = _dataSubject.Where(dp => dp is { DataQuality: DataQuality.Good, Value: List<BatchCollectItemModel> })
+                .SelectMany(dp => (List<BatchCollectItemModel>)dp.Value);
         }
 
         // 抽象方法 

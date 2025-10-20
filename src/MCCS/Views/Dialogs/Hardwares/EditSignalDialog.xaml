@@ -171,16 +171,10 @@
                                 <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
                                     <TextBlock Text="接口地址(注意:这里直接和采集数据相关!)" FontSize="14" Margin="0,0,0,15"></TextBlock>
                                     <ComboBox Width="Auto" IsEnabled="{Binding IsCanEdit}" 
-                                              SelectedIndex="{Binding Address, Mode=TwoWay, 
-                                              UpdateSourceTrigger=PropertyChanged}">
-                                        <ComboBoxItem TabIndex="0">AI_0</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="1">AI_1</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="2">AI_2</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="3">AI_3</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="4">AI_4</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="5">AI_5</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="10">SSI_0</ComboBoxItem>
-                                        <ComboBoxItem TabIndex="11">SSI_1</ComboBoxItem>
+                                              ItemsSource="{Binding DataContext.AddressItems, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              DisplayMemberPath="Display"
+                                              SelectedValuePath="Value"
+                                              SelectedValue="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"> 
                                     </ComboBox>
                                 </StackPanel> 
                                 <StackPanel Grid.Column="2" Grid.Row="1" 

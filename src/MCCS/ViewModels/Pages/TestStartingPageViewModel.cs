@@ -23,6 +23,7 @@ using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
 using MCCS.Core.Models.StationSites;
@@ -37,6 +38,10 @@ using Prism.Modularity;
 using Prism.Dialogs;
 using SharpDX;
 using Color = System.Windows.Media.Color;
+using MCCS.Collecter.DllNative.Models;
+using Newtonsoft.Json;
+using Serilog;
+using MahApps.Metro.Controls;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -61,21 +66,18 @@ namespace MCCS.ViewModels.Pages
         private readonly IModel3DDataRepository _model3DDataRepository;
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
         private readonly IControllerService _controllerService;
+        private readonly IDeviceManager _deviceManager;
+        // 存储所有的广告牌引用,方便后期快速更新
+        private readonly Dictionary<long, TextInfoExt> _textInfoDic = [];
 
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress = new(); 
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
         private const int MouseMoveThrottleMs = 50; // 50ms 节流 
-        private const int MaxPoints = 20;
+        private const int MaxPoints = 20; 
 
-        private readonly IDeviceManager _deviceManager;
-        private readonly Random _random = new();
-        private DateTime _currentTime = DateTime.Now;
-
-        private Model3DViewModel? _clearOperationModel = null;
-        //private SceneNodeGroupModel3D _dataLabelsGroup;
-        //private SceneNodeGroupModel3D _connectionLinesGroup;
+        private Model3DViewModel? _clearOperationModel = null; 
         private MultipleControllerMainPageViewModel? _multipleControllerMainPageViewModel = null;
         private bool _isCtrlPressed = false;
         #endregion
@@ -197,8 +199,10 @@ namespace MCCS.ViewModels.Pages
         public BillboardText3D CollectionDataLabels { get; } = new() 
         { 
             IsDynamic = true
-        };
-
+        }; 
+        /// <summary>
+        /// 线集合
+        /// </summary>
         public LineGeometry3D ConnectionLineGeometry { get; } = new() 
         {
             IsDynamic = true
@@ -261,11 +265,7 @@ namespace MCCS.ViewModels.Pages
             IsLoading = true;
             if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
             var modelAggregate = await _model3DDataRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id);
-            if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL");
-            var allBindControlChannel = modelAggregate.BillboardInfos.Select(s => s.ControlChannelId).ToList();
-            var controlChannels = await _stationSiteAggregateRepository.GetControlChannelAndSignalInfosAsync(c =>
-                c.IsDeleted == false
-                && allBindControlChannel.Contains(c.Id));
+            if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL"); 
             Camera = new OrthographicCamera()
             {
                 LookDirection = modelAggregate.BaseInfo.CameraLookDirection.ToVector<Vector3D>(),
@@ -285,41 +285,34 @@ namespace MCCS.ViewModels.Pages
                     modelAggregate.Model3DDataList, 
                     progress, 
                     (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.MaterialColor), 
-                    _loadingCancellation.Token); 
-                // var positions = new Vector3Collection();
-                // var connectionIndexs = new IntCollection();
-                // 替换连接线创建方式
-                // var lineBuilder = new LineBuilder();
-                // lineBuilder.ToLineGeometry3D();
+                    _loadingCancellation.Token);
+                var positions = new Vector3Collection();
+                var connectionIndexs = new IntCollection(); 
                 // UI线程更新
                 foreach (var wrapper in wrappers)
                 { 
                     Models.Add(wrapper);
-                    GroupModel.AddNode(wrapper.SceneNode);
-
-                    // if (wrapper.DataLabels?.Count > 0)
-                    //    CollectionDataLabels.TextInfo.AddRange(wrapper.DataLabels);
-                    // 重新整合线段; 默认没有一个点连接两条线的情况.
-                    //if (wrapper.ConnectPoints?.Count > 0
-                    //    && wrapper.ConnectCollection?.Count > 0
-                    //    && wrapper.ConnectPoints.Count == wrapper.ConnectCollection.Count)
-                    //{
-                    //    foreach (var index in wrapper.ConnectCollection)
-                    //    {
-                    //        positions.Add(wrapper.ConnectPoints[index]);
-                    //        connectionIndexs.Add(connectionIndexs.Count);
-                    //    }
-                    //}
-                    
-                }
-
+                    GroupModel.AddNode(wrapper.SceneNode); 
+                } 
+                var index = 0;
                 foreach (var billboardInfo in modelAggregate.BillboardInfos)
                 {
                     var temp1 = (Color)ColorConverter.ConvertFromString(billboardInfo.BackgroundColor);
                     var temp2 = (Color)ColorConverter.ConvertFromString(billboardInfo.FontColor);
                     var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
                     var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
-                    CollectionDataLabels.TextInfo.Add(new TextInfoExt
+                    var bindModelViewModel = Models.FirstOrDefault(c => c.ModelId == billboardInfo.ModelFileId);
+                    if (bindModelViewModel != null)
+                    {
+                        // 模型起点
+                        positions.Add(bindModelViewModel.GetModelCenterFromGeometry());
+                        // 广告牌中心
+                        positions.Add(billboardInfo.PositionStr.ToVector<Vector3>());
+                        connectionIndexs.AddRange([index, index + 1]); 
+                        index += 2;
+                    }
+
+                    var textInfo = new TextInfoExt
                     {
                         Text = billboardInfo.BillboardName,
                         Origin = billboardInfo.PositionStr.ToVector<Vector3>(),
@@ -327,28 +320,38 @@ namespace MCCS.ViewModels.Pages
                         Foreground = fontColor,
                         Background = backgroundColor,
                         Size = billboardInfo.FontSize
-                    });
-                    // billboardInfo.ControlChannelId
-                    var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c =>
-                        c.Id == billboardInfo.ControlChannelId);
-                    BindSignals.FirstOrDefault(s => s.ControlChannelSignalType != SignalTypeEnum.Output);
-                    _controllerService.GetDataStreamByControllerId();
-                    //actor1
-                    //    .Sample(TimeSpan.FromSeconds(1))
-                    //    .Subscribe(OnDeviceDataReceived);
+                    };
+                    var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.ControlChannelId);
+                    if (channelInfo != null)
+                    {
+                        var signalType = channelInfo.ChannelType switch
+                        {
+                            ChannelTypeEnum.Position => SignalTypeEnum.Position,
+                            ChannelTypeEnum.Force => SignalTypeEnum.Force,
+                            _ => SignalTypeEnum.Position
+                        };
+                        // 默认只寻找第一个采集信号作展示
+                        var signal = channelInfo.BindSignals.FirstOrDefault(s => s.ControlChannelSignalType == signalType);
+                        if (signal != null)
+                        {
+                            _textInfoDic.Add(signal.Id, textInfo);
+                        }
+                    }
+                    CollectionDataLabels.TextInfo.Add(textInfo); 
                 }
+                InitializeDataSubscriptions();
                 // 渲染时机很重要,这里相当于首次设置
-                //ConnectionLineGeometry.Positions = positions;
-                //ConnectionLineGeometry.Indices = connectionIndexs;
+                ConnectionLineGeometry.Positions = positions;
+                ConnectionLineGeometry.Indices = connectionIndexs;
 
             }
             catch (OperationCanceledException)
             {
                 // 加载被取消
             }
-            catch (Exception)
-            {
-                // _eventAggregator.GetEvent<ErrorEvent>().Publish($"加载模型失败: {ex.Message}");
+            catch (Exception ex)
+            { 
+                Log.Error($"加载模型失败: {ex.Message}");
             }
             finally
             {
@@ -468,49 +471,41 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         public void InitializeDataSubscriptions()
         {
-            //var actor1 = _deviceManager.GetDevice("1b7914d074794b5990f97df4ccdc65ae")?.DataStream 
-            //    ?? throw new ArgumentNullException($"Device id {"1b7914d074794b5990f97df4ccdc65ae"} is not exist！");
-            //var actor2 = _deviceManager.GetDevice("ff8db91959a64338b80dba86b16c92c7")?.DataStream 
-            //    ?? throw new ArgumentNullException($"Device id {"ff8db91959a64338b80dba86b16c92c7"} is not exist！");
-            //actor1
-            //    .Sample(TimeSpan.FromSeconds(1))
-            //    .Subscribe(OnDeviceDataReceived);
-
-            //actor2
-            //    .Sample(TimeSpan.FromSeconds(1))
-            //    .Subscribe(OnDeviceDataReceived);
-        } 
+            var controllers = GlobalDataManager.Instance.StationSiteInfo?.ControllerInfos;
+            if (controllers == null) return;
+            foreach (var controller in controllers)
+            {
+                var controllerInfo = _controllerService.GetControllerInfo(controller.Id); 
+                controllerInfo.IndividualDataStream.Sample(TimeSpan.FromSeconds(0.4)).Subscribe(OnDeviceDataReceived);
+            } 
+        }
 
         /// <summary>
         /// 处理设备数据更新
         /// </summary>
-        /// <param name="deviceData">设备数据</param>
-        private void OnDeviceDataReceived(DeviceData deviceData)
+        /// <param name="collectItemModel">设备单个数据</param>
+        private void OnDeviceDataReceived(BatchCollectItemModel collectItemModel)
         {
-            // 在UI线程更新模型
-            var targetModel = Models.FirstOrDefault(m => m.Model3DData.DeviceId == deviceData.DeviceId);
-            if (targetModel != null)
+            if (collectItemModel == null) return;
+#if DEBUG
+            Debug.WriteLine($"接收到的数据:{JsonConvert.SerializeObject(collectItemModel)}");
+#endif
+            foreach (var textInfoItem in _textInfoDic)
             {
-                UpdateModelWithDeviceData(targetModel, deviceData);
+                var success = collectItemModel.Net_AD_S.TryGetValue(textInfoItem.Key, out var temp);
+                if (success)
+                {
+                    textInfoItem.Value.Text = $"Position: {temp:F3}mm";
+                    continue;
+                } 
+                success = collectItemModel.Net_AD_N.TryGetValue(textInfoItem.Key, out temp);
+                if (success)
+                {
+                    textInfoItem.Value.Text = $"Force: {temp:F3}kN";
+                }
             }
-        }
-
-        /// <summary>
-        /// 使用设备数据更新模型
-        /// </summary>
-        /// <param name="model">要更新的模型</param>
-        /// <param name="deviceData">设备数据</param>
-        private void UpdateModelWithDeviceData(Model3DViewModel model, DeviceData deviceData)
-        {
-            if (deviceData.Value is MockActuatorCollection v)
-            {
-                // Debug.WriteLine($"更新模型: {model.Model3DData.DeviceId}, 力: {v.Force}, 位移: {v.Displacement}");
-                model.ForceNum = v.Force;
-                model.DisplacementNum = v.Displacement;
-                CollectionDataLabels.Invalidate();
-            }
-        }
-
+            CollectionDataLabels.Invalidate();
+        } 
         /// <summary>
         /// 接受到信息后移动
         /// </summary>
@@ -799,18 +794,15 @@ namespace MCCS.ViewModels.Pages
         private void ClearModels()
         {
             // 清理 GroupModel 中的节点
-            if (GroupModel != null)
-            {
-                // SceneNodeGroupModel3D 使用 Clear() 方法清空所有子节点
-                GroupModel.Clear();
+            // SceneNodeGroupModel3D 使用 Clear() 方法清空所有子节点
+            GroupModel.Clear();
 
-                // 如果 GroupModel 有 SceneNode 属性，遍历并清理 Tag
-                if (GroupModel.SceneNode != null)
+            // 如果 GroupModel 有 SceneNode 属性，遍历并清理 Tag
+            if (GroupModel.SceneNode != null)
+            {
+                foreach (var child in GroupModel.SceneNode.Traverse())
                 {
-                    foreach (var child in GroupModel.SceneNode.Traverse())
-                    {
-                        child.Tag = null;
-                    }
+                    child.Tag = null;
                 }
             }
             foreach (var model in Models)

@@ -5,11 +5,8 @@ using System.Text;
 namespace MCCS.Collecter.DllNative
 {
     public static class POPNetCtrl
-    {
-        
-
-        #region DLL函数导入
-
+    { 
+        #region DLL函数导入 
         /// <summary>
         /// 动态连接库参数初始化
         /// 读取动态库配置文件,最大设备数 ,定时器时间 ,AD采样频率等

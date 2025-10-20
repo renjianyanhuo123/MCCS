@@ -36,12 +36,13 @@ namespace MCCS.Collecter.Services
             throw new Exception($"DLL初始化失败,错误码:{result}"); 
         }
 
-        public IObservable<DataPoint> GetDataStreamByControllerId(long controllerId)
+        public ControllerHardwareDeviceBase GetControllerInfo(long controllerId)
         {
             var controller = _controllers.FirstOrDefault(c => c.DeviceId == controllerId);
             if (controller == null) throw new ArgumentNullException("controllerId is Null!");
-            return controller.DataStream;
+            return controller;
         }
+         
 
         /// <summary>
         /// 创建控制器

@@ -14,8 +14,7 @@
         protected override async void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
-            var viewModel = DataContext as ViewModels.Pages.TestStartingPageViewModel;
-            viewModel?.InitializeDataSubscriptions();
+            var viewModel = DataContext as ViewModels.Pages.TestStartingPageViewModel; 
             await viewModel?.LoadModelsCommand.Execute()!;
             // await viewModel.InitialCurves();
         }

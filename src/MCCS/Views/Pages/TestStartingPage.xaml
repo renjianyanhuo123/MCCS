@@ -145,7 +145,8 @@
                 <!-- 连线 -->
                 <hx:LineGeometryModel3D 
                         Geometry="{Binding ConnectionLineGeometry}" 
-                        Color="Blue"
+                        Color="Red" 
+                        Thickness="2"
                         IsHitTestVisible="False"/>
                 <!--模型内容-->
                 <hx:Element3DPresenter Content="{Binding GroupModel}"/>

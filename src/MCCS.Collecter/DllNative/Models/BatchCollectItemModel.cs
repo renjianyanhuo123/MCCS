@@ -8,6 +8,7 @@
         public Dictionary<long, double> Net_AD_N { get; init; } = new(6);
         /// <summary>
         /// 2路SSI通道采样值
+        /// key为SignalId
         /// </summary>
         public Dictionary<long, double> Net_AD_S { get; init; } = new(2);
 

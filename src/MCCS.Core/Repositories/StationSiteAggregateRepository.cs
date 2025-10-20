@@ -199,6 +199,7 @@ namespace MCCS.Core.Repositories
             .Set(s => s.ControlCycle, controlChannelInfo.ControlCycle)
             .Set(s => s.ControlMode, controlChannelInfo.ControlMode)
             .Set(s => s.IsShowable, controlChannelInfo.IsShowable)
+            .Set(s => s.ChannelType, controlChannelInfo.ChannelType)
             .Set(s => s.IsOpenSpecimenProtected, controlChannelInfo.IsOpenSpecimenProtected)
             .Where(s => s.Id == controlChannelInfo.Id)
             .ExecuteAffrowsAsync(cancellationToken);

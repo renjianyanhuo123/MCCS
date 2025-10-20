@@ -1,7 +1,6 @@
 ﻿using MCCS.Collecter.DllNative.Models;
 using System.Diagnostics;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 
@@ -9,15 +8,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase
     {
-        private readonly ReplaySubject<DataPoint> _dataSubject;
         private readonly IDisposable _acquisitionSubscription; 
         private readonly int _sampleRate;
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         { 
-            _sampleRate = configuration.Signals.Max(s => s.SampleRate);
-            _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
-            _acquisitionSubscription = CreateAcquisitionLoop();
-            DataStream = _dataSubject.AsObservable();
+            _sampleRate = configuration.Signals.Max(s => s.SampleRate); 
+            _acquisitionSubscription = CreateAcquisitionLoop(); 
         }  
 
         public override bool ConnectToHardware()
@@ -39,21 +35,14 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 .Where(_ => _isRunning && Status == HardwareConnectionStatus.Connected)
                 .Subscribe(_ =>
                 {
-                    var temp = new DataPoint
-                    {
-                        DataQuality = DataQuality.Good,
-                        DeviceId = DeviceId,
-                        Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        Value = MockAcquireReading()
-                    };
-                    _dataSubject.OnNext(temp);
+                    _dataSubject.OnNext(MockAcquireReading());
 #if DEBUG
-                    Debug.WriteLine($"生成的模拟数据:{JsonConvert.SerializeObject(temp)}");
+                    // Debug.WriteLine($"生成的模拟数据:{JsonConvert.SerializeObject(temp)}");
 #endif
                 });
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private DataPoint MockAcquireReading()
         {
             // 模拟数据采集

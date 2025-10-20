@@ -433,6 +433,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId); 
             Model3DFiles.Clear();
             GroupModel.Clear();
+            GroupModel.Dispose();
             BindingControlChannels.Clear();
             foreach (var controlChannel in controlChannels)
             {
@@ -667,7 +668,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 FontSize = 14
             });
             CollectionDataLabels.TextInfo.Add(textInfo);
-        }
+        } 
         #endregion
     }
 }

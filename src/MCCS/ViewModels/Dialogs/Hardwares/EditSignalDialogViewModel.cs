@@ -19,10 +19,22 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
             IDeviceInfoRepository deviceInfoRepository) : base(eventAggregator)
         {
             _deviceInfoRepository = deviceInfoRepository;
+            AddressItems =
+            [
+                new AddressItem { Value = 0, Display = "AI_0" },
+                new AddressItem { Value = 1, Display = "AI_1" },
+                new AddressItem { Value = 2, Display = "AI_2" },
+                new AddressItem { Value = 3, Display = "AI_3" },
+                new AddressItem { Value = 4, Display = "AI_4" },
+                new AddressItem { Value = 5, Display = "AI_5" },
+                new AddressItem { Value = 10, Display = "SSI_0" },
+                new AddressItem { Value = 11, Display = "SSI_1" }
+            ];
             _eventAggregator.GetEvent<SendHardwareSignalIdEvent>().Subscribe(param => _controllerId = param.ControllerId);
         }
 
         #region Property 
+        public ObservableCollection<AddressItem> AddressItems { get; set; }
         public ObservableCollection<HardwareSignalListItemViewModel> Signals { get; private set; } = [];
         public ObservableCollection<HardwareSignalBindDevicesItemViewModel> BindDevices { get; private set; } = [];
         #endregion

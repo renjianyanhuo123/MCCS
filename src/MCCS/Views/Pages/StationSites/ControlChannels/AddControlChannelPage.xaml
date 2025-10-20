@@ -62,6 +62,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -78,16 +79,26 @@
                     <TextBlock Text="通道内部ID" FontSize="14" Margin="0,0,0,15"></TextBlock>
                     <TextBlock FontSize="15" Width="Auto" Text="{Binding InternalId}" Foreground="#A5A5A5"></TextBlock>
                 </StackPanel>
-                <StackPanel Grid.Column="0" Grid.Row="1" Margin="15">
-                    <TextBlock Text="是否可见" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                    <ToggleButton HorizontalAlignment="Left" IsChecked="{Binding IsShowable}"></ToggleButton>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
-                    <TextBlock Text="是否开启试样保护"  FontSize="14" Margin="0,0,0,15"></TextBlock>
-                    <ToggleButton FontSize="15" HorizontalAlignment="Left" IsChecked="{Binding IsOpenSpecimenProtected}" Foreground="#A5A5A5"></ToggleButton>
-                </StackPanel>
+                <StackPanel Grid.Column="2" Grid.Row="0" Margin="15">
+                    <TextBlock Text="通道类型" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <ComboBox FontSize="15" Width="Auto" 
+                              SelectedIndex="{Binding ChannelType, Mode=TwoWay}">
+                        <ComboBoxItem TabIndex="0">位移</ComboBoxItem>
+                        <ComboBoxItem TabIndex="1">力</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel> 
+                <UniformGrid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Columns="2">
+                    <StackPanel Margin="15">
+                        <TextBlock Text="是否可见" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <ToggleButton HorizontalAlignment="Left" IsChecked="{Binding IsShowable}"></ToggleButton>
+                    </StackPanel>
+                    <StackPanel  Margin="15">
+                        <TextBlock Text="是否开启试样保护"  FontSize="14" Margin="0,0,0,15"></TextBlock>
+                        <ToggleButton FontSize="15" HorizontalAlignment="Left" IsChecked="{Binding IsOpenSpecimenProtected}" Foreground="#A5A5A5"></ToggleButton>
+                    </StackPanel>
+                </UniformGrid>
                 <Border Grid.Row="2" Grid.Column="0" Background="#F9FAFB"
-                        Grid.ColumnSpan="2"
+                        Grid.ColumnSpan="3"
                         Margin="15"
                         Height="Auto"
                         Width="Auto">
@@ -113,7 +124,7 @@
                         </UniformGrid>
                     </StackPanel>
                 </Border> 
-                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="15,0,0,0">
+                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="15,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -134,7 +145,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-                <ItemsControl Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" ItemsSource="{Binding SignalModels}">
+                <ItemsControl Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" ItemsSource="{Binding SignalModels}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="2" BorderBrush="Gray" Background="#F9FAFB"

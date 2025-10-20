@@ -81,8 +81,7 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             set => SetProperty(ref _channelType, value);
         }
         public ObservableCollection<ControlChannelSelectableItemModel> SelectableControlChannels { get; private set; } = [];
-        public ObservableCollection<EditControlChannelFeedbackSignalItemModel> SignalModels { get; private set; } = [];
-
+        public ObservableCollection<EditControlChannelFeedbackSignalItemModel> SignalModels { get; private set; } = []; 
         #endregion
 
         #region Command
@@ -126,6 +125,7 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             OutputLimit = controlChannel?.OutputLimitation ?? 0;
             IsShowable = controlChannel?.IsShowable ?? false;
             IsOpenSpecimenProtected = controlChannel?.IsOpenSpecimenProtected ?? false; 
+            ChannelType = (int)controlChannel?.ChannelType!;
             foreach (var item in staionSelectedHardware)
             {
                 var parentInfo = allDevices.FirstOrDefault(c => c.Id == item.BelongToControllerId);
@@ -168,6 +168,7 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
                 ChannelName = ChannelName,
                 ControlCycle = ControlCycle,
                 ControlMode = (ControlChannelModeTypeEnum)ControlMode,
+                ChannelType = (ChannelTypeEnum)ChannelType,
                 OutputLimitation = OutputLimit,
                 StationId = _stationId,
                 IsShowable = IsShowable,
