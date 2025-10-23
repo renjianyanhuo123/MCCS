@@ -134,8 +134,14 @@
                 <!--光照-->
                 <hx:AmbientLight3D Color="#414141" />
                 <hx:DirectionalLight3D Direction="{Binding Camera.LookDirection}" Color="#D6D6D6" />
+                <!-- 广告牌 状态显示 -->
+                <hx:InstancingBillboardModel3D
+                    x:Name="BillboardModel3D"
+                    Geometry="{Binding BillboardModel}"
+                    InstanceParamArray="{Binding BillboardInstanceParams}"
+                    Instances="{Binding BillboardInstances}" />
                 <!-- 绑定Billboard文本集合 -->
-                <hx:TopMostGroup3D x:Name="topMostGroup" EnableTopMost="True">
+                <hx:TopMostGroup3D x:Name="TopMostGroup" EnableTopMost="True">
                     <!--动态文本: FixedSize: 是否固定大小 Geometry: 绑定到 ViewModel 中的 BatchedText 属性 IsHitTestVisible: 是否可被鼠标事件检测到-->
                     <hx:BillboardTextModel3D
                             FixedSize="True"
@@ -152,7 +158,7 @@
                 <hx:Element3DPresenter Content="{Binding GroupModel}"/>
                 <hx:PostEffectMeshBorderHighlight EffectName="highlight" />
                 <hx:AxisPlaneGridModel3D
-                        x:Name="plane"
+                        x:Name="Plane"
                         AutoSpacing="True"
                         Offset="-65" />
             </hx:Viewport3DX>

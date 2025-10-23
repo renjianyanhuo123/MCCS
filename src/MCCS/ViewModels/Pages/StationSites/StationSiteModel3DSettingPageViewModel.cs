@@ -7,6 +7,7 @@ using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
+using MahApps.Metro.Controls;
 using MCCS.Common;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Core.Models.Model3D;
@@ -180,7 +181,42 @@ namespace MCCS.ViewModels.Pages.StationSites
             IsDynamic = true
         };
 
-        #region BillboradInfo  
+        #region BillboradInfo
+        /// <summary>
+        /// 文本内容
+        /// </summary>
+        private string _textContent;
+        public string TextContent
+        {
+            get => _textContent;
+            set
+            {
+                if (SetProperty(ref _textContent, value))
+                {
+                    if (SelectedBillBoradInfo == null) return;
+                    SelectedBillBoradInfo.BillboardName = _textContent;
+                    CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Text = _textContent;
+                    CollectionDataLabels.Invalidate();
+                }
+            }
+        }
+
+        private float _billboardSize; 
+        public float BillboardSize
+        {
+            get => _billboardSize;
+            set
+            {
+                if (SetProperty(ref _billboardSize, value))
+                {
+                    if (SelectedBillBoradInfo == null) return;
+                    SelectedBillBoradInfo.Scale = _billboardSize;
+                    CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Scale = _billboardSize; 
+                    CollectionDataLabels.Invalidate();
+                }
+            }
+        }
+
         private double _xDistance;
         public double XDistance
         {
@@ -230,13 +266,13 @@ namespace MCCS.ViewModels.Pages.StationSites
                     var temp = CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin;
                     CollectionDataLabels.TextInfo[SelectedBillBoradInfo.Index].Origin =
                         new Vector3(temp.X, temp.Y, (float)_zDistance);
-                    CollectionDataLabels.Invalidate();
+                    CollectionDataLabels.Invalidate(); 
                 }
             }
         }
 
-        private BindedChannelModelBillboardTextInfo _selectedBillBoradInfo;
-        public BindedChannelModelBillboardTextInfo SelectedBillBoradInfo
+        private BindedChannelModelBillboardTextInfo? _selectedBillBoradInfo;
+        public BindedChannelModelBillboardTextInfo? SelectedBillBoradInfo
         {
             get => _selectedBillBoradInfo;
             set => SetProperty(ref _selectedBillBoradInfo, value);
@@ -288,7 +324,9 @@ namespace MCCS.ViewModels.Pages.StationSites
             XDistance = SelectedBillBoradInfo.XDistance;
             YDistance = SelectedBillBoradInfo.YDistance;
             ZDistance = SelectedBillBoradInfo.ZDistance;
-            SelectedBillBoradInfo.Index = res.TextInfoIndex;
+            BillboardSize = SelectedBillBoradInfo.Scale;
+            TextContent = SelectedBillBoradInfo.BillboardName;
+            SelectedBillBoradInfo.Index = res.TextInfoIndex; 
             CollectionDataLabels.Invalidate();
         }
 
@@ -299,8 +337,8 @@ namespace MCCS.ViewModels.Pages.StationSites
             for (var i = 0; i < billboardInfos.Count; i++)
             {
                 var position = billboardInfos[i].PositionStr.ToVector<Vector3>();
-                var temp1 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfos[i].BackgroundColor);
-                var temp2 = (Color)System.Windows.Media.ColorConverter.ConvertFromString(billboardInfos[i].FontColor);
+                var temp1 = (Color)ColorConverter.ConvertFromString(billboardInfos[i].BackgroundColor);
+                var temp2 = (Color)ColorConverter.ConvertFromString(billboardInfos[i].FontColor);
                 var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
                 var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
                 var selectedModel = Model3DFiles.FirstOrDefault(c => c.Key == billboardInfos[i].ModelFileId);
@@ -311,7 +349,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     Foreground = fontColor,
                     Origin = position,
                     Padding = new Vector4(5),
-                    Scale = billboardInfos[i].FontSize / 14.0f,
+                    Scale = billboardInfos[i].Scale,
                     Size = billboardInfos[i].FontSize,
                     Text = billboardInfos[i].BillboardName
                 });
@@ -323,6 +361,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     BackgroundColor1 = temp1,
                     FontColor1 = temp2,
                     BillboardName = billboardInfos[i].BillboardName,
+                    Scale = billboardInfos[i].Scale,
                     SelectedBindedChannel = selectedBindChannel,
                     SelectedModel = selectedModel,
                     FontColor = fontColor,
@@ -385,16 +424,26 @@ namespace MCCS.ViewModels.Pages.StationSites
                 DeviceId = null,
                 Orientation = "0,-1,0"
             }).ToList();
-            var billboardTextInfos = BindedChannelModelBillboardTextInfos.Select(s => new ModelBillboardInfo()
+            var billboardTextInfos = BindedChannelModelBillboardTextInfos.Select(s =>
             {
-                ModelFileId = s.SelectedModel.Key,
-                ModelId = modelBaseInfo.Id,
-                ControlChannelId = s.SelectedBindedChannel.Id,
-                BackgroundColor = $"#{s.BackgroundColor.A:X2}{s.BackgroundColor.R:X2}{s.BackgroundColor.G:X2}{s.BackgroundColor.B:X2}",
-                FontColor = $"#{s.FontColor.A:X2}{s.FontColor.R:X2}{s.FontColor.G:X2}{s.FontColor.B:X2}",
-                BillboardName = s.BillboardName,
-                FontSize = s.FontSize,
-                PositionStr = $"{s.XDistance},{s.YDistance},{s.ZDistance}"
+                var tempType = (BillboardTypeEnum)s.BillboardType;
+                var res = new ModelBillboardInfo
+                {
+                    ModelFileId = s.SelectedModel.Key,
+                    ModelId = modelBaseInfo.Id, 
+                    BackgroundColor = $"#{s.BackgroundColor.A:X2}{s.BackgroundColor.R:X2}{s.BackgroundColor.G:X2}{s.BackgroundColor.B:X2}",
+                    FontColor = $"#{s.FontColor.A:X2}{s.FontColor.R:X2}{s.FontColor.G:X2}{s.FontColor.B:X2}",
+                    BillboardName = s.BillboardName,
+                    BillboardType = (BillboardTypeEnum)s.BillboardType,
+                    FontSize = s.FontSize,
+                    Scale = BillboardSize,
+                    PositionStr = $"{s.XDistance},{s.YDistance},{s.ZDistance}"
+                };
+                if (tempType == BillboardTypeEnum.DataShow)
+                {
+                    res.ControlChannelId = s.SelectedBindedChannel.Id;
+                } 
+                return res;
             }).ToList(); 
             var controlChannelAndModelInfos = (from item in Model3DFiles
                     from controlChannel in item.BindedControlChannelIds
@@ -434,6 +483,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             Model3DFiles.Clear();
             GroupModel.Clear();
             GroupModel.Dispose();
+            SelectedBillBoradInfo = null;
             BindingControlChannels.Clear();
             foreach (var controlChannel in controlChannels)
             {
@@ -662,9 +712,11 @@ namespace MCCS.ViewModels.Pages.StationSites
             {
                 Id = -1,
                 BackgroundColor = SharpDX.Color.Black,
+                Index = BindedChannelModelBillboardTextInfos.Count,
                 FontColor = SharpDX.Color.White,
                 BillboardName = $"DefaultName{CollectionDataLabels.TextInfo.Count + 1}", 
                 BindedModelId = -1,
+                Scale = 1.0f,
                 FontSize = 14
             });
             CollectionDataLabels.TextInfo.Add(textInfo);

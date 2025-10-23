@@ -284,8 +284,7 @@ namespace MCCS
                     new()
                     {
                         Id = 4,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "力传感器1",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "附着于作动器1上的力传感器",
@@ -295,8 +294,7 @@ namespace MCCS
                     new()
                     {
                         Id = 5,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "位移传感器1",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "附着于作动器1上的位移传感器",
@@ -307,8 +305,7 @@ namespace MCCS
                     new()
                     {
                         Id = 6,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "力传感器2",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "附着于作动器2上的位移传感器",
@@ -319,8 +316,7 @@ namespace MCCS
                     new()
                     {
                         Id = 7,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "位移传感器2",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "附着于作动器2上的位移传感器",
@@ -331,8 +327,7 @@ namespace MCCS
                     new()
                     {
                         Id = 8,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "伺服阀1",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "作用于作动器1上的伺服阀",
@@ -343,8 +338,7 @@ namespace MCCS
                     new()
                     {
                         Id = 9,
-                        DeviceId = Guid.NewGuid().ToString("N"),
-                        ConnectionType = ConnectionTypeEnum.Modbus,
+                        DeviceId = Guid.NewGuid().ToString("N"), 
                         DeviceName = "伺服阀2",
                         DeviceType = DeviceTypeEnum.Sensor,
                         Description = "作用于作动器2上的伺服阀",

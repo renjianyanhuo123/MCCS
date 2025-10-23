@@ -134,6 +134,16 @@ namespace MCCS.Models.Stations.Model3DSettings
             set => SetProperty(ref _fontSize, value);
         }
 
+        /// <summary>
+        /// 广告牌大小
+        /// </summary>
+        private float _scale;
+        public float Scale
+        {
+            get => _scale;
+            set => SetProperty(ref _scale, value);
+        }
+
         private double _xDistance; 
         public double XDistance
         {
@@ -160,6 +170,15 @@ namespace MCCS.Models.Stations.Model3DSettings
         {
             get => _selectedModel;
             set => SetProperty(ref _selectedModel, value);
+        }
+        /// <summary>
+        /// 广告牌类型
+        /// </summary>
+        private int _billboardType; 
+        public int BillboardType
+        {
+            get => _billboardType;
+            set => SetProperty(ref _billboardType, value);
         }
 
         private BindingControlChannelItemModel _selectedBindedChannel; 

@@ -35,14 +35,7 @@ namespace MCCS.Models.Stations
         {
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
-        }
-
-        private DeviceStatusEnum _deviceStatus = DeviceStatusEnum.Unknown;
-        public DeviceStatusEnum DeviceStatus
-        {
-            get => _deviceStatus;
-            set => SetProperty(ref _deviceStatus, value);
-        }
+        } 
     }
 
     public sealed class HardwareListItemViewModel : BindableBase

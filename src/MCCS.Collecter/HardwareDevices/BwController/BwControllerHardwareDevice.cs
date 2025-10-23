@@ -91,7 +91,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return new EventLoopScheduler(ts => new Thread(ts)
             {
                 Name = $"Controller_{_hardwareDeviceConfiguration.DeviceId}",
-                IsBackground = false,
+                IsBackground = true,
                 Priority = ThreadPriority.Highest
             });
         }

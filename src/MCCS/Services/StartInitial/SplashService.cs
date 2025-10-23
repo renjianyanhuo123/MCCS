@@ -52,8 +52,7 @@ namespace MCCS.Services.StartInitial
                         }); 
                     temp.SignalInfos.AddRange(bindSignals);
                     return temp;
-                }).ToList();
-            stationSiteInfo.ControllerInfos.AddRange(controllerInfos);
+                }).ToList(); 
             // 创建所有的控制通道
             foreach (var ControlChannelSignalInfo in currentUseStation.ControlChannelSignalInfos)
             {
@@ -75,6 +74,7 @@ namespace MCCS.Services.StartInitial
             StartUpAllControllers(deviceInfos
                 .Where(c => c.DeviceType == DeviceTypeEnum.Controller), allSignals);
             GlobalDataManager.Instance.SetValue(stationSiteInfo);
+            GlobalDataManager.Instance.SetValue(controllerInfos);
         }
 
 

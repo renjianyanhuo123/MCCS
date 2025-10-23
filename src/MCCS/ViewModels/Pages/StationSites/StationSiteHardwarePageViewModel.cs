@@ -143,8 +143,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                             SignalId = c.Id,
                             SignalName = c.SignalName,
                             IsSelectable = !isSelected,
-                            IsSelected = isSelected,
-                            DeviceStatus = DeviceStatusEnum.Connected,
+                            IsSelected = isSelected
                         };
                     }).ToList();
                 foreach (var item in childItems)

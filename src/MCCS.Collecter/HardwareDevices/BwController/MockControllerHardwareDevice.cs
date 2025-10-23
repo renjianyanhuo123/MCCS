@@ -42,7 +42,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 });
         }
 
-        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private DataPoint MockAcquireReading()
         {
             // 模拟数据采集

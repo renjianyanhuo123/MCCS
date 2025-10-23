@@ -19,6 +19,7 @@
         <hardwares:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
         <modelSetttings:ModelFileIsNullToVisilityConverter x:Key="ModelFileIsNullToVisilityConverter" />
         <modelSetttings:BillBoradInfoIsNullToVisilityConverter x:Key="BillBoradInfoIsNullToVisilityConverter"/>
+        <modelSetttings:BillboardTypeToVisilityConverter x:Key="BillboardTypeToVisilityConverter" />
     </UserControl.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
@@ -346,7 +347,14 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Vertical" Margin="15">
                             <TextBlock Text="广告牌名称" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                            <TextBox Text="{Binding SelectedBillBoradInfo.BillboardName, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Text="{Binding TextContent, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="广告牌类型" FontSize="14" Margin="0,0,0,15"></TextBlock> 
+                            <ComboBox SelectedIndex="{Binding SelectedBillBoradInfo.BillboardType, UpdateSourceTrigger=PropertyChanged}">
+                                <ComboBoxItem TabIndex="0">阀门状态</ComboBoxItem>
+                                <ComboBoxItem TabIndex="1">数据采集</ComboBoxItem>
+                            </ComboBox>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="15">
                             <TextBlock Text="绑定模型" FontSize="14" Margin="0,0,0,15"></TextBlock>
@@ -354,7 +362,7 @@
                                       SelectedItem="{Binding SelectedBillBoradInfo.SelectedModel}"
                                       DisplayMemberPath="FileName"/>
                         </StackPanel>
-                        <StackPanel Orientation="Vertical" Margin="15">
+                        <StackPanel Orientation="Vertical" Margin="15" Visibility="{Binding SelectedBillBoradInfo.BillboardType, Converter={StaticResource BillboardTypeToVisilityConverter}}">
                             <TextBlock Text="绑定控制通道" FontSize="14" Margin="0,0,0,15"></TextBlock>
                             <ComboBox ItemsSource="{Binding SelectedBillBoradInfo.SelectedModel.BindedControlChannelIds}"
                                       SelectedItem="{Binding SelectedBillBoradInfo.SelectedBindedChannel}"
@@ -371,8 +379,8 @@
                                             Color="{Binding SelectedBillBoradInfo.FontColor1, Delay=25}" />
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="15">
-                            <TextBlock Text="广告牌字体大小" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                            <mah:NumericUpDown Value="{Binding SelectedBillBoradInfo.FontSize}"></mah:NumericUpDown>
+                            <TextBlock Text="广告牌大小" FontSize="14" Margin="0,0,0,15" />
+                            <mah:NumericUpDown Value="{Binding BillboardSize}"></mah:NumericUpDown>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="15">
                             <TextBlock Text="广告牌位置(X方向)" FontSize="14" Margin="0,0,0,15"></TextBlock>

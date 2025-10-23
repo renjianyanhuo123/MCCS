@@ -17,7 +17,7 @@ namespace MCCS.Modules
             // var effectManager = new DefaultEffectsManager();
             containerRegistry.RegisterSingleton<IEffectsManager, DefaultEffectsManager>();
             containerRegistry.Register<IModel3DLoaderService, Model3DLoaderService>();
-            containerRegistry.RegisterSingleton<IGenerateControlCommandServices, GenerateControlCommandServices>();
+            // containerRegistry.RegisterSingleton<IGenerateControlCommandServices, GenerateControlCommandServices>();
 
         }
     }

@@ -1,24 +1,20 @@
-﻿using MCCS.Core.Devices.Manager;
-using MCCS.ViewModels.Pages.Controllers;
+﻿using MCCS.ViewModels.Pages.Controllers;
 using MCCS.Views.Pages.Controllers;
 
 namespace MCCS.Services.ControlCommand
 {
     public class GenerateControlCommandServices : IGenerateControlCommandServices
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IDeviceManager _deviceManager;
+        private readonly IEventAggregator _eventAggregator; 
         private readonly IRegionManager _regionManager;
         private readonly Dictionary<string, ControllerMainPage> _controllerMainPages = new();
 
         public GenerateControlCommandServices(
             IRegionManager regionManager,
-            IEventAggregator eventAggregator,
-            IDeviceManager deviceManager)
+            IEventAggregator eventAggregator)
         {
             _regionManager = regionManager;
-            _eventAggregator = eventAggregator;
-            _deviceManager = deviceManager;
+            _eventAggregator = eventAggregator; 
         }
 
         public ControllerMainPage CreateControllerPage(string channelId, string channelName)

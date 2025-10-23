@@ -14,11 +14,7 @@
         /// <summary>
         /// 站点名称
         /// </summary>
-        public string Name { get; private set; }
-        /// <summary>
-        /// 控制器
-        /// </summary>
-        public List<StationSiteControllerInfo> ControllerInfos { get; } = [];
+        public string Name { get; private set; } 
         /// <summary>
         /// 控制通道
         /// </summary>

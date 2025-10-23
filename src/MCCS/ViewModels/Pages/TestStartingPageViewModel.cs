@@ -1,12 +1,12 @@
 ﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
-using MaterialDesignThemes.Wpf;
+using MCCS.Collecter.DllNative.Models;
+using MCCS.Collecter.Services;
 using MCCS.Common;
-using MCCS.Core.Devices;
-using MCCS.Core.Devices.Commands;
-using MCCS.Core.Devices.Details;
-using MCCS.Core.Devices.Manager;
+using MCCS.Common.DataManagers;
+using MCCS.Core.Models.StationSites;
+using MCCS.Core.Repositories;
 using MCCS.Events.ControlCommand;
 using MCCS.Events.Controllers;
 using MCCS.Models;
@@ -14,34 +14,27 @@ using MCCS.Models.ControlCommand;
 using MCCS.Models.Model3D;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
+using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Others;
 using MCCS.ViewModels.Pages.Controllers;
-using MCCS.Views.Dialogs;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Reactive.Linq;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.Services;
-using MCCS.Common.DataManagers;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Repositories;
-using MCCS.ViewModels.Dialogs;
-using Camera = HelixToolkit.Wpf.SharpDX.Camera;
-using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
-using Vector3D = System.Windows.Media.Media3D.Vector3D;
-using Serilog.Events;
-using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
-using Prism.Modularity;
-using Prism.Dialogs;
-using SharpDX;
-using Color = System.Windows.Media.Color;
-using MCCS.Collecter.DllNative.Models;
 using Newtonsoft.Json;
 using Serilog;
-using MahApps.Metro.Controls;
+using SharpDX;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
+using Camera = HelixToolkit.Wpf.SharpDX.Camera;
+using Color = System.Windows.Media.Color;
+using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
+using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
+using Vector3D = System.Windows.Media.Media3D.Vector3D;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -65,8 +58,8 @@ namespace MCCS.ViewModels.Pages
         private readonly ICurveAggregateRepository _curveAggregateRepository;
         private readonly IModel3DDataRepository _model3DDataRepository;
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
-        private readonly IControllerService _controllerService;
-        private readonly IDeviceManager _deviceManager;
+        private readonly IControllerService _controllerService; 
+        private IDisposable? _subscribeDispose;
         // 存储所有的广告牌引用,方便后期快速更新
         private readonly Dictionary<long, TextInfoExt> _textInfoDic = [];
 
@@ -101,8 +94,7 @@ namespace MCCS.ViewModels.Pages
 
         public TestStartingPageViewModel(
             IContainerProvider containerProvider,
-            IRegionManager regionManager,
-            IDeviceManager deviceManager,
+            IRegionManager regionManager, 
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
@@ -113,8 +105,7 @@ namespace MCCS.ViewModels.Pages
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
-            _containerProvider = containerProvider;
-            _deviceManager = deviceManager;
+            _containerProvider = containerProvider; 
             _model3DLoaderService = model3DLoaderService;
             _controllerService = controllerService;
             _model3DDataRepository = model3DDataRepository;
@@ -207,6 +198,12 @@ namespace MCCS.ViewModels.Pages
         {
             IsDynamic = true
         };
+
+        #region 状态显示模型
+        public BillboardSingleImage3D BillboardModel { private set; get; }
+        public SharpDX.Matrix[] BillboardInstances { private set; get; }
+        public BillboardInstanceParameter[] BillboardInstanceParams { private set; get; }
+        #endregion
 
         public SceneNodeGroupModel3D GroupModel { get; } = new();
         
@@ -319,6 +316,7 @@ namespace MCCS.ViewModels.Pages
                         Padding = new Vector4(5),
                         Foreground = fontColor,
                         Background = backgroundColor,
+                        Scale = billboardInfo.Scale,
                         Size = billboardInfo.FontSize
                     };
                     var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.ControlChannelId);
@@ -339,11 +337,17 @@ namespace MCCS.ViewModels.Pages
                     }
                     CollectionDataLabels.TextInfo.Add(textInfo); 
                 }
-                InitializeDataSubscriptions();
                 // 渲染时机很重要,这里相当于首次设置
                 ConnectionLineGeometry.Positions = positions;
                 ConnectionLineGeometry.Indices = connectionIndexs;
-
+                // 渲染控制通道状态显示
+                // 单个纯色圆形
+                var circleTexture = CreateCircleTexture(512, Colors.White, false);
+                var circleTextureModel = BitmapToTextureModel(circleTexture);
+               BillboardModel = new BillboardSingleImage3D(circleTextureModel, 100, 100); 
+                InitialBillboardStatus();
+                // 初始化订阅链接
+                InitializeDataSubscriptions();  
             }
             catch (OperationCanceledException)
             {
@@ -358,6 +362,24 @@ namespace MCCS.ViewModels.Pages
                 IsLoading = false;
             }
         }
+        private List<SharpDX.Matrix> billboardinstances = new List<SharpDX.Matrix>(4);
+        private List<BillboardInstanceParameter> billboardParams = new List<BillboardInstanceParameter>(4);
+        private void InitialBillboardStatus()
+        { 
+            for (var i = 0; i < 4; ++i)
+            {
+                billboardParams.Add(new BillboardInstanceParameter()
+                {
+                    TexCoordOffset = new Vector2(10000f, 10000f),
+                    TexCoordScale = new Vector2(1f, 1f)
+                });
+                billboardinstances.Add(SharpDX.Matrix.Scaling(1f, 1f, 1f)
+                                       * SharpDX.Matrix.Translation(new Vector3(7000, 12000, 3000)));
+            }
+            BillboardInstanceParams = billboardParams.ToArray();
+            BillboardInstances = billboardinstances.ToArray();
+        }
+
         /// <summary>
         /// 测试使用
         /// </summary>
@@ -471,13 +493,29 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         public void InitializeDataSubscriptions()
         {
-            var controllers = GlobalDataManager.Instance.StationSiteInfo?.ControllerInfos;
+            var controllers = GlobalDataManager.Instance?.ControllerInfos;
             if (controllers == null) return;
-            foreach (var controller in controllers)
-            {
-                var controllerInfo = _controllerService.GetControllerInfo(controller.Id); 
-                controllerInfo.IndividualDataStream.Sample(TimeSpan.FromSeconds(0.4)).Subscribe(OnDeviceDataReceived);
-            } 
+             
+            _subscribeDispose = controllers
+                .Select(controller => _controllerService.GetControllerInfo(controller.Id))
+                .Where(controllerInfo => controllerInfo != null)
+                .Select(controllerInfo => controllerInfo.IndividualDataStream
+                    .Sample(TimeSpan.FromSeconds(0.4))
+                    .Select(data => new
+                    {
+                        ControllerId = controllerInfo.DeviceId,
+                        Data = data,
+                        ReceiveTimestamp = DateTime.Now
+                    }))
+                .Merge()
+                // 关键：统一到一个线程处理
+                .ObserveOn(Scheduler.Default) 
+                .Subscribe(packet =>
+                {
+                    // 现在这个回调只会在一个线程上串行执行 
+                    OnDeviceDataReceived(packet.Data);
+                });
+             
         }
 
         /// <summary>
@@ -542,43 +580,43 @@ namespace MCCS.ViewModels.Pages
                 default:
                     break;
             }
-            var device = _deviceManager.GetDevice(expander.CommandId) ?? throw new ArgumentNullException(nameof(expander.CommandId));
-            await device.SendCommandAsync(new DeviceCommand
-            {
-                DeviceId = expander.CommandId,
-                Type = CommandTypeEnum.SetMove,
-                Parameters = expander.GetParamDic()
-            }, targetModel.CancelModelMove.Token);
+            // var device = _deviceManager.GetDevice(expander.CommandId) ?? throw new ArgumentNullException(nameof(expander.CommandId));
+            //await device.SendCommandAsync(new DeviceCommand
+            //{
+            //    DeviceId = expander.CommandId,
+            //    Type = CommandTypeEnum.SetMove,
+            //    Parameters = expander.GetParamDic()
+            //}, targetModel.CancelModelMove.Token);
 
-            // 事件完成后订阅
-            targetModel.DeviceSubscription = device.CommandStatusStream
-                .Sample(TimeSpan.FromSeconds(1.5))
-                .Subscribe(OnChangedCommandStatus);
+            //// 事件完成后订阅
+            //targetModel.DeviceSubscription = device.CommandStatusStream
+            //    .Sample(TimeSpan.FromSeconds(1.5))
+            //    .Subscribe(OnChangedCommandStatus);
         }
 
-        private void OnChangedCommandStatus(CommandResponse response) 
-        {
-            var expander = ControlProcessExpanders.FirstOrDefault(c => c.CommandId == response.CommandId);
-            var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == response.CommandId);
-            if (expander == null || targetModel == null) return;
-            expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
-            // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
-            if (response.CommandExecuteStatus is CommandExecuteStatusEnum.ExecuttionCompleted or CommandExecuteStatusEnum.Stoping) 
-            {
-                // 解绑状态订阅链接
-                targetModel.DeviceSubscription?.Dispose();
-                // 通知控制界面这条指令已经完成
-                _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandStatusEventParam 
-                { 
-                    CommandId = response.CommandId,
-                    CommandExecuteStatus = response.CommandExecuteStatus
-                }); 
-                PropertyChangeAsync(() => 
-                {
-                    ControlProcessExpanders.Remove(expander);
-                });
-            }
-        }
+        //private void OnChangedCommandStatus(CommandResponse response) 
+        //{
+        //    var expander = ControlProcessExpanders.FirstOrDefault(c => c.CommandId == response.CommandId);
+        //    var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == response.CommandId);
+        //    if (expander == null || targetModel == null) return;
+        //    expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
+        //    // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
+        //    if (response.CommandExecuteStatus is CommandExecuteStatusEnum.ExecuttionCompleted or CommandExecuteStatusEnum.Stoping) 
+        //    {
+        //        // 解绑状态订阅链接
+        //        targetModel.DeviceSubscription?.Dispose();
+        //        // 通知控制界面这条指令已经完成
+        //        _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandStatusEventParam 
+        //        { 
+        //            CommandId = response.CommandId,
+        //            CommandExecuteStatus = response.CommandExecuteStatus
+        //        }); 
+        //        PropertyChangeAsync(() => 
+        //        {
+        //            ControlProcessExpanders.Remove(expander);
+        //        });
+        //    }
+        //}
 
         /// <summary>
         /// 静态控制模式下 模型移动
@@ -814,6 +852,66 @@ namespace MCCS.ViewModels.Pages
             ConnectionLineGeometry.Positions = null;
             ConnectionLineGeometry.Indices = null; 
             ClearSelection();
+        }
+
+        /// <summary>
+        /// 创建圆形纹理
+        /// </summary>
+        private BitmapSource CreateCircleTexture(int size, Color color, bool addGradient = false)
+        {
+            var bitmap = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+            var visual = new DrawingVisual(); 
+            using (var context = visual.RenderOpen())
+            {
+                // 透明背景
+                context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, size, size)); 
+                var center = new System.Windows.Point(size / 2.0, size / 2.0);
+                var radius = size / 2.0 - 2; // 留点边距防止边缘锯齿 
+                Brush brush;
+                if (addGradient)
+                {
+                    // 带渐变的圆形
+                    var gradientBrush = new RadialGradientBrush
+                    {
+                        GradientOrigin = new System.Windows.Point(0.5, 0.5),
+                        Center = new System.Windows.Point(0.5, 0.5)
+                    };
+                    gradientBrush.GradientStops.Add(new GradientStop(color, 0.0));
+                    gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0, color.R, color.G, color.B), 0.9));
+                    brush = gradientBrush;
+                }
+                else
+                {
+                    // 纯色圆形
+                    brush = new SolidColorBrush(color);
+                }
+
+                // 绘制实心圆
+                context.DrawEllipse(brush, null, center, radius, radius);
+
+                // 可选：添加白色边框
+                var pen = new Pen(new SolidColorBrush(Colors.White), 2);
+                context.DrawEllipse(null, pen, center, radius - 1, radius - 1);
+            }
+
+            bitmap.Render(visual);
+            return bitmap;
+        }
+
+        /// <summary>
+        /// 将 BitmapSource 转换为 TextureModel
+        /// </summary>
+        private TextureModel BitmapToTextureModel(BitmapSource bitmap)
+        {
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap)); 
+            using var stream = new MemoryStream();
+            encoder.Save(stream);
+            stream.Position = 0; 
+            // 保存到临时文件
+            var tempFile = Path.Combine(Path.GetTempPath(), $"circle_{Guid.NewGuid()}.png");
+            File.WriteAllBytes(tempFile, stream.ToArray()); 
+            return TextureModel.Create(tempFile);
         }
 
         /// <summary>

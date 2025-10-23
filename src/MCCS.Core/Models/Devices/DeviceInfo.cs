@@ -1,5 +1,5 @@
 ﻿using FreeSql.DataAnnotations;
-using MCCS.Core.Devices;
+using MCCS.WorkflowSetting.Models.Edges;
 
 namespace MCCS.Core.Models.Devices;
 
@@ -24,29 +24,12 @@ public class DeviceInfo : BaseModel
     /// 设备描述
     /// </summary>
     [Column(IsNullable = true, StringLength = 500)]
-    public string? Description { get; set; }
-
-    ///// <summary>
-    ///// 主设备ID
-    ////  去除掉，使用接口信号的方式绑定设备，增强其灵活性
-    ///// </summary>
-    //[Column(IsNullable = true, StringLength = 100)]
-    //public string? MainDeviceId { get; set; }
+    public string? Description { get; set; } 
 
     /// <summary>
     /// 采集频率（单位：Hz）
     /// </summary>
-    public double Frequency { get; set; } = 20.0;
-
-    /// <summary>
-    /// 采集方式
-    /// </summary>
-    public CollectionMode Mode { get; set; } = CollectionMode.Scheduled;
-
-    /// <summary>
-    /// 连接方式
-    /// </summary>
-    public ConnectionTypeEnum ConnectionType { get; set; } = ConnectionTypeEnum.Mock;
+    public double Frequency { get; set; } = 20.0;  
     /// <summary>
     /// 功能类型
     /// </summary>

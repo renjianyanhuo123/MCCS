@@ -16,6 +16,10 @@ namespace MCCS.Common.DataManagers
         /// </summary>
         public StationSiteInfo? StationSiteInfo { get; private set; }
         /// <summary>
+        /// 控制器 核心
+        /// </summary>
+        public List<StationSiteControllerInfo>? ControllerInfos { get; private set; } 
+        /// <summary>
         /// 当前编辑的方法信息
         /// </summary>
         public MethodContentItemModel? MethodInfo { get; private set; } 
@@ -30,7 +34,8 @@ namespace MCCS.Common.DataManagers
                 case MethodContentItemModel methodContentItemModel:
                     MethodInfo = methodContentItemModel;
                     break;
-                case List<IControllerHardwareDevice> hardwareDevices: 
+                case List<StationSiteControllerInfo> controllers:
+                    ControllerInfos = controllers;
                     break;
             }
         }

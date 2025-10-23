@@ -36,7 +36,15 @@ namespace MCCS.Core.Models.Model3D
         /// <summary>
         /// 字体大小
         /// </summary>
-        public int FontSize { get; set; }
+        public int FontSize { get; set; } 
+        /// <summary>
+        /// 广告牌大小
+        /// </summary>
+        public float Scale { get; set; }
+        /// <summary>
+        /// 广告牌类型
+        /// </summary>
+        public BillboardTypeEnum BillboardType { get; set; }
 
         [Column(IsNullable = false, StringLength = 50)]
         public string PositionStr { get; set; } = string.Empty;

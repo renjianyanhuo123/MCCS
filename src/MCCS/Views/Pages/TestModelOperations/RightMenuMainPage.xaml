@@ -76,27 +76,13 @@
                 Effect="{StaticResource MenuShadow}">
 
             <StackPanel Margin="0,4"> 
-                <!-- 转发 -->
-                <Border x:Name="ForwardItem" Style="{StaticResource CustomMenuItemStyle}" Tag="转发">
-                    <Grid Margin="12,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="转发" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
-                        <TextBlock Grid.Column="1" Text="Ctrl+V" VerticalAlignment="Center" FontSize="12" Foreground="#999" Margin="24,0,0,0"/>
-                    </Grid>
-                </Border> 
-                <!-- 放大 -->
-                <Border x:Name="ZoomInItem" Style="{StaticResource CustomMenuItemStyle}"  Tag="放大">
-                    <Grid Margin="12,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="放大" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
-                        <TextBlock Grid.Column="1" Text="Alt+(+)" VerticalAlignment="Center" FontSize="12" Foreground="#999" Margin="24,0,0,0"/>
-                    </Grid>
+                <!-- 打开阀门 -->
+                <Border x:Name="OpenValveItem" Style="{StaticResource CustomMenuItemStyle}" Tag="打开阀门">
+                    <TextBlock Margin="12,0"  Text="打开阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
+                </Border>
+                <!-- 关闭阀门 -->
+                <Border x:Name="CloseValveItem" Style="{StaticResource CustomMenuItemStyle}"  Tag="关闭阀门">
+                    <TextBlock  Margin="12,0"  Text="关闭阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
 
                 <!-- 缩小 -->

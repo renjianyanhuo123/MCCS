@@ -1,5 +1,4 @@
-﻿using MCCS.Core.Devices.Commands;
-using MCCS.Core.Devices.Manager;
+﻿using MCCS.Core.Devices.Commands; 
 using MCCS.Events.Controllers;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
@@ -9,8 +8,7 @@ namespace MCCS.ViewModels.Pages.Controllers
 {
     public class ControllerMainPageViewModel : BindableBase
     {
-        public const string Tag = "ControllerMainPage"; 
-        private readonly IDeviceManager _deviceManager;  
+        public const string Tag = "ControllerMainPage";  
         private readonly IEventAggregator _eventAggregator;
 
         private bool _isShowController = false;

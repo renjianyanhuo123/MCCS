@@ -11,6 +11,7 @@
              xmlns:localDeviceStatus="clr-namespace:MCCS.Core.Models.Devices;assembly=MCCS.Core"
              mc:Ignorable="d" 
              xmlns:stationViewModel="clr-namespace:MCCS.ViewModels.Pages.StationSites"
+             xmlns:devices="clr-namespace:MCCS.Collecter.Devices;assembly=MCCS.Collecter"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance stationViewModel:StationSiteHardwarePageViewModel}">
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
@@ -120,16 +121,16 @@
                         <Ellipse.Style>
                             <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicatorStyle}">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Connected}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Connected}">
                                         <Setter Property="Fill" Value="#90EE90"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Busy}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Busy}">
                                         <Setter Property="Fill" Value="#FFA500"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Error}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Error}">
                                         <Setter Property="Fill" Value="#FF6B6B"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static localDeviceStatus:DeviceStatusEnum.Disconnected}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Disconnected}">
                                         <Setter Property="Fill" Value="#808080"/>
                                     </DataTrigger>
                                 </Style.Triggers>

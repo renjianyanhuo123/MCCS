@@ -1,7 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf;
 using MCCS.Models.Model3D;
-using System.Collections.ObjectModel;
-using MCCS.Core.Devices.Details;
+using System.Collections.ObjectModel; 
 using MCCS.Models;
 
 namespace MCCS.ViewModels.Dialogs

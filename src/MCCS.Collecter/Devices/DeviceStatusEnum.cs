@@ -1,4 +1,4 @@
-﻿namespace MCCS.Core.Models.Devices
+﻿namespace MCCS.Collecter.Devices
 {
     public enum DeviceStatusEnum: int
     {
