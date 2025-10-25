@@ -156,10 +156,23 @@ namespace MCCS.ViewModels.Pages.StationSites
                     foreach (var bindedChannel in BindingControlChannels)
                     {
                         bindedChannel.IsSelected = value.BindedControlChannelIds.Any(c => c.Id == bindedChannel.Id);
-                    }
-                }
-
+                    }  
+                } 
                 SetProperty(ref _selectedModel3DFile, value);
+                if(_selectedModel3DFile != null) IsCanControl = _selectedModel3DFile.IsCanControl;
+            }
+        }
+
+        private bool _isCanControl;
+        public bool IsCanControl
+        {
+            get => _isCanControl;
+            set
+            {
+                if (SetProperty(ref _isCanControl, value))
+                {
+                    SelectedModel3DFile.IsCanControl = _isCanControl;
+                }
             }
         }
 
@@ -324,7 +337,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             XDistance = SelectedBillBoradInfo.XDistance;
             YDistance = SelectedBillBoradInfo.YDistance;
             ZDistance = SelectedBillBoradInfo.ZDistance;
-            BillboardSize = SelectedBillBoradInfo.Scale;
+            BillboardSize = SelectedBillBoradInfo.Scale; 
             TextContent = SelectedBillBoradInfo.BillboardName;
             SelectedBillBoradInfo.Index = res.TextInfoIndex; 
             CollectionDataLabels.Invalidate();
@@ -361,6 +374,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     BackgroundColor1 = temp1,
                     FontColor1 = temp2,
                     BillboardName = billboardInfos[i].BillboardName,
+                    BillboardType = (int)billboardInfos[i].BillboardType,
                     Scale = billboardInfos[i].Scale,
                     SelectedBindedChannel = selectedBindChannel,
                     SelectedModel = selectedModel,
@@ -417,6 +431,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 FilePath = s.FilePath,
                 GroupKey = modelBaseInfo.Id,
                 Type = s.BindedControlChannelIds.Count == 0 ? ModelType.Other : ModelType.Actuator,
+                IsCanControl = s.IsCanControl,
                 PositionStr = "0,0,0",
                 RotationStr = "",
                 RotateAngle = 90,
@@ -434,9 +449,9 @@ namespace MCCS.ViewModels.Pages.StationSites
                     BackgroundColor = $"#{s.BackgroundColor.A:X2}{s.BackgroundColor.R:X2}{s.BackgroundColor.G:X2}{s.BackgroundColor.B:X2}",
                     FontColor = $"#{s.FontColor.A:X2}{s.FontColor.R:X2}{s.FontColor.G:X2}{s.FontColor.B:X2}",
                     BillboardName = s.BillboardName,
-                    BillboardType = (BillboardTypeEnum)s.BillboardType,
+                    BillboardType = tempType,
                     FontSize = s.FontSize,
-                    Scale = BillboardSize,
+                    Scale = s.Scale,
                     PositionStr = $"{s.XDistance},{s.YDistance},{s.ZDistance}"
                 };
                 if (tempType == BillboardTypeEnum.DataShow)
@@ -521,6 +536,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                         Id = item.Id,
                         Key = item.Key,
                         FileName = item.Name, 
+                        IsCanControl = item.IsCanControl
                     };
                     var temp = bindedChannels
                         .Where(c => c.ModelFileId == item.Key).ToList(); 

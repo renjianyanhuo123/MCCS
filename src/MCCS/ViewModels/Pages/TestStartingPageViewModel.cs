@@ -9,6 +9,7 @@ using MCCS.Core.Models.StationSites;
 using MCCS.Core.Repositories;
 using MCCS.Events.ControlCommand;
 using MCCS.Events.Controllers;
+using MCCS.Events.Tests;
 using MCCS.Models;
 using MCCS.Models.ControlCommand;
 using MCCS.Models.Model3D;
@@ -339,13 +340,7 @@ namespace MCCS.ViewModels.Pages
                 }
                 // 渲染时机很重要,这里相当于首次设置
                 ConnectionLineGeometry.Positions = positions;
-                ConnectionLineGeometry.Indices = connectionIndexs;
-                // 渲染控制通道状态显示
-                // 单个纯色圆形
-                var circleTexture = CreateCircleTexture(512, Colors.White, false);
-                var circleTextureModel = BitmapToTextureModel(circleTexture);
-               BillboardModel = new BillboardSingleImage3D(circleTextureModel, 100, 100); 
-                InitialBillboardStatus();
+                ConnectionLineGeometry.Indices = connectionIndexs; 
                 // 初始化订阅链接
                 InitializeDataSubscriptions();  
             }
@@ -361,24 +356,7 @@ namespace MCCS.ViewModels.Pages
             {
                 IsLoading = false;
             }
-        }
-        private List<SharpDX.Matrix> billboardinstances = new List<SharpDX.Matrix>(4);
-        private List<BillboardInstanceParameter> billboardParams = new List<BillboardInstanceParameter>(4);
-        private void InitialBillboardStatus()
-        { 
-            for (var i = 0; i < 4; ++i)
-            {
-                billboardParams.Add(new BillboardInstanceParameter()
-                {
-                    TexCoordOffset = new Vector2(10000f, 10000f),
-                    TexCoordScale = new Vector2(1f, 1f)
-                });
-                billboardinstances.Add(SharpDX.Matrix.Scaling(1f, 1f, 1f)
-                                       * SharpDX.Matrix.Translation(new Vector3(7000, 12000, 3000)));
-            }
-            BillboardInstanceParams = billboardParams.ToArray();
-            BillboardInstances = billboardinstances.ToArray();
-        }
+        } 
 
         /// <summary>
         /// 测试使用
@@ -760,7 +738,16 @@ namespace MCCS.ViewModels.Pages
             var modelId = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
             if (modelId == null) return;
             _clearOperationModel = Models.FirstOrDefault(c => c.ModelId == modelId);
-            IsShowContextMenu = true;
+            var mappingDevice = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.ModelFileKey == modelId)?.MappingDevice;
+            // 是否可控制
+            if (mappingDevice != null && _clearOperationModel is { Model3DData.IsCanControl: true })
+            {
+                _eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>().Publish(new NotificationRightMenuValveStatusEventParam
+                {
+                    DeviceId = mappingDevice.Id
+                });
+                IsShowContextMenu = true;
+            } 
             mouseArgs.Handled = true;
         }
         
@@ -769,10 +756,10 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         private async Task ExecuteSetCurveCommand(string id)
         {
-            //var curveModel = CurveModels.FirstOrDefault(c => c.DeviceId == id);
-            //if(curveModel == null) return;
-            //var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
-            //var result = await DialogHost.Show(setCurveView,"RootDialog");
+            // var curveModel = CurveModels.FirstOrDefault(c => c.DeviceId == id);
+            // if(curveModel == null) return;
+            // var setCurveView = _containerProvider.Resolve<SetCurveDialog>();
+            // var result = await DialogHost.Show(setCurveView,"RootDialog");
             // Debug.WriteLine("Test!!!");
         }
 
@@ -852,68 +839,7 @@ namespace MCCS.ViewModels.Pages
             ConnectionLineGeometry.Positions = null;
             ConnectionLineGeometry.Indices = null; 
             ClearSelection();
-        }
-
-        /// <summary>
-        /// 创建圆形纹理
-        /// </summary>
-        private BitmapSource CreateCircleTexture(int size, Color color, bool addGradient = false)
-        {
-            var bitmap = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
-            var visual = new DrawingVisual(); 
-            using (var context = visual.RenderOpen())
-            {
-                // 透明背景
-                context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, size, size)); 
-                var center = new System.Windows.Point(size / 2.0, size / 2.0);
-                var radius = size / 2.0 - 2; // 留点边距防止边缘锯齿 
-                Brush brush;
-                if (addGradient)
-                {
-                    // 带渐变的圆形
-                    var gradientBrush = new RadialGradientBrush
-                    {
-                        GradientOrigin = new System.Windows.Point(0.5, 0.5),
-                        Center = new System.Windows.Point(0.5, 0.5)
-                    };
-                    gradientBrush.GradientStops.Add(new GradientStop(color, 0.0));
-                    gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0, color.R, color.G, color.B), 0.9));
-                    brush = gradientBrush;
-                }
-                else
-                {
-                    // 纯色圆形
-                    brush = new SolidColorBrush(color);
-                }
-
-                // 绘制实心圆
-                context.DrawEllipse(brush, null, center, radius, radius);
-
-                // 可选：添加白色边框
-                var pen = new Pen(new SolidColorBrush(Colors.White), 2);
-                context.DrawEllipse(null, pen, center, radius - 1, radius - 1);
-            }
-
-            bitmap.Render(visual);
-            return bitmap;
-        }
-
-        /// <summary>
-        /// 将 BitmapSource 转换为 TextureModel
-        /// </summary>
-        private TextureModel BitmapToTextureModel(BitmapSource bitmap)
-        {
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap)); 
-            using var stream = new MemoryStream();
-            encoder.Save(stream);
-            stream.Position = 0; 
-            // 保存到临时文件
-            var tempFile = Path.Combine(Path.GetTempPath(), $"circle_{Guid.NewGuid()}.png");
-            File.WriteAllBytes(tempFile, stream.ToArray()); 
-            return TextureModel.Create(tempFile);
-        }
-
+        } 
         /// <summary>
         /// 寻找Tag中的Model3D对象的ID
         /// </summary>

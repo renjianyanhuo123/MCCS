@@ -15,9 +15,7 @@ namespace MCCS.Services.Model3DService
         IConfiguration configuration)
         : IModel3DLoaderService
     {
-        private readonly SemaphoreSlim _importSemaphore = new(MaxConcurrentImports, MaxConcurrentImports);
-        // private CancellationTokenSource _cancellationTokenSource;
-        // private readonly SynchronizationContext? _uiContext;
+        private readonly SemaphoreSlim _importSemaphore = new(MaxConcurrentImports, MaxConcurrentImports); 
         private readonly  IEffectsManager _effectsManager = effectsManager ?? throw new ArgumentNullException(nameof(effectsManager)); 
         private const int MaxConcurrentImports = 4; 
         private readonly IConfiguration _configuration = configuration;

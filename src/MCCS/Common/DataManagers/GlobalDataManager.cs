@@ -1,6 +1,8 @@
-﻿using MCCS.Collecter.HardwareDevices;
+﻿using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Methods;
+using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Common.DataManagers.StationSites;
+using MCCS.Core.Models.Devices;
 
 namespace MCCS.Common.DataManagers
 {
@@ -16,14 +18,21 @@ namespace MCCS.Common.DataManagers
         /// </summary>
         public StationSiteInfo? StationSiteInfo { get; private set; }
         /// <summary>
+        /// 所有设备
+        /// </summary>
+        public List<BaseDevice>? Devices { get; private set; }
+        /// <summary>
         /// 控制器 核心
         /// </summary>
-        public List<StationSiteControllerInfo>? ControllerInfos { get; private set; } 
+        public List<ControllerDevice>? ControllerInfos { get; private set; } 
         /// <summary>
         /// 当前编辑的方法信息
         /// </summary>
         public MethodContentItemModel? MethodInfo { get; private set; } 
-
+        /// <summary>
+        /// 当前使用的3D模型集合
+        /// </summary>
+        public List<Model3DMainInfo>? Model3Ds { get; private set; }
         public void SetValue<T>(T value) where T : class
         {
             switch (value)
@@ -34,8 +43,13 @@ namespace MCCS.Common.DataManagers
                 case MethodContentItemModel methodContentItemModel:
                     MethodInfo = methodContentItemModel;
                     break;
-                case List<StationSiteControllerInfo> controllers:
-                    ControllerInfos = controllers;
+                case List<BaseDevice> devices:
+                    Devices = devices;
+                    ControllerInfos = devices.Where(c => c.Type == DeviceTypeEnum.Controller)
+                        .Select(s => (ControllerDevice)s).ToList();
+                    break;
+                case List<Model3DMainInfo> model3Ds:
+                    Model3Ds = model3Ds;
                     break;
             }
         }

@@ -22,6 +22,10 @@ namespace MCCS.Core.Models.Model3D
         //public int OriginalColor { get; set; }
         //public int SelectedColor { get; set; }
         //public int HoverColor { get; set; }
+        /// <summary>
+        /// 是否可控制
+        /// </summary>
+        public bool IsCanControl { get; set; }
 
         public ModelType Type { get; set; }
 

@@ -7,7 +7,10 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:localView="clr-namespace:MCCS.ViewModels.Pages.TestModelOperations"
+             xmlns:testStarting="clr-namespace:MCCS.Converters.TestStarting"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance localView:RightMenuMainPageViewModel}">
     <UserControl.Resources>
         <!-- 菜单项样式 -->
         <Style x:Key="CustomMenuItemStyle" TargetType="Border">
@@ -64,6 +67,8 @@
                           ShadowDepth="4" 
                           Color="Black" 
                           Opacity="0.15"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+        <testStarting:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
     </UserControl.Resources>
     <Grid>
         <!-- 主菜单 -->
@@ -77,12 +82,19 @@
 
             <StackPanel Margin="0,4"> 
                 <!-- 打开阀门 -->
-                <Border x:Name="OpenValveItem" Style="{StaticResource CustomMenuItemStyle}" Tag="打开阀门">
+                <Border x:Name="OpenValveItem" Style="{StaticResource CustomMenuItemStyle}" Tag="打开阀门"
+                        Visibility="{Binding IsOpen, Converter={StaticResource InverseBoolToVisibleConverter}}">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonDown">
+                            <b:InvokeCommandAction 
+                                Command="{Binding OpenValveCommand}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
                     <TextBlock Margin="12,0"  Text="打开阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
                 <!-- 关闭阀门 -->
-                <Border x:Name="CloseValveItem" Style="{StaticResource CustomMenuItemStyle}"  Tag="关闭阀门">
-                    <TextBlock  Margin="12,0"  Text="关闭阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
+                <Border x:Name="CloseValveItem" Style="{StaticResource CustomMenuItemStyle}" Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}" Tag="关闭阀门">
+                    <TextBlock  Margin="12,0"  Text="关闭阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333" />
                 </Border>
 
                 <!-- 缩小 -->

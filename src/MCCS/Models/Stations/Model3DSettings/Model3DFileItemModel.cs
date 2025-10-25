@@ -40,6 +40,15 @@ namespace MCCS.Models.Stations.Model3DSettings
             get => _materialColor;
             set => SetProperty(ref _materialColor, value);
         }
+        /// <summary>
+        /// 是否可控制
+        /// </summary>
+        private bool _isCanControl;
+        public bool IsCanControl
+        {
+            get => _isCanControl;
+            set => SetProperty(ref _isCanControl, value);
+        }
 
         /// <summary>
         /// 绑定的控制通道ID集合

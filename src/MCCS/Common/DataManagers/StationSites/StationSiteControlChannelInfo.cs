@@ -12,6 +12,6 @@ namespace MCCS.Common.DataManagers.StationSites
 
         public ChannelTypeEnum ChannelType { get; private set; } = channelType;
 
-        public List<StationSiteControllerSignalInfo> BindSignals { get; set; }
+        public List<StationSiteControllerSignalInfo> BindSignals { get; set; } = [];
     }
 }

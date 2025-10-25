@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Collecter.Devices
 {
-    public enum DeviceStatusEnum: int
+    public enum DeviceStatusEnum : int
     {
         /// <summary>
         /// 未知

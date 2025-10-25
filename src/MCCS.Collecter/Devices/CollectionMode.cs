@@ -1,4 +1,4 @@
-﻿namespace MCCS.Core.Devices
+﻿namespace MCCS.Collecter.Devices
 {
     public enum CollectionMode
     {

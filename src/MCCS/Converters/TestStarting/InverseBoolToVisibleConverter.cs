@@ -10,7 +10,7 @@ namespace MCCS.Converters.TestStarting
         {
             if (value is bool isLoading)
             {
-                return isLoading ? Visibility.Hidden : Visibility.Visible;
+                return isLoading ? Visibility.Collapsed : Visibility.Visible;
             }
             return Visibility.Visible;
         }

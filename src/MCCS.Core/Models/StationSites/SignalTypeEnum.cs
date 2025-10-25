@@ -3,7 +3,7 @@
     /// <summary>
     /// 控制通道绑定
     /// </summary>
-    public enum SignalTypeEnum : int
+    public enum SignalTypeEnum
     {
         /// <summary>
         /// 位置反馈

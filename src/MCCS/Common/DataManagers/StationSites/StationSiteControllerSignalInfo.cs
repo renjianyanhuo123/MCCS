@@ -1,4 +1,5 @@
-﻿using MCCS.Core.Models.StationSites;
+﻿using MCCS.Common.DataManagers.Devices;
+using MCCS.Core.Models.StationSites;
 using Newtonsoft.Json;
 
 namespace MCCS.Common.DataManagers.StationSites
@@ -10,17 +11,16 @@ namespace MCCS.Common.DataManagers.StationSites
         string name)
     {
         public long Id { get; } = id;
-        public string Name { get; } = name;
-
+        public string Name { get; } = name; 
         public long BelongControllerId { get; } = belongControllerId;
         /// <summary>
         /// 控制通道信号类型
         /// </summary>
         public SignalTypeEnum ControlChannelSignalType { get; set; }
 
-        public StationSiteDeviceInfo? LinkedDevice { get; private set; }
+        public BaseDevice? LinkedDevice { get; private set; }
 
-        public void Link(StationSiteDeviceInfo device)
+        public void Link(BaseDevice device)
         {
             LinkedDevice = device;
         }
