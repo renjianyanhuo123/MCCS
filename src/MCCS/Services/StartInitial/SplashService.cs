@@ -48,18 +48,18 @@ namespace MCCS.Services.StartInitial
             {
                 if (deviceInfo.DeviceType == DeviceTypeEnum.Controller)
                 { 
-                    globalDevices.Add(new ControllerDevice(deviceInfo.Id, deviceInfo.DeviceName)); 
+                    globalDevices.Add(new ControllerDevice(deviceInfo.Id, deviceInfo.DeviceName, null)); 
                 }
                 else if (deviceInfo.DeviceType == DeviceTypeEnum.Actuator)
                 {
-                    globalDevices.Add(new ActuatorDevice(deviceInfo.Id, deviceInfo.DeviceName));
+                    globalDevices.Add(new ActuatorDevice(deviceInfo.Id, deviceInfo.DeviceName, null));
                 }
                 else
                 {
-                    globalDevices.Add(new BaseDevice(deviceInfo.Id, deviceInfo.DeviceName, deviceInfo.DeviceType));
+                    globalDevices.Add(new BaseDevice(deviceInfo.Id, deviceInfo.DeviceName, deviceInfo.DeviceType, null));
                 }
             }
-            // 所有的控制器接口Link设备
+            // 所有的控制器接口Link设备;并绑定设备的父子关系;方便后面找到控制器进行控制
             foreach (var device in globalDevices.Where(c => c.Type == DeviceTypeEnum.Controller))
             {
                 if (device is not ControllerDevice controllerDevice) continue;
@@ -67,8 +67,12 @@ namespace MCCS.Services.StartInitial
                     currentUseStation.Signals.Select(a =>
                     {
                         var temp1 = new StationSiteControllerSignalInfo(a.Id, a.BelongToControllerId, a.SignalName);
-                        var bindDevice = globalDevices.FirstOrDefault(c => c.Id == a.ConnectedDeviceId);
-                        if (bindDevice != null) temp1.Link(bindDevice);
+                        var bindDevice = globalDevices.FirstOrDefault(c => c.Id == a.ConnectedDeviceId); 
+                        if (bindDevice != null)
+                        {
+                            bindDevice.ParentDeviceId = a.BelongToControllerId;
+                            temp1.Link(bindDevice);
+                        }
                         return temp1;
                     });
                 controllerDevice.SignalInfos.AddRange(bindSignals);

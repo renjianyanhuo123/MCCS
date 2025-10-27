@@ -35,15 +35,19 @@ namespace MCCS.Collecter.Services
             }
             throw new Exception($"DLL初始化失败,错误码:{result}"); 
         }
-
+        /// <summary>
+        /// 获取控制器
+        /// </summary>
+        /// <param name="controllerId"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public ControllerHardwareDeviceBase GetControllerInfo(long controllerId)
         {
             var controller = _controllers.FirstOrDefault(c => c.DeviceId == controllerId);
             if (controller == null) throw new ArgumentNullException("controllerId is Null!");
             return controller;
         }
-         
-
+        
         /// <summary>
         /// 创建控制器
         /// </summary>

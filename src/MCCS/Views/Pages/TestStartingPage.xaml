@@ -27,9 +27,12 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <convert:InverseBoolToVisibleConverter x:Key="InverseBoolToVisibleConverter" />
             <convert:BoolToStyleConverter x:Key="BoolToStyleConverter" />
-            <convert:BoolToTextContentConverter x:Key="BoolToTextContentConverter" />
+            <convert:BoolToStopAndStartTextContentConverter x:Key="BoolToStopAndStartTextContentConverter" />
+            <convert:BoolToPauseAndContinueTextContentConverter x:Key="BoolToPauseAndContinueTextContentConverter" />
             <convert:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter" />
-            <convert:BoolToColumnSpanConverter x:Key="BoolToColumnSpanConverter" />
+            <convert:BoolToColumnSpanConverter x:Key="BoolToColumnSpanConverter" /> 
+            <convert:BooleanToPauseAndContinueIconConverter  x:Key="BooleanToPauseAndContinueIconConverter" />
+            <convert:BooleanToStopAndStartIconConverter  x:Key="BooleanToStopAndStartIconConverter" />
             <!-- 定义不同ViewModel对应的View -->
             <DataTemplate DataType="{x:Type vmControllers:ControllerMainPageViewModel}">
                 <controllers:ControllerMainPage />
@@ -60,15 +63,35 @@
         </Grid.RowDefinitions>
         <!-- 顶部按钮区域 - 最先声明 -->
         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5">
-            <Button
-            Width="100"
-            Margin="15"
-            Content="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" 
-            Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
-            Command="{Binding StartTestCommand}"
-            ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToTextContentConverter}}" />
+            <!-- 开始和终止按钮 -->
+            <StackPanel>
+                <Button 
+                    Margin="15"
+                    VerticalAlignment="Center"
+                    Content="{Binding IsStartedTest, Converter={StaticResource BooleanToStopAndStartIconConverter}}" 
+                    Style="{Binding IsStartedTest, Converter={StaticResource BoolToStyleConverter}}"
+                    Command="{Binding StartTestCommand}"
+                    ToolTip="{Binding IsStartedTest, Converter={StaticResource BoolToStopAndStartTextContentConverter}}">
+                </Button>
+                <TextBlock Text="{Binding IsStartedTest, Converter={StaticResource BoolToStopAndStartTextContentConverter}}" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" />
+            </StackPanel>
+            <!-- 暂停和继续按钮 -->
+            <StackPanel Visibility="{Binding IsStartedTest, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Button 
+                    Margin="15"
+                    VerticalAlignment="Center"
+                    Content="{Binding IsPaused, Converter={StaticResource BooleanToPauseAndContinueIconConverter}}" 
+                    Style="{Binding IsPaused, Converter={StaticResource BoolToStyleConverter}}"
+                    Command="{Binding PauseTestCommand}"
+                    ToolTip="{Binding IsPaused, Converter={StaticResource BoolToPauseAndContinueTextContentConverter}}">
+                </Button>
+                <TextBlock Text="{Binding IsPaused, Converter={StaticResource BoolToPauseAndContinueTextContentConverter}}" 
+                           VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" />
+            </StackPanel>
             <Button
                 Width="200"
+                Margin="100,0,0,0"
                 Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
                 Content="展示曲线图像"
                 Command="{Binding ShowCurveCommand}" />
@@ -183,7 +206,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Gray" BorderThickness="1" Margin="5">
+                        <Border BorderBrush="Gray" BorderThickness="1"  CornerRadius="3"  >
                             <!--<controllers:ControllerMainPage DataContext="{Binding}" />-->
                             <ContentControl Content="{Binding}" Margin="0,0,0,15"/>
                         </Border>

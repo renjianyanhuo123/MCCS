@@ -1,5 +1,4 @@
 ﻿using FreeSql.DataAnnotations;
-using MCCS.WorkflowSetting.Models.Edges;
 
 namespace MCCS.Core.Models.Devices;
 

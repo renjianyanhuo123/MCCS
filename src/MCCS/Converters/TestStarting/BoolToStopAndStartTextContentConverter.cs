@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace MCCS.Converters.TestStarting
 {
-    public sealed class BoolToTextContentConverter : IValueConverter
+    public sealed class BoolToStopAndStartTextContentConverter : IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
@@ -12,7 +12,7 @@ namespace MCCS.Converters.TestStarting
             {
                 return isStartedTest ? Application.Current.FindResource("StopTest") : Application.Current.FindResource("StartTest");
             }
-            return "开始测试";
+            return Application.Current.FindResource("StartTest");
         }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

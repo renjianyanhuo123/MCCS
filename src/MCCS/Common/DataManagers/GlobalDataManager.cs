@@ -1,5 +1,5 @@
-﻿using MCCS.Common.DataManagers.Devices;
-using MCCS.Common.DataManagers.Methods;
+﻿using MCCS.Common.DataManagers.CurrentTest;
+using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
@@ -24,24 +24,27 @@ namespace MCCS.Common.DataManagers
         /// <summary>
         /// 控制器 核心
         /// </summary>
-        public List<ControllerDevice>? ControllerInfos { get; private set; } 
+        public List<ControllerDevice>? ControllerInfos { get; private set; }  
         /// <summary>
-        /// 当前编辑的方法信息
+        /// 当前正在进行的试验
         /// </summary>
-        public MethodContentItemModel? MethodInfo { get; private set; } 
+        public CurrentTestInfo CurrentTestInfo { get; private set; } = new();
+
         /// <summary>
         /// 当前使用的3D模型集合
         /// </summary>
-        public List<Model3DMainInfo>? Model3Ds { get; private set; }
+        public List<Model3DMainInfo>? Model3Ds { get; private set; } 
+
         public void SetValue<T>(T value) where T : class
         {
             switch (value)
             {
                 case StationSiteInfo stationSiteInfo:
                     StationSiteInfo = stationSiteInfo;
-                    break;
-                case MethodContentItemModel methodContentItemModel:
-                    MethodInfo = methodContentItemModel;
+                    break; 
+                case CurrentTestInfo currentTestInfo:
+                    CurrentTestInfo = null;
+                    CurrentTestInfo = currentTestInfo;
                     break;
                 case List<BaseDevice> devices:
                     Devices = devices;

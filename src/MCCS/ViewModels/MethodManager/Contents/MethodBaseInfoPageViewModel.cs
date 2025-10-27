@@ -16,7 +16,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
             IMethodRepository methodRepository) : base(eventAggregator)
         {
             _methodRepository = methodRepository;
-            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
+            LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -32,14 +32,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         public string Name
         {
             get => _name;
-            set
-            {
-                if (SetProperty(ref _name, value))
-                {
-                    if (GlobalDataManager.Instance.MethodInfo?.MethodBaseInfo == null) return;
-                    GlobalDataManager.Instance.MethodInfo.MethodBaseInfo.Name = _name;
-                }
-            }
+            set => SetProperty(ref _name, value);
         }
 
         /// <summary>
@@ -68,14 +61,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         public string Standard
         {
             get => _standard;
-            set
-            {
-                if (SetProperty(ref _standard, value))
-                {
-                    if (GlobalDataManager.Instance.MethodInfo?.MethodBaseInfo == null) return;
-                    GlobalDataManager.Instance.MethodInfo.MethodBaseInfo.Standard = _standard;
-                }
-            }
+            set => SetProperty(ref _standard, value);
         }
 
         private string _code;
@@ -89,33 +75,25 @@ namespace MCCS.ViewModels.MethodManager.Contents
         public string Remark
         {
             get => _remark;
-            set
-            {
-                if (SetProperty(ref _remark, value))
-                {
-                    if (GlobalDataManager.Instance.MethodInfo?.MethodBaseInfo == null) return;
-                    GlobalDataManager.Instance.MethodInfo.MethodBaseInfo.Remark = _remark;
-                }
-            }
+            set => SetProperty(ref _remark, value);
         }
         #endregion
 
         #region Command 
-        public DelegateCommand LoadCommand { get; }
+        public AsyncDelegateCommand LoadCommand { get; }
         #endregion
 
         #region Private Method
-        private void ExecuteLoadCommand()
+        private async Task ExecuteLoadCommand()
         {
             if (_methodId == -1) throw new ArgumentNullException("No MethodId!");
-            var methodInfo = GlobalDataManager.Instance.MethodInfo;
-            if (methodInfo?.MethodBaseInfo == null) return;
-            Name = methodInfo.MethodBaseInfo.Name;
-            Code = methodInfo.MethodBaseInfo.Code;
-            MethodType = methodInfo.MethodBaseInfo.MethodType;
-            TestType = methodInfo.MethodBaseInfo.TestType;
-            Standard = methodInfo.MethodBaseInfo.Standard;
-            Remark = methodInfo.MethodBaseInfo.Remark;
+            var methodInfo = await _methodRepository.GetMethodAsync(_methodId);
+            Name = methodInfo.Name;
+            Code = methodInfo.Code;
+            MethodType = methodInfo.MethodType;
+            TestType = methodInfo.TestType;
+            Standard = methodInfo.Standard;
+            Remark = methodInfo.Remark ?? "";
         }
         #endregion
 

@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
@@ -84,7 +85,20 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 #endif
                 return false;
             }
-        } 
+        }
+
+        #region Control Method
+        /// <summary>
+        /// 开始试验
+        /// </summary>
+        public void OperationTestStart(TestState testState)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return;
+            POPNetCtrl.NetCtrl01_Set_TestStartState(base._deviceHandle, (byte)testState);
+        }
+
+        #endregion
+
         #region Private Method
         private EventLoopScheduler CreateHighPriorityScheduler()
         {
@@ -124,8 +138,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         {
             // 精确计算下次采样间隔
             return TimeSpan.FromTicks(Stopwatch.Frequency / _sampleRate);
-        }
-
+        } 
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private DataPoint AcquireReading()

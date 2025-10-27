@@ -10,15 +10,19 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
     {
         public const string Tag = "RightMenuMainPage";
         private long _deviceId = -1;
+        private string _modelId = string.Empty;
 
+        private readonly IEventAggregator _eventAggregator;
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            OpenValveCommand = new DelegateCommand(ExecuteOpenValveCommand);
+            _eventAggregator = eventAggregator; 
+            OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
             eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>()
                 .Subscribe(param =>
                 {
                     _deviceId = param.DeviceId;
+                    _modelId = param.ModelId;
                     var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(c => c.Id == param.DeviceId);
                     if (device is { Type: DeviceTypeEnum.Actuator } and ActuatorDevice actuatorDevice)
                     {
@@ -36,22 +40,34 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         }
         #endregion
 
-        #region Command 
-        public DelegateCommand OpenValveCommand { get; }
+        #region Command  
+        public DelegateCommand<string> OperationValveCommand { get; } 
         #endregion
 
         #region Private Method
-        private void ExecuteOpenValveCommand()
+
+        private void ExecuteOperationValveCommand(string obj)
         {
-            if (_deviceId == -1) return;
+            if (_deviceId == -1 || string.IsNullOrEmpty(_modelId)) return;
+            var success = bool.TryParse(obj, out var isOpen);
+            if (!success) return;
             var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(s => s.Id == _deviceId);
-            if (device is ActuatorDevice actuatorDevice)
+            if (device is not ActuatorDevice actuatorDevice) return;
+            if (isOpen)
             {
                 actuatorDevice.OpenValve();
-                IsOpen = true;
             }
-        }
-
+            else
+            {
+                actuatorDevice.CloseValve();
+            }
+            IsOpen = isOpen;
+            _eventAggregator.GetEvent<OperationValveEvent>().Publish(new OperationValveEventParam
+            {
+                ModelId = _modelId,
+                IsOpen = isOpen
+            });
+        }  
         #endregion
     }
 }

@@ -5,9 +5,10 @@ using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.Services;
 using MCCS.Common;
 using MCCS.Common.DataManagers;
+using MCCS.Common.DataManagers.Devices;
+using MCCS.Core.Models.Model3D;
 using MCCS.Core.Models.StationSites;
 using MCCS.Core.Repositories;
-using MCCS.Events.ControlCommand;
 using MCCS.Events.Controllers;
 using MCCS.Events.Tests;
 using MCCS.Models;
@@ -23,19 +24,21 @@ using Serilog;
 using SharpDX;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
+using MCCS.Common.DataManagers.CurrentTest;
+using MCCS.Common.DataManagers.StationSites;
+using MCCS.Components.GlobalNotification.Models;
+using MCCS.Infrastructure.TestModels;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;
 using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
 using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
+using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -43,9 +46,7 @@ namespace MCCS.ViewModels.Pages
     {
         public const string Tag = "TestStartPage";
         
-        #region private field 
-        private bool _isLoading = true;
-        private bool _isStartedTest = false; // 是否开始试验
+        #region private field  
         private string _loadingMessage = ""; 
 
         private Model3DViewModel? _lastHoveredModel = null;
@@ -53,16 +54,14 @@ namespace MCCS.ViewModels.Pages
 
         private Camera _camera;
         private IEffectsManager _effectsManager;
-        private readonly IModel3DLoaderService _model3DLoaderService;
-        private readonly IRegionManager _regionManager;
-        private readonly IContainerProvider _containerProvider;
-        private readonly ICurveAggregateRepository _curveAggregateRepository;
-        private readonly IModel3DDataRepository _model3DDataRepository;
-        private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
-        private readonly IControllerService _controllerService; 
+        private readonly IModel3DLoaderService _model3DLoaderService; 
+        private readonly IModel3DDataRepository _model3DDataRepository; 
+        private readonly IControllerService _controllerService;
+        private readonly INotificationService _notificationService;
         private IDisposable? _subscribeDispose;
         // 存储所有的广告牌引用,方便后期快速更新
         private readonly Dictionary<long, TextInfoExt> _textInfoDic = [];
+        private readonly Dictionary<string, TextInfoExt> _modelTextInfoDic = [];
 
         private CancellationTokenSource? _loadingCancellation;
         private ImportProgressEventArgs _loadingProgress = new(); 
@@ -82,6 +81,7 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<object> Model3DMouseMoveCommand { get; }
         public DelegateCommand ClearSelectionCommand { get; }
         public DelegateCommand StartTestCommand { get; }
+        public DelegateCommand PauseTestCommand { get; }
         public DelegateCommand LoadCommand { get; }
         public DelegateCommand TestModelMoveCommand { get; }
         public DelegateCommand<MouseDown3DEventArgs> Model3DRightMouseDownCommand { get; }
@@ -93,32 +93,27 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand ShowCurveCommand { get; }
         #endregion
 
-        public TestStartingPageViewModel(
-            IContainerProvider containerProvider,
-            IRegionManager regionManager, 
+        public TestStartingPageViewModel( 
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
             IControllerService controllerService,
             IModel3DDataRepository model3DDataRepository,
-            ICurveAggregateRepository curveAggregateRepository,
-            IStationSiteAggregateRepository stationSiteAggregateRepository,
+            INotificationService notificationService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds");
-            _containerProvider = containerProvider; 
+            // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds"); 
             _model3DLoaderService = model3DLoaderService;
             _controllerService = controllerService;
-            _model3DDataRepository = model3DDataRepository;
-            _curveAggregateRepository = curveAggregateRepository;
-            _stationSiteAggregateRepository = stationSiteAggregateRepository;
+            _model3DDataRepository = model3DDataRepository; 
             _effectsManager = effectsManager;
-            _regionManager = regionManager;
+            _notificationService = notificationService;
             LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
             Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
             Model3DMouseMoveCommand = new DelegateCommand<object>(OnModel3DMouseMove);
             ClearSelectionCommand = new DelegateCommand(ClearSelection);
             StartTestCommand = new DelegateCommand(ExecuteStartTestCommand);
+            PauseTestCommand = new DelegateCommand(ExecutePauseTestCommand);
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             TestModelMoveCommand = new DelegateCommand(ExecuteTestModelMoveCommand);
             Model3DRightMouseDownCommand = new DelegateCommand<MouseDown3DEventArgs>(ExecuteModel3DRightMouseDownCommand);
@@ -138,7 +133,8 @@ namespace MCCS.ViewModels.Pages
                 model.CancelModelMove.Cancel();
                 model.CancelModelMove.Dispose();
                 model.CancelModelMove = new CancellationTokenSource();
-            }); 
+            });
+            _eventAggregator.GetEvent<OperationValveEvent>().Subscribe(OnOperationValveEvent);
         }
 
         #region Property
@@ -160,10 +156,24 @@ namespace MCCS.ViewModels.Pages
         /// 曲线数据集合
         /// </summary>
         public ObservableCollection<CurveShowModel> CurveModels { get; set; } = [];
+
+        /// <summary>
+        /// 是否开始试验
+        /// </summary>
+        private bool _isStartedTeste = false; 
         public bool IsStartedTest
         {
-            get => _isStartedTest;
-            set => SetProperty(ref _isStartedTest, value);
+            get => _isStartedTeste;
+            set => SetProperty(ref _isStartedTeste, value);
+        }
+        /// <summary>
+        /// 是否暂停
+        /// </summary>
+        private bool _isPaused = false; 
+        public bool IsPaused
+        {
+            get => _isPaused;
+            set => SetProperty(ref _isPaused, value);
         }
 
         public Camera Camera
@@ -224,8 +234,9 @@ namespace MCCS.ViewModels.Pages
         {
             get => _loadingMessage;
             set => SetProperty(ref _loadingMessage, value);
-        } 
+        }
 
+        private bool _isLoading = true;
         public bool IsLoading
         {
             get => _isLoading;
@@ -320,21 +331,28 @@ namespace MCCS.ViewModels.Pages
                         Scale = billboardInfo.Scale,
                         Size = billboardInfo.FontSize
                     };
-                    var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.ControlChannelId);
-                    if (channelInfo != null)
+                    if (billboardInfo.BillboardType == BillboardTypeEnum.DataShow)
                     {
-                        var signalType = channelInfo.ChannelType switch
+                        var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.ControlChannelId);
+                        if (channelInfo != null)
                         {
-                            ChannelTypeEnum.Position => SignalTypeEnum.Position,
-                            ChannelTypeEnum.Force => SignalTypeEnum.Force,
-                            _ => SignalTypeEnum.Position
-                        };
-                        // 默认只寻找第一个采集信号作展示
-                        var signal = channelInfo.BindSignals.FirstOrDefault(s => s.ControlChannelSignalType == signalType);
-                        if (signal != null)
-                        {
-                            _textInfoDic.Add(signal.Id, textInfo);
+                            var signalType = channelInfo.ChannelType switch
+                            {
+                                ChannelTypeEnum.Position => SignalTypeEnum.Position,
+                                ChannelTypeEnum.Force => SignalTypeEnum.Force,
+                                _ => SignalTypeEnum.Position
+                            };
+                            // 默认只寻找第一个采集信号作展示
+                            var signal = channelInfo.BindSignals.FirstOrDefault(s => s.ControlChannelSignalType == signalType);
+                            if (signal != null)
+                            {
+                                _textInfoDic.Add(signal.Id, textInfo);
+                            }
                         }
+                    }
+                    else
+                    {
+                        _modelTextInfoDic.Add(billboardInfo.ModelFileId, textInfo);
                     }
                     CollectionDataLabels.TextInfo.Add(textInfo); 
                 }
@@ -378,7 +396,41 @@ namespace MCCS.ViewModels.Pages
 
         private void ExecuteStartTestCommand()
         {
-            IsStartedTest = !IsStartedTest;
+            if (IsStartedTest)
+            { 
+                if ((DateTimeOffset.Now - GlobalDataManager.Instance.CurrentTestInfo.StartTime).Seconds < 3)
+                {
+                    _notificationService.Show("提示", "实验时间小于3S,请稍后......");
+                    return;
+                }
+                // 终止当前实验时,将会重置整个实验
+                if (GlobalDataManager.Instance.CurrentTestInfo.Stop())
+                {
+                    GlobalDataManager.Instance.SetValue(new CurrentTestInfo());
+                    _controllerService.StartAllControllers();
+                    IsStartedTest = false;
+                }
+            }
+            else
+            { 
+                if (GlobalDataManager.Instance.CurrentTestInfo.Start())
+                {
+                    IsStartedTest = true;
+                }
+            } 
+        }
+
+        private void ExecutePauseTestCommand()
+        {
+            if (IsPaused)
+            {
+                GlobalDataManager.Instance.CurrentTestInfo?.Continue();
+            }
+            else
+            {
+                GlobalDataManager.Instance.CurrentTestInfo?.Pause();
+            }
+            IsPaused = !IsPaused;
         }
 
         /// <summary>
@@ -413,7 +465,7 @@ namespace MCCS.ViewModels.Pages
             if (multipleControllerMainPageViewModel == null) return;
             foreach (var item in multipleControllerMainPageViewModel.Children)
             {
-                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerService, _eventAggregator));
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
@@ -494,6 +546,16 @@ namespace MCCS.ViewModels.Pages
                     OnDeviceDataReceived(packet.Data);
                 });
              
+        }
+
+        private void OnOperationValveEvent(OperationValveEventParam param)
+        {
+            var success = _modelTextInfoDic.TryGetValue(param.ModelId, out var textInfo);
+            if (success)
+            {
+                textInfo.Text = param.IsOpen ? "ON" : "OFF";
+                IsShowContextMenu = false;
+            }
         }
 
         /// <summary>
@@ -650,8 +712,7 @@ namespace MCCS.ViewModels.Pages
                 Keyboard.IsKeyDown(Key.LeftAlt) ||
                 Keyboard.IsKeyDown(Key.RightAlt)) return;
             if (args.OriginalInputEventArgs is MouseButtonEventArgs mouseArgs &&
-                mouseArgs.LeftButton != MouseButtonState.Pressed) return;
-            if (!IsStartedTest) return;
+                mouseArgs.LeftButton != MouseButtonState.Pressed) return; 
             // 获取点击的模型
             var modelId = args.HitTestResult != null ? FindViewModel(args.HitTestResult.ModelHit) : null; 
             // 如果点击到了模型
@@ -659,6 +720,11 @@ namespace MCCS.ViewModels.Pages
             if (clickedModel is not { IsSelectable: true }) return;
             // 如果已经参与控制则退出
             if (clickedModel.IsSelected) return;
+            if (!IsStartedTest)
+            {
+                _notificationService.Show("提示", "试验未开始,请先开始试验!");
+                return;
+            }
             // 鼠标左键 + Ctrl 键单独处理
             if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
                 Keyboard.IsKeyDown(Key.RightCtrl))
@@ -666,12 +732,23 @@ namespace MCCS.ViewModels.Pages
                 ExecuteLeftMouseCtrlDownCommand(clickedModel);
                 return;
             }
+            // 如果阀门关闭则退出
+            if (GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.Id == clickedModel.Model3DData.Id)
+                    ?.MappingDevice is ActuatorDevice
+                {
+                    ValveStatus: ValveStatusEnum.Closed
+                })
+            {
+                _notificationService.Show("提示", "请先右键单击打开该作动器的阀门");
+                return;
+            }
+
             // 切换当前模型的选中状态
             clickedModel.IsSelected = true;
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
                 && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentModelId == clickedModel.Model3DData.Id)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerService, _eventAggregator));
                 IsShowController = Controllers.Count > 0;
             }
         }
@@ -744,7 +821,8 @@ namespace MCCS.ViewModels.Pages
             {
                 _eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>().Publish(new NotificationRightMenuValveStatusEventParam
                 {
-                    DeviceId = mappingDevice.Id
+                    DeviceId = mappingDevice.Id,
+                    ModelId = _clearOperationModel.ModelId
                 });
                 IsShowContextMenu = true;
             } 
@@ -861,6 +939,6 @@ namespace MCCS.ViewModels.Pages
             return null;
         } 
         #endregion
-
+         
     }
 }

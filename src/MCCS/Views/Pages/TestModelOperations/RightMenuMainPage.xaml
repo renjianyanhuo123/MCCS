@@ -87,28 +87,35 @@
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="MouseLeftButtonDown">
                             <b:InvokeCommandAction 
-                                Command="{Binding OpenValveCommand}" />
+                                Command="{Binding OperationValveCommand}"
+                                CommandParameter="True"/>
                         </b:EventTrigger>
                     </b:Interaction.Triggers>
                     <TextBlock Margin="12,0"  Text="打开阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
                 <!-- 关闭阀门 -->
-                <Border x:Name="CloseValveItem" Style="{StaticResource CustomMenuItemStyle}" Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}" Tag="关闭阀门">
+                <Border x:Name="CloseValveItem" Style="{StaticResource CustomMenuItemStyle}" 
+                        Visibility="{Binding IsOpen, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                        Tag="关闭阀门">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonDown">
+                            <b:InvokeCommandAction 
+                                Command="{Binding OperationValveCommand}"
+                                CommandParameter="False"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
                     <TextBlock  Margin="12,0"  Text="关闭阀门" VerticalAlignment="Center" FontSize="14" Foreground="#333" />
                 </Border>
-
-                <!-- 缩小 -->
-                <Border x:Name="ZoomOutItem" Style="{StaticResource CustomMenuItemStyle}"   Tag="缩小">
-                    <Grid Margin="12,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="缩小" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
-                        <TextBlock Grid.Column="1" Text="Alt+(-)" VerticalAlignment="Center" FontSize="12" Foreground="#999" Margin="24,0,0,0"/>
-                    </Grid>
+                <!-- 分割线 -->
+                <Rectangle Style="{StaticResource MenuSeparatorStyle}"/>
+                <!-- 力清零 -->
+                <Border x:Name="ForceClearZero" Style="{StaticResource CustomMenuItemStyle}"   Tag="力清零">
+                    <TextBlock Margin="12,0" Text="力清零" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
-
+                <!-- 位移清零 -->
+                <Border x:Name="PositionClearZero" Style="{StaticResource CustomMenuItemStyle}"   Tag="位移清零">
+                    <TextBlock Margin="12,0" Text="位移清零" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
+                </Border>
                 <!-- 分割线 -->
                 <Rectangle Style="{StaticResource MenuSeparatorStyle}"/>
 

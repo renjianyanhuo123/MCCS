@@ -80,8 +80,7 @@ namespace MCCS.ViewModels.MethodManager
             {
                 var temp = await FileHelper.ReadJsonAsync<MethodContentItemModel>(methodBaseInfo.FilePath);
                 if (temp == null) throw new ArgumentNullException("methodInfo is null"); 
-            }
-            GlobalDataManager.Instance.SetValue(methodInfo);
+            } 
             SelectedMenuItem = Menus.FirstOrDefault(c => c.Id == 1); 
         }
 

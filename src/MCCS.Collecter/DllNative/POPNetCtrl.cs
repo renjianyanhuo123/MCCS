@@ -1,5 +1,4 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MCCS.Collecter.DllNative

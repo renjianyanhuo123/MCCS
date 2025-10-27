@@ -21,7 +21,7 @@
     
     <!-- TestStarting Page -->
     <system:String x:Key="StartTest">开始试验</system:String>
-    <system:String x:Key="StopTest">停止试验</system:String>
+    <system:String x:Key="StopTest">终止试验</system:String>
     
     <!-- Controller Main Page -->
     <system:String x:Key="ControllerStep1">第一步: 控制通道</system:String>

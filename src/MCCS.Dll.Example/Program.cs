@@ -342,7 +342,7 @@ namespace POPNetCtrlConsoleTest
                 int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(deviceHandle, ctrlState);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
-                    string[] modes = { "开环", "静态", "动态" };
+                    string[] modes = ["开环", "静态", "动态"];
                     Console.WriteLine($"   ✓ 控制方式设置为: {modes[ctrlState]}");
                 }
                 else

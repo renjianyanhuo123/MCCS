@@ -1,4 +1,5 @@
-﻿using MCCS.Core.Devices.Commands; 
+﻿using MCCS.Collecter.Services;
+using MCCS.Core.Devices.Commands; 
 using MCCS.Events.Controllers;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
@@ -10,6 +11,7 @@ namespace MCCS.ViewModels.Pages.Controllers
     {
         public const string Tag = "ControllerMainPage";  
         private readonly IEventAggregator _eventAggregator;
+        private readonly IControllerService _controllerService;
 
         private bool _isShowController = false;
         private bool _isParticipateControl = false; 
@@ -24,14 +26,17 @@ namespace MCCS.ViewModels.Pages.Controllers
         private CommandExecuteStatusEnum _currentCommandStatus;
 
         public ControllerMainPageViewModel(
-            IEventAggregator eventAggregator )
+            IControllerService controllerService,
+            IEventAggregator eventAggregator)
         {
+            _controllerService = controllerService;
             _eventAggregator = eventAggregator;  
         }
 
         public ControllerMainPageViewModel(
-            long modelId, 
-            IEventAggregator eventAggregator) : this(eventAggregator)
+            long modelId,
+            IControllerService controllerService,
+            IEventAggregator eventAggregator) : this(controllerService, eventAggregator)
         {
             IsParticipateControl = true;
             CurrentModelId = modelId;

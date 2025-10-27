@@ -11,8 +11,8 @@ namespace MCCS.Converters.TestStarting
             if (value is bool isStartedTest)
             {
                 return isStartedTest 
-                    ? Application.Current.FindResource("MaterialDesignRaisedLightButton") 
-                    : Application.Current.FindResource("MaterialDesignRaisedSecondaryDarkButton");
+                    ? Application.Current.FindResource("MaterialDesignFloatingActionMiniLightButton") 
+                    : Application.Current.FindResource("MaterialDesignFloatingActionMiniSecondaryButton");
             }
             return null;
         }

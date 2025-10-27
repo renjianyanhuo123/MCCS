@@ -8,7 +8,7 @@ namespace MCCS.Common.DataManagers.Devices
     /// </summary>
     public class ActuatorDevice : BaseDevice
     {
-        public ActuatorDevice(long id, string name) : base(id, name, DeviceTypeEnum.Actuator)
+        public ActuatorDevice(long id, string name, long? parentDevice) : base(id, name, DeviceTypeEnum.Actuator, parentDevice)
         {
             ValveStatus = ValveStatusEnum.Closed; 
         }
