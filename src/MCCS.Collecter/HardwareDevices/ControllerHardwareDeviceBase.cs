@@ -14,7 +14,6 @@ namespace MCCS.Collecter.HardwareDevices
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected readonly ReplaySubject<DataPoint> _dataSubject;
         protected readonly Subject<CommandStatusChangeEvent> _commandStatusSubject;
-        protected readonly ConcurrentDictionary<long, CommandExecuteStatusEnum> _deviceCommandStatuses = new();
         protected IDisposable? _statusSubscription;
         // 是否正在采集数据
         protected bool _isRunning = false;
@@ -36,12 +35,9 @@ namespace MCCS.Collecter.HardwareDevices
         /// </summary>
         public SystemControlState ControlState { get; protected set; }
         /// <summary>
-        /// 获取指定设备的命令执行状态
+        /// 获取指定设备的命令执行状态（由子类实现）
         /// </summary>
-        public CommandExecuteStatusEnum GetDeviceCommandStatus(long deviceId)
-        {
-            return _deviceCommandStatuses.GetValueOrDefault(deviceId, CommandExecuteStatusEnum.NoExecute);
-        }
+        public abstract CommandExecuteStatusEnum GetDeviceCommandStatus(long deviceId);
         /// <summary>
         /// 命令状态变化流（包含设备ID信息）
         /// </summary>
@@ -185,7 +181,6 @@ namespace MCCS.Collecter.HardwareDevices
             _statusSubject.Dispose();
             _commandStatusSubject?.OnCompleted();
             _commandStatusSubject?.Dispose();
-            _deviceCommandStatuses.Clear();
         }
     }
 }

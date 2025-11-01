@@ -161,6 +161,18 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
+        /// <summary>
+        /// 获取指定设备的命令执行状态
+        /// </summary>
+        public override Core.Devices.Commands.CommandExecuteStatusEnum GetDeviceCommandStatus(long deviceId)
+        {
+            if (_deviceContexts.TryGetValue(deviceId, out var context))
+            {
+                return context.CurrentStatus;
+            }
+            return Core.Devices.Commands.CommandExecuteStatusEnum.NoExecute;
+        }
+
         public override bool ManualControl(long deviceId, float outValue)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
@@ -174,7 +186,10 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             };
 
             _activeDeviceId = deviceId;
-            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext { DeviceId = deviceId });
+            context.ControlMode = SystemControlState.OpenLoop;
+            UpdateDeviceCommandStatus(deviceId, context, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
             PositionChangeToTarget(deviceId, speed, speed > 0 ? PositionMax : PositionMin);
             return true;
         }
@@ -193,7 +208,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _activeDeviceId = deviceId;
 
             // 更新设备状态为执行中
-            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            UpdateDeviceCommandStatus(deviceId, context, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
 
             switch (controlParams.StaticLoadControl)
             {
@@ -230,7 +245,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _activeDeviceId = deviceId;
 
             // 更新设备状态为执行中
-            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            UpdateDeviceCommandStatus(deviceId, context, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
 
             Task.Run(() =>
             {
@@ -239,8 +254,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 if (_deviceContexts.TryGetValue(deviceId, out var ctx))
                 {
                     ctx.IsExecuting = false;
+                    UpdateDeviceCommandStatus(deviceId, ctx, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
                 }
-                UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
             });
             return true;
         }
@@ -248,9 +263,9 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 更新设备命令状态并发送事件
         /// </summary>
-        private void UpdateDeviceCommandStatus(long deviceId, Core.Devices.Commands.CommandExecuteStatusEnum status)
+        private void UpdateDeviceCommandStatus(long deviceId, DeviceCommandContext context, Core.Devices.Commands.CommandExecuteStatusEnum status)
         {
-            _deviceCommandStatuses[deviceId] = status;
+            context.CurrentStatus = status;  // 更新 Context 中的状态
             _commandStatusSubject.OnNext(new Core.Devices.Commands.CommandStatusChangeEvent
             {
                 DeviceId = deviceId,
@@ -278,7 +293,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             context.ControlMode == SystemControlState.Static)
                         {
                             context.IsExecuting = false;
-                            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
+                            UpdateDeviceCommandStatus(deviceId, context, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
                         }
                         break;
                     }
@@ -310,7 +325,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             context.ControlMode == SystemControlState.Static)
                         {
                             context.IsExecuting = false;
-                            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
+                            UpdateDeviceCommandStatus(deviceId, context, Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted);
                         }
                         break;
                     }
