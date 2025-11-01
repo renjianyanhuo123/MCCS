@@ -11,13 +11,19 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase
-    { 
+    {
         private readonly IDisposable _acquisitionSubscription;
         private readonly EventLoopScheduler _highPriorityScheduler;
         private readonly int _sampleRate;
         private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
         private IntPtr _singleBuffer = IntPtr.Zero;
-        private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo)); 
+        private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
+
+        // 命令执行相关参数
+        private int _targetCycleCount = 0;  // 动态控制目标循环次数
+        private float _targetValue = 0f;    // 静态控制目标值
+        private float _positionTolerance = 0.5f; // 位置容差（默认0.5）
+        private bool _isCommandExecuting = false; // 是否有命令正在执行 
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
@@ -133,6 +139,16 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 ControlState = SystemControlState.Static;
             }
             var result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)controlParams.StaticLoadControl, controlParams.Speed, controlParams.TargetValue);
+
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+                // 设置静态控制参数并启动状态监控
+                _targetValue = controlParams.TargetValue;
+                _isCommandExecuting = true;
+                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                _commandStatusSubject.OnNext(CurrentCommandStatus);
+            }
+
             return result == AddressContanst.OP_SUCCESSFUL;
         }
         
@@ -145,17 +161,27 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
                 ControlState = SystemControlState.Dynamic;
             }
-            var result = POPNetCtrl.NetCtrl01_Osci_SetWaveInfo((int)DeviceId, 
-                controlParams.MeanValue, 
-                controlParams.Amplitude, 
-                controlParams.Frequency, 
-                (byte)controlParams.WaveType, 
-                (byte)controlParams.ControlMode, 
+            var result = POPNetCtrl.NetCtrl01_Osci_SetWaveInfo((int)DeviceId,
+                controlParams.MeanValue,
+                controlParams.Amplitude,
+                controlParams.Frequency,
+                (byte)controlParams.WaveType,
+                (byte)controlParams.ControlMode,
                 controlParams.CompensateAmplitude,
                 controlParams.CompensationPhase,
                 controlParams.CycleCount,
-                controlParams.IsAdjustedMedian ? 0: 1 
+                controlParams.IsAdjustedMedian ? 0: 1
                 );
+
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+                // 设置动态控制参数并启动状态监控
+                _targetCycleCount = controlParams.CycleCount;
+                _isCommandExecuting = true;
+                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                _commandStatusSubject.OnNext(CurrentCommandStatus);
+            }
+
             return result == AddressContanst.OP_SUCCESSFUL;
         }
 
@@ -207,7 +233,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         {
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
-                return CreateBadDataPoint(); 
+                return CreateBadDataPoint();
             if(_singleBuffer != IntPtr.Zero)
                 _singleBuffer = BufferPool.Rent();
             var results = new List<BatchCollectItemModel>((int)count);
@@ -215,8 +241,15 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
                 if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
                     return CreateBadDataPoint();
-                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer); 
-                results.Add(StructDataToCollectModel(tempValue));
+                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer);
+                var collectItem = StructDataToCollectModel(tempValue);
+                results.Add(collectItem);
+
+                // 判断命令执行状态（使用最后一个数据点）
+                if (_isCommandExecuting && i == count - 1)
+                {
+                    UpdateCommandStatus(collectItem);
+                }
             }
 
             return new DataPoint
@@ -234,6 +267,81 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             Timestamp = Stopwatch.GetTimestamp(),
             DataQuality = DataQuality.Bad
         };
+
+        /// <summary>
+        /// 更新命令执行状态
+        /// </summary>
+        private void UpdateCommandStatus(BatchCollectItemModel data)
+        {
+            var newStatus = DetermineCommandStatus(data);
+            if (newStatus != CurrentCommandStatus)
+            {
+                CurrentCommandStatus = newStatus;
+                _commandStatusSubject.OnNext(newStatus);
+
+                // 如果命令执行完成，重置标志
+                if (newStatus == Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted)
+                {
+                    _isCommandExecuting = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 判断命令执行状态
+        /// </summary>
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
+        {
+            // 检查是否有保护错误
+            if (data.Net_PrtErrState != 0)
+            {
+                return Core.Devices.Commands.CommandExecuteStatusEnum.Stoping;
+            }
+
+            // 根据当前控制模式判断状态
+            switch (ControlState)
+            {
+                case SystemControlState.Static:
+                    return DetermineStaticCommandStatus(data);
+                case SystemControlState.Dynamic:
+                    return DetermineDynamicCommandStatus(data);
+                case SystemControlState.OpenLoop:
+                    // 开环控制（手动控制）没有执行完成的概念
+                    return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                default:
+                    return Core.Devices.Commands.CommandExecuteStatusEnum.NoExecute;
+            }
+        }
+
+        /// <summary>
+        /// 判断静态控制命令状态
+        /// </summary>
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
+        {
+            // 静态控制：检查位置误差是否在容差范围内
+            // Net_PosE 是位置误差，当误差接近0时表示到达目标位置
+            if (Math.Abs(data.Net_PosE) <= _positionTolerance)
+            {
+                return Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+            }
+
+            return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+        }
+
+        /// <summary>
+        /// 判断动态控制（疲劳控制）命令状态
+        /// </summary>
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
+        {
+            // 动态控制：检查循环次数是否达到目标
+            // Net_CycleCount 是当前循环计数
+            if (_targetCycleCount > 0 && data.Net_CycleCount >= _targetCycleCount)
+            {
+                return Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+            }
+
+            return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+        }
         #endregion
         public void CleanupResources()
         {

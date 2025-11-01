@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Core.Devices.Commands;
 
 namespace MCCS.Collecter.HardwareDevices
 {
@@ -12,6 +13,7 @@ namespace MCCS.Collecter.HardwareDevices
         protected readonly ConcurrentDictionary<long, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected readonly ReplaySubject<DataPoint> _dataSubject;
+        protected readonly BehaviorSubject<CommandExecuteStatusEnum> _commandStatusSubject;
         protected IDisposable? _statusSubscription;
         // 是否正在采集数据
         protected bool _isRunning = false;
@@ -29,9 +31,17 @@ namespace MCCS.Collecter.HardwareDevices
         public string DeviceType { get; }
         public HardwareConnectionStatus Status { get; protected set; }
         /// <summary>
-        /// 控制器当前所处的控制状态 
+        /// 控制器当前所处的控制状态
         /// </summary>
         public SystemControlState ControlState { get; protected set; }
+        /// <summary>
+        /// 当前命令执行状态
+        /// </summary>
+        public CommandExecuteStatusEnum CurrentCommandStatus { get; protected set; }
+        /// <summary>
+        /// 命令状态变化流
+        /// </summary>
+        public IObservable<CommandExecuteStatusEnum> CommandStatusStream => _commandStatusSubject.AsObservable();
         public IObservable<DataPoint> DataStream { get; protected set; }
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
         // 不预先展开，而是提供展开后的Observable;单个的数据流
@@ -44,6 +54,8 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceType = configuration.DeviceType;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
             _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
+            _commandStatusSubject = new BehaviorSubject<CommandExecuteStatusEnum>(CommandExecuteStatusEnum.NoExecute);
+            CurrentCommandStatus = CommandExecuteStatusEnum.NoExecute;
             foreach (var item in configuration.Signals)
             {
                 AddSignal(item);
@@ -165,6 +177,8 @@ namespace MCCS.Collecter.HardwareDevices
             _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
             _statusSubject.Dispose();
+            _commandStatusSubject.OnCompleted();
+            _commandStatusSubject.Dispose();
         }
     }
 }
