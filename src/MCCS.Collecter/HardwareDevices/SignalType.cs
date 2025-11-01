@@ -1,5 +1,6 @@
 ﻿namespace MCCS.Collecter.HardwareDevices
 {
+
     public enum SignalType
     {
         AnalogInput,    // 模拟量输入 (AI)
