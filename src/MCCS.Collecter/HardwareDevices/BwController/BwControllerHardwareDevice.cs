@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
@@ -145,7 +146,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 // 设置静态控制参数并启动状态监控
                 _targetValue = controlParams.TargetValue;
                 _isCommandExecuting = true;
-                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             }
 
@@ -178,7 +179,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 // 设置动态控制参数并启动状态监控
                 _targetCycleCount = controlParams.CycleCount;
                 _isCommandExecuting = true;
-                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             }
 
@@ -280,7 +281,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 _commandStatusSubject.OnNext(newStatus);
 
                 // 如果命令执行完成，重置标志
-                if (newStatus == Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted)
+                if (newStatus == CommandExecuteStatusEnum.ExecutionCompleted)
                 {
                     _isCommandExecuting = false;
                 }
@@ -290,12 +291,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断命令执行状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
+        private CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
         {
             // 检查是否有保护错误
             if (data.Net_PrtErrState != 0)
             {
-                return Core.Devices.Commands.CommandExecuteStatusEnum.Stoping;
+                return CommandExecuteStatusEnum.Stoping;
             }
 
             // 根据当前控制模式判断状态
@@ -307,40 +308,40 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     return DetermineDynamicCommandStatus(data);
                 case SystemControlState.OpenLoop:
                     // 开环控制（手动控制）没有执行完成的概念
-                    return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                    return CommandExecuteStatusEnum.Executing;
                 default:
-                    return Core.Devices.Commands.CommandExecuteStatusEnum.NoExecute;
+                    return CommandExecuteStatusEnum.NoExecute;
             }
         }
 
         /// <summary>
         /// 判断静态控制命令状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
+        private CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
         {
             // 静态控制：检查位置误差是否在容差范围内
             // Net_PosE 是位置误差，当误差接近0时表示到达目标位置
             if (Math.Abs(data.Net_PosE) <= _positionTolerance)
             {
-                return Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                return CommandExecuteStatusEnum.ExecutionCompleted;
             }
 
-            return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            return CommandExecuteStatusEnum.Executing;
         }
 
         /// <summary>
         /// 判断动态控制（疲劳控制）命令状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
+        private CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
         {
             // 动态控制：检查循环次数是否达到目标
             // Net_CycleCount 是当前循环计数
             if (_targetCycleCount > 0 && data.Net_CycleCount >= _targetCycleCount)
             {
-                return Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                return CommandExecuteStatusEnum.ExecutionCompleted;
             }
 
-            return Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            return CommandExecuteStatusEnum.Executing;
         }
         #endregion
         public void CleanupResources()

@@ -1,6 +1,6 @@
-﻿using MCCS.Core.Devices.Commands;
-using MCCS.Events.Controllers;
+﻿using MCCS.Events.Controllers;
 using System.Collections.ObjectModel;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {

@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
-using MCCS.Core.Devices.Commands;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Collecter.HardwareDevices
 {

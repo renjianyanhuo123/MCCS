@@ -1,4 +1,4 @@
-﻿namespace MCCS.Core.Devices.Commands
+﻿namespace MCCS.Infrastructure.TestModels.Commands
 {
     public enum CommandTypeEnum:int
     {

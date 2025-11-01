@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
@@ -186,7 +187,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             // 设置静态控制参数并启动状态监控
             _targetValue = controlParams.TargetValue;
             _isCommandExecuting = true;
-            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             _commandStatusSubject.OnNext(CurrentCommandStatus);
 
             switch (controlParams.StaticLoadControl)
@@ -220,7 +221,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _targetCycleCount = controlParams.CycleCount;
             _currentCycleCount = 0;
             _isCommandExecuting = true;
-            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             _commandStatusSubject.OnNext(CurrentCommandStatus);
 
             Task.Run(() =>
@@ -228,7 +229,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
                 // 波形生成完成后标记为完成
                 _isCommandExecuting = false;
-                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             });
             return true;
@@ -251,7 +252,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                         if (_isCommandExecuting && ControlState == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
@@ -282,7 +283,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                         if (_isCommandExecuting && ControlState == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;

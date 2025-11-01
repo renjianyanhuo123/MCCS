@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
-using MCCS.Core.Devices.Commands;
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
@@ -9,6 +8,7 @@ using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 using MCCS.Components.GlobalNotification.Models;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.Controllers
