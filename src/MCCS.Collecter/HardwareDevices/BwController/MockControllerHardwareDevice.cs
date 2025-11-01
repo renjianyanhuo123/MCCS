@@ -12,6 +12,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private readonly IDisposable _acquisitionSubscription; 
         private readonly int _sampleRate;
         private static readonly Random _rand = new();
+
         // 目前一个控制器就控制一个作动器
         private float _force = 10.0f;
         private float _position = 50.0f;
