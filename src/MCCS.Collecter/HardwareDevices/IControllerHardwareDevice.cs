@@ -10,13 +10,15 @@ namespace MCCS.Collecter.HardwareDevices
         void StopDataAcquisition();
 
         /// <summary>
-        /// 当前命令执行状态
+        /// 获取指定设备的命令执行状态
         /// </summary>
-        CommandExecuteStatusEnum CurrentCommandStatus { get; }
+        /// <param name="deviceId">设备ID（通道ID）</param>
+        /// <returns>命令执行状态</returns>
+        CommandExecuteStatusEnum GetDeviceCommandStatus(long deviceId);
 
         /// <summary>
-        /// 命令状态变化流
+        /// 命令状态变化流（包含设备ID信息）
         /// </summary>
-        IObservable<CommandExecuteStatusEnum> CommandStatusStream { get; }
+        IObservable<CommandStatusChangeEvent> CommandStatusStream { get; }
     }
 }

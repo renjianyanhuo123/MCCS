@@ -90,7 +90,7 @@ namespace MCCS.Collecter.Services
         public bool ManualControl(long controllerId, long deviceId, float speed)
         {
             var controller = GetControllerInfo(controllerId);
-            return controller.ManualControl(speed);
+            return controller.ManualControl(deviceId, speed);
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace MCCS.Collecter.Services
         public bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam)
         {
             var controller = GetControllerInfo(controllerId);
-            return controller.StaticControl(staticControlParam);
+            return controller.StaticControl(deviceId, staticControlParam);
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace MCCS.Collecter.Services
         public bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam)
         {
             var controller = GetControllerInfo(controllerId);
-            return controller.DynamicControl(dynamicControlParam);
+            return controller.DynamicControl(deviceId, dynamicControlParam);
         }
 
         /// <summary>
