@@ -175,7 +175,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             };
 
             _activeDeviceId = deviceId;
-            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            UpdateDeviceCommandStatus(deviceId, CommandExecuteStatusEnum.Executing);
             PositionChangeToTarget(deviceId, speed, speed > 0 ? PositionMax : PositionMin);
             return true;
         }
@@ -194,7 +194,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _activeDeviceId = deviceId;
 
             // 更新设备状态为执行中
-            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            UpdateDeviceCommandStatus(deviceId,  CommandExecuteStatusEnum.Executing);
 
             switch (controlParams.StaticLoadControl)
             {
@@ -227,7 +227,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _targetCycleCount = controlParams.CycleCount;
             _currentCycleCount = 0;
             _isCommandExecuting = true;
-            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            CurrentCommandStatus =  CommandExecuteStatusEnum.Executing;
             _commandStatusSubject.OnNext(CurrentCommandStatus);
 
             Task.Run(() =>
@@ -235,7 +235,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 GenerateWaveform(deviceId, controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
                 // 波形生成完成后标记为完成
                 _isCommandExecuting = false;
-                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             });
             return true;
@@ -244,10 +244,10 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 更新设备命令状态并发送事件
         /// </summary>
-        private void UpdateDeviceCommandStatus(long deviceId, Core.Devices.Commands.CommandExecuteStatusEnum status)
+        private void UpdateDeviceCommandStatus(long deviceId, CommandExecuteStatusEnum status)
         {
             _deviceCommandStatuses[deviceId] = status;
-            _commandStatusSubject.OnNext(new Core.Devices.Commands.CommandStatusChangeEvent
+            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
             {
                 DeviceId = deviceId,
                 Status = status,
@@ -274,7 +274,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             context.ControlMode == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus =  CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
@@ -307,7 +307,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             context.ControlMode == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus =  CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;

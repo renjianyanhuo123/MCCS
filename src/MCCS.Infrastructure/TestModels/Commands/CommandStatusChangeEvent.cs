@@ -1,4 +1,4 @@
-namespace MCCS.Core.Devices.Commands
+namespace MCCS.Infrastructure.TestModels.Commands
 {
     /// <summary>
     /// 命令状态变化事件

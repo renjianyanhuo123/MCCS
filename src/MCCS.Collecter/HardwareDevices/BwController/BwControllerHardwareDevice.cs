@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using System.Collections.Concurrent;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
@@ -144,7 +145,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
                 _activeDeviceId = deviceId;
                 // 手动控制模式下，设置为执行中状态
-                UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+                UpdateDeviceCommandStatus(deviceId, CommandExecuteStatusEnum.Executing);
             }
 
             return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL;
@@ -171,7 +172,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 _activeDeviceId = deviceId;
 
                 // 更新设备状态为执行中
-                UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+                UpdateDeviceCommandStatus(deviceId,  CommandExecuteStatusEnum.Executing);
             }
 
             return result == AddressContanst.OP_SUCCESSFUL;
@@ -203,7 +204,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 // 设置动态控制参数并启动状态监控
                 _targetCycleCount = controlParams.CycleCount;
                 _isCommandExecuting = true;
-                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+                CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             }
 
@@ -305,14 +306,14 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 return;
 
             var newStatus = DetermineCommandStatus(deviceId, data, context);
-            var oldStatus = _deviceCommandStatuses.GetValueOrDefault(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.NoExecute);
+            var oldStatus = _deviceCommandStatuses.GetValueOrDefault(deviceId, CommandExecuteStatusEnum.NoExecute);
 
             if (newStatus != oldStatus)
             {
                 UpdateDeviceCommandStatus(deviceId, newStatus);
 
                 // 如果命令执行完成，重置标志
-                if (newStatus == Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted)
+                if (newStatus ==  CommandExecuteStatusEnum.ExecutionCompleted)
                 {
                     context.IsExecuting = false;
                 }
@@ -322,10 +323,10 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 更新设备命令状态并发送事件
         /// </summary>
-        private void UpdateDeviceCommandStatus(long deviceId, Core.Devices.Commands.CommandExecuteStatusEnum status)
+        private void UpdateDeviceCommandStatus(long deviceId, CommandExecuteStatusEnum status)
         {
             _deviceCommandStatuses[deviceId] = status;
-            _commandStatusSubject.OnNext(new Core.Devices.Commands.CommandStatusChangeEvent
+            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
             {
                 DeviceId = deviceId,
                 Status = status,
@@ -336,7 +337,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断命令执行状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
+        private  CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
         {
             // 检查是否有保护错误
             if (data.Net_PrtErrState != 0)
@@ -362,7 +363,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断静态控制命令状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
+        private  CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
         {
             // 静态控制：检查位置误差是否在容差范围内
             // Net_PosE 是位置误差，当误差接近0时表示到达目标位置
@@ -377,7 +378,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断动态控制（疲劳控制）命令状态
         /// </summary>
-        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
+        private CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
         {
             // 动态控制：检查循环次数是否达到目标
             // Net_CycleCount 是当前循环计数
