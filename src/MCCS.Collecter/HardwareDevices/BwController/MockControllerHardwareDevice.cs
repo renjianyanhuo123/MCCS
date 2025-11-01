@@ -9,7 +9,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase
     {
-        private readonly IDisposable _acquisitionSubscription; 
+        private readonly IDisposable _acquisitionSubscription;
         private readonly int _sampleRate;
         private static readonly Random _rand = new();
 
@@ -24,6 +24,13 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
         private const float PositionMin = -1000.0f;
         private const float PositionMax = 1000.0f;
+
+        // 命令执行相关参数
+        private int _targetCycleCount = 0;
+        private float _targetValue = 0f;
+        private float _positionTolerance = 0.5f;
+        private bool _isCommandExecuting = false;
+        private int _currentCycleCount = 0;
 
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         { 
@@ -175,6 +182,13 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
+
+            // 设置静态控制参数并启动状态监控
+            _targetValue = controlParams.TargetValue;
+            _isCommandExecuting = true;
+            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            _commandStatusSubject.OnNext(CurrentCommandStatus);
+
             switch (controlParams.StaticLoadControl)
             {
                 case StaticLoadControlEnum.CTRLMODE_LoadN:
@@ -193,7 +207,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     break;
                 default:
                     break;
-            } 
+            }
             return true;
         }
 
@@ -201,9 +215,21 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Dynamic;
+
+            // 设置动态控制参数并启动状态监控
+            _targetCycleCount = controlParams.CycleCount;
+            _currentCycleCount = 0;
+            _isCommandExecuting = true;
+            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
+            _commandStatusSubject.OnNext(CurrentCommandStatus);
+
             Task.Run(() =>
             {
                 GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
+                // 波形生成完成后标记为完成
+                _isCommandExecuting = false;
+                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                _commandStatusSubject.OnNext(CurrentCommandStatus);
             });
             return true;
         }
@@ -214,12 +240,19 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
                 while (true)
                 {
-                    if ((speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)) 
+                    if ((speed < 0 && Math.Abs(_force - target) < Math.Abs(speed))
                         || (speed > 0 && Math.Abs(_force - target) < speed))
                     {
                         lock (_lock)
                         {
                             _force = target;
+                        }
+                        // 到达目标，标记为完成
+                        if (_isCommandExecuting && ControlState == SystemControlState.Static)
+                        {
+                            _isCommandExecuting = false;
+                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
                     }
@@ -244,6 +277,13 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                         lock (_lock)
                         {
                             _position = target;
+                        }
+                        // 到达目标，标记为完成
+                        if (_isCommandExecuting && ControlState == SystemControlState.Static)
+                        {
+                            _isCommandExecuting = false;
+                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
+                            _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
                     }

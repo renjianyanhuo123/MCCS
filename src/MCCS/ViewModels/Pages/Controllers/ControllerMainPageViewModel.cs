@@ -1,15 +1,13 @@
 ﻿using System.Reactive.Linq;
 using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
-using MCCS.Core.Devices.Commands; 
+using MCCS.Core.Devices.Commands;
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
-using System.Security.AccessControl;
-using MCCS.Collecter.DllNative.Models;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Services.NotificationService;
 
@@ -17,12 +15,13 @@ namespace MCCS.ViewModels.Pages.Controllers
 {
     public class ControllerMainPageViewModel : BindableBase
     {
-        public const string Tag = "ControllerMainPage";  
+        public const string Tag = "ControllerMainPage";
         private readonly IEventAggregator _eventAggregator;
         private readonly IControllerService _controllerService;
         private readonly INotificationService _notificationService;
         private readonly long _controllerId = -1;
         private readonly long _deviceId = -1;
+        private IDisposable? _commandStatusSubscription;
 
         public ControllerMainPageViewModel(
             IControllerService controllerService,
@@ -169,17 +168,6 @@ namespace MCCS.ViewModels.Pages.Controllers
             };
         }
 
-        /// <summary>
-        /// 指令执行状态监听回调
-        /// </summary>
-        /// <param name="param"></param>
-        private void OnCommandExecuteStatus(BatchCollectItemModel param)
-        {
-            if ()
-            {
-
-            }
-        }
 
         /// <summary>
         /// 应用命令
@@ -189,7 +177,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void ExecuteApplyCommand()
         {
             if (_controllerId == -1 || _deviceId == -1) return;
-            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
+
             var controlMode = (ControlMode)SelectedControlMode;
             switch (controlMode)
             {
@@ -210,7 +198,8 @@ namespace MCCS.ViewModels.Pages.Controllers
                         });
                         if (success)
                         {
-                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
+                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success);
+                            SubscribeToCommandStatus();
                         }
                         else
                         {
@@ -231,12 +220,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                         if (success)
                         {
                             _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
-                            // 开启订阅流检查指令是否完成 
-                            var controller = _controllerService.GetControllerInfo(_controllerId);
-                            var tempSubscribe = controller
-                                .IndividualDataStream
-                                .Sample(TimeSpan.FromMilliseconds(100))
-                                .Subscribe(OnCommandExecuteStatus);
+                            SubscribeToCommandStatus();
                         }
                         else
                         {
@@ -252,12 +236,28 @@ namespace MCCS.ViewModels.Pages.Controllers
                     break;
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
-                    { 
+                    {
                     }
                     break;
                 default:
                     break;
             }
+        }
+
+        /// <summary>
+        /// 订阅命令状态流
+        /// </summary>
+        private void SubscribeToCommandStatus()
+        {
+            // 取消之前的订阅
+            _commandStatusSubscription?.Dispose();
+
+            // 获取控制器并订阅命令状态流
+            var controller = _controllerService.GetControllerInfo(_controllerId);
+            _commandStatusSubscription = controller
+                .CommandStatusStream
+                .ObserveOnDispatcher()
+                .Subscribe(status => CurrentCommandStatus = status);
         }
 
         /// <summary>
