@@ -29,6 +29,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
@@ -143,19 +145,66 @@
             </StackPanel> 
         </ScrollViewer>
         <UniformGrid Grid.Row="1" Columns="2" Margin="0 20 0 0">
-            <Button 
-                Content="应用" 
+            <Button
+                Content="应用"
                 IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
                 Width="80"
                 Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
-                ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
+                ToolTip="MaterialDesignFlatSecondaryDarkBgButton"
                 Command="{Binding ApplyCommand}"/>
-            <Button  
+            <Button
                 Content="暂停"
                 IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
                 Width="80"
                 Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
                 Command="{Binding StopCommand}"/>
         </UniformGrid>
+
+        <!-- 命令状态显示 -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource MaterialDesignPaper}"
+                BorderBrush="{DynamicResource MaterialDesignDivider}"
+                BorderThickness="0,1,0,0"
+                Padding="10,5">
+            <StackPanel>
+                <TextBlock Text="执行状态"
+                           FontWeight="Bold"
+                           Margin="0,0,0,3"
+                           FontSize="11"/>
+                <TextBlock Text="{Binding CommandStatusMessage}"
+                           FontSize="10"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 命令历史记录（可折叠） -->
+        <Expander Grid.Row="3"
+                  Header="命令历史 (最近10条)"
+                  IsExpanded="False"
+                  Background="{DynamicResource MaterialDesignPaper}">
+            <ListBox ItemsSource="{Binding CommandHistory}"
+                     MaxHeight="150"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     BorderThickness="0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="5">
+                            <TextBlock FontWeight="Bold" FontSize="10">
+                                <Run Text="{Binding CommandType, Mode=OneWay}"/>
+                                <Run Text=" - "/>
+                                <Run Text="{Binding Status, Mode=OneWay}"/>
+                            </TextBlock>
+                            <TextBlock Text="{Binding CreatedTime, StringFormat='时间: {0:HH:mm:ss}'}"
+                                       FontSize="9"
+                                       Foreground="Gray"/>
+                            <TextBlock Text="{Binding ExecutionDurationMs, StringFormat='耗时: {0:F0}ms'}"
+                                       FontSize="9"
+                                       Foreground="Gray"
+                                       Visibility="{Binding ExecutionDurationMs, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Expander>
     </Grid>
 </UserControl>

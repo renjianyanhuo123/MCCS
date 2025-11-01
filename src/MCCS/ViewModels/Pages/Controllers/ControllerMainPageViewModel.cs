@@ -1,9 +1,10 @@
 ﻿using System.Reactive.Linq;
 using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
-using MCCS.Core.Devices.Commands; 
+using MCCS.Core.Devices.Commands;
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.CommandTracking;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
@@ -12,37 +13,50 @@ using System.Security.AccessControl;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Services.NotificationService;
+using System.Collections.ObjectModel;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
     public class ControllerMainPageViewModel : BindableBase
     {
-        public const string Tag = "ControllerMainPage";  
+        public const string Tag = "ControllerMainPage";
         private readonly IEventAggregator _eventAggregator;
         private readonly IControllerService _controllerService;
+        private readonly ICommandTrackingService _commandTrackingService;
         private readonly INotificationService _notificationService;
         private readonly long _controllerId = -1;
         private readonly long _deviceId = -1;
 
+        // 当前执行的命令记录
+        private CommandRecord? _currentCommandRecord;
+
         public ControllerMainPageViewModel(
             IControllerService controllerService,
+            ICommandTrackingService commandTrackingService,
             INotificationService notificationService,
             IEventAggregator eventAggregator)
         {
             _controllerService = controllerService;
+            _commandTrackingService = commandTrackingService;
             _eventAggregator = eventAggregator;
             _notificationService = notificationService;
+
+            // 订阅命令状态变更事件
+            _eventAggregator.GetEvent<CommandStatusChangedEvent>()
+                .Subscribe(OnCommandStatusChanged);
         }
 
         public ControllerMainPageViewModel(
             long modelId,
             IControllerService controllerService,
+            ICommandTrackingService commandTrackingService,
             INotificationService notificationService,
-            IEventAggregator eventAggregator) : this(controllerService, notificationService, eventAggregator)
+            IEventAggregator eventAggregator) : this(controllerService, commandTrackingService, notificationService, eventAggregator)
         {
             IsParticipateControl = true;
             CurrentModelId = modelId;
             CurrentChannelName = "力/位移控制通道";
+            CommandHistory = new ObservableCollection<CommandRecord>();
             ParticipateControlCommand = new DelegateCommand<long?>(ExecuteParticipateControlCommand);
             ControlModeSelectionChangedCommand = new DelegateCommand(ExecuteControlModeSelectionChangedCommand);
             ApplyCommand = new DelegateCommand(ExecuteApplyCommand);
@@ -122,11 +136,31 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// 是否参与控制
         /// </summary>
         private bool _isParticipateControl = false;
-        public bool IsParticipateControl 
+        public bool IsParticipateControl
         {
             get => _isParticipateControl;
             set => SetProperty(ref _isParticipateControl, value);
-        } 
+        }
+
+        /// <summary>
+        /// 命令历史记录
+        /// </summary>
+        private ObservableCollection<CommandRecord> _commandHistory;
+        public ObservableCollection<CommandRecord> CommandHistory
+        {
+            get => _commandHistory;
+            set => SetProperty(ref _commandHistory, value);
+        }
+
+        /// <summary>
+        /// 当前命令状态消息
+        /// </summary>
+        private string _commandStatusMessage = "就绪";
+        public string CommandStatusMessage
+        {
+            get => _commandStatusMessage;
+            set => SetProperty(ref _commandStatusMessage, value);
+        }
         #endregion
 
         #region Command
@@ -170,14 +204,74 @@ namespace MCCS.ViewModels.Pages.Controllers
         }
 
         /// <summary>
-        /// 指令执行状态监听回调
+        /// 命令状态变更回调
+        /// </summary>
+        private void OnCommandStatusChanged(CommandStatusChangedEventParam param)
+        {
+            var commandRecord = param.CommandRecord;
+
+            // 只处理当前控制器和设备的命令
+            if (commandRecord.ControllerId != _controllerId || commandRecord.DeviceId != _deviceId)
+                return;
+
+            // 更新UI线程
+            System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+            {
+                // 更新当前命令状态
+                CurrentCommandStatus = commandRecord.Status;
+
+                // 更新状态消息
+                CommandStatusMessage = commandRecord.Status switch
+                {
+                    CommandExecuteStatusEnum.Idle => "就绪",
+                    CommandExecuteStatusEnum.Executing => "执行中...",
+                    CommandExecuteStatusEnum.ExecuttionCompleted => $"执行完成 (耗时: {commandRecord.ExecutionDurationMs:F0}ms)",
+                    CommandExecuteStatusEnum.Stoping => "停止中...",
+                    CommandExecuteStatusEnum.Error => $"错误: {commandRecord.ErrorMessage}",
+                    _ => "未知状态"
+                };
+
+                // 更新命令历史
+                var existingCommand = CommandHistory.FirstOrDefault(c => c.CommandId == commandRecord.CommandId);
+                if (existingCommand == null)
+                {
+                    CommandHistory.Insert(0, commandRecord);
+                    // 限制历史记录数量
+                    while (CommandHistory.Count > 10)
+                    {
+                        CommandHistory.RemoveAt(CommandHistory.Count - 1);
+                    }
+                }
+
+                // 根据状态显示通知
+                switch (commandRecord.Status)
+                {
+                    case CommandExecuteStatusEnum.ExecuttionCompleted:
+                        _notificationService.Show("成功",
+                            $"{commandRecord.CommandType} 命令执行完成！",
+                            NotificationType.Success);
+                        break;
+                    case CommandExecuteStatusEnum.Error:
+                        _notificationService.Show("错误",
+                            $"{commandRecord.CommandType} 命令执行失败: {commandRecord.ErrorMessage}",
+                            NotificationType.Error);
+                        break;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 指令执行状态监听回调（硬件数据流）
         /// </summary>
         /// <param name="param"></param>
         private void OnCommandExecuteStatus(BatchCollectItemModel param)
         {
-            if ()
+            // TODO: 根据硬件反馈判断命令是否执行完成
+            // 例如：检查是否达到目标值
+            if (_currentCommandRecord != null)
             {
-
+                // 这里可以根据实际的硬件反馈来判断命令是否完成
+                // 例如：检查力值或位移是否达到目标值
             }
         }
 
@@ -189,14 +283,14 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void ExecuteApplyCommand()
         {
             if (_controllerId == -1 || _deviceId == -1) return;
-            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
+
             var controlMode = (ControlMode)SelectedControlMode;
             switch (controlMode)
             {
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
                     {
-                        var success = _controllerService.DynamicControl(_controllerId, _deviceId, new DynamicControlParams
+                        var commandRecord = _controllerService.DynamicControl(_controllerId, _deviceId, new DynamicControlParams
                         {
                             ControlMode = fatigueControlViewModel.ControlUnitType,
                             Amplitude = fatigueControlViewModel.Amplitude,
@@ -208,9 +302,11 @@ namespace MCCS.ViewModels.Pages.Controllers
                             IsAdjustedMedian = false,
                             CycleCount = fatigueControlViewModel.CycleTimes
                         });
-                        if (success)
+
+                        if (commandRecord != null)
                         {
-                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
+                            _currentCommandRecord = commandRecord;
+                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success);
                         }
                         else
                         {
@@ -218,20 +314,24 @@ namespace MCCS.ViewModels.Pages.Controllers
                         }
                     }
                     break;
+
                 case ControlMode.Static:
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
-                        var success = _controllerService.StaticControl(_controllerId, _deviceId,
+                        var commandRecord = _controllerService.StaticControl(_controllerId, _deviceId,
                             new StaticControlParams
                             {
                                 StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
                                 Speed = staticControlViewModel.Speed,
                                 TargetValue = staticControlViewModel.TargetValue
                             });
-                        if (success)
+
+                        if (commandRecord != null)
                         {
+                            _currentCommandRecord = commandRecord;
                             _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
-                            // 开启订阅流检查指令是否完成 
+
+                            // 开启订阅流检查指令是否完成
                             var controller = _controllerService.GetControllerInfo(_controllerId);
                             var tempSubscribe = controller
                                 .IndividualDataStream
@@ -244,17 +344,20 @@ namespace MCCS.ViewModels.Pages.Controllers
                         }
                     }
                     break;
+
                 case ControlMode.Programmable:
                     if (CurrentPage.DataContext is ViewProgramControlViewModel programControlViewModel)
                     {
 
                     }
                     break;
+
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
-                    { 
+                    {
                     }
                     break;
+
                 default:
                     break;
             }

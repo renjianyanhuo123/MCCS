@@ -98,6 +98,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
+            containerRegistry.RegisterSingleton<ICommandTrackingService, CommandTrackingService>();
             containerRegistry.RegisterSingleton<IControllerService, ControllerService>();
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             // containerRegistry.AddNotificationModule(configuration);

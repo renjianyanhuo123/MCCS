@@ -1,8 +1,10 @@
 ﻿using MCCS.Collecter.DllNative;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.HardwareDevices.BwController;
+using MCCS.Infrastructure.Enums;
 using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.CommandTracking;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.Services
@@ -14,11 +16,12 @@ namespace MCCS.Collecter.Services
     {
         private static volatile bool _isDllInitialized = false;
         private readonly List<ControllerHardwareDeviceBase> _controllers = [];
+        private readonly ICommandTrackingService _commandTrackingService;
         private bool _isMock = false;
 
-        public ControllerService()
+        public ControllerService(ICommandTrackingService commandTrackingService)
         {
-
+            _commandTrackingService = commandTrackingService;
         }
 
         public bool InitializeDll(bool isMock = false)
@@ -100,10 +103,44 @@ namespace MCCS.Collecter.Services
         /// <param name="deviceId"></param>
         /// <param name="staticControlParam"></param>
         /// <returns></returns>
-        public bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam)
+        public CommandRecord? StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam)
         {
-            var controller = GetControllerInfo(controllerId);
-            return controller.StaticControl(staticControlParam);
+            try
+            {
+                var controller = GetControllerInfo(controllerId);
+
+                // 创建命令记录
+                var commandRecord = _commandTrackingService.CreateCommand(
+                    (int)controllerId,
+                    (int)deviceId,
+                    ControlMode.Static,
+                    staticControlParam);
+
+                // 发送命令
+                _commandTrackingService.UpdateCommandStatus(commandRecord.CommandId, CommandExecuteStatusEnum.Executing);
+                var success = controller.StaticControl(staticControlParam);
+
+                if (success)
+                {
+                    // 命令发送成功，保持 Executing 状态
+                    // 实际完成状态需要通过监听硬件反馈来更新
+                    return commandRecord;
+                }
+                else
+                {
+                    // 命令发送失败
+                    _commandTrackingService.UpdateCommandStatus(
+                        commandRecord.CommandId,
+                        CommandExecuteStatusEnum.Error,
+                        "命令发送失败");
+                    return commandRecord;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 发生异常，无法创建命令记录
+                return null;
+            }
         }
 
         /// <summary>
@@ -113,10 +150,44 @@ namespace MCCS.Collecter.Services
         /// <param name="deviceId"></param>
         /// <param name="dynamicControlParam"></param>
         /// <returns></returns>
-        public bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam)
+        public CommandRecord? DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam)
         {
-            var controller = GetControllerInfo(controllerId);
-            return controller.DynamicControl(dynamicControlParam);
+            try
+            {
+                var controller = GetControllerInfo(controllerId);
+
+                // 创建命令记录
+                var commandRecord = _commandTrackingService.CreateCommand(
+                    (int)controllerId,
+                    (int)deviceId,
+                    ControlMode.Fatigue,
+                    dynamicControlParam);
+
+                // 发送命令
+                _commandTrackingService.UpdateCommandStatus(commandRecord.CommandId, CommandExecuteStatusEnum.Executing);
+                var success = controller.DynamicControl(dynamicControlParam);
+
+                if (success)
+                {
+                    // 命令发送成功，保持 Executing 状态
+                    // 实际完成状态需要通过监听硬件反馈来更新
+                    return commandRecord;
+                }
+                else
+                {
+                    // 命令发送失败
+                    _commandTrackingService.UpdateCommandStatus(
+                        commandRecord.CommandId,
+                        CommandExecuteStatusEnum.Error,
+                        "命令发送失败");
+                    return commandRecord;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 发生异常，无法创建命令记录
+                return null;
+            }
         }
 
         /// <summary>
