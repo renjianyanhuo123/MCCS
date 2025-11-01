@@ -252,12 +252,13 @@ namespace MCCS.ViewModels.Pages.Controllers
             // 取消之前的订阅
             _commandStatusSubscription?.Dispose();
 
-            // 获取控制器并订阅命令状态流
+            // 获取控制器并订阅命令状态流（只订阅当前设备的状态变化）
             var controller = _controllerService.GetControllerInfo(_controllerId);
             _commandStatusSubscription = controller
                 .CommandStatusStream
+                .Where(e => e.DeviceId == _deviceId)  // 过滤出当前设备的状态变化
                 .ObserveOnDispatcher()
-                .Subscribe(status => CurrentCommandStatus = status);
+                .Subscribe(e => CurrentCommandStatus = e.Status);
         }
 
         /// <summary>

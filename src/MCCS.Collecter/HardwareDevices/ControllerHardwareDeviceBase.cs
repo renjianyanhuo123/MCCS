@@ -13,7 +13,8 @@ namespace MCCS.Collecter.HardwareDevices
         protected readonly ConcurrentDictionary<long, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected readonly ReplaySubject<DataPoint> _dataSubject;
-        protected readonly BehaviorSubject<CommandExecuteStatusEnum> _commandStatusSubject;
+        protected readonly Subject<CommandStatusChangeEvent> _commandStatusSubject;
+        protected readonly ConcurrentDictionary<long, CommandExecuteStatusEnum> _deviceCommandStatuses = new();
         protected IDisposable? _statusSubscription;
         // 是否正在采集数据
         protected bool _isRunning = false;
@@ -35,13 +36,16 @@ namespace MCCS.Collecter.HardwareDevices
         /// </summary>
         public SystemControlState ControlState { get; protected set; }
         /// <summary>
-        /// 当前命令执行状态
+        /// 获取指定设备的命令执行状态
         /// </summary>
-        public CommandExecuteStatusEnum CurrentCommandStatus { get; protected set; }
+        public CommandExecuteStatusEnum GetDeviceCommandStatus(long deviceId)
+        {
+            return _deviceCommandStatuses.GetValueOrDefault(deviceId, CommandExecuteStatusEnum.NoExecute);
+        }
         /// <summary>
-        /// 命令状态变化流
+        /// 命令状态变化流（包含设备ID信息）
         /// </summary>
-        public IObservable<CommandExecuteStatusEnum> CommandStatusStream => _commandStatusSubject.AsObservable();
+        public IObservable<CommandStatusChangeEvent> CommandStatusStream => _commandStatusSubject.AsObservable();
         public IObservable<DataPoint> DataStream { get; protected set; }
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
         // 不预先展开，而是提供展开后的Observable;单个的数据流
@@ -54,8 +58,7 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceType = configuration.DeviceType;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
             _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
-            _commandStatusSubject = new BehaviorSubject<CommandExecuteStatusEnum>(CommandExecuteStatusEnum.NoExecute);
-            CurrentCommandStatus = CommandExecuteStatusEnum.NoExecute;
+            _commandStatusSubject = new Subject<CommandStatusChangeEvent>();
             foreach (var item in configuration.Signals)
             {
                 AddSignal(item);
@@ -108,21 +111,24 @@ namespace MCCS.Collecter.HardwareDevices
         /// <summary>
         /// 手动控制
         /// </summary>
-        /// <param name="outValue"></param>
+        /// <param name="deviceId">设备ID（通道ID）</param>
+        /// <param name="outValue">输出值</param>
         /// <returns></returns>
-        public abstract bool ManualControl(float outValue);
+        public abstract bool ManualControl(long deviceId, float outValue);
         /// <summary>
         /// 静态控制
         /// </summary>
-        /// <param name="controlParams"></param>
+        /// <param name="deviceId">设备ID（通道ID）</param>
+        /// <param name="controlParams">控制参数</param>
         /// <returns></returns>
-        public abstract bool StaticControl(StaticControlParams controlParams);
+        public abstract bool StaticControl(long deviceId, StaticControlParams controlParams);
         /// <summary>
         /// 疲劳控制
         /// </summary>
-        /// <param name="controlParams"></param>
+        /// <param name="deviceId">设备ID（通道ID）</param>
+        /// <param name="controlParams">控制参数</param>
         /// <returns></returns>
-        public abstract bool DynamicControl(DynamicControlParams controlParams);
+        public abstract bool DynamicControl(long deviceId, DynamicControlParams controlParams);
         #endregion
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)
@@ -177,8 +183,9 @@ namespace MCCS.Collecter.HardwareDevices
             _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
             _statusSubject.Dispose();
-            _commandStatusSubject.OnCompleted();
-            _commandStatusSubject.Dispose();
+            _commandStatusSubject?.OnCompleted();
+            _commandStatusSubject?.Dispose();
+            _deviceCommandStatuses.Clear();
         }
     }
 }

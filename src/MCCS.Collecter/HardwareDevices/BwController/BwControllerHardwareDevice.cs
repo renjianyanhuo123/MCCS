@@ -11,6 +11,19 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
+    /// <summary>
+    /// 设备命令执行上下文
+    /// </summary>
+    internal class DeviceCommandContext
+    {
+        public long DeviceId { get; set; }
+        public int TargetCycleCount { get; set; }  // 动态控制目标循环次数
+        public float TargetValue { get; set; }     // 静态控制目标值
+        public float PositionTolerance { get; set; } = 0.5f; // 位置容差
+        public bool IsExecuting { get; set; }      // 是否正在执行
+        public SystemControlState ControlMode { get; set; } // 控制模式
+    }
+
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase
     {
         private readonly IDisposable _acquisitionSubscription;
@@ -20,11 +33,10 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private IntPtr _singleBuffer = IntPtr.Zero;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
 
-        // 命令执行相关参数
-        private int _targetCycleCount = 0;  // 动态控制目标循环次数
-        private float _targetValue = 0f;    // 静态控制目标值
-        private float _positionTolerance = 0.5f; // 位置容差（默认0.5）
-        private bool _isCommandExecuting = false; // 是否有命令正在执行 
+        // 每个设备的命令执行上下文
+        private readonly ConcurrentDictionary<long, DeviceCommandContext> _deviceContexts = new();
+        // 当前活跃的设备ID（最近执行命令的设备）
+        private long _activeDeviceId = -1; 
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
@@ -117,7 +129,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return result == AddressContanst.OP_SUCCESSFUL;
         } 
 
-        public override bool ManualControl(float outValue)
+        public override bool ManualControl(long deviceId, float outValue)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             if (ControlState != SystemControlState.Static)
@@ -127,10 +139,18 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 ControlState = SystemControlState.Static;
             }
             var setCtrlModeResult = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)StaticLoadControlEnum.CTRLMODE_LoadS, outValue, 0);
-            return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL; 
+
+            if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
+            {
+                _activeDeviceId = deviceId;
+                // 手动控制模式下，设置为执行中状态
+                UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            }
+
+            return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL;
         }
          
-        public override bool StaticControl(StaticControlParams controlParams)
+        public override bool StaticControl(long deviceId, StaticControlParams controlParams)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             if (ControlState != SystemControlState.Static)
@@ -143,17 +163,21 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
-                // 设置静态控制参数并启动状态监控
-                _targetValue = controlParams.TargetValue;
-                _isCommandExecuting = true;
-                CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
-                _commandStatusSubject.OnNext(CurrentCommandStatus);
+                // 创建或更新设备执行上下文
+                var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext { DeviceId = deviceId });
+                context.TargetValue = controlParams.TargetValue;
+                context.IsExecuting = true;
+                context.ControlMode = SystemControlState.Static;
+                _activeDeviceId = deviceId;
+
+                // 更新设备状态为执行中
+                UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
             }
 
             return result == AddressContanst.OP_SUCCESSFUL;
         }
         
-        public override bool DynamicControl(DynamicControlParams controlParams)
+        public override bool DynamicControl(long deviceId, DynamicControlParams controlParams)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             if (ControlState != SystemControlState.Dynamic)
@@ -179,7 +203,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 // 设置动态控制参数并启动状态监控
                 _targetCycleCount = controlParams.CycleCount;
                 _isCommandExecuting = true;
-                CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
+                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             }
 
@@ -246,10 +270,10 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 var collectItem = StructDataToCollectModel(tempValue);
                 results.Add(collectItem);
 
-                // 判断命令执行状态（使用最后一个数据点）
-                if (_isCommandExecuting && i == count - 1)
+                // 判断命令执行状态（使用最后一个数据点，针对当前活跃的设备）
+                if (_activeDeviceId != -1 && i == count - 1)
                 {
-                    UpdateCommandStatus(collectItem);
+                    UpdateCommandStatus(_activeDeviceId, collectItem);
                 }
             }
 
@@ -270,28 +294,49 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         };
 
         /// <summary>
-        /// 更新命令执行状态
+        /// 更新设备命令执行状态
         /// </summary>
-        private void UpdateCommandStatus(BatchCollectItemModel data)
+        private void UpdateCommandStatus(long deviceId, BatchCollectItemModel data)
         {
-            var newStatus = DetermineCommandStatus(data);
-            if (newStatus != CurrentCommandStatus)
+            if (!_deviceContexts.TryGetValue(deviceId, out var context))
+                return;
+
+            if (!context.IsExecuting)
+                return;
+
+            var newStatus = DetermineCommandStatus(deviceId, data, context);
+            var oldStatus = _deviceCommandStatuses.GetValueOrDefault(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.NoExecute);
+
+            if (newStatus != oldStatus)
             {
-                CurrentCommandStatus = newStatus;
-                _commandStatusSubject.OnNext(newStatus);
+                UpdateDeviceCommandStatus(deviceId, newStatus);
 
                 // 如果命令执行完成，重置标志
-                if (newStatus == CommandExecuteStatusEnum.ExecutionCompleted)
+                if (newStatus == Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted)
                 {
-                    _isCommandExecuting = false;
+                    context.IsExecuting = false;
                 }
             }
         }
 
         /// <summary>
+        /// 更新设备命令状态并发送事件
+        /// </summary>
+        private void UpdateDeviceCommandStatus(long deviceId, Core.Devices.Commands.CommandExecuteStatusEnum status)
+        {
+            _deviceCommandStatuses[deviceId] = status;
+            _commandStatusSubject.OnNext(new Core.Devices.Commands.CommandStatusChangeEvent
+            {
+                DeviceId = deviceId,
+                Status = status,
+                Timestamp = Stopwatch.GetTimestamp()
+            });
+        }
+
+        /// <summary>
         /// 判断命令执行状态
         /// </summary>
-        private CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineCommandStatus(BatchCollectItemModel data)
         {
             // 检查是否有保护错误
             if (data.Net_PrtErrState != 0)
@@ -300,12 +345,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             }
 
             // 根据当前控制模式判断状态
-            switch (ControlState)
+            switch (context.ControlMode)
             {
                 case SystemControlState.Static:
-                    return DetermineStaticCommandStatus(data);
+                    return DetermineStaticCommandStatus(data, context);
                 case SystemControlState.Dynamic:
-                    return DetermineDynamicCommandStatus(data);
+                    return DetermineDynamicCommandStatus(data, context);
                 case SystemControlState.OpenLoop:
                     // 开环控制（手动控制）没有执行完成的概念
                     return CommandExecuteStatusEnum.Executing;
@@ -317,11 +362,11 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断静态控制命令状态
         /// </summary>
-        private CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineStaticCommandStatus(BatchCollectItemModel data)
         {
             // 静态控制：检查位置误差是否在容差范围内
             // Net_PosE 是位置误差，当误差接近0时表示到达目标位置
-            if (Math.Abs(data.Net_PosE) <= _positionTolerance)
+            if (Math.Abs(data.Net_PosE) <= context.PositionTolerance)
             {
                 return CommandExecuteStatusEnum.ExecutionCompleted;
             }
@@ -332,11 +377,11 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         /// <summary>
         /// 判断动态控制（疲劳控制）命令状态
         /// </summary>
-        private CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
+        private Core.Devices.Commands.CommandExecuteStatusEnum DetermineDynamicCommandStatus(BatchCollectItemModel data)
         {
             // 动态控制：检查循环次数是否达到目标
             // Net_CycleCount 是当前循环计数
-            if (_targetCycleCount > 0 && data.Net_CycleCount >= _targetCycleCount)
+            if (context.TargetCycleCount > 0 && data.Net_CycleCount >= context.TargetCycleCount)
             {
                 return CommandExecuteStatusEnum.ExecutionCompleted;
             }

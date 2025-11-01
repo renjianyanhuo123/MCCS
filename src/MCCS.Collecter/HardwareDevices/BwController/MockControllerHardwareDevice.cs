@@ -1,4 +1,5 @@
-﻿using MCCS.Collecter.DllNative.Models;
+using MCCS.Collecter.DllNative.Models;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -26,18 +27,16 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private const float PositionMin = -1000.0f;
         private const float PositionMax = 1000.0f;
 
-        // 命令执行相关参数
-        private int _targetCycleCount = 0;
-        private float _targetValue = 0f;
-        private float _positionTolerance = 0.5f;
-        private bool _isCommandExecuting = false;
-        private int _currentCycleCount = 0;
+        // 每个设备的命令执行上下文
+        private readonly ConcurrentDictionary<long, DeviceCommandContext> _deviceContexts = new();
+        // 当前活跃的设备ID
+        private long _activeDeviceId = -1;
 
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
-        { 
-            _sampleRate = configuration.Signals.Max(s => s.SampleRate); 
-            _acquisitionSubscription = CreateAcquisitionLoop(); 
-        } 
+        {
+            _sampleRate = configuration.Signals.Max(s => s.SampleRate);
+            _acquisitionSubscription = CreateAcquisitionLoop();
+        }
 
         /// <summary>
         /// 根据正态分布对输入值进行微扰。
@@ -58,7 +57,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return value + noise;
         }
 
-        private void GenerateWaveform(int changeType, double amplitude, double frequency, int waveType, uint totalCount = 0)
+        private void GenerateWaveform(long deviceId, int changeType, double amplitude, double frequency, int waveType, uint totalCount = 0)
         {
             double time = 0; // 时间变量（秒）
 
@@ -75,7 +74,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                         CalculateSquareWave(amplitude, frequency, time),
                     _ => 0
                 };
-                // 更新外部变量 位移 
+                // 更新外部变量 位移
                 if (changeType == 0)
                 {
                     lock (_lock)
@@ -89,7 +88,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     {
                         _force = (float)value;
                     }
-                } 
+                }
                 var temp = 1 / frequency * 1000;
                 // 等待500ms
                 Thread.Sleep(500);
@@ -163,7 +162,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool ManualControl(float outValue)
+        public override bool ManualControl(long deviceId, float outValue)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
@@ -174,37 +173,44 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 > 1000.0f => 1000.0f,
                 _ => speed
             };
-            PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
+
+            _activeDeviceId = deviceId;
+            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
+            PositionChangeToTarget(deviceId, speed, speed > 0 ? PositionMax : PositionMin);
             return true;
         }
 
-        public override bool StaticControl(StaticControlParams controlParams)
+        public override bool StaticControl(long deviceId, StaticControlParams controlParams)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
 
-            // 设置静态控制参数并启动状态监控
-            _targetValue = controlParams.TargetValue;
-            _isCommandExecuting = true;
-            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
-            _commandStatusSubject.OnNext(CurrentCommandStatus);
+            // 创建或更新设备执行上下文
+            var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext { DeviceId = deviceId });
+            context.TargetValue = controlParams.TargetValue;
+            context.IsExecuting = true;
+            context.ControlMode = SystemControlState.Static;
+            _activeDeviceId = deviceId;
+
+            // 更新设备状态为执行中
+            UpdateDeviceCommandStatus(deviceId, Core.Devices.Commands.CommandExecuteStatusEnum.Executing);
 
             switch (controlParams.StaticLoadControl)
             {
                 case StaticLoadControlEnum.CTRLMODE_LoadN:
-                    ForceChangeToTarget(speed, controlParams.TargetValue);
+                    ForceChangeToTarget(deviceId, speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadS:
-                    PositionChangeToTarget(speed, controlParams.TargetValue);
+                    PositionChangeToTarget(deviceId, speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadSVNP:
-                    PositionChangeToTarget(speed - 1, speed - 1 > 0 ? PositionMax : PositionMin);
-                    ForceChangeToTarget(speed, controlParams.TargetValue);
+                    PositionChangeToTarget(deviceId, speed - 1, speed - 1 > 0 ? PositionMax : PositionMin);
+                    ForceChangeToTarget(deviceId, speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadNVSP:
-                    PositionChangeToTarget(speed, controlParams.TargetValue);
-                    ForceChangeToTarget(speed - 1, speed - 1 > 0 ? ForceMax : ForceMin);
+                    PositionChangeToTarget(deviceId, speed, controlParams.TargetValue);
+                    ForceChangeToTarget(deviceId, speed - 1, speed - 1 > 0 ? ForceMax : ForceMin);
                     break;
                 default:
                     break;
@@ -212,7 +218,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool DynamicControl(DynamicControlParams controlParams)
+        public override bool DynamicControl(long deviceId, DynamicControlParams controlParams)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Dynamic;
@@ -221,21 +227,35 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             _targetCycleCount = controlParams.CycleCount;
             _currentCycleCount = 0;
             _isCommandExecuting = true;
-            CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
+            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.Executing;
             _commandStatusSubject.OnNext(CurrentCommandStatus);
 
             Task.Run(() =>
             {
-                GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
+                GenerateWaveform(deviceId, controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
                 // 波形生成完成后标记为完成
                 _isCommandExecuting = false;
-                CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
+                CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
                 _commandStatusSubject.OnNext(CurrentCommandStatus);
             });
             return true;
         }
 
-        private void ForceChangeToTarget(float speed, float target)
+        /// <summary>
+        /// 更新设备命令状态并发送事件
+        /// </summary>
+        private void UpdateDeviceCommandStatus(long deviceId, Core.Devices.Commands.CommandExecuteStatusEnum status)
+        {
+            _deviceCommandStatuses[deviceId] = status;
+            _commandStatusSubject.OnNext(new Core.Devices.Commands.CommandStatusChangeEvent
+            {
+                DeviceId = deviceId,
+                Status = status,
+                Timestamp = Stopwatch.GetTimestamp()
+            });
+        }
+
+        private void ForceChangeToTarget(long deviceId, float speed, float target)
         {
             Task.Run(() =>
             {
@@ -249,10 +269,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             _force = target;
                         }
                         // 到达目标，标记为完成
-                        if (_isCommandExecuting && ControlState == SystemControlState.Static)
+                        if (_deviceContexts.TryGetValue(deviceId, out var context) &&
+                            context.IsExecuting &&
+                            context.ControlMode == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
@@ -266,7 +288,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             });
         }
 
-        private void PositionChangeToTarget(float speed, float target)
+        private void PositionChangeToTarget(long deviceId, float speed, float target)
         {
             Task.Run(() =>
             {
@@ -280,10 +302,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                             _position = target;
                         }
                         // 到达目标，标记为完成
-                        if (_isCommandExecuting && ControlState == SystemControlState.Static)
+                        if (_deviceContexts.TryGetValue(deviceId, out var context) &&
+                            context.IsExecuting &&
+                            context.ControlMode == SystemControlState.Static)
                         {
                             _isCommandExecuting = false;
-                            CurrentCommandStatus = CommandExecuteStatusEnum.ExecutionCompleted;
+                            CurrentCommandStatus = Core.Devices.Commands.CommandExecuteStatusEnum.ExecutionCompleted;
                             _commandStatusSubject.OnNext(CurrentCommandStatus);
                         }
                         break;
@@ -349,7 +373,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             base.Dispose();
             _acquisitionSubscription.Dispose();
             _dataSubject?.OnCompleted();
-            _dataSubject?.Dispose(); 
+            _dataSubject?.Dispose();
+            _deviceContexts.Clear();
         }
     }
 }
