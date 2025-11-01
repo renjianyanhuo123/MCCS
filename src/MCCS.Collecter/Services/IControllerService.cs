@@ -1,6 +1,7 @@
 ﻿using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Infrastructure.TestModels.CommandTracking;
 
 namespace MCCS.Collecter.Services
 {
@@ -20,9 +21,17 @@ namespace MCCS.Collecter.Services
 
         bool ManualControl(long controllerId, long deviceId, float speed);
 
-        bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam);
+        /// <summary>
+        /// 静态控制（带命令跟踪）
+        /// </summary>
+        /// <returns>命令记录，如果创建失败则返回null</returns>
+        CommandRecord? StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam);
 
-        bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam);
+        /// <summary>
+        /// 动态控制（带命令跟踪）
+        /// </summary>
+        /// <returns>命令记录，如果创建失败则返回null</returns>
+        CommandRecord? DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam);
 
         bool RemoveController(int deviceId);
 
