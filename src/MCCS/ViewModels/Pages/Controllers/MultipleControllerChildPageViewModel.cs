@@ -8,10 +8,7 @@ namespace MCCS.ViewModels.Pages.Controllers
     public class MultipleControllerChildPageViewModel : BindableBase
     { 
         private bool _isShowController = false;
-        private bool _isParticipateControl = false;
-
-        private bool _isSelected = false;
-        private long _currentModelId = -1;
+        private bool _isParticipateControl = false; 
 
         private ControlTypeEnum _controlType = ControlTypeEnum.Single;
         private int _selectedControlMode = 0;
@@ -51,10 +48,11 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             get => _selectedControlMode;
             set => SetProperty(ref _selectedControlMode, value);
-        }  
+        }
         /// <summary>
         /// 当前模型Id
         /// </summary>
+        private long _currentModelId = -1;
         public long CurrentModelId
         {
             get => _currentModelId;

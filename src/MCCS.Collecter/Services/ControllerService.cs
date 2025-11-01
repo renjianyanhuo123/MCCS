@@ -2,6 +2,8 @@
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.HardwareDevices.BwController;
 using MCCS.Infrastructure.Helper;
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.Services
 {
@@ -47,7 +49,76 @@ namespace MCCS.Collecter.Services
             if (controller == null) throw new ArgumentNullException("controllerId is Null!");
             return controller;
         }
-        
+
+        /// <summary>
+        /// 操作阀门
+        /// </summary>
+        public bool OperationSigngleValve(long controllerId, bool isOpen)
+        {
+            return GetControllerInfo(controllerId).OperationValveState(isOpen);
+        }
+         
+        /// <summary>
+        /// 操作整个实验
+        /// </summary>
+        /// <param name="isStart"></param>
+        /// <returns></returns>
+        public bool OperationTest(bool isStart)
+        {
+            var temp = isStart ? 1u : 0u;
+            return _controllers.Select(controller => controller.OperationTest(temp)).All(success => success);
+        }
+
+        /// <summary>
+        /// 操作单个控制器的控制模式
+        /// </summary>
+        /// <param name="controllerId"></param>
+        /// <param name="controlMode"></param>
+        /// <returns></returns>
+        public bool OperationControlMode(long controllerId, SystemControlState controlMode)
+        {
+            return GetControllerInfo(controllerId).OperationControlMode(controlMode);
+        }
+
+        /// <summary>
+        /// 手动控制
+        /// </summary>
+        /// <param name="controllerId">控制器ID</param>
+        /// <param name="deviceId">对应控制的作动器设备ID</param>
+        /// <param name="speed">作动器位移的速度</param>
+        /// <returns></returns>
+        public bool ManualControl(long controllerId, long deviceId, float speed)
+        {
+            var controller = GetControllerInfo(controllerId);
+            return controller.ManualControl(speed);
+        }
+
+        /// <summary>
+        /// 静态控制
+        /// </summary>
+        /// <param name="controllerId"></param>
+        /// <param name="deviceId"></param>
+        /// <param name="staticControlParam"></param>
+        /// <returns></returns>
+        public bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam)
+        {
+            var controller = GetControllerInfo(controllerId);
+            return controller.StaticControl(staticControlParam);
+        }
+
+        /// <summary>
+        /// 动态控制
+        /// </summary>
+        /// <param name="controllerId"></param>
+        /// <param name="deviceId"></param>
+        /// <param name="dynamicControlParam"></param>
+        /// <returns></returns>
+        public bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam)
+        {
+            var controller = GetControllerInfo(controllerId);
+            return controller.DynamicControl(dynamicControlParam);
+        }
+
         /// <summary>
         /// 创建控制器
         /// </summary>

@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices
 {
@@ -26,7 +28,10 @@ namespace MCCS.Collecter.HardwareDevices
         public string DeviceName { get; }
         public string DeviceType { get; }
         public HardwareConnectionStatus Status { get; protected set; }
-
+        /// <summary>
+        /// 控制器当前所处的控制状态 
+        /// </summary>
+        public SystemControlState ControlState { get; protected set; }
         public IObservable<DataPoint> DataStream { get; protected set; }
         public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
         // 不预先展开，而是提供展开后的Observable;单个的数据流
@@ -68,6 +73,45 @@ namespace MCCS.Collecter.HardwareDevices
         {
             _isRunning = false;
         }
+
+
+        #region 可重写的方法
+        /// <summary>
+        /// 操作试验实验状态
+        /// </summary>
+        /// <param name="isStart">是否开始 0-停止  1-开始</param>
+        public abstract bool OperationTest(uint isStart);
+        /// <summary>
+        /// 操作阀门
+        /// </summary>
+        /// <param name="isOpen"></param>
+        /// <returns></returns>
+        public abstract bool OperationValveState(bool isOpen);
+        /// <summary>
+        /// 切换控制方式
+        /// </summary>
+        /// <param name="controlState"></param>
+        /// <returns></returns>
+        public abstract bool OperationControlMode(SystemControlState controlState);
+        /// <summary>
+        /// 手动控制
+        /// </summary>
+        /// <param name="outValue"></param>
+        /// <returns></returns>
+        public abstract bool ManualControl(float outValue);
+        /// <summary>
+        /// 静态控制
+        /// </summary>
+        /// <param name="controlParams"></param>
+        /// <returns></returns>
+        public abstract bool StaticControl(StaticControlParams controlParams);
+        /// <summary>
+        /// 疲劳控制
+        /// </summary>
+        /// <param name="controlParams"></param>
+        /// <returns></returns>
+        public abstract bool DynamicControl(DynamicControlParams controlParams);
+        #endregion
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)
         {

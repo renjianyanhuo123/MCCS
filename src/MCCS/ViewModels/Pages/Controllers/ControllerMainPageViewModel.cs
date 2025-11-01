@@ -1,9 +1,17 @@
-﻿using MCCS.Collecter.Services;
+﻿using System.Reactive.Linq;
+using MCCS.Collecter.Services;
+using MCCS.Common.DataManagers;
 using MCCS.Core.Devices.Commands; 
 using MCCS.Events.Controllers;
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
+using System.Security.AccessControl;
+using MCCS.Collecter.DllNative.Models;
+using MCCS.Components.GlobalNotification.Models;
+using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
@@ -12,35 +20,38 @@ namespace MCCS.ViewModels.Pages.Controllers
         public const string Tag = "ControllerMainPage";  
         private readonly IEventAggregator _eventAggregator;
         private readonly IControllerService _controllerService;
-
-        private bool _isShowController = false;
-        private bool _isParticipateControl = false; 
-
-        private bool _isSelected = false;  
-        private long _currentModelId = -1;
-
-        private ControlTypeEnum _controlType = ControlTypeEnum.Single; 
-        private int _selectedControlMode = 0; 
-        private string _currentChannelName = string.Empty; 
-
-        private CommandExecuteStatusEnum _currentCommandStatus;
+        private readonly INotificationService _notificationService;
+        private readonly long _controllerId = -1;
+        private readonly long _deviceId = -1;
 
         public ControllerMainPageViewModel(
             IControllerService controllerService,
+            INotificationService notificationService,
             IEventAggregator eventAggregator)
         {
             _controllerService = controllerService;
-            _eventAggregator = eventAggregator;  
+            _eventAggregator = eventAggregator;
+            _notificationService = notificationService;
         }
 
         public ControllerMainPageViewModel(
             long modelId,
             IControllerService controllerService,
-            IEventAggregator eventAggregator) : this(controllerService, eventAggregator)
+            INotificationService notificationService,
+            IEventAggregator eventAggregator) : this(controllerService, notificationService, eventAggregator)
         {
             IsParticipateControl = true;
             CurrentModelId = modelId;
             CurrentChannelName = "力/位移控制通道";
+            ParticipateControlCommand = new DelegateCommand<long?>(ExecuteParticipateControlCommand);
+            ControlModeSelectionChangedCommand = new DelegateCommand(ExecuteControlModeSelectionChangedCommand);
+            ApplyCommand = new DelegateCommand(ExecuteApplyCommand);
+            StopCommand = new DelegateCommand(ExecuteStopCommand);
+            // 查找当前模型对应的设备ID  的  控制器ID
+            var tempDevice = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId)?.MappingDevice;
+            if (tempDevice?.ParentDeviceId== null) throw new ArgumentNullException("未配置连接到控制器");
+            _controllerId = (long)tempDevice.ParentDeviceId;
+            _deviceId = tempDevice.Id;
         }
 
         #region Proterty
@@ -56,6 +67,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 当前指令的执行状态
         /// </summary>
+        private CommandExecuteStatusEnum _currentCommandStatus;
         public CommandExecuteStatusEnum CurrentCommandStatus 
         {
             get => _currentCommandStatus;
@@ -64,22 +76,25 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 当前选择的控制模式
         /// </summary>
+        private int _selectedControlMode = 0;
         public int SelectedControlMode
         {
             get => _selectedControlMode;
             set => SetProperty(ref _selectedControlMode, value);
-        } 
+        }
         /// <summary>
         /// 当前是否选中
         /// </summary>
+        private bool _isSelected = false;
         public bool IsSelected
         {
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
-        }  
+        }
         /// <summary>
         /// 控制类型
         /// </summary>
+        private ControlTypeEnum _controlType = ControlTypeEnum.Single;
         public ControlTypeEnum ControlType
         {
             get => _controlType;
@@ -88,6 +103,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 当前模型Id
         /// </summary>
+        private long _currentModelId = -1;
         public long CurrentModelId
         {
             get => _currentModelId;
@@ -96,14 +112,16 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 当前通道名称
         /// </summary>
+        private string _currentChannelName = string.Empty;
         public string CurrentChannelName 
         {
             get => _currentChannelName;
             set => SetProperty(ref _currentChannelName, value);
-        } 
+        }
         /// <summary>
         /// 是否参与控制
         /// </summary>
+        private bool _isParticipateControl = false;
         public bool IsParticipateControl 
         {
             get => _isParticipateControl;
@@ -111,58 +129,135 @@ namespace MCCS.ViewModels.Pages.Controllers
         } 
         #endregion
 
-        #region Command 
+        #region Command
+
         /// <summary>
         /// 是否参与控制
         /// </summary>
-        public DelegateCommand<long?> ParticipateControlCommand => new(ExecuteParticipateControlCommand);
+        public DelegateCommand<long?> ParticipateControlCommand { get; }
+
         /// <summary>
         /// 控制模式切换命令
         /// </summary>
-        public DelegateCommand ControlModeSelectionChangedCommand => new(ExecuteControlModeSelectionChangedCommand);
+        public DelegateCommand ControlModeSelectionChangedCommand { get; }
+
         /// <summary>
         /// 应用命令
         /// </summary>
-        public DelegateCommand ApplyCommand => new(ExecuteApplyCommand); 
-
-        public DelegateCommand StopCommand => new(ExecuteStopCommand);
-        #endregion 
+        public DelegateCommand ApplyCommand { get; }
+        /// <summary>
+        /// 暂停命令
+        /// </summary>
+        public DelegateCommand StopCommand { get; }
+        #endregion
 
         #region private method 
+        /// <summary>
+        /// 根据静态控制视图模型获取静态控制枚举
+        /// </summary>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
+        private static StaticLoadControlEnum GetStaticLoadControl(ViewStaticControlViewModel viewModel)
+        {
+            return viewModel switch
+            {
+                { SelectedControlUnitType: 0, SelectedTargetUnitType: 0 } => StaticLoadControlEnum.CTRLMODE_LoadS,
+                { SelectedControlUnitType: 0, SelectedTargetUnitType: 1 } => StaticLoadControlEnum.CTRLMODE_LoadSVNP,
+                { SelectedControlUnitType: 1, SelectedTargetUnitType: 0 } => StaticLoadControlEnum.CTRLMODE_LoadNVSP,
+                { SelectedControlUnitType: 1, SelectedTargetUnitType: 1 } => StaticLoadControlEnum.CTRLMODE_LoadN,
+                _ => StaticLoadControlEnum.CTRLMODE_LoadS
+            };
+        }
+
+        /// <summary>
+        /// 指令执行状态监听回调
+        /// </summary>
+        /// <param name="param"></param>
+        private void OnCommandExecuteStatus(BatchCollectItemModel param)
+        {
+            if ()
+            {
+
+            }
+        }
+
         /// <summary>
         /// 应用命令
         /// </summary>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        private void ExecuteApplyCommand() 
+        private void ExecuteApplyCommand()
         {
+            if (_controllerId == -1 || _deviceId == -1) return;
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
-            //var model = _controlInfoDic[CurrentChannelId].ControlParams;
-            //var res = new ReceivedCommandDataEventParam
-            //{
-            //    ControlMode = (ControlMode)SelectedControlMode,
-            //    Param = _tempSaveControlParamInfo
-            //};
-            //if (ControlType == ControlTypeEnum.Single)
-            //{
-            //    res.ChannelIds.Add(CurrentChannelId);
-            //}
-            //else
-            //{
-            //    var combineInfo = _controlCombineInfos.FirstOrDefault(c => c.CombineChannelId == SelectedControlCombineInfo.CombineChannelId);
-            //    if (combineInfo != null)
-            //    {
-            //        res.ChannelIds.AddRange(combineInfo.ControlChannels.Select(s => s.ChannelId));
-            //    }
-            //}
-            //_eventAggregator.GetEvent<ReceivedCommandDataEvent>().Publish(res);
-            //_eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Subscribe(res =>
-            //{
-            //    var success = _controlInfoDic.TryGetValue(res.CommandId, out var controlInfo);
-            //    if (!success || controlInfo == null) return;
-            //    controlInfo.ExecutingStatus = res.CommandExecuteStatus;
-            //    if (CurrentChannelId == res.CommandId) CurrentCommandStatus = res.CommandExecuteStatus;
-            //});
+            var controlMode = (ControlMode)SelectedControlMode;
+            switch (controlMode)
+            {
+                case ControlMode.Fatigue:
+                    if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
+                    {
+                        var success = _controllerService.DynamicControl(_controllerId, _deviceId, new DynamicControlParams
+                        {
+                            ControlMode = fatigueControlViewModel.ControlUnitType,
+                            Amplitude = fatigueControlViewModel.Amplitude,
+                            WaveType = fatigueControlViewModel.WaveformType,
+                            Frequency = fatigueControlViewModel.Frequency,
+                            MeanValue = fatigueControlViewModel.Median,
+                            CompensateAmplitude = fatigueControlViewModel.CompensateAmplitude,
+                            CompensationPhase = fatigueControlViewModel.CompensatePhase,
+                            IsAdjustedMedian = false,
+                            CycleCount = fatigueControlViewModel.CycleTimes
+                        });
+                        if (success)
+                        {
+                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
+                        }
+                        else
+                        {
+                            _notificationService.Show("失败", "该通道启动疲劳控制失败!", NotificationType.Error);
+                        }
+                    }
+                    break;
+                case ControlMode.Static:
+                    if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
+                    {
+                        var success = _controllerService.StaticControl(_controllerId, _deviceId,
+                            new StaticControlParams
+                            {
+                                StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
+                                Speed = staticControlViewModel.Speed,
+                                TargetValue = staticControlViewModel.TargetValue
+                            });
+                        if (success)
+                        {
+                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
+                            // 开启订阅流检查指令是否完成 
+                            var controller = _controllerService.GetControllerInfo(_controllerId);
+                            var tempSubscribe = controller
+                                .IndividualDataStream
+                                .Sample(TimeSpan.FromMilliseconds(100))
+                                .Subscribe(OnCommandExecuteStatus);
+                        }
+                        else
+                        {
+                            _notificationService.Show("失败", "该通道启动静态控制失败!", NotificationType.Error);
+                        }
+                    }
+                    break;
+                case ControlMode.Programmable:
+                    if (CurrentPage.DataContext is ViewProgramControlViewModel programControlViewModel)
+                    {
+
+                    }
+                    break;
+                case ControlMode.Manual:
+                    if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
+                    { 
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         /// <summary>
@@ -182,33 +277,46 @@ namespace MCCS.ViewModels.Pages.Controllers
             var controlMode = (ControlMode)SelectedControlMode; 
             switch (controlMode)
             {
-                case ControlMode.Fatigue:
-                    var fatigue = new ViewFatigueControl
+                case ControlMode.Fatigue: 
+                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Dynamic))
                     {
-                        DataContext = new ViewFatigueControlViewModel()
-                    };
-                    CurrentPage = fatigue;
+                        var fatigue = new ViewFatigueControl
+                        {
+                            DataContext = new ViewFatigueControlViewModel()
+                        };
+                        CurrentPage = fatigue;
+                    } 
                     break;
-                case ControlMode.Static:
-                    var staticView = new ViewStaticControl
+                case ControlMode.Static: 
+                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Static))
                     {
-                        DataContext = new ViewStaticControlViewModel()
-                    };
-                    CurrentPage = staticView;
+                        var staticView = new ViewStaticControl
+                        {
+                            DataContext = new ViewStaticControlViewModel()
+                        };
+                        CurrentPage = staticView;
+                    } 
                     break;
-                case ControlMode.Programmable:
-                    var programView = new ViewProgramControl
+                case ControlMode.Programmable: 
+                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Static))
                     {
-                        DataContext = new ViewProgramControlViewModel()
-                    };
-                    CurrentPage = programView;
+                        var programView = new ViewProgramControl
+                        {
+                            DataContext = new ViewProgramControlViewModel()
+                        };
+                        CurrentPage = programView;
+                    } 
                     break;
                 case ControlMode.Manual:
-                    var manualView = new ViewManualControl
+                    
+                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.OpenLoop))
                     {
-                        DataContext = new ViewManualControlViewModel()
-                    };
-                    CurrentPage = manualView;
+                        var manualView = new ViewManualControl
+                        {
+                            DataContext = new ViewManualControlViewModel()
+                        };
+                        CurrentPage = manualView;
+                    }
                     break;
                 default:
                     break;

@@ -3,11 +3,8 @@
     public class ViewManualControlViewModel : BindableBase
     {
         public const string Tag = "ManualControl";
-
+         
         private double _outputMaxValue = 100.0;
-        private double _outputMinValue = 0.0;
-        private double _outPutValue = 0.0;  
-
         public double OutputMaxValue
         {
             get => _outputMaxValue;
@@ -15,11 +12,12 @@
             {
                 if (SetProperty(ref _outputMaxValue, value))
                 {
-                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一  
+                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 100.0; // 计算步长为最大值和最小值之差的20之一  
                 }
             }
         }
 
+        private double _outputMinValue = -100.0;
         public double OutputMinValue
         {
             get => _outputMinValue;
@@ -27,10 +25,11 @@
             {
                 if (SetProperty(ref _outputMinValue, value)) 
                 {
-                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 20.0; // 计算步长为最大值和最小值之差的20之一   
+                    ChangeStep = Math.Abs(OutputMaxValue - OutputMinValue) / 100.0; // 计算步长为最大值和最小值之差的20之一   
                 }
             }
         } 
+
         private double _changeStep = 1.0;
         public double ChangeStep
         {
@@ -38,6 +37,7 @@
             set => SetProperty(ref _changeStep, value);
         }
 
+        private double _outPutValue = 0.0;
         public double OutPutValue
         {
             get => _outPutValue;

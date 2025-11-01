@@ -32,7 +32,6 @@ using System.Windows.Media.Media3D;
 using MCCS.Common.DataManagers.CurrentTest;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Components.GlobalNotification.Models;
-using MCCS.Infrastructure.TestModels;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;
 using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
@@ -168,6 +167,7 @@ namespace MCCS.ViewModels.Pages
         }
         /// <summary>
         /// 是否暂停
+        /// 这是整个停止的按钮
         /// </summary>
         private bool _isPaused = false; 
         public bool IsPaused
@@ -210,7 +210,8 @@ namespace MCCS.ViewModels.Pages
             IsDynamic = true
         };
 
-        #region 状态显示模型
+        #region 状态显示模型 
+        // TODO: 暂时先保留后面如果用到
         public BillboardSingleImage3D BillboardModel { private set; get; }
         public SharpDX.Matrix[] BillboardInstances { private set; get; }
         public BillboardInstanceParameter[] BillboardInstanceParams { private set; get; }
@@ -396,26 +397,36 @@ namespace MCCS.ViewModels.Pages
 
         private void ExecuteStartTestCommand()
         {
+            // TODO：后期如果更加复杂后，需要加入事务处理
             if (IsStartedTest)
             { 
                 if ((DateTimeOffset.Now - GlobalDataManager.Instance.CurrentTestInfo.StartTime).Seconds < 3)
                 {
                     _notificationService.Show("提示", "实验时间小于3S,请稍后......");
                     return;
-                }
+                } 
                 // 终止当前实验时,将会重置整个实验
-                if (GlobalDataManager.Instance.CurrentTestInfo.Stop())
+                if (_controllerService.OperationTest(false) && GlobalDataManager.Instance.CurrentTestInfo.Stop())
                 {
+                    _notificationService.Show("成功", "成功停止实验!", NotificationType.Success);
                     GlobalDataManager.Instance.SetValue(new CurrentTestInfo());
-                    _controllerService.StartAllControllers();
-                    IsStartedTest = false;
+                    IsStartedTest = false; 
+                }
+                else
+                {
+                    _notificationService.Show("失败", "未能正确停止实验,请检查!", NotificationType.Error);
                 }
             }
             else
             { 
-                if (GlobalDataManager.Instance.CurrentTestInfo.Start())
+                if (_controllerService.OperationTest(true) && GlobalDataManager.Instance.CurrentTestInfo.Start())
                 {
-                    IsStartedTest = true;
+                    _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
+                    IsStartedTest = true;  
+                }
+                else
+                {
+                    _notificationService.Show("失败", "未能正确开启实验,请检查!", NotificationType.Error);
                 }
             } 
         }
@@ -465,7 +476,7 @@ namespace MCCS.ViewModels.Pages
             if (multipleControllerMainPageViewModel == null) return;
             foreach (var item in multipleControllerMainPageViewModel.Children)
             {
-                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerService, _notificationService, _eventAggregator));
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
@@ -530,7 +541,7 @@ namespace MCCS.ViewModels.Pages
                 .Select(controller => _controllerService.GetControllerInfo(controller.Id))
                 .Where(controllerInfo => controllerInfo != null)
                 .Select(controllerInfo => controllerInfo.IndividualDataStream
-                    .Sample(TimeSpan.FromSeconds(0.4))
+                    .Sample(TimeSpan.FromMilliseconds(400))
                     .Select(data => new
                     {
                         ControllerId = controllerInfo.DeviceId,
@@ -748,7 +759,7 @@ namespace MCCS.ViewModels.Pages
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
                 && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentModelId == clickedModel.Model3DData.Id)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerService, _notificationService, _eventAggregator));
                 IsShowController = Controllers.Count > 0;
             }
         }

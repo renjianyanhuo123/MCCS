@@ -1,4 +1,5 @@
-﻿using MCCS.Common.DataManagers;
+﻿using MCCS.Collecter.Services;
+using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
@@ -13,10 +14,13 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         private string _modelId = string.Empty;
 
         private readonly IEventAggregator _eventAggregator;
+        private readonly IControllerService _controllerService;
 
-        public RightMenuMainPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
+            IControllerService controllerService) : base(eventAggregator)
         {
-            _eventAggregator = eventAggregator; 
+            _eventAggregator = eventAggregator;
+            _controllerService = controllerService;
             OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
             eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>()
                 .Subscribe(param =>
@@ -52,15 +56,9 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
             var success = bool.TryParse(obj, out var isOpen);
             if (!success) return;
             var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(s => s.Id == _deviceId);
-            if (device is not ActuatorDevice actuatorDevice) return;
-            if (isOpen)
-            {
-                actuatorDevice.OpenValve();
-            }
-            else
-            {
-                actuatorDevice.CloseValve();
-            }
+            if (device is not ActuatorDevice actuatorDevice || actuatorDevice.ParentDeviceId == null) return;  
+            if (!_controllerService.OperationSigngleValve((long)actuatorDevice.ParentDeviceId, isOpen)) return;
+            actuatorDevice.OperationValve(isOpen);
             IsOpen = isOpen;
             _eventAggregator.GetEvent<OperationValveEvent>().Publish(new OperationValveEventParam
             {

@@ -21,6 +21,7 @@
     <None Remove="App.xaml~RF43ad201d.TMP" />
     <None Remove="Resources\mainpagemethod.png" />
     <None Remove="Resources\mainpagetest.png" />
+    <None Remove="ViewModels\Pages\Controllers\ControllerMainPageViewModel.cs~RFac07cd45.TMP" />
   </ItemGroup>
 
   <ItemGroup>

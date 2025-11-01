@@ -20,16 +20,9 @@ namespace MCCS.Common.DataManagers.Devices
         /// <summary>
         /// 开阀
         /// </summary>
-        public void OpenValve()
+        public void OperationValve(bool isOpen)
         {
-            ValveStatus = ValveStatusEnum.Opened;
-        }
-        /// <summary>
-        /// 关阀
-        /// </summary>
-        public void CloseValve()
-        {
-            ValveStatus = ValveStatusEnum.Closed;
+            ValveStatus = isOpen ?  ValveStatusEnum.Opened : ValveStatusEnum.Closed;
         }
     }
 }

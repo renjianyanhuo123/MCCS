@@ -20,10 +20,10 @@
         <StackPanel>
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="控制模式" />
             <ComboBox
-                    x:Name="control_mode" 
+                    x:Name="Control_Mode" 
                     SelectedIndex="{Binding SelectedControlUnitType}">
-                <ComboBoxItem TabIndex="0" Content="试验力"  Tag="mm"/>
-                <ComboBoxItem TabIndex="1" Content="位移" Tag="kN" />
+                <ComboBoxItem TabIndex="0" Content="位移"  Tag="mm"/>
+                <ComboBoxItem TabIndex="1" Content="试验力" Tag="kN" />
             </ComboBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
@@ -34,11 +34,20 @@
             </TextBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
-            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" />
-            <TextBox materialDesign:HintAssist.Hint="请输入目标值" 
-                     Text="{Binding TargetValue, Mode=TwoWay}"
-             materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}">
-            </TextBox>
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" /> 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.8*"></ColumnDefinition>
+                    <ColumnDefinition Width="0.2*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" materialDesign:HintAssist.Hint="请输入目标值"  
+                         Text="{Binding TargetValue, Mode=TwoWay}" >
+                </TextBox>
+                <ComboBox Grid.Column="1" SelectedIndex="{Binding SelectedTargetUnitType}">
+                    <ComboBoxItem TabIndex="0">mm</ComboBoxItem>
+                    <ComboBoxItem TabIndex="1">kN</ComboBoxItem>
+                </ComboBox>
+            </Grid>
         </StackPanel>
     </StackPanel>
 </UserControl>

@@ -25,7 +25,7 @@
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Text="设定输出最小值" Margin="{StaticResource TextMargin}"/>
             <Slider
               Maximum="{Binding OutputMaxValue}"
-              Minimum="0"
+              Minimum="0.0"
               TickFrequency="5"
               SmallChange="1"
               Style="{StaticResource MaterialDesignDiscreteSlider}"
@@ -44,12 +44,19 @@
               Value="{Binding OutputMaxValue}" />
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
+            <TextBlock  Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Text="选择运动方向" Margin="{StaticResource TextMargin}" />
+            <ComboBox FontSize="14">
+                <ComboBoxItem TabIndex="0">伸</ComboBoxItem>
+                <ComboBoxItem TabIndex="1">缩</ComboBoxItem>
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock  Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Text="设定输出值(%)" Margin="{StaticResource TextMargin}" />
             <materialDesign:DecimalUpDown
           ValueStep="{Binding ChangeStep}"
           Minimum="{Binding OutputMinValue}"
           Maximum="{Binding OutputMaxValue}"
-          Value="{Binding OutPutValue}"/>
+          Value="{Binding OutPutValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
     </StackPanel>
 </UserControl>

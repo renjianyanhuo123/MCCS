@@ -1,4 +1,6 @@
 ﻿using MCCS.Collecter.HardwareDevices;
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.Services
 {
@@ -9,6 +11,18 @@ namespace MCCS.Collecter.Services
         ControllerHardwareDeviceBase GetControllerInfo(long controllerId);
 
         bool CreateController(HardwareDeviceConfiguration configuration);
+
+        bool OperationSigngleValve(long controllerId, bool isOpen);
+
+        bool OperationTest(bool isStart);
+
+        bool OperationControlMode(long controllerId, SystemControlState controlMode);
+
+        bool ManualControl(long controllerId, long deviceId, float speed);
+
+        bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam);
+
+        bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam);
 
         bool RemoveController(int deviceId);
 

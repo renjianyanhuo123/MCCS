@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.DllNative.Models
+﻿namespace MCCS.Infrastructure.TestModels
 {
     /// <summary>
     /// 系统控制状态

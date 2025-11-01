@@ -6,7 +6,8 @@
              xmlns:convert="clr-namespace:MCCS.Converters.ControlCommand"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" 
-             xmlns:controlcommandpages="clr-namespace:MCCS.ViewModels.Pages.ControlCommandPages" 
+             xmlns:controlcommandpages="clr-namespace:MCCS.ViewModels.Pages.ControlCommandPages"
+             xmlns:testStarting="clr-namespace:MCCS.Converters.TestStarting"
              d:DataContext="{d:DesignInstance Type=controlcommandpages:ViewFatigueControlViewModel}"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
@@ -14,6 +15,7 @@
     <UserControl.Resources>
         <Thickness x:Key="StackPanelMargin">0,25,0,0</Thickness>
         <Thickness x:Key="TextMargin">0,0,0,5</Thickness>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
         <convert:EnumToSuffixTextConverter x:Key="EnumToSuffixTextConverter" />
     </UserControl.Resources>
     <StackPanel> 
@@ -31,7 +33,7 @@
             <ComboBox SelectedIndex="{Binding WaveformType, Mode=TwoWay}">
                 <ComboBoxItem TabIndex="0" Content="正弦波"  />
                 <ComboBoxItem TabIndex="1" Content="方波"   />
-                <ComboBoxItem TabIndex="2" Content="二角波"  />
+                <ComboBoxItem TabIndex="2" Content="三角波"  />
                 <ComboBoxItem TabIndex="3" Content="斜波"   />
                 <ComboBoxItem TabIndex="4" Content="半正弦波"  />
             </ComboBox>
@@ -52,9 +54,12 @@
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="中值" />
-            <TextBox Text="{Binding Median, Mode=TwoWay}" 
-                    materialDesign:HintAssist.Hint="请输入中值" 
-                     materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}" />
+            <UniformGrid Columns="2">
+                <TextBox Text="{Binding Median, Mode=TwoWay}" 
+                         materialDesign:HintAssist.Hint="请输入中值" 
+                         materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}}" />
+                <Button Content="调整中值" Width="Auto" Height="Auto" Margin="3,0,0,0"></Button>
+            </UniformGrid> 
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环次数" />
@@ -64,25 +69,19 @@
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="循环计数" />
             <TextBox IsEnabled="False" Text="{Binding CycleCount}" />
         </StackPanel>
-        <UniformGrid Columns="2" Margin="{StaticResource StackPanelMargin}">
-            <TextBlock Text="幅值补偿:2.4" />
-            <TextBlock Text="相位补偿:-8.0" />
+        <UniformGrid Columns="4" Margin="{StaticResource StackPanelMargin}">
+            <TextBlock Text="幅值补偿:" />
+            <TextBox Text="{Binding CompensateAmplitude, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+            <TextBlock Text="相位补偿:" />
+            <TextBox Text="{Binding CompensatePhase, UpdateSourceTrigger=PropertyChanged}"></TextBox>
         </UniformGrid>
-        <!--<Separator Margin="0 5" />
-        <StackPanel  Margin="{StaticResource StackPanelMargin}"
-                 HorizontalAlignment="Center"
-                 Orientation="Horizontal">
-            <Button Width="60" 
-                Content="应用"
-                Margin="0 0 5 0" />
-            <Button Width="60" 
-            Content="中值"
-            Margin="0 0 5 0"  />
-            <Button Width="60" 
-            Content="暂停"
-            Margin="0 0 5 0" />
-            <Button Width="60" 
-            Content="补偿"  />
-        </StackPanel>-->
+        <UniformGrid Margin="0,5,0,0" Columns="2"
+                     Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Button Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
+                    Margin="0,0,5,0"
+                    Content="应用" />
+            <Button Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
+                    Content="解锁" />
+        </UniformGrid> 
     </StackPanel>
 </UserControl>

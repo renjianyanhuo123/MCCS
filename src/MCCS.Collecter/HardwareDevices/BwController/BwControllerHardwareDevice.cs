@@ -3,10 +3,10 @@ using MCCS.Collecter.DllNative.Models;
 using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
@@ -87,14 +87,76 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             }
         }
 
-        #region Control Method
-        /// <summary>
-        /// 开始试验
-        /// </summary>
-        public void OperationTestStart(TestState testState)
+        #region Control Method 
+        public override bool OperationTest(uint isStart)
         {
-            if (Status != HardwareConnectionStatus.Connected) return;
-            POPNetCtrl.NetCtrl01_Set_TestStartState(base._deviceHandle, (byte)testState);
+            if (Status != HardwareConnectionStatus.Connected) return false; 
+            var success = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, (byte)isStart);
+            return success == AddressContanst.OP_SUCCESSFUL;
+        }
+        
+        public override bool OperationValveState(bool isOpen)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            var v = isOpen ? 1u : 0u;
+            var result = POPNetCtrl.NetCtrl01_Set_StationCtrl(_deviceHandle, v, 0);
+            return result == AddressContanst.OP_SUCCESSFUL;
+        }
+         
+        public override bool OperationControlMode(SystemControlState controlState)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            var result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)controlState);
+            return result == AddressContanst.OP_SUCCESSFUL;
+        } 
+
+        public override bool ManualControl(float outValue)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            if (ControlState != SystemControlState.Static)
+            {
+                var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Static);
+                if(setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                ControlState = SystemControlState.Static;
+            }
+            var setCtrlModeResult = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)StaticLoadControlEnum.CTRLMODE_LoadS, outValue, 0);
+            return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL; 
+        }
+         
+        public override bool StaticControl(StaticControlParams controlParams)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            if (ControlState != SystemControlState.Static)
+            {
+                var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Static);
+                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                ControlState = SystemControlState.Static;
+            }
+            var result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)controlParams.StaticLoadControl, controlParams.Speed, controlParams.TargetValue);
+            return result == AddressContanst.OP_SUCCESSFUL;
+        }
+        
+        public override bool DynamicControl(DynamicControlParams controlParams)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            if (ControlState != SystemControlState.Dynamic)
+            {
+                var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Dynamic);
+                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                ControlState = SystemControlState.Dynamic;
+            }
+            var result = POPNetCtrl.NetCtrl01_Osci_SetWaveInfo((int)DeviceId, 
+                controlParams.MeanValue, 
+                controlParams.Amplitude, 
+                controlParams.Frequency, 
+                (byte)controlParams.WaveType, 
+                (byte)controlParams.ControlMode, 
+                controlParams.CompensateAmplitude,
+                controlParams.CompensationPhase,
+                controlParams.CycleCount,
+                controlParams.IsAdjustedMedian ? 0: 1 
+                );
+            return result == AddressContanst.OP_SUCCESSFUL;
         }
 
         #endregion
