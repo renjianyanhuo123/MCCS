@@ -21,6 +21,11 @@ namespace MCCS.Collecter.HardwareDevices
         protected bool _isRunning = false;
 
         /// <summary>
+        /// 临时监控订阅字典（按需创建，用完自动释放）
+        /// </summary>
+        protected readonly ConcurrentDictionary<long, IDisposable> _activeMonitorings = new();
+
+        /// <summary>
         /// 当前设备句柄
         /// </summary>
         protected IntPtr _deviceHandle = IntPtr.Zero;
@@ -176,8 +181,145 @@ namespace MCCS.Collecter.HardwareDevices
             return res;
         }
 
+        #region 临时监控管理
+
+        /// <summary>
+        /// 启动StaticControl的临时监控（连续6条数据达到目标后自动停止）
+        /// </summary>
+        /// <param name="controlParams">静态控制参数</param>
+        /// <param name="allowedErrorPercent">允许误差百分比（默认2%）</param>
+        /// <param name="timeoutSeconds">超时时间（秒，默认300秒）</param>
+        protected void StartStaticControlMonitoring(StaticControlParams controlParams,
+            float allowedErrorPercent = 0.02f, int timeoutSeconds = 300)
+        {
+            // 停止该设备之前的监控
+            StopMonitoring(controlParams.DeviceId);
+
+            // 获取或创建设备上下文
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+            {
+                DeviceId = controlParams.DeviceId
+            });
+
+            // 创建临时监控订阅
+            var subscription = IndividualDataStream
+                .Buffer(6, 1)  // 滑动窗口：连续6条数据
+                .Where(buffer => buffer.Count == 6)
+                .Select(buffer => CheckStaticTargetReached(buffer, controlParams, allowedErrorPercent))
+                .DistinctUntilChanged()  // 只在状态变化时触发
+                .Where(isReached => isReached)  // 只关注达到目标的情况
+                .Take(1)  // 只取第一次达到目标
+                .Timeout(TimeSpan.FromSeconds(timeoutSeconds))  // 超时保护
+                .Subscribe(
+                    onNext: _ =>
+                    {
+                        // 达到目标
+                        UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.ExecuttionCompleted);
+                        // 自动清理订阅
+                        StopMonitoring(controlParams.DeviceId);
+                    },
+                    onError: ex =>
+                    {
+                        // 超时或其他错误
+                        if (ex is TimeoutException)
+                        {
+                            UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Timeout);
+                        }
+                        else
+                        {
+                            UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Failed);
+                        }
+                        StopMonitoring(controlParams.DeviceId);
+                    }
+                );
+
+            _activeMonitorings.TryAdd(controlParams.DeviceId, subscription);
+        }
+
+        /// <summary>
+        /// 检查连续6条数据是否都达到目标
+        /// </summary>
+        private bool CheckStaticTargetReached(IList<BatchCollectItemModel> buffer,
+            StaticControlParams controlParams, float allowedErrorPercent)
+        {
+            // 根据控制模式获取相应的信号值并检查是否都在误差范围内
+            return buffer.All(data =>
+            {
+                var currentValue = GetCurrentValueByControlMode(data, controlParams.StaticLoadControl);
+                if (currentValue == null) return false;
+
+                var error = Math.Abs(currentValue.Value - controlParams.TargetValue);
+                var allowedError = Math.Abs(controlParams.TargetValue * allowedErrorPercent);
+                return error <= allowedError;
+            });
+        }
+
+        /// <summary>
+        /// 根据控制模式获取当前值
+        /// </summary>
+        private float? GetCurrentValueByControlMode(BatchCollectItemModel data, StaticLoadControlEnum controlMode)
+        {
+            return controlMode switch
+            {
+                // 力控制模式：读取力信号（Net_AD_N）
+                StaticLoadControlEnum.CTRLMODE_LoadN or
+                StaticLoadControlEnum.CTRLMODE_LoadSVNP =>
+                    data.Net_AD_N.Values.FirstOrDefault(),
+
+                // 位移控制模式：读取位移信号（Net_AD_S）
+                StaticLoadControlEnum.CTRLMODE_LoadS or
+                StaticLoadControlEnum.CTRLMODE_LoadNVSP =>
+                    data.Net_AD_S.Values.FirstOrDefault(),
+
+                _ => null
+            };
+        }
+
+        /// <summary>
+        /// 停止指定设备的临时监控
+        /// </summary>
+        /// <param name="deviceId">设备ID</param>
+        protected void StopMonitoring(long deviceId)
+        {
+            if (_activeMonitorings.TryRemove(deviceId, out var subscription))
+            {
+                subscription?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// 停止所有临时监控
+        /// </summary>
+        protected void StopAllMonitorings()
+        {
+            foreach (var subscription in _activeMonitorings.Values)
+            {
+                subscription?.Dispose();
+            }
+            _activeMonitorings.Clear();
+        }
+
+        /// <summary>
+        /// 更新设备命令状态并发送事件
+        /// </summary>
+        protected void UpdateDeviceCommandStatus(long deviceId, DeviceCommandContext context, CommandExecuteStatusEnum status)
+        {
+            context.CurrentStatus = status;
+            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
+            {
+                DeviceId = deviceId,
+                Status = status,
+                Timestamp = System.Diagnostics.Stopwatch.GetTimestamp()
+            });
+        }
+
+        #endregion
+
         public virtual void Dispose()
         {
+            // 清理所有临时监控
+            StopAllMonitorings();
+
             foreach (var channel in _signals.Values)
             {
                 channel.Dispose();

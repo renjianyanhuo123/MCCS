@@ -174,6 +174,16 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
+
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+            {
+                DeviceId = controlParams.DeviceId
+            });
+            context.ControlMode = SystemControlState.Static;
+            // 设置为执行中状态
+            UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+
             var speed = controlParams.Speed / 60.0f;
             switch (controlParams.StaticLoadControl)
             {
@@ -193,7 +203,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     break;
                 default:
                     break;
-            } 
+            }
+
+            // 启动临时监控：连续6条数据达到目标后自动停止
+            // 允许误差2%，超时300秒
+            StartStaticControlMonitoring(controlParams, allowedErrorPercent: 0.02f, timeoutSeconds: 300);
+
             return true;
         }
 

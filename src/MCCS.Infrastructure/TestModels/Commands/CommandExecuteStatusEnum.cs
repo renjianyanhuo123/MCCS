@@ -17,6 +17,14 @@
         /// <summary>
         /// 执行完成
         /// </summary>
-        ExecuttionCompleted
+        ExecuttionCompleted,
+        /// <summary>
+        /// 执行失败
+        /// </summary>
+        Failed,
+        /// <summary>
+        /// 执行超时
+        /// </summary>
+        Timeout
     }
 }

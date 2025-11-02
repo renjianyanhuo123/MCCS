@@ -153,8 +153,12 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     DeviceId = controlParams.DeviceId
                 });
                 context.ControlMode = SystemControlState.Static;
-                // 手动控制模式下，设置为执行中状态
+                // 设置为执行中状态
                 UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+
+                // 启动临时监控：连续6条数据达到目标后自动停止
+                // 允许误差2%，超时300秒
+                StartStaticControlMonitoring(controlParams, allowedErrorPercent: 0.02f, timeoutSeconds: 300);
             }
             return result == AddressContanst.OP_SUCCESSFUL;
         }
@@ -268,21 +272,6 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             Timestamp = Stopwatch.GetTimestamp(),
             DataQuality = DataQuality.Bad
         };
-
-        /// <summary>
-        /// 更新设备命令状态并发送事件
-        /// </summary>
-        private void UpdateDeviceCommandStatus(long deviceId, DeviceCommandContext context, CommandExecuteStatusEnum status)
-        {
-            // 更新 Context 中的状态
-            context.CurrentStatus = status;
-            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
-            {
-                DeviceId = deviceId,
-                Status = status,
-                Timestamp = Stopwatch.GetTimestamp()
-            });
-        }
         #endregion
         public void CleanupResources()
         {
