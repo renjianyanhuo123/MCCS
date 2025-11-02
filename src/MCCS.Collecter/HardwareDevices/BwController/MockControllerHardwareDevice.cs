@@ -155,7 +155,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool ManualControl(float outValue)
+        public override bool ManualControl(long deviceId, float outValue)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
@@ -170,8 +170,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool StaticControl(StaticControlParams controlParams)
-        {
+            public override bool StaticControl(StaticControlParams controlParams)
+            {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
@@ -197,7 +197,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool DynamicControl(DynamicControlParams controlParams)
+        public override bool DynamicControl( DynamicControlParams controlParams)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             ControlState = SystemControlState.Dynamic;

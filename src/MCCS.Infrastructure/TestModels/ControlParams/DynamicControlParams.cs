@@ -3,6 +3,10 @@
     public sealed record DynamicControlParams
     {
         /// <summary>
+        /// 设备ID
+        /// </summary>
+        public long DeviceId { get; init; }
+        /// <summary>
         /// 控制模式：0=位移，1=力
         /// </summary>
         public int ControlMode { get; init; }

@@ -20,9 +20,9 @@ namespace MCCS.Collecter.Services
 
         bool ManualControl(long controllerId, long deviceId, float speed);
 
-        bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam);
+        bool StaticControl(long controllerId, StaticControlParams staticControlParam);
 
-        bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam);
+        bool DynamicControl(long controllerId, DynamicControlParams dynamicControlParam);
 
         bool RemoveController(int deviceId);
 

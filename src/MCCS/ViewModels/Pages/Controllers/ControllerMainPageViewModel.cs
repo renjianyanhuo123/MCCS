@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers;
-using MCCS.Core.Devices.Commands; 
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
@@ -11,6 +10,7 @@ using MCCS.Views.Pages.ControlCommandPages;
 using System.Security.AccessControl;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Components.GlobalNotification.Models;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.Controllers
@@ -175,10 +175,10 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <param name="param"></param>
         private void OnCommandExecuteStatus(BatchCollectItemModel param)
         {
-            if ()
-            {
+            //if ()
+            //{
 
-            }
+            //}
         }
 
         /// <summary>
@@ -196,8 +196,9 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
                     {
-                        var success = _controllerService.DynamicControl(_controllerId, _deviceId, new DynamicControlParams
+                        var success = _controllerService.DynamicControl(_controllerId, new DynamicControlParams
                         {
+                            DeviceId = _deviceId,
                             ControlMode = fatigueControlViewModel.ControlUnitType,
                             Amplitude = fatigueControlViewModel.Amplitude,
                             WaveType = fatigueControlViewModel.WaveformType,
@@ -221,9 +222,10 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Static:
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
-                        var success = _controllerService.StaticControl(_controllerId, _deviceId,
+                        var success = _controllerService.StaticControl(_controllerId,
                             new StaticControlParams
                             {
+                                DeviceId = _deviceId,
                                 StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
                                 Speed = staticControlViewModel.Speed,
                                 TargetValue = staticControlViewModel.TargetValue

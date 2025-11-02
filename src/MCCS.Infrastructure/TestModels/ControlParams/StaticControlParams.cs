@@ -23,6 +23,11 @@
     public sealed record StaticControlParams
     {
         /// <summary>
+        /// 设备ID
+        /// </summary>
+        public long DeviceId { get; init; }
+
+        /// <summary>
         /// 静态控制类型
         /// </summary>
         public StaticLoadControlEnum StaticLoadControl { get; init; }

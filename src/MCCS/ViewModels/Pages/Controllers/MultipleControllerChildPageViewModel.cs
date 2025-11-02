@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Devices.Commands;
+﻿using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;

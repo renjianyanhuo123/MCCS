@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Devices.Commands;
+﻿using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Events.ControlCommand
 {

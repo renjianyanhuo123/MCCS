@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
 {
@@ -110,7 +111,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return result == AddressContanst.OP_SUCCESSFUL;
         } 
 
-        public override bool ManualControl(float outValue)
+        public override bool ManualControl(long deviceId, float outValue)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
             if (ControlState != SystemControlState.Static)
@@ -120,6 +121,17 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 ControlState = SystemControlState.Static;
             }
             var setCtrlModeResult = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)StaticLoadControlEnum.CTRLMODE_LoadS, outValue, 0);
+            if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
+            {
+                // 创建或获取设备上下文
+                var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
+                {
+                    DeviceId = deviceId
+                });
+                context.ControlMode = SystemControlState.OpenLoop;
+                // 手动控制模式下，设置为执行中状态
+                UpdateDeviceCommandStatus(deviceId, context, CommandExecuteStatusEnum.Executing);
+            } 
             return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL; 
         }
          
@@ -133,6 +145,17 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 ControlState = SystemControlState.Static;
             }
             var result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)controlParams.StaticLoadControl, controlParams.Speed, controlParams.TargetValue);
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+                // 创建或获取设备上下文
+                var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+                {
+                    DeviceId = controlParams.DeviceId
+                });
+                context.ControlMode = SystemControlState.Static;
+                // 手动控制模式下，设置为执行中状态
+                UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+            }
             return result == AddressContanst.OP_SUCCESSFUL;
         }
         
@@ -156,6 +179,17 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 controlParams.CycleCount,
                 controlParams.IsAdjustedMedian ? 0: 1 
                 );
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+                // 创建或获取设备上下文
+                var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+                {
+                    DeviceId = controlParams.DeviceId
+                });
+                context.ControlMode = SystemControlState.Dynamic;
+                // 手动控制模式下，设置为执行中状态
+                UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+            }
             return result == AddressContanst.OP_SUCCESSFUL;
         }
 
@@ -234,6 +268,21 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             Timestamp = Stopwatch.GetTimestamp(),
             DataQuality = DataQuality.Bad
         };
+
+        /// <summary>
+        /// 更新设备命令状态并发送事件
+        /// </summary>
+        private void UpdateDeviceCommandStatus(long deviceId, DeviceCommandContext context, CommandExecuteStatusEnum status)
+        {
+            // 更新 Context 中的状态
+            context.CurrentStatus = status;
+            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
+            {
+                DeviceId = deviceId,
+                Status = status,
+                Timestamp = Stopwatch.GetTimestamp()
+            });
+        }
         #endregion
         public void CleanupResources()
         {

@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Collecter.HardwareDevices
 {
@@ -13,6 +14,9 @@ namespace MCCS.Collecter.HardwareDevices
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected readonly ReplaySubject<DataPoint> _dataSubject;
         protected IDisposable? _statusSubscription;
+
+        protected readonly Subject<CommandStatusChangeEvent> _commandStatusSubject;
+        protected readonly ConcurrentDictionary<long, DeviceCommandContext> _deviceContexts = new();
         // 是否正在采集数据
         protected bool _isRunning = false;
 
@@ -28,6 +32,11 @@ namespace MCCS.Collecter.HardwareDevices
         public string DeviceName { get; }
         public string DeviceType { get; }
         public HardwareConnectionStatus Status { get; protected set; }
+
+        /// <summary>
+        /// 命令状态变化流（包含设备ID信息）
+        /// </summary>
+        public IObservable<CommandStatusChangeEvent> CommandStatusStream => _commandStatusSubject.AsObservable();
         /// <summary>
         /// 控制器当前所处的控制状态 
         /// </summary>
@@ -43,6 +52,7 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
+            _commandStatusSubject = new Subject<CommandStatusChangeEvent>();
             _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
             foreach (var item in configuration.Signals)
             {
@@ -58,7 +68,16 @@ namespace MCCS.Collecter.HardwareDevices
         public abstract bool DisconnectFromHardware();
          
         public HardwareSignalChannel GetSignal(long signalId) => _signals.GetValueOrDefault(signalId);
-        public bool IsSignalAvailable(long signalId) => _signals.ContainsKey(signalId); 
+        public bool IsSignalAvailable(long signalId) => _signals.ContainsKey(signalId);
+
+        public DeviceCommandContext GetDeviceCommandContext(long deviceId)
+        {
+            return _deviceContexts.GetValueOrDefault(deviceId, new DeviceCommandContext
+            {
+                DeviceId = deviceId,
+                CurrentStatus = CommandExecuteStatusEnum.NoExecute
+            });
+        }
 
         public virtual void StartDataAcquisition()
         {
@@ -96,21 +115,22 @@ namespace MCCS.Collecter.HardwareDevices
         /// <summary>
         /// 手动控制
         /// </summary>
-        /// <param name="outValue"></param>
+        /// <param name="deviceId">对应连接的作动器设备ID</param>
+        /// <param name="outValue">位移运动速度</param>
         /// <returns></returns>
-        public abstract bool ManualControl(float outValue);
+        public abstract bool ManualControl(long deviceId, float outValue);
         /// <summary>
         /// 静态控制
         /// </summary>
-        /// <param name="controlParams"></param>
+        /// <param name="controlParam">静态控制参数</param>
         /// <returns></returns>
-        public abstract bool StaticControl(StaticControlParams controlParams);
+        public abstract bool StaticControl(StaticControlParams controlParam);
         /// <summary>
         /// 疲劳控制
         /// </summary>
-        /// <param name="controlParams"></param>
+        /// <param name="controlParam">动态控制参数</param>
         /// <returns></returns>
-        public abstract bool DynamicControl(DynamicControlParams controlParams);
+        public abstract bool DynamicControl(DynamicControlParams controlParam);
         #endregion
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)
@@ -165,6 +185,9 @@ namespace MCCS.Collecter.HardwareDevices
             _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
             _statusSubject.Dispose();
+            _commandStatusSubject?.OnCompleted();
+            _commandStatusSubject?.Dispose();
+            _deviceContexts.Clear();
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using MCCS.Core.Devices.Commands;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Converters.TestStarting
 {

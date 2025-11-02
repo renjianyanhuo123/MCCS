@@ -90,7 +90,7 @@ namespace MCCS.Collecter.Services
         public bool ManualControl(long controllerId, long deviceId, float speed)
         {
             var controller = GetControllerInfo(controllerId);
-            return controller.ManualControl(speed);
+            return controller.ManualControl(deviceId, speed);
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace MCCS.Collecter.Services
         /// <param name="deviceId"></param>
         /// <param name="staticControlParam"></param>
         /// <returns></returns>
-        public bool StaticControl(long controllerId, long deviceId, StaticControlParams staticControlParam)
+        public bool StaticControl(long controllerId, StaticControlParams staticControlParam)
         {
             var controller = GetControllerInfo(controllerId);
             return controller.StaticControl(staticControlParam);
@@ -109,11 +109,10 @@ namespace MCCS.Collecter.Services
         /// <summary>
         /// 动态控制
         /// </summary>
-        /// <param name="controllerId"></param>
-        /// <param name="deviceId"></param>
+        /// <param name="controllerId"></param> 
         /// <param name="dynamicControlParam"></param>
         /// <returns></returns>
-        public bool DynamicControl(long controllerId, long deviceId, DynamicControlParams dynamicControlParam)
+        public bool DynamicControl(long controllerId, DynamicControlParams dynamicControlParam)
         {
             var controller = GetControllerInfo(controllerId);
             return controller.DynamicControl(dynamicControlParam);
