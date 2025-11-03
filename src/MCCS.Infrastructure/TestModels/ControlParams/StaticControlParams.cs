@@ -28,6 +28,12 @@
         public long DeviceId { get; init; }
 
         /// <summary>
+        /// 信号接口ID;
+        /// 用于直接控制;
+        /// </summary>
+        public long SignalId { get; init; }
+
+        /// <summary>
         /// 静态控制类型
         /// </summary>
         public StaticLoadControlEnum StaticLoadControl { get; init; }

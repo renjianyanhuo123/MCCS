@@ -12,10 +12,9 @@ namespace MCCS.Collecter.HardwareDevices
     {
         protected readonly ConcurrentDictionary<long, HardwareSignalChannel> _signals = new();
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
-        protected readonly ReplaySubject<DataPoint> _dataSubject;
+        protected readonly ReplaySubject<DataPoint> _dataSubject; 
         protected IDisposable? _statusSubscription;
-
-        protected readonly Subject<CommandStatusChangeEvent> _commandStatusSubject;
+         
         protected readonly ConcurrentDictionary<long, DeviceCommandContext> _deviceContexts = new();
         // 是否正在采集数据
         protected bool _isRunning = false;
@@ -31,12 +30,8 @@ namespace MCCS.Collecter.HardwareDevices
         public long DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
-        public HardwareConnectionStatus Status { get; protected set; }
+        public HardwareConnectionStatus Status { get; protected set; } 
 
-        /// <summary>
-        /// 命令状态变化流（包含设备ID信息）
-        /// </summary>
-        public IObservable<CommandStatusChangeEvent> CommandStatusStream => _commandStatusSubject.AsObservable();
         /// <summary>
         /// 控制器当前所处的控制状态 
         /// </summary>
@@ -51,8 +46,7 @@ namespace MCCS.Collecter.HardwareDevices
             DeviceId = configuration.DeviceId;
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType;
-            _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
-            _commandStatusSubject = new Subject<CommandStatusChangeEvent>();
+            _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected); 
             _dataSubject = new ReplaySubject<DataPoint>(bufferSize: 1000);
             foreach (var item in configuration.Signals)
             {
@@ -75,6 +69,7 @@ namespace MCCS.Collecter.HardwareDevices
             return _deviceContexts.GetValueOrDefault(deviceId, new DeviceCommandContext
             {
                 DeviceId = deviceId,
+                IsValid = false,
                 CurrentStatus = CommandExecuteStatusEnum.NoExecute
             });
         }
@@ -118,19 +113,19 @@ namespace MCCS.Collecter.HardwareDevices
         /// <param name="deviceId">对应连接的作动器设备ID</param>
         /// <param name="outValue">位移运动速度</param>
         /// <returns></returns>
-        public abstract bool ManualControl(long deviceId, float outValue);
+        public abstract DeviceCommandContext ManualControl(long deviceId, float outValue);
         /// <summary>
         /// 静态控制
         /// </summary>
         /// <param name="controlParam">静态控制参数</param>
         /// <returns></returns>
-        public abstract bool StaticControl(StaticControlParams controlParam);
+        public abstract DeviceCommandContext StaticControl(StaticControlParams controlParam);
         /// <summary>
         /// 疲劳控制
         /// </summary>
         /// <param name="controlParam">动态控制参数</param>
         /// <returns></returns>
-        public abstract bool DynamicControl(DynamicControlParams controlParam);
+        public abstract DeviceCommandContext DynamicControl(DynamicControlParams controlParam);
         #endregion
 
         protected void AddSignal(HardwareSignalConfiguration signalConfiguration)
@@ -184,9 +179,7 @@ namespace MCCS.Collecter.HardwareDevices
             }
             _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
-            _statusSubject.Dispose();
-            _commandStatusSubject?.OnCompleted();
-            _commandStatusSubject?.Dispose();
+            _statusSubject.Dispose(); 
             _deviceContexts.Clear();
         }
     }

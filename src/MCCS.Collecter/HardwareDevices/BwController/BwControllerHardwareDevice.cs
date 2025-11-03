@@ -111,61 +111,90 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return result == AddressContanst.OP_SUCCESSFUL;
         } 
 
-        public override bool ManualControl(long deviceId, float outValue)
+        public override DeviceCommandContext ManualControl(long deviceId, float outValue)
         {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
+            {
+                DeviceId = deviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             if (ControlState != SystemControlState.Static)
             {
                 var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Static);
-                if(setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                if(setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return context;
                 ControlState = SystemControlState.Static;
             }
             var setCtrlModeResult = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)StaticLoadControlEnum.CTRLMODE_LoadS, outValue, 0);
             if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
             {
-                // 创建或获取设备上下文
-                var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
-                {
-                    DeviceId = deviceId
-                });
+                context.IsValid = true;
                 context.ControlMode = SystemControlState.OpenLoop;
-                // 手动控制模式下，设置为执行中状态
-                UpdateDeviceCommandStatus(deviceId, context, CommandExecuteStatusEnum.Executing);
+                context.CurrentStatus = CommandExecuteStatusEnum.Executing;
             } 
-            return setCtrlModeResult == AddressContanst.OP_SUCCESSFUL; 
+            return context; 
         }
          
-        public override bool StaticControl(StaticControlParams controlParams)
+        public override DeviceCommandContext StaticControl(StaticControlParams controlParams)
         {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+            {
+                DeviceId = controlParams.DeviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             if (ControlState != SystemControlState.Static)
             {
                 var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Static);
-                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return context;
                 ControlState = SystemControlState.Static;
             }
             var result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)controlParams.StaticLoadControl, controlParams.Speed, controlParams.TargetValue);
+            
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
-                // 创建或获取设备上下文
-                var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
-                {
-                    DeviceId = controlParams.DeviceId
-                });
+                context.IsValid = true;
                 context.ControlMode = SystemControlState.Static;
-                // 手动控制模式下，设置为执行中状态
-                UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+                context.CommandSubscribetion = IndividualDataStream.Buffer(context.BufferSize, context.BufferSize)
+                    .Where(buffer => buffer.Count == context.BufferSize)
+                    .ObserveOn(TaskPoolScheduler.Default)
+                    .Subscribe(datas =>
+                    {
+                        foreach (var data in datas)
+                        {
+                            // 根据设备寻找所有的signal对象; 可能一个设备上有多个Signal
+                            //if (signal.Value != null)
+                            //{
+                            //    var index = signal.Value.SignalAddressIndex;
+                            //    CheckCompletionCondition(
+                            //        controlParams.StaticLoadControl,
+                            //        controlParams.TargetValue,
+                            //        data.Net_AD_S[index],
+                            //        );
+                            //}
+
+                            
+                        }
+                    }); 
             }
-            return result == AddressContanst.OP_SUCCESSFUL;
+            return context;
         }
         
-        public override bool DynamicControl(DynamicControlParams controlParams)
+        public override DeviceCommandContext DynamicControl(DynamicControlParams controlParams)
         {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+            {
+                DeviceId = controlParams.DeviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             if (ControlState != SystemControlState.Dynamic)
             {
                 var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Dynamic);
-                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return false;
+                if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return context;
                 ControlState = SystemControlState.Dynamic;
             }
             var result = POPNetCtrl.NetCtrl01_Osci_SetWaveInfo((int)DeviceId, 
@@ -181,16 +210,11 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 );
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
-                // 创建或获取设备上下文
-                var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
-                {
-                    DeviceId = controlParams.DeviceId
-                });
+                context.IsValid = true;
                 context.ControlMode = SystemControlState.Dynamic;
-                // 手动控制模式下，设置为执行中状态
-                UpdateDeviceCommandStatus(controlParams.DeviceId, context, CommandExecuteStatusEnum.Executing);
+                context.CurrentStatus = CommandExecuteStatusEnum.Executing; 
             }
-            return result == AddressContanst.OP_SUCCESSFUL;
+            return context;
         }
 
         #endregion
@@ -242,7 +266,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
                 return CreateBadDataPoint(); 
-            if(_singleBuffer != IntPtr.Zero)
+            if(_singleBuffer == IntPtr.Zero)
                 _singleBuffer = BufferPool.Rent();
             var results = new List<BatchCollectItemModel>((int)count);
             for (uint i = 0; i < count; i++)
@@ -270,18 +294,85 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         };
 
         /// <summary>
-        /// 更新设备命令状态并发送事件
+        /// 检查完成条件
         /// </summary>
-        private void UpdateDeviceCommandStatus(long deviceId, DeviceCommandContext context, CommandExecuteStatusEnum status)
+        /// <param name="mode"></param>
+        /// <param name="targetValue"></param>
+        /// <param name="currentDisplacement"></param>
+        /// <param name="currentForce"></param>
+        /// <param name="posE"></param>
+        /// <param name="ctrlOutput"></param>
+        /// <param name="stableCount"></param>
+        /// <param name="requiredStableCount"></param>
+        /// <returns></returns>
+        private bool CheckCompletionCondition(
+            StaticLoadControlEnum mode,
+            double targetValue,
+            double currentDisplacement,
+            double currentForce,
+            double posE,
+            double ctrlOutput,
+            ref int stableCount,
+            int requiredStableCount)
         {
-            // 更新 Context 中的状态
-            context.CurrentStatus = status;
-            _commandStatusSubject.OnNext(new CommandStatusChangeEvent
+            var condition1 = false;
+            var condition2 = false;
+            var condition3 = false;
+
+            switch (mode)
             {
-                DeviceId = deviceId,
-                Status = status,
-                Timestamp = Stopwatch.GetTimestamp()
-            });
+                case StaticLoadControlEnum.CTRLMODE_LoadS: // 位移控制
+                    condition1 = Math.Abs(currentDisplacement - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.DisplacementTolerance;
+                    condition2 = Math.Abs(posE) < _hardwareDeviceConfiguration.CompletionConfig?.PosErrorThreshold;
+                    condition3 = Math.Abs(ctrlOutput) < _hardwareDeviceConfiguration.CompletionConfig?.ControlOutputThreshold;
+                    break;
+
+                case StaticLoadControlEnum.CTRLMODE_LoadN: // 力控制
+                    condition1 = Math.Abs(currentForce - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.ForceTolerance;
+                    condition2 = Math.Abs(posE) < _hardwareDeviceConfiguration.CompletionConfig?.ForceTolerance;
+                    condition3 = Math.Abs(ctrlOutput) < _hardwareDeviceConfiguration.CompletionConfig?.ControlOutputThreshold;
+                    break;
+
+                case StaticLoadControlEnum.CTRLMODE_LoadSVNP: // 位移控制(力判断停止)
+                    // 先检查力是否到达（提前停止条件）
+                    var forceReached = Math.Abs(currentForce - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.ForceTolerance;
+                    if (forceReached)
+                    {
+                        condition1 = condition2 = condition3 = true;
+                    }
+                    else
+                    {
+                        // 检查位移是否到达
+                        condition1 = Math.Abs(currentDisplacement - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.DisplacementTolerance;
+                        condition2 = Math.Abs(posE) < _hardwareDeviceConfiguration.CompletionConfig?.PosErrorThreshold;
+                        condition3 = Math.Abs(ctrlOutput) < _hardwareDeviceConfiguration.CompletionConfig?.ControlOutputThreshold;
+                    }
+                    break;
+
+                case StaticLoadControlEnum.CTRLMODE_LoadNVSP: // 力控制(位移判断停止)
+                    // 先检查位移是否到达（提前停止条件）
+                    var displacementReached = Math.Abs(currentDisplacement - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.DisplacementTolerance;
+                    if (displacementReached)
+                    {
+                        condition1 = condition2 = condition3 = true;
+                    }
+                    else
+                    {
+                        // 检查力是否到达
+                        condition1 = Math.Abs(currentForce - targetValue) < _hardwareDeviceConfiguration.CompletionConfig?.ForceTolerance;
+                        condition2 = Math.Abs(posE) < _hardwareDeviceConfiguration.CompletionConfig?.ForceTolerance;
+                        condition3 = Math.Abs(ctrlOutput) < _hardwareDeviceConfiguration.CompletionConfig?.ControlOutputThreshold;
+                    }
+                    break;
+            }
+
+            if (condition1 && condition2 && condition3)
+            {
+                stableCount++;
+                return stableCount >= requiredStableCount;
+            }
+
+            return false;
         }
         #endregion
         public void CleanupResources()

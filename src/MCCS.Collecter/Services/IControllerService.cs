@@ -1,5 +1,6 @@
 ﻿using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.Services
@@ -18,11 +19,11 @@ namespace MCCS.Collecter.Services
 
         bool OperationControlMode(long controllerId, SystemControlState controlMode);
 
-        bool ManualControl(long controllerId, long deviceId, float speed);
+        DeviceCommandContext ManualControl(long controllerId, long deviceId, float speed);
 
-        bool StaticControl(long controllerId, StaticControlParams staticControlParam);
+        DeviceCommandContext StaticControl(long controllerId, StaticControlParams staticControlParam);
 
-        bool DynamicControl(long controllerId, DynamicControlParams dynamicControlParam);
+        DeviceCommandContext DynamicControl(long controllerId, DynamicControlParams dynamicControlParam);
 
         bool RemoveController(int deviceId);
 

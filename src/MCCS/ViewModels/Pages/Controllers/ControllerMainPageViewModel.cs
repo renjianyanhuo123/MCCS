@@ -7,7 +7,6 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
-using System.Security.AccessControl;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Infrastructure.TestModels.Commands;
@@ -49,6 +48,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             StopCommand = new DelegateCommand(ExecuteStopCommand);
             // 查找当前模型对应的设备ID  的  控制器ID
             var tempDevice = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId)?.MappingDevice;
+            // var controlChannels = GlobalDataManager.Instance.Model3Ds
             if (tempDevice?.ParentDeviceId== null) throw new ArgumentNullException("未配置连接到控制器");
             _controllerId = (long)tempDevice.ParentDeviceId;
             _deviceId = tempDevice.Id;
@@ -196,7 +196,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
                     {
-                        var success = _controllerService.DynamicControl(_controllerId, new DynamicControlParams
+                        var commandContext = _controllerService.DynamicControl(_controllerId, new DynamicControlParams
                         {
                             DeviceId = _deviceId,
                             ControlMode = fatigueControlViewModel.ControlUnitType,
@@ -209,7 +209,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                             IsAdjustedMedian = false,
                             CycleCount = fatigueControlViewModel.CycleTimes
                         });
-                        if (success)
+                        if (commandContext.IsValid)
                         {
                             _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
                         }
@@ -222,7 +222,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Static:
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
-                        var success = _controllerService.StaticControl(_controllerId,
+                        var commandContext = _controllerService.StaticControl(_controllerId,
                             new StaticControlParams
                             {
                                 DeviceId = _deviceId,
@@ -230,15 +230,11 @@ namespace MCCS.ViewModels.Pages.Controllers
                                 Speed = staticControlViewModel.Speed,
                                 TargetValue = staticControlViewModel.TargetValue
                             });
-                        if (success)
+                        if (commandContext.IsValid)
                         {
                             _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
                             // 开启订阅流检查指令是否完成 
-                            var controller = _controllerService.GetControllerInfo(_controllerId);
-                            var tempSubscribe = controller
-                                .IndividualDataStream
-                                .Sample(TimeSpan.FromMilliseconds(100))
-                                .Subscribe(OnCommandExecuteStatus);
+                            var controller = _controllerService.GetControllerInfo(_controllerId); 
                         }
                         else
                         {

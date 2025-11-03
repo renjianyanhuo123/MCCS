@@ -3,6 +3,7 @@ using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.HardwareDevices.BwController;
 using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.Services
@@ -87,7 +88,7 @@ namespace MCCS.Collecter.Services
         /// <param name="deviceId">对应控制的作动器设备ID</param>
         /// <param name="speed">作动器位移的速度</param>
         /// <returns></returns>
-        public bool ManualControl(long controllerId, long deviceId, float speed)
+        public DeviceCommandContext ManualControl(long controllerId, long deviceId, float speed)
         {
             var controller = GetControllerInfo(controllerId);
             return controller.ManualControl(deviceId, speed);
@@ -96,11 +97,10 @@ namespace MCCS.Collecter.Services
         /// <summary>
         /// 静态控制
         /// </summary>
-        /// <param name="controllerId"></param>
-        /// <param name="deviceId"></param>
+        /// <param name="controllerId"></param> 
         /// <param name="staticControlParam"></param>
         /// <returns></returns>
-        public bool StaticControl(long controllerId, StaticControlParams staticControlParam)
+        public DeviceCommandContext StaticControl(long controllerId, StaticControlParams staticControlParam)
         {
             var controller = GetControllerInfo(controllerId);
             return controller.StaticControl(staticControlParam);
@@ -112,7 +112,7 @@ namespace MCCS.Collecter.Services
         /// <param name="controllerId"></param> 
         /// <param name="dynamicControlParam"></param>
         /// <returns></returns>
-        public bool DynamicControl(long controllerId, DynamicControlParams dynamicControlParam)
+        public DeviceCommandContext DynamicControl(long controllerId, DynamicControlParams dynamicControlParam)
         {
             var controller = GetControllerInfo(controllerId);
             return controller.DynamicControl(dynamicControlParam);

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.HardwareDevices.BwController
@@ -155,9 +156,15 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override bool ManualControl(long deviceId, float outValue)
+        public override DeviceCommandContext ManualControl(long deviceId, float outValue)
         {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+            // 创建或获取设备上下文
+            var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
+            {
+                DeviceId = deviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             ControlState = SystemControlState.Static;
             var speed = outValue / 60.0f;
             speed = speed switch
@@ -167,12 +174,17 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 _ => speed
             };
             PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
-            return true;
+            return context;
         }
 
-            public override bool StaticControl(StaticControlParams controlParams)
+        public override DeviceCommandContext StaticControl(StaticControlParams controlParams)
+        {
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
             {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+                DeviceId = controlParams.DeviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
             switch (controlParams.StaticLoadControl)
@@ -194,18 +206,23 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 default:
                     break;
             } 
-            return true;
+            return context;
         }
 
-        public override bool DynamicControl( DynamicControlParams controlParams)
+        public override DeviceCommandContext DynamicControl( DynamicControlParams controlParams)
         {
-            if (Status != HardwareConnectionStatus.Connected) return false;
+            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
+            {
+                DeviceId = controlParams.DeviceId,
+                IsValid = false
+            });
+            if (Status != HardwareConnectionStatus.Connected) return context;
             ControlState = SystemControlState.Dynamic;
             Task.Run(() =>
             {
                 GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
             });
-            return true;
+            return context;
         }
 
         private void ForceChangeToTarget(float speed, float target)

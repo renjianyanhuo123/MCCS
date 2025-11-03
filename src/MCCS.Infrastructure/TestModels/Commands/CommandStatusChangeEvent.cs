@@ -3,9 +3,9 @@
 /// <summary>
 /// 设备指令结构
 /// </summary>
+[Obsolete]
 public record CommandStatusChangeEvent 
 {
-    public string CommandId { get; } = Guid.NewGuid().ToString();
     /// <summary>
     /// 执行状态
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using MCCS.Common.DataManagers.StationSites; 
+﻿using MCCS.Common.DataManagers.Devices;
 using Newtonsoft.Json;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
@@ -28,7 +28,7 @@ namespace MCCS.UnitTest
         [DataRow(_json)]
         public void Deserialization_StationSiteControllerInfo(string json)
         {
-            var obj = JsonConvert.DeserializeObject<StationSiteControllerInfo>(json);
+            var obj = JsonConvert.DeserializeObject<ControllerDevice>(json);
             IsNotNull(obj);
             AreEqual(obj.Name, "测试");
             AreEqual(obj.SignalInfos.Count, 2);

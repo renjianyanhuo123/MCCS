@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="Common\**" />
+    <Compile Remove="Devices\**" />
     <EmbeddedResource Remove="Common\**" />
+    <EmbeddedResource Remove="Devices\**" />
     <None Remove="Common\**" />
+    <None Remove="Devices\**" />
     <Page Remove="Common\**" />
+    <Page Remove="Devices\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Devices\" />
     <Folder Include="Repositories\Project\" />
   </ItemGroup>
 

@@ -18,7 +18,10 @@ namespace MCCS.Collecter.HardwareDevices
         public string Unit { get; set; } = string.Empty;               // 工程单位
         public string Description { get; set; } = string.Empty;        // 信号描述
         public bool IsEnabled { get; set; } = true;                    // 是否启用
-        public long DeviceId { get; set; } = 0;                         // 所属设备ID
+        /// <summary>
+        /// 所连接的设备ID
+        /// </summary>
+        public long? DeviceId { get; set; } = 0;                         
         public int SampleRate { get; set; } = 50; 
         public int BufferSize { get; set; } = 1000;                     // 每个信号独立的缓冲区大小
     }

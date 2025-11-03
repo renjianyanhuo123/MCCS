@@ -142,18 +142,23 @@ namespace MCCS.Services.StartInitial
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
                     IsSimulation = isMock,
+                    CompletionConfig = new ControlCompletionConfiguration(),
                     ConnectionString = ""
                 };
                 configuration.Signals.AddRange(signals
                     .Where(c => c.BelongToControllerId == item.Id)
-                    .Select(s => new HardwareSignalConfiguration
+                    .Select(s =>
                     {
-                        SignalId = s.Id,
-                        SignalName = s.SignalName,
-                        SignalAddress = (SignalAddressEnum)s.SignalAddress,
-                        SignalType = SignalType.AnalogInput,
-                        MinValue = s.DownLimitRange,
-                        MaxValue = s.UpLimitRange
+                        // var signalBinded = GlobalDataManager.Instance.ControllerInfos.Fi
+                        return new HardwareSignalConfiguration
+                        {
+                            SignalId = s.Id,
+                            SignalName = s.SignalName,
+                            SignalAddress = (SignalAddressEnum)s.SignalAddress, 
+                            MinValue = s.DownLimitRange,
+                            MaxValue = s.UpLimitRange,
+                            DeviceId = s.ConnectedDeviceId
+                        };
                     }));
                 _controllerService.CreateController(configuration);
             }

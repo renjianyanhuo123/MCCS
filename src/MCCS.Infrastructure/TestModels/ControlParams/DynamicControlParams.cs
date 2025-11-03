@@ -7,6 +7,11 @@
         /// </summary>
         public long DeviceId { get; init; }
         /// <summary>
+        /// 信号接口ID;
+        /// 用于直接控制;
+        /// </summary>
+        public long SignalId { get; init; }
+        /// <summary>
         /// 控制模式：0=位移，1=力
         /// </summary>
         public int ControlMode { get; init; }

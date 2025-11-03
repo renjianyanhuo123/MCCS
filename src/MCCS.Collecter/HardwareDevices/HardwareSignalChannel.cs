@@ -7,14 +7,29 @@
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
             _configuration = signalConfig;
-            SignalAddressIndex = (long)signalConfig.SignalAddress;
+            DeviceId = signalConfig.DeviceId;
             SignalId = signalConfig.SignalId;
         }
 
-        public long SignalId { get; private set; } 
+        public long SignalId { get; private set; }
 
-        public long SignalAddressIndex { get; private set; }
-         
+        public long? DeviceId { get; private set; }
+
+        public long SignalAddressIndex {
+            get
+            {
+                var index = (long)_configuration.SignalAddress;
+                if (index < 10)
+                {
+                    return index;
+                }
+                else
+                {
+                    return index % 10;
+                } 
+            }
+        }
+
         public void Start()
         { 
         } 

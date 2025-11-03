@@ -1,12 +1,11 @@
 ﻿namespace MCCS.Collecter.HardwareDevices
 {
+    /// <summary>
+    /// 舍弃原先的物理含义;转而变成业务含义的区分
+    /// </summary>
     public enum SignalType
     {
-        AnalogInput,    // 模拟量输入 (AI)
-        AnalogOutput,   // 模拟量输出 (AO) 
-        DigitalInput,   // 数字量输入 (DI)
-        DigitalOutput,  // 数字量输出 (DO)
-        Counter,        // 计数器
-        PWM            // 脉宽调制输出
+        Displacement,
+        Force
     }
 }
