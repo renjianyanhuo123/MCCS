@@ -44,8 +44,8 @@
                                     Command="{Binding DataContext.EditPseudoChannelCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                     CommandParameter="{Binding Id}"></Button>
                                 <Button Content="删除" Width="80" Margin="5"
-                                    Command="{Binding DataContext.DeletePseudoChannelCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding Id}"></Button>
+                                        Click="DeletePseudoChannel_Click" 
+                                    Tag="{Binding Id}"></Button>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

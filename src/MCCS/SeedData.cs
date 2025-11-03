@@ -1,5 +1,6 @@
 ﻿using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
+using MCCS.Core.Models.StationSites;
 using MCCS.Core.Models.SystemManager;
 using MCCS.Core.Models.SystemSetting;
 using MCCS.Core.Models.TestInfo;
@@ -347,7 +348,8 @@ namespace MCCS
                 };
                 freeSql.Insert(devices).ExecuteAffrows();
             }
-
+            freeSql.CodeFirst.SyncStructure<PseudoChannelInfo>();
+            freeSql.CodeFirst.SyncStructure<PseudoChannelAndSignalInfo>();
             //if (!freeSql.Select<ChannelInfo>().Any())
             //{
             //    var channels = new List<ChannelInfo>
