@@ -5,7 +5,7 @@ namespace MCCS.Core.Models.StationSites
     /// <summary>
     /// 虚拟通道
     /// </summary>
-    [Table(Name = "tb_pseudoChannelInfo")]
+    [Table(Name = "stationSite_PseudoChannelInfo")]
     public class PseudoChannelInfo : BaseModel
     {
         public long StationId { get; set; }
