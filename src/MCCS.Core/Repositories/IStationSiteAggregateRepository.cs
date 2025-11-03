@@ -23,6 +23,16 @@ namespace MCCS.Core.Repositories
 
         Task<List<PseudoChannelInfo>> GetStationSitePseudoChannels(long stationId, CancellationToken cancellationToken = default);
 
+        Task<PseudoChannelInfo> GetPseudoChannelById(long channelId, CancellationToken cancellationToken = default);
+
+        Task<long> AddStationSitePseudoChannelAsync(PseudoChannelInfo pseudoChannelInfo, List<PseudoChannelAndSignalInfo> signals, CancellationToken cancellationToken = default);
+
+        Task<bool> UpdateStationSitePseudoChannelAsync(PseudoChannelInfo pseudoChannelInfo, List<PseudoChannelAndSignalInfo> signals, CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteStationSitePseudoChannelAsync(long channelId, CancellationToken cancellationToken = default);
+
+        Task<List<PseudoChannelAndSignalInfo>> GetPseudoChannelAndSignalInfosAsync(Expression<Func<PseudoChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default);
+
         Task<List<SignalInterfaceInfo>> GetStationSiteDevices(long stationId, CancellationToken cancellationToken = default);
 
         Task<ControlChannelInfo> GetControlChannelById(long channelId, CancellationToken cancellationToken = default);

@@ -177,7 +177,73 @@ namespace MCCS.Core.Repositories
         public Task<List<PseudoChannelInfo>> GetStationSitePseudoChannels(long stationId, CancellationToken cancellationToken = default)
         {
             return freeSql.Select<PseudoChannelInfo>()
-                .Where(pc => pc.StationId == stationId)
+                .Where(pc => pc.StationId == stationId && pc.IsDeleted == false)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<PseudoChannelInfo> GetPseudoChannelById(long channelId, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<PseudoChannelInfo>()
+                .Where(c => c.Id == channelId)
+                .FirstAsync(cancellationToken);
+        }
+
+        public async Task<long> AddStationSitePseudoChannelAsync(PseudoChannelInfo pseudoChannelInfo, List<PseudoChannelAndSignalInfo> signals, CancellationToken cancellationToken = default)
+        {
+            using var uow = freeSql.CreateUnitOfWork();
+            var addId = await uow.Orm.Insert(pseudoChannelInfo).ExecuteIdentityAsync(cancellationToken);
+            foreach (var signal in signals)
+            {
+                signal.PseudoChannelId = addId;
+            }
+            if (signals.Count > 0)
+            {
+                await uow.Orm.Insert(signals).ExecuteAffrowsAsync(cancellationToken);
+            }
+            uow.Commit();
+            return addId;
+        }
+
+        public async Task<bool> UpdateStationSitePseudoChannelAsync(PseudoChannelInfo pseudoChannelInfo, List<PseudoChannelAndSignalInfo> signals, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(pseudoChannelInfo);
+            using var uow = freeSql.CreateUnitOfWork();
+            var count1 = await uow.Orm.Update<PseudoChannelInfo>()
+                .Set(s => s.ChannelName, pseudoChannelInfo.ChannelName)
+                .Set(s => s.RangeMin, pseudoChannelInfo.RangeMin)
+                .Set(s => s.RangeMax, pseudoChannelInfo.RangeMax)
+                .Set(s => s.Formula, pseudoChannelInfo.Formula)
+                .Set(s => s.HasTare, pseudoChannelInfo.HasTare)
+                .Where(s => s.Id == pseudoChannelInfo.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            var count2 = await uow.Orm.Delete<PseudoChannelAndSignalInfo>().Where(s => s.PseudoChannelId == pseudoChannelInfo.Id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            var count3 = 0;
+            if (signals.Count > 0)
+            {
+                count3 = await uow.Orm.Insert(signals).ExecuteAffrowsAsync(cancellationToken);
+            }
+            uow.Commit();
+            return count1 >= 0 && count2 >= 0 && count3 >= 0;
+        }
+
+        public async Task<bool> DeleteStationSitePseudoChannelAsync(long channelId, CancellationToken cancellationToken = default)
+        {
+            using var uow = freeSql.CreateUnitOfWork();
+            var count1 = await uow.Orm.Update<PseudoChannelInfo>()
+                .Set(s => s.IsDeleted, true)
+                .Where(s => s.Id == channelId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            var count2 = await uow.Orm.Delete<PseudoChannelAndSignalInfo>().Where(s => s.PseudoChannelId == channelId)
+                .ExecuteAffrowsAsync(cancellationToken);
+            uow.Commit();
+            return count1 >= 0 && count2 >= 0;
+        }
+
+        public async Task<List<PseudoChannelAndSignalInfo>> GetPseudoChannelAndSignalInfosAsync(Expression<Func<PseudoChannelAndSignalInfo, bool>> expression, CancellationToken cancellationToken = default)
+        {
+            return await freeSql.Select<PseudoChannelAndSignalInfo>()
+                .Where(expression)
                 .ToListAsync(cancellationToken);
         }
 

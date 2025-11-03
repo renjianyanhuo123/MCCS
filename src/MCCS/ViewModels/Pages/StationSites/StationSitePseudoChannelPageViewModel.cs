@@ -1,6 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using MCCS.Core.Repositories;
 using MCCS.Models.Stations.PseudoChannels;
+using MaterialDesignThemes.Wpf;
+using MCCS.Events.StationSites;
+using MCCS.Events.StationSites.PseudoChannels;
+using MCCS.Views.Pages.StationSites.PseudoChannels;
+using MCCS.Views.Dialogs.Common;
+using MCCS.Events.Common;
 
 namespace MCCS.ViewModels.Pages.StationSites
 {
@@ -9,16 +15,25 @@ namespace MCCS.ViewModels.Pages.StationSites
         public const string Tag = "StationSitePseudoChannel";
 
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
+        private readonly IContainerProvider _containerProvider;
 
         private long _stationId = -1;
 
         public StationSitePseudoChannelPageViewModel(IStationSiteAggregateRepository stationSiteAggregateRepository,
-            IEventAggregator eventAggregator) : base(eventAggregator)
+            IEventAggregator eventAggregator,
+            IContainerProvider containerProvider) : base(eventAggregator)
         {
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
-            AddPseudoChannelCommand = new DelegateCommand(ExecuteAddPseudoChannelCommand);
-            EditPseudoChannelCommand = new DelegateCommand(ExecuteEditPseudoChannelCommand);
+            _containerProvider = containerProvider;
+            AddPseudoChannelCommand = new AsyncDelegateCommand(ExecuteAddPseudoChannelCommand);
+            EditPseudoChannelCommand = new AsyncDelegateCommand<long>(ExecuteEditPseudoChannelCommand);
+            DeletePseudoChannelCommand = new AsyncDelegateCommand<long>(ExecuteDeletePseudoChannelCommand);
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
+
+            _eventAggregator.GetEvent<NotificationAddPseudoChannelEvent>()
+                .Subscribe(async param => await ExecuteLoadCommand());
+            _eventAggregator.GetEvent<NotificationUpdatePseudoChannelEvent>()
+                .Subscribe(async param => await ExecuteLoadCommand());
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -32,28 +47,66 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         public AsyncDelegateCommand LoadCommand { get; }
 
-        public DelegateCommand AddPseudoChannelCommand { get; }
+        public AsyncDelegateCommand AddPseudoChannelCommand { get; }
 
-        public DelegateCommand EditPseudoChannelCommand { get; } 
+        public AsyncDelegateCommand<long> EditPseudoChannelCommand { get; }
+
+        public AsyncDelegateCommand<long> DeletePseudoChannelCommand { get; }
         #endregion
 
-        #region Private Method 
-        private void ExecuteAddPseudoChannelCommand()
+        #region Private Method
+        private async Task ExecuteAddPseudoChannelCommand()
         {
-
+            var addDialog = _containerProvider.Resolve<AddPseudoChannelPage>();
+            _eventAggregator.GetEvent<SendStationSiteIdEvent>().Publish(new SendStationSiteIdEventParam()
+            {
+                StationId = _stationId
+            });
+            await DialogHost.Show(addDialog, "RootDialog");
         }
 
-        private void ExecuteEditPseudoChannelCommand()
+        private async Task ExecuteEditPseudoChannelCommand(long channelId)
         {
+            var editPage = _containerProvider.Resolve<EditPseudoChannelPage>();
+            _eventAggregator.GetEvent<SendEditPseudoChannelStationSiteIdEvent>().Publish(new SendEditPseudoChannelStationSiteIdEventParam()
+            {
+                StationId = _stationId,
+                ChannelId = channelId
+            });
+            await DialogHost.Show(editPage, "RootDialog");
+        }
 
+        private async Task ExecuteDeletePseudoChannelCommand(long channelId)
+        {
+            var confirmDialog = _containerProvider.Resolve<DeleteConfirmDialog>();
+            var result = await DialogHost.Show(confirmDialog, "RootDialog");
+            if (result is DialogConfirmEvent { IsConfirmed: true })
+            {
+                var pseudoChannel = Channels.FirstOrDefault(c => c.Id == channelId);
+                if (pseudoChannel != null)
+                {
+                    Channels.Remove(pseudoChannel);
+                    await _stationSiteAggregateRepository.DeleteStationSitePseudoChannelAsync(channelId);
+                }
+            }
         }
 
         private async Task ExecuteLoadCommand()
         {
             if (_stationId == -1) throw new InvalidOperationException("StationId is not set.");
             Channels.Clear();
-            // var pseudoChannels = await _stationSiteAggregateRepository.
-        } 
+            var pseudoChannels = await _stationSiteAggregateRepository.GetStationSitePseudoChannels(_stationId);
+            foreach (var channel in pseudoChannels)
+            {
+                Channels.Add(new PseudoChannelListItemViewModel
+                {
+                    Id = channel.Id,
+                    Name = channel.ChannelName,
+                    CreateTime = channel.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                    UpdateTime = channel.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+                });
+            }
+        }
         #endregion
     }
 }

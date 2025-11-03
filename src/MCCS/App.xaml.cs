@@ -21,6 +21,8 @@ using MCCS.Views.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.ViewModels.Pages.StationSites.ControlChannels;
 using MCCS.Views.Pages.StationSites.ControlChannels;
+using MCCS.ViewModels.Pages.StationSites.PseudoChannels;
+using MCCS.Views.Pages.StationSites.PseudoChannels;
 using MCCS.Services.StartInitial;
 using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.MethodManager;
@@ -127,6 +129,8 @@ namespace MCCS
             containerRegistry.RegisterDialog<AddHardwareDialog>(AddHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditHardwareDialog>(EditHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditControlChannelPage>(EditControlChannelPageViewModel.Tag);
+            containerRegistry.RegisterDialog<AddPseudoChannelPage>(AddPseudoChannelPageViewModel.Tag);
+            containerRegistry.RegisterDialog<EditPseudoChannelPage>(EditPseudoChannelPageViewModel.Tag);
             // Dialog  Methods
             containerRegistry.RegisterDialog<AddMethodDialog>(AddMethodDialogViewModel.Tag);
             // Station Sites

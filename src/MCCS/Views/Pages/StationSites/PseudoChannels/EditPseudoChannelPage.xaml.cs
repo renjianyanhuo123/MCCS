@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace MCCS.Views.Pages.StationSites.PseudoChannels
 {
     /// <summary>
-    /// EditControlChannelPage.xaml 的交互逻辑
+    /// EditPseudoChannelPage.xaml 的交互逻辑
     /// </summary>
-    public partial class EditControlChannelPage : UserControl
+    public partial class EditPseudoChannelPage : UserControl
     {
-        public EditControlChannelPage()
+        public EditPseudoChannelPage()
         {
             InitializeComponent();
         }
