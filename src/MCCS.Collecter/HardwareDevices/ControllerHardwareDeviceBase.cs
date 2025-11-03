@@ -5,6 +5,7 @@ using System.Reactive.Subjects;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Infrastructure.TestModels.Commands;
+using MCCS.Collecter.SignalInterfaceManager;
 
 namespace MCCS.Collecter.HardwareDevices
 {
