@@ -4,17 +4,18 @@ using System.Collections.Concurrent;
 namespace MCCS.Collecter.SignalInterfaceManager
 {
     /// <summary>
-    /// 信号接口管理器 - 管理所有物理信号接口，实现数据采集隔离
+    /// 信号接口管理器 - 管理所有控制器及其物理信号接口，实现数据采集隔离
     /// </summary>
     public sealed class SignalManager : ISignalManager
     {
+        private readonly ConcurrentDictionary<long, IControllerHardwareDevice> _devices;
         private readonly ConcurrentDictionary<long, HardwareSignalChannel> _physicalSignals;
-        private IControllerHardwareDevice? _device;
         private bool _isInitialized;
         private readonly object _lockObject = new();
 
         public SignalManager()
         {
+            _devices = new ConcurrentDictionary<long, IControllerHardwareDevice>();
             _physicalSignals = new ConcurrentDictionary<long, HardwareSignalChannel>();
             _isInitialized = false;
         }
@@ -25,17 +26,64 @@ namespace MCCS.Collecter.SignalInterfaceManager
         public bool IsRunning => _isInitialized;
 
         /// <summary>
-        /// 初始化信号管理器，关联硬件设备
+        /// 添加硬件控制器设备
         /// </summary>
-        public void Initialize(IControllerHardwareDevice device)
+        public bool AddDevice(IControllerHardwareDevice device)
         {
-            lock (_lockObject)
-            {
-                if (_device != null)
-                    throw new InvalidOperationException("SignalManager已经初始化过，不能重复初始化");
+            if (device == null)
+                throw new ArgumentNullException(nameof(device));
 
-                _device = device ?? throw new ArgumentNullException(nameof(device));
+            if (device is not ControllerHardwareDeviceBase deviceBase)
+                throw new ArgumentException("设备类型不支持，必须继承自ControllerHardwareDeviceBase", nameof(device));
+
+            var added = _devices.TryAdd(deviceBase.DeviceId, device);
+
+            // 如果已经初始化，需要初始化该设备的所有信号流
+            if (added && _isInitialized)
+            {
+                InitializeDeviceSignals(deviceBase.DeviceId);
             }
+
+            return added;
+        }
+
+        /// <summary>
+        /// 移除硬件控制器设备
+        /// </summary>
+        public bool RemoveDevice(long deviceId)
+        {
+            if (_devices.TryRemove(deviceId, out var device))
+            {
+                // 移除该设备的所有信号
+                var signalsToRemove = _physicalSignals.Values
+                    .Where(s => s.ConnectedDeviceId == deviceId)
+                    .ToList();
+
+                foreach (var signal in signalsToRemove)
+                {
+                    RemovePhysicalSignal(signal.SignalId);
+                }
+
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 获取控制器设备
+        /// </summary>
+        public IControllerHardwareDevice? GetDevice(long deviceId)
+        {
+            _devices.TryGetValue(deviceId, out var device);
+            return device;
+        }
+
+        /// <summary>
+        /// 获取所有控制器设备
+        /// </summary>
+        public IReadOnlyCollection<IControllerHardwareDevice> GetAllDevices()
+        {
+            return _devices.Values.ToList().AsReadOnly();
         }
 
         /// <summary>
@@ -46,17 +94,24 @@ namespace MCCS.Collecter.SignalInterfaceManager
             if (signalConfig == null)
                 throw new ArgumentNullException(nameof(signalConfig));
 
+            if (!signalConfig.DeviceId.HasValue)
+                throw new ArgumentException("信号配置必须指定DeviceId", nameof(signalConfig));
+
             // 检查信号是否已存在
             if (_physicalSignals.ContainsKey(signalConfig.SignalId))
                 return false;
 
+            // 检查设备是否存在
+            if (!_devices.ContainsKey(signalConfig.DeviceId.Value))
+                throw new InvalidOperationException($"设备 {signalConfig.DeviceId} 不存在，请先添加设备");
+
             var signal = new HardwareSignalChannel(signalConfig);
             var added = _physicalSignals.TryAdd(signalConfig.SignalId, signal);
 
-            // 如果已经启动，立即初始化新添加的信号流
-            if (added && _isInitialized && _device is ControllerHardwareDeviceBase deviceBase)
+            // 如果已经初始化，立即初始化新添加的信号流
+            if (added && _isInitialized)
             {
-                signal.Initialize(deviceBase.IndividualDataStream);
+                InitializeSignal(signal);
             }
 
             return added;
@@ -99,16 +154,10 @@ namespace MCCS.Collecter.SignalInterfaceManager
                 if (_isInitialized)
                     return;
 
-                if (_device == null)
-                    throw new InvalidOperationException("设备未初始化，请先调用Initialize方法");
-
-                if (_device is not ControllerHardwareDeviceBase deviceBase)
-                    throw new InvalidOperationException("设备类型不支持，必须继承自ControllerHardwareDeviceBase");
-
-                // 初始化所有物理信号的数据流（直接从设备流派生，不使用 Subject 转发）
+                // 初始化所有物理信号的数据流
                 foreach (var signal in _physicalSignals.Values)
                 {
-                    signal.Initialize(deviceBase.IndividualDataStream);
+                    InitializeSignal(signal);
                 }
 
                 _isInitialized = true;
@@ -127,7 +176,6 @@ namespace MCCS.Collecter.SignalInterfaceManager
                     return;
 
                 // 使用 RefCount 的流会自动管理订阅，不需要手动停止
-                // 这里只是标记状态
                 _isInitialized = false;
             }
         }
@@ -147,6 +195,17 @@ namespace MCCS.Collecter.SignalInterfaceManager
         public IReadOnlyCollection<HardwareSignalChannel> GetAllPhysicalSignals()
         {
             return _physicalSignals.Values.ToList().AsReadOnly();
+        }
+
+        /// <summary>
+        /// 根据设备ID获取该设备的所有物理信号
+        /// </summary>
+        public IReadOnlyCollection<HardwareSignalChannel> GetPhysicalSignalsByDevice(long deviceId)
+        {
+            return _physicalSignals.Values
+                .Where(s => s.ConnectedDeviceId == deviceId)
+                .ToList()
+                .AsReadOnly();
         }
 
         /// <summary>
@@ -170,6 +229,45 @@ namespace MCCS.Collecter.SignalInterfaceManager
         }
 
         /// <summary>
+        /// 检查设备是否存在
+        /// </summary>
+        public bool ContainsDevice(long deviceId)
+        {
+            return _devices.ContainsKey(deviceId);
+        }
+
+        /// <summary>
+        /// 初始化单个信号流
+        /// </summary>
+        private void InitializeSignal(HardwareSignalChannel signal)
+        {
+            if (!signal.ConnectedDeviceId.HasValue)
+                return;
+
+            if (_devices.TryGetValue(signal.ConnectedDeviceId.Value, out var device))
+            {
+                if (device is ControllerHardwareDeviceBase deviceBase)
+                {
+                    signal.Initialize(deviceBase.IndividualDataStream);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 初始化指定设备的所有信号流
+        /// </summary>
+        private void InitializeDeviceSignals(long deviceId)
+        {
+            var signals = _physicalSignals.Values
+                .Where(s => s.ConnectedDeviceId == deviceId);
+
+            foreach (var signal in signals)
+            {
+                InitializeSignal(signal);
+            }
+        }
+
+        /// <summary>
         /// 释放资源
         /// </summary>
         public void Dispose()
@@ -183,7 +281,8 @@ namespace MCCS.Collecter.SignalInterfaceManager
             }
             _physicalSignals.Clear();
 
-            _device = null;
+            // 清理设备引用
+            _devices.Clear();
         }
     }
 }
