@@ -1,38 +1,35 @@
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.DllNative.Models;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace MCCS.Collecter.SignalInterfaceManager
 {
     /// <summary>
     /// 物理信号通道 - 从硬件设备数据流中提取对应物理信号的数据
+    /// 使用 Rx 操作符直接派生数据流，不使用 Subject 转发
     /// </summary>
     public sealed class HardwareSignalChannel : IDisposable
     {
-        private readonly Subject<SignalData> _dataSubject;
-        private IDisposable? _dataSubscription;
-        private bool _isRunning;
+        private IObservable<SignalData>? _dataStream;
 
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
             Configuration = signalConfig;
             ConnectedDeviceId = signalConfig.DeviceId;
             SignalId = signalConfig.SignalId;
-            _dataSubject = new Subject<SignalData>();
-            DataStream = _dataSubject.AsObservable();
         }
 
-        public long SignalId { get; private set; }
+        public long SignalId { get; }
 
-        public long? ConnectedDeviceId { get; private set; }
+        public long? ConnectedDeviceId { get; }
 
         public HardwareSignalConfiguration Configuration { get; }
 
         /// <summary>
-        /// 信号数据流
+        /// 信号数据流 - 直接从设备流派生，不提前拆开
         /// </summary>
-        public IObservable<SignalData> DataStream { get; }
+        public IObservable<SignalData> DataStream => _dataStream
+            ?? throw new InvalidOperationException($"信号 {SignalId} 未初始化，请先调用 Initialize 方法");
 
         public long SignalAddressIndex
         {
@@ -51,35 +48,21 @@ namespace MCCS.Collecter.SignalInterfaceManager
         }
 
         /// <summary>
-        /// 启动信号采集，订阅硬件设备的数据流
+        /// 初始化信号数据流，直接从设备流派生
         /// </summary>
         /// <param name="deviceDataStream">硬件设备的数据流</param>
-        public void Start(IObservable<BatchCollectItemModel> deviceDataStream)
+        public void Initialize(IObservable<BatchCollectItemModel> deviceDataStream)
         {
-            if (_isRunning) return;
+            if (_dataStream != null)
+                throw new InvalidOperationException($"信号 {SignalId} 已经初始化过");
 
-            _dataSubscription = deviceDataStream
-                .Where(data => data != null)
+            // 直接使用 Rx 操作符从源流派生，不使用 Subject 转发
+            _dataStream = deviceDataStream
                 .Select(data => ExtractSignalData(data))
                 .Where(signalData => signalData != null)
-                .Subscribe(
-                    signalData => _dataSubject.OnNext(signalData!),
-                    error => { /* 错误处理暂时忽略 */ }
-                );
-
-            _isRunning = true;
-        }
-
-        /// <summary>
-        /// 停止信号采集
-        /// </summary>
-        public void Stop()
-        {
-            if (!_isRunning) return;
-
-            _dataSubscription?.Dispose();
-            _dataSubscription = null;
-            _isRunning = false;
+                .Select(signalData => signalData!)
+                .Publish()      // 转为热流
+                .RefCount();    // 自动管理订阅，有订阅者时连接，无订阅者时断开
         }
 
         /// <summary>
@@ -116,9 +99,8 @@ namespace MCCS.Collecter.SignalInterfaceManager
 
         public void Dispose()
         {
-            Stop();
-            _dataSubject.OnCompleted();
-            _dataSubject.Dispose();
+            // RefCount 会自动管理订阅的生命周期，不需要手动清理
+            _dataStream = null;
         }
     }
 }

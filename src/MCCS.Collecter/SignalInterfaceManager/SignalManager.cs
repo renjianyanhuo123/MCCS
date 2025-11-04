@@ -10,19 +10,19 @@ namespace MCCS.Collecter.SignalInterfaceManager
     {
         private readonly ConcurrentDictionary<long, HardwareSignalChannel> _physicalSignals;
         private IControllerHardwareDevice? _device;
-        private bool _isRunning;
+        private bool _isInitialized;
         private readonly object _lockObject = new();
 
         public SignalManager()
         {
             _physicalSignals = new ConcurrentDictionary<long, HardwareSignalChannel>();
-            _isRunning = false;
+            _isInitialized = false;
         }
 
         /// <summary>
-        /// 是否正在运行
+        /// 是否正在运行（信号流已初始化）
         /// </summary>
-        public bool IsRunning => _isRunning;
+        public bool IsRunning => _isInitialized;
 
         /// <summary>
         /// 初始化信号管理器，关联硬件设备
@@ -53,10 +53,10 @@ namespace MCCS.Collecter.SignalInterfaceManager
             var signal = new HardwareSignalChannel(signalConfig);
             var added = _physicalSignals.TryAdd(signalConfig.SignalId, signal);
 
-            // 如果已经在运行，立即启动新添加的信号
-            if (added && _isRunning && _device is ControllerHardwareDeviceBase deviceBase)
+            // 如果已经启动，立即初始化新添加的信号流
+            if (added && _isInitialized && _device is ControllerHardwareDeviceBase deviceBase)
             {
-                signal.Start(deviceBase.IndividualDataStream);
+                signal.Initialize(deviceBase.IndividualDataStream);
             }
 
             return added;
@@ -90,13 +90,13 @@ namespace MCCS.Collecter.SignalInterfaceManager
         }
 
         /// <summary>
-        /// 启动所有信号采集
+        /// 启动所有信号采集（初始化所有信号的数据流）
         /// </summary>
         public void Start()
         {
             lock (_lockObject)
             {
-                if (_isRunning)
+                if (_isInitialized)
                     return;
 
                 if (_device == null)
@@ -105,33 +105,30 @@ namespace MCCS.Collecter.SignalInterfaceManager
                 if (_device is not ControllerHardwareDeviceBase deviceBase)
                     throw new InvalidOperationException("设备类型不支持，必须继承自ControllerHardwareDeviceBase");
 
-                // 启动所有物理信号采集
+                // 初始化所有物理信号的数据流（直接从设备流派生，不使用 Subject 转发）
                 foreach (var signal in _physicalSignals.Values)
                 {
-                    signal.Start(deviceBase.IndividualDataStream);
+                    signal.Initialize(deviceBase.IndividualDataStream);
                 }
 
-                _isRunning = true;
+                _isInitialized = true;
             }
         }
 
         /// <summary>
         /// 停止所有信号采集
+        /// 注意：由于使用 RefCount，流会在没有订阅者时自动停止，此方法主要用于标记状态
         /// </summary>
         public void Stop()
         {
             lock (_lockObject)
             {
-                if (!_isRunning)
+                if (!_isInitialized)
                     return;
 
-                // 停止所有物理信号
-                foreach (var signal in _physicalSignals.Values)
-                {
-                    signal.Stop();
-                }
-
-                _isRunning = false;
+                // 使用 RefCount 的流会自动管理订阅，不需要手动停止
+                // 这里只是标记状态
+                _isInitialized = false;
             }
         }
 
@@ -153,7 +150,7 @@ namespace MCCS.Collecter.SignalInterfaceManager
         }
 
         /// <summary>
-        /// 获取信号数据流
+        /// 获取信号数据流（直接从设备流派生，不提前拆开）
         /// </summary>
         public IObservable<SignalData>? GetSignalDataStream(long signalId)
         {
