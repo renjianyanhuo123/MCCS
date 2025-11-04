@@ -2,144 +2,299 @@
 
 ## 概述
 
-SignalManager 实现了数据采集和控制部分的隔离，通过物理信号接口实现底层硬件设备与上层控制逻辑的解耦。
+SignalManager 是物理信号接口管理器，专注于管理所有物理信号接口（HardwareSignalChannel），实现**数据采集部分与控制部分的隔离**。
 
-## 架构层次
+## 核心职责
 
-### 1. 物理信号层 (HardwareSignalChannel)
-- **职责**：从硬件设备的数据流中提取对应的物理信号数据
+### SignalManager 负责：
+1. **管理物理信号接口** - 添加、移除、查询物理信号
+2. **数据采集隔离** - 从硬件设备流中提取每个物理信号的数据
+3. **提供数据流接口** - 为虚拟通道和控制通道提供可订阅的数据流
+
+### SignalManager 不负责：
+- ❌ 虚拟通道的管理和计算（由外部管理）
+- ❌ 控制通道的管理和控制逻辑（由外部管理）
+- ❌ 业务逻辑和控制算法
+
+## 架构设计
+
+```
+硬件设备 (ControllerHardwareDevice)
+    ↓
+    ↓ IndividualDataStream (批量数据流)
+    ↓
+SignalManager (物理信号接口管理)
+    ├── HardwareSignalChannel 1 (AI0) → SignalData流
+    ├── HardwareSignalChannel 2 (AI1) → SignalData流
+    ├── HardwareSignalChannel 3 (SSI0) → SignalData流
+    └── ...
+         ↓
+         ↓ 订阅物理信号数据流
+         ↓
+外部模块（虚拟通道、控制通道等）
+    ├── VirtualChannel - 组合多个物理信号计算
+    └── ControlChannel - 使用物理信号进行控制
+```
+
+## 核心类说明
+
+### 1. SignalData
+信号数据模型，标准化的数据结构：
+```csharp
+public record SignalData
+{
+    public long SignalId { get; init; }      // 信号ID
+    public double Value { get; init; }       // 数据值
+    public long Timestamp { get; init; }     // 时间戳
+    public bool IsValid { get; init; }       // 数据是否有效
+}
+```
+
+### 2. HardwareSignalChannel
+物理信号接口，从硬件设备流中提取对应信号的数据：
 - **输入**：硬件设备的 `IndividualDataStream`
-- **输出**：单个物理信号的数据流 `IObservable<SignalData>`
-- **特点**：每个物理信号独立管理，支持热插拔
+- **输出**：`IObservable<SignalData>` 数据流
+- **功能**：独立管理每个物理信号的数据采集
 
-### 2. 虚拟通道层 (VirtualChannel)
-- **职责**：组合多个物理信号进行数学运算，输出计算结果
-- **输入**：多个物理信号的数据流
-- **配置**：支持自定义计算公式（如：`{1} + {2} * 0.5`）
-- **输出**：虚拟通道的数据流 `IObservable<SignalData>`
-- **特点**：支持动态添加/删除，实时计算
-
-### 3. 控制通道层 (ControlChannel)
-- **职责**：实现闭环控制逻辑
-- **输入**：反馈信号（位置/力）+ 设定值
-- **输出**：控制指令发送到硬件设备
-- **支持**：可订阅物理信号或虚拟通道作为反馈
-- **特点**：支持多种控制模式（开环/闭环）
-
-### 4. 信号管理器 (SignalManager)
-- **职责**：统一管理所有信号和通道
-- **功能**：
-  - 初始化和生命周期管理
-  - 动态添加/删除虚拟通道和控制通道
-  - 提供统一的查询接口
+### 3. ISignalManager / SignalManager
+信号接口管理器，统一管理所有物理信号：
+- **初始化**：关联硬件设备
+- **信号管理**：添加、移除物理信号
+- **生命周期**：启动、停止、释放资源
+- **数据访问**：提供信号数据流订阅接口
 
 ## 使用示例
 
 ### 基本使用流程
 
 ```csharp
-// 1. 创建SignalManager实例
+// 1. 创建 SignalManager 实例
 var signalManager = new SignalManager();
 
-// 2. 初始化物理信号配置
-var signalConfigs = new List<HardwareSignalConfiguration>
-{
-    new() { SignalId = 1, SignalName = "AI0", SignalAddress = SignalAddressEnum.AI0, DeviceId = 100 },
-    new() { SignalId = 2, SignalName = "AI1", SignalAddress = SignalAddressEnum.AI1, DeviceId = 100 }
-};
-signalManager.InitializePhysicalSignals(signalConfigs);
-
-// 3. 关联硬件设备
+// 2. 初始化并关联硬件设备
 IControllerHardwareDevice device = ...; // 获取硬件设备实例
 signalManager.Initialize(device);
 
-// 4. 添加虚拟通道
-signalManager.AddVirtualChannel(
-    channelId: 1001,
-    channelName: "平均力",
-    formula: "({1} + {2}) / 2",  // 信号1和信号2的平均值
-    signalIds: new List<long> { 1, 2 },
-    rangeMin: 0,
-    rangeMax: 1000
-);
+// 3. 添加物理信号配置
+var signalConfigs = new List<HardwareSignalConfiguration>
+{
+    new() {
+        SignalId = 1,
+        SignalName = "力传感器",
+        SignalAddress = SignalAddressEnum.AI0,
+        DeviceId = 100,
+        MinValue = 0,
+        MaxValue = 1000,
+        Unit = "N"
+    },
+    new() {
+        SignalId = 2,
+        SignalName = "位移传感器",
+        SignalAddress = SignalAddressEnum.AI1,
+        DeviceId = 100,
+        MinValue = 0,
+        MaxValue = 100,
+        Unit = "mm"
+    }
+};
+signalManager.AddPhysicalSignals(signalConfigs);
 
-// 5. 添加控制通道
-signalManager.AddControlChannel(
-    channelId: 2001,
-    channelName: "力控制通道",
-    channelType: ChannelTypeEnum.Force,
-    controlMode: ControlChannelModeTypeEnum.FCSLoop,
-    controlCycle: 20.0,  // 20ms控制周期
-    positionSignalId: null,
-    forceSignalId: 1001,  // 使用虚拟通道作为反馈
-    outputSignalId: 10,
-    outputLimitation: 80
-);
-
-// 6. 启动所有信号和通道
+// 4. 启动信号采集
 signalManager.Start();
 
-// 7. 订阅信号数据流
-var dataStream = signalManager.GetSignalDataStream(1001);
-dataStream?.Subscribe(data =>
+// 5. 订阅物理信号数据流
+var forceDataStream = signalManager.GetSignalDataStream(1);
+forceDataStream?.Subscribe(data =>
 {
-    Console.WriteLine($"虚拟通道数据: {data.Value} @ {data.Timestamp}");
+    Console.WriteLine($"力信号: {data.Value} N @ {data.Timestamp}");
 });
 
-// 8. 获取控制通道并设置目标值
-var controlChannel = signalManager.GetControlChannel(2001);
-controlChannel?.SetSetpoint(500.0);
+// 6. 查询信号
+var signal = signalManager.GetPhysicalSignal(1);
+Console.WriteLine($"信号配置: {signal?.Configuration.SignalName}");
 
-// 9. 停止和释放
+// 7. 停止和释放
 signalManager.Stop();
 signalManager.Dispose();
 ```
 
-### 虚拟通道公式支持
+### 在虚拟通道中使用 SignalManager
 
-虚拟通道支持以下公式格式：
-- `{SignalId}` 或 `[SignalId]` - 引用信号值
-- 支持基本数学运算：`+`, `-`, `*`, `/`, `(`, `)`
-- 示例：
-  - `{1} * 2 + {2}` - 信号1的2倍加上信号2
-  - `({1} + {2}) / 2` - 信号1和2的平均值
-  - `{1} * 0.5 + 100` - 线性变换
+虚拟通道可以订阅多个物理信号进行组合计算：
+
+```csharp
+// 虚拟通道：计算两个力传感器的平均值
+public class AverageForcePseudoChannel
+{
+    private readonly ISignalManager _signalManager;
+    private readonly IDisposable _subscription1;
+    private readonly IDisposable _subscription2;
+
+    private double _latestValue1;
+    private double _latestValue2;
+
+    public AverageForcePseudoChannel(ISignalManager signalManager)
+    {
+        _signalManager = signalManager;
+
+        // 订阅物理信号1
+        var stream1 = _signalManager.GetSignalDataStream(1);
+        _subscription1 = stream1?.Subscribe(data => {
+            _latestValue1 = data.Value;
+            EmitAverageValue();
+        });
+
+        // 订阅物理信号2
+        var stream2 = _signalManager.GetSignalDataStream(2);
+        _subscription2 = stream2?.Subscribe(data => {
+            _latestValue2 = data.Value;
+            EmitAverageValue();
+        });
+    }
+
+    private void EmitAverageValue()
+    {
+        var average = (_latestValue1 + _latestValue2) / 2.0;
+        // 输出虚拟通道的数据
+        OnDataAvailable?.Invoke(average);
+    }
+
+    public event Action<double>? OnDataAvailable;
+
+    public void Dispose()
+    {
+        _subscription1?.Dispose();
+        _subscription2?.Dispose();
+    }
+}
+```
+
+### 在控制通道中使用 SignalManager
+
+控制通道可以订阅物理信号或虚拟通道作为反馈：
+
+```csharp
+// 控制通道：使用力信号进行PID控制
+public class ForceControlChannel
+{
+    private readonly ISignalManager _signalManager;
+    private readonly IDisposable _subscription;
+    private double _setpoint;
+
+    public ForceControlChannel(ISignalManager signalManager, long feedbackSignalId)
+    {
+        _signalManager = signalManager;
+
+        // 订阅反馈信号
+        var feedbackStream = _signalManager.GetSignalDataStream(feedbackSignalId);
+        _subscription = feedbackStream?.Subscribe(data => {
+            var feedback = data.Value;
+            var output = CalculatePID(feedback);
+            SendControlOutput(output);
+        });
+    }
+
+    public void SetSetpoint(double setpoint)
+    {
+        _setpoint = setpoint;
+    }
+
+    private double CalculatePID(double feedback)
+    {
+        var error = _setpoint - feedback;
+        // PID 控制逻辑
+        return error * 0.5; // 简化的比例控制
+    }
+
+    private void SendControlOutput(double output)
+    {
+        // 发送控制指令到硬件设备
+    }
+
+    public void Dispose()
+    {
+        _subscription?.Dispose();
+    }
+}
+```
+
+## API 说明
+
+### ISignalManager 接口
+
+| 方法 | 说明 |
+|------|------|
+| `Initialize(device)` | 初始化并关联硬件设备 |
+| `AddPhysicalSignal(config)` | 添加单个物理信号 |
+| `AddPhysicalSignals(configs)` | 批量添加物理信号 |
+| `RemovePhysicalSignal(signalId)` | 移除物理信号 |
+| `Start()` | 启动所有信号采集 |
+| `Stop()` | 停止所有信号采集 |
+| `GetPhysicalSignal(signalId)` | 获取物理信号接口 |
+| `GetAllPhysicalSignals()` | 获取所有物理信号 |
+| `GetSignalDataStream(signalId)` | 获取信号数据流（用于订阅） |
+| `ContainsSignal(signalId)` | 检查信号是否存在 |
+| `IsRunning` | 是否正在运行（属性） |
+| `Dispose()` | 释放资源 |
 
 ## 设计特点
 
-### 高性能
-- 使用 Reactive Extensions (Rx) 实现异步数据流
-- 采用 `ConcurrentDictionary` 保证线程安全
-- 避免不必要的数据拷贝
+### ✅ 单一职责
+- SignalManager 只管理物理信号接口
+- 虚拟通道和控制通道由外部独立管理
+- 各模块职责清晰，易于维护
 
-### 可扩展性
+### ✅ 高性能
+- 使用 Reactive Extensions (Rx) 实现高性能异步数据流
+- `ConcurrentDictionary` 保证线程安全
+- 避免不必要的数据拷贝和转换
+
+### ✅ 隔离性
+- 物理信号与硬件设备隔离
+- 数据采集与控制逻辑隔离
+- 各层独立，便于测试和替换
+
+### ✅ 可扩展性
 - 接口与实现分离（`ISignalManager`）
-- 支持动态添加/删除通道
-- 易于添加新的信号类型和控制算法
+- 支持运行时动态添加/移除信号
+- 易于添加新的信号类型
 
-### 隔离性
-- 物理信号层与硬件设备隔离
-- 虚拟通道独立于物理信号
-- 控制通道可选择物理或虚拟信号作为反馈
-
-### 简洁性
-- 核心类职责清晰
+### ✅ 简洁性
 - API 简单易用
+- 代码结构清晰
 - 避免过度设计
+
+## 与其他模块的关系
+
+### SignalManager → 虚拟通道（PseudoChannel）
+- 虚拟通道订阅 SignalManager 的物理信号数据流
+- 虚拟通道组合多个物理信号进行计算
+- 虚拟通道输出的数据可供其他模块使用
+
+### SignalManager → 控制通道（ControlChannel）
+- 控制通道订阅 SignalManager 的物理信号或虚拟通道作为反馈
+- 控制通道实现控制算法（如PID）
+- 控制通道输出控制指令到硬件设备
+
+### 数据流向
+```
+硬件设备 → SignalManager → 物理信号 → 虚拟通道/控制通道 → 业务逻辑
+```
 
 ## 注意事项
 
-1. **线程安全**：所有公共方法都是线程安全的
-2. **生命周期**：必须在使用完后调用 `Dispose()` 释放资源
-3. **初始化顺序**：必须先调用 `Initialize()` 再调用 `Start()`
-4. **公式验证**：虚拟通道公式需确保引用的信号存在
-5. **性能考虑**：虚拟通道的计算频率取决于输入信号的采样率
+1. **初始化顺序**：必须先调用 `Initialize()` 再调用 `Start()`
+2. **线程安全**：所有公共方法都是线程安全的
+3. **资源释放**：使用完后必须调用 `Dispose()` 释放资源
+4. **信号ID唯一性**：每个信号的ID必须唯一
+5. **硬件设备类型**：设备必须继承自 `ControllerHardwareDeviceBase`
 
-## 后续扩展
+## 后续扩展建议
 
-可以考虑的扩展功能（当前版本未实现）：
-- 信号数据质量监控和异常检测
-- 控制通道的完整PID算法实现
-- 信号数据的历史记录和回放
-- 更复杂的公式表达式支持（三角函数、指数等）
-- 控制通道的自动调优功能
+当前版本已实现核心功能，以下是可选的扩展方向：
+
+- [ ] 信号数据质量监控
+- [ ] 信号数据的历史缓冲
+- [ ] 信号采样率动态调整
+- [ ] 信号数据的统计分析（最大值、最小值、平均值等）
+- [ ] 信号数据的持久化存储
