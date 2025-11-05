@@ -31,6 +31,12 @@ namespace MCCS.Core.Models.StationSites
         [Column(IsNullable = false, StringLength = -2)]
         public string Formula { get; set; } = string.Empty;
         /// <summary>
+        /// 单位;None---默认无单位
+        /// </summary>
+        [Column(IsNullable = true, StringLength = 50)]
+        public string? Unit { get; set; } = null;
+
+        /// <summary>
         /// 是否可校准
         /// </summary>
         public bool HasTare { get; set; }

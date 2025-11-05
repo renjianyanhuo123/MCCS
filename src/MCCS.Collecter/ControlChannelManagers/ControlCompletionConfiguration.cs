@@ -1,6 +1,6 @@
-﻿namespace MCCS.Collecter.HardwareDevices
+﻿namespace MCCS.Collecter.ControlChannelManagers 
 {
-    public sealed class ControlCompletionConfiguration
+    public sealed record ControlCompletionConfiguration
     {
         /// <summary>
         /// 位移允许误差 (mm)

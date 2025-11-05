@@ -16,6 +16,13 @@
             set => SetProperty(ref _name, value);
         }
 
+        private string _unit; 
+        public string Unit
+        {
+            get => _unit;
+            set => SetProperty(ref _unit, value);
+        }
+
         private string _createTime; 
         public string CreateTime
         {

@@ -1,17 +1,17 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using MCCS.Collecter.DllNative.Models;
+using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
-namespace MCCS.Collecter.HardwareDevices.BwController
+namespace MCCS.Collecter.ControllerManagers.Entities
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase
     {
         private readonly IDisposable _acquisitionSubscription; 
-        private readonly int _sampleRate;
         private static readonly Random _rand = new();
 
         // 目前一个控制器就控制一个作动器
@@ -28,9 +28,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
 
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         { 
-            _sampleRate = configuration.Signals.Max(s => s.SampleRate); 
-            _acquisitionSubscription = CreateAcquisitionLoop(); 
-        } 
+            _acquisitionSubscription = CreateAcquisitionLoop();
+        }
 
         /// <summary>
         /// 根据正态分布对输入值进行微扰。
@@ -82,7 +81,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                     {
                         _force = (float)value;
                     }
-                } 
+                }
                 var temp = 1 / frequency * 1000;
                 // 等待500ms
                 Thread.Sleep(500);
@@ -98,7 +97,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private double CalculateTriangleWave(double amplitude, double frequency, double time)
         {
             var period = 1.0 / frequency;
-            var phase = (time % period) / period; // 归一化到 [0, 1)
+            var phase = time % period / period; // 归一化到 [0, 1)
 
             if (phase < 0.25)
             {
@@ -122,7 +121,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         private double CalculateSquareWave(double amplitude, double frequency, double time)
         {
             var period = 1.0 / frequency;
-            var phase = (time % period) / period; // 归一化到 [0, 1)
+            var phase = time % period / period; // 归一化到 [0, 1)
 
             // 前半个周期为正幅值，后半个周期为负幅值
             return phase < 0.5 ? amplitude : -amplitude;
@@ -156,15 +155,9 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             return true;
         }
 
-        public override DeviceCommandContext ManualControl(long deviceId, float outValue)
+        public void MockManualControl(long deviceId, float outValue)
         {
-            // 创建或获取设备上下文
-            var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
-            {
-                DeviceId = deviceId,
-                IsValid = false
-            });
-            if (Status != HardwareConnectionStatus.Connected) return context;
+            if (Status != HardwareConnectionStatus.Connected) return;
             ControlState = SystemControlState.Static;
             var speed = outValue / 60.0f;
             speed = speed switch
@@ -174,17 +167,11 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 _ => speed
             };
             PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
-            return context;
         }
 
-        public override DeviceCommandContext StaticControl(StaticControlParams controlParams)
-        {
-            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
-            {
-                DeviceId = controlParams.DeviceId,
-                IsValid = false
-            });
-            if (Status != HardwareConnectionStatus.Connected) return context;
+        public void MockStaticControl(StaticControlParams controlParams)
+        { 
+            if (Status != HardwareConnectionStatus.Connected) return;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
             switch (controlParams.StaticLoadControl)
@@ -206,23 +193,16 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 default:
                     break;
             } 
-            return context;
         }
 
-        public override DeviceCommandContext DynamicControl( DynamicControlParams controlParams)
-        {
-            var context = _deviceContexts.GetOrAdd(controlParams.DeviceId, new DeviceCommandContext
-            {
-                DeviceId = controlParams.DeviceId,
-                IsValid = false
-            });
-            if (Status != HardwareConnectionStatus.Connected) return context;
+        public void MockDynamicControl(DynamicControlParams controlParams)
+        { 
+            if (Status != HardwareConnectionStatus.Connected) return;
             ControlState = SystemControlState.Dynamic;
             Task.Run(() =>
             {
                 GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
             });
-            return context;
         }
 
         private void ForceChangeToTarget(float speed, float target)
@@ -231,8 +211,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
                 while (true)
                 {
-                    if ((speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)) 
-                        || (speed > 0 && Math.Abs(_force - target) < speed))
+                    if (speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)
+                        || speed > 0 && Math.Abs(_force - target) < speed)
                     {
                         lock (_lock)
                         {
@@ -255,8 +235,8 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             {
                 while (true)
                 {
-                    if ((speed < 0 && Math.Abs(_position - target) < Math.Abs(speed))
-                        || (speed > 0 && Math.Abs(_position - target) < speed))
+                    if (speed < 0 && Math.Abs(_position - target) < Math.Abs(speed)
+                        || speed > 0 && Math.Abs(_position - target) < speed)
                     {
                         lock (_lock)
                         {
@@ -288,17 +268,17 @@ namespace MCCS.Collecter.HardwareDevices.BwController
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint MockAcquireReading()
+        private DataPoint<List<BatchCollectItemModel>> MockAcquireReading()
         {
             // 模拟数据采集
             var rand = new Random();
             var res = new List<BatchCollectItemModel>();
-            var mockValue = new TNet_ADHInfo
+            var mockValue = new TNet_ADHInfo()
             {
                 Net_AD_N =
                 {
-                    [0] = (float)(AddNormalNoise(_force)),
-                    [1] = (float)(AddNormalNoise(_force)),
+                    [0] = (float)AddNormalNoise(_force),
+                    [1] = (float)AddNormalNoise(_force),
                     [2] = (float)(rand.NextDouble() * 100),
                     [3] = (float)(rand.NextDouble() * 100),
                     [4] = (float)(rand.NextDouble() * 100),
@@ -311,7 +291,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
                 }
             };
             res.Add(StructDataToCollectModel(mockValue));
-            return new DataPoint
+            return new DataPoint<List<BatchCollectItemModel>>
             {
                 DeviceId = DeviceId,
                 Value = res,
@@ -325,7 +305,7 @@ namespace MCCS.Collecter.HardwareDevices.BwController
             base.Dispose();
             _acquisitionSubscription.Dispose();
             _dataSubject?.OnCompleted();
-            _dataSubject?.Dispose(); 
+            _dataSubject?.Dispose();
         }
     }
 }

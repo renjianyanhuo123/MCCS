@@ -27,8 +27,4 @@
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="SystemControls\" />
-  </ItemGroup>
-
 </Project>

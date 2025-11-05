@@ -1,8 +1,11 @@
 ﻿namespace MCCS.Collecter.DllNative.Models
 {
-    public record BatchCollectItemModel
-    {
-        public Dictionary<long, double> CollectData { get; init; } = new();
+    public record SingleCollectItemModel
+    { 
+        /// <summary>
+        /// 所有采集信号的值
+        /// </summary>
+        public Dictionary<long, double> Values { get; init; } = new();
 
         /// <summary>
         /// 位置给定值

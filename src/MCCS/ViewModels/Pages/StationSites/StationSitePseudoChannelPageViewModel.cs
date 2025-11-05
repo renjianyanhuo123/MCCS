@@ -102,6 +102,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 {
                     Id = channel.Id,
                     Name = channel.ChannelName,
+                    Unit = channel.Unit,
                     CreateTime = channel.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"),
                     UpdateTime = channel.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
                 });

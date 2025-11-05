@@ -214,6 +214,7 @@ namespace MCCS.Core.Repositories
                 .Set(s => s.RangeMax, pseudoChannelInfo.RangeMax)
                 .Set(s => s.Formula, pseudoChannelInfo.Formula)
                 .Set(s => s.HasTare, pseudoChannelInfo.HasTare)
+                .Set(s => s.Unit, pseudoChannelInfo.Unit)
                 .Where(s => s.Id == pseudoChannelInfo.Id)
                 .ExecuteAffrowsAsync(cancellationToken);
             var count2 = await uow.Orm.Delete<PseudoChannelAndSignalInfo>().Where(s => s.PseudoChannelId == pseudoChannelInfo.Id)

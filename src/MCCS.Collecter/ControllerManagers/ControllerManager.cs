@@ -1,23 +1,21 @@
-﻿using MCCS.Collecter.DllNative;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.HardwareDevices.BwController;
+﻿using MCCS.Collecter.ControllerManagers.Entities;
+using MCCS.Collecter.DllNative;
+using MCCS.Collecter.HardwareDevices; 
 using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.TestModels;
-using MCCS.Infrastructure.TestModels.Commands;
-using MCCS.Infrastructure.TestModels.ControlParams;
 
-namespace MCCS.Collecter.Services
+namespace MCCS.Collecter.ControllerManagers
 {
     /// <summary>
-    /// 控制器服务(务必保持单例)
+    /// 控制器管理(务必保持单例)
     /// </summary>
-    public sealed class ControllerService : IControllerService
+    public sealed class ControllerManager : IControllerManager
     {
         private static volatile bool _isDllInitialized = false;
         private readonly List<ControllerHardwareDeviceBase> _controllers = [];
         private bool _isMock = false;
 
-        public ControllerService()
+        public ControllerManager()
         {
 
         }
@@ -38,6 +36,15 @@ namespace MCCS.Collecter.Services
             }
             throw new Exception($"DLL初始化失败,错误码:{result}"); 
         }
+
+        public SystemControlState GetControlStateBySignalId(long signalId)
+        {
+            // 目前还在控制器中, 后面要改进的
+            var controller = _controllers.FirstOrDefault(c => c.Signals.Any(s => s.SignalId == signalId));
+            if (controller == null) throw new ArgumentNullException("controller no find signal");
+            return controller.ControlState;
+        }
+
         /// <summary>
         /// 获取控制器
         /// </summary>
@@ -51,8 +58,9 @@ namespace MCCS.Collecter.Services
             return controller;
         }
 
-        /// <summary>
-        /// 操作阀门
+        /// <summary>                                                                                                                                                                                                                          
+        /// 操作阀门(应该属于设备上的操作;甚至可能由其他设备控制)
+        /// 暂时先由控制器掌控吧
         /// </summary>
         public bool OperationSigngleValve(long controllerId, bool isOpen)
         {
@@ -79,44 +87,7 @@ namespace MCCS.Collecter.Services
         public bool OperationControlMode(long controllerId, SystemControlState controlMode)
         {
             return GetControllerInfo(controllerId).OperationControlMode(controlMode);
-        }
-
-        /// <summary>
-        /// 手动控制
-        /// </summary>
-        /// <param name="controllerId">控制器ID</param>
-        /// <param name="deviceId">对应控制的作动器设备ID</param>
-        /// <param name="speed">作动器位移的速度</param>
-        /// <returns></returns>
-        public DeviceCommandContext ManualControl(long controllerId, long deviceId, float speed)
-        {
-            var controller = GetControllerInfo(controllerId);
-            return controller.ManualControl(deviceId, speed);
-        }
-
-        /// <summary>
-        /// 静态控制
-        /// </summary>
-        /// <param name="controllerId"></param> 
-        /// <param name="staticControlParam"></param>
-        /// <returns></returns>
-        public DeviceCommandContext StaticControl(long controllerId, StaticControlParams staticControlParam)
-        {
-            var controller = GetControllerInfo(controllerId);
-            return controller.StaticControl(staticControlParam);
-        }
-
-        /// <summary>
-        /// 动态控制
-        /// </summary>
-        /// <param name="controllerId"></param> 
-        /// <param name="dynamicControlParam"></param>
-        /// <returns></returns>
-        public DeviceCommandContext DynamicControl(long controllerId, DynamicControlParams dynamicControlParam)
-        {
-            var controller = GetControllerInfo(controllerId);
-            return controller.DynamicControl(dynamicControlParam);
-        }
+        } 
 
         /// <summary>
         /// 创建控制器
@@ -156,6 +127,7 @@ namespace MCCS.Collecter.Services
 
         /// <summary>
         /// 开启所有控制器的数据采集
+        /// 这里相当于硬件上的总开关
         /// </summary>
         public void StartAllControllers()
         {
@@ -171,6 +143,7 @@ namespace MCCS.Collecter.Services
 
         /// <summary>
         /// 停止所有控制器的数据采集并断开连接
+        /// 这里相当于硬件上的总开关
         /// </summary>
         public void StopAllControllers()
         {

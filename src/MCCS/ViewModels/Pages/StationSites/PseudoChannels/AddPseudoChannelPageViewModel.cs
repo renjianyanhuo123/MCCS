@@ -61,6 +61,16 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
         public string Formula { get => _formula; set => SetProperty(ref _formula, value); }
 
         /// <summary>
+        /// 单位
+        /// </summary>
+        private string _unit; 
+        public string Unit
+        {
+            get => _unit;
+            set => SetProperty(ref _unit, value);
+        }
+
+        /// <summary>
         /// 是否可校准
         /// </summary>
         private bool _hasTare;
@@ -104,6 +114,7 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
                 RangeMax = RangeMax,
                 Formula = Formula,
                 HasTare = HasTare,
+                Unit = Unit,
                 StationId = _stationId
             };
             var signals = SignalModels

@@ -8,6 +8,7 @@ using System.Windows;
 using Serilog;
 using System.Windows.Threading;
 using DryIoc.Microsoft.DependencyInjection;
+using MCCS.Collecter.ControllerManagers;
 using MCCS.Core.WorkflowSettings;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Common;
@@ -37,7 +38,6 @@ using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
-using MCCS.Collecter.Services;
 using MCCS.Collecter.DllNative;
 using MCCS.Core.Repositories;
 using MCCS.ViewModels.Pages.TestModelOperations;
@@ -100,7 +100,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
-            containerRegistry.RegisterSingleton<IControllerService, ControllerService>();
+            containerRegistry.RegisterSingleton<IControllerManager, ControllerManager>();
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
@@ -200,7 +200,7 @@ namespace MCCS
         {
             Log.CloseAndFlush();
             base.OnExit(e);
-            var controllerService = Container.Resolve<IControllerService>();
+            var controllerService = Container.Resolve<IControllerManager>();
             controllerService.StopAllControllers();
             controllerService.Dispose();
             // 关闭主窗口后则释放所有设备连接 

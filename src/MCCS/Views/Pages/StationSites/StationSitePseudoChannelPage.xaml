@@ -34,6 +34,7 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" Visibility="Hidden"></DataGridTextColumn>
                 <DataGridTextColumn Header="虚拟通道名称" Binding="{Binding Name}" IsReadOnly="True" Width="*"/>
+                <DataGridTextColumn Header="单位" Binding="{Binding Unit}" IsReadOnly="True" Width="*"/>
                 <DataGridTextColumn Header="创建时间" IsReadOnly="True" Binding="{Binding CreateTime}" Width="*"/>
                 <DataGridTextColumn Header="更新时间" IsReadOnly="True" Binding="{Binding UpdateTime}" Width="*"/>
                 <DataGridTemplateColumn Header="操作"  Width="*">

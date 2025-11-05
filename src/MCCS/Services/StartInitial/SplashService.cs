@@ -1,11 +1,11 @@
 ﻿
+using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
 using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.Services;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Core.Models.StationSites;
@@ -18,12 +18,12 @@ namespace MCCS.Services.StartInitial
     {
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
         private readonly IDeviceInfoRepository _deviceInfoRepository;
-        private readonly IControllerService _controllerService;
+        private readonly IControllerManager _controllerService;
         private readonly IConfiguration _configuration;
 
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository,
             IDeviceInfoRepository deviceInfoRepository,
-            IControllerService controllerService,
+            IControllerManager controllerService,
             IConfiguration configuration)
         {
             _configuration = configuration;
@@ -141,8 +141,7 @@ namespace MCCS.Services.StartInitial
                     DeviceAddressId = index++,
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
-                    IsSimulation = isMock,
-                    CompletionConfig = new ControlCompletionConfiguration(),
+                    IsSimulation = isMock, 
                     ConnectionString = ""
                 };
                 configuration.Signals.AddRange(signals

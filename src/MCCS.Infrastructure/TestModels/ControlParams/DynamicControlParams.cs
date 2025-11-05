@@ -1,11 +1,7 @@
 ﻿namespace MCCS.Infrastructure.TestModels.ControlParams
 {
     public sealed record DynamicControlParams
-    {
-        /// <summary>
-        /// 设备ID
-        /// </summary>
-        public long DeviceId { get; init; }
+    { 
         /// <summary>
         /// 信号接口ID;
         /// 用于直接控制;

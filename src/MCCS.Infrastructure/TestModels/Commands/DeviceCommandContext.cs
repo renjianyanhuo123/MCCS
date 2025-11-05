@@ -6,11 +6,13 @@
         /// 是否有效(用于封装为整体的返回结果; 每次应用一个指令后)
         /// </summary>
         public required bool IsValid { get; set; }
-
-        public long DeviceId { get; init; }
+        /// <summary>
+        /// 属于哪个控制通道
+        /// </summary>
+        public long ControlChannelId { get; init; }
         public int TargetCycleCount { get; init; }
         /// <summary>
-        /// 每10个连续数据判断是否达标
+        /// 每10个连续数据判断是否达标 
         /// </summary>
         public int BufferSize { get; init; } = 10;
 

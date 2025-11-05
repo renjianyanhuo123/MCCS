@@ -50,6 +50,16 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
         private double _rangeMax;
         public double RangeMax { get => _rangeMax; set => SetProperty(ref _rangeMax, value); }
 
+        /// <summary>
+        /// 单位
+        /// </summary>
+        private string _unit;
+        public string Unit
+        {
+            get => _unit;
+            set => SetProperty(ref _unit, value);
+        }
+
         private string _formula = string.Empty;
         public string Formula { get => _formula; set => SetProperty(ref _formula, value); }
 
@@ -100,7 +110,7 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
             RangeMax = pseudoChannel?.RangeMax ?? 0;
             Formula = pseudoChannel?.Formula ?? string.Empty;
             HasTare = pseudoChannel?.HasTare ?? false;
-
+            Unit = pseudoChannel?.Unit ?? string.Empty;
             foreach (var item in staionSelectedHardware)
             {
                 var parentInfo = allDevices.FirstOrDefault(c => c.Id == item.BelongToControllerId);

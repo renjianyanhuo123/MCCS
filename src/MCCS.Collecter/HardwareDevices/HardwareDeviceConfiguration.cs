@@ -9,11 +9,10 @@
         public string ConnectionString { get; init; } = string.Empty;    // 连接字符串或地址
         public bool IsSimulation { get; set; } = false;                // 是否为模拟设备
         public int StatusInterval { get; init; } = 3;                  // 状态检查间隔，单位秒，0表示不检查
-        public List<HardwareSignalConfiguration> Signals { get; init; } = [];
-
         /// <summary>
-        /// 控制完成判断配置
+        /// 采样频率
         /// </summary>
-        public ControlCompletionConfiguration? CompletionConfig { get; set; }
+        public int SampleRate { get; init; }
+        public List<HardwareSignalConfiguration> Signals { get; init; } = []; 
     }
 }

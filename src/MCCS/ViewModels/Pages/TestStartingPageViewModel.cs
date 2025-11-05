@@ -2,7 +2,6 @@
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.Services;
 using MCCS.Common;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Devices;
@@ -29,6 +28,7 @@ using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers.CurrentTest;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Components.GlobalNotification.Models;
@@ -55,7 +55,7 @@ namespace MCCS.ViewModels.Pages
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService; 
         private readonly IModel3DDataRepository _model3DDataRepository; 
-        private readonly IControllerService _controllerService;
+        private readonly IControllerManager _controllerService;
         private readonly INotificationService _notificationService;
         private IDisposable? _subscribeDispose;
         // 存储所有的广告牌引用,方便后期快速更新
@@ -96,7 +96,7 @@ namespace MCCS.ViewModels.Pages
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
-            IControllerService controllerService,
+            IControllerManager controllerService,
             IModel3DDataRepository model3DDataRepository,
             INotificationService notificationService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
@@ -554,7 +554,7 @@ namespace MCCS.ViewModels.Pages
                 .Subscribe(packet =>
                 {
                     // 现在这个回调只会在一个线程上串行执行 
-                    OnDeviceDataReceived(packet.Data);
+                    // OnDeviceDataReceived(packet.Data);
                 });
              
         }
@@ -581,17 +581,17 @@ namespace MCCS.ViewModels.Pages
 #endif
             foreach (var textInfoItem in _textInfoDic)
             {
-                var success = collectItemModel.Net_AD_S.TryGetValue(textInfoItem.Key, out var temp);
-                if (success)
-                {
-                    textInfoItem.Value.Text = $"Position: {temp:F3}mm";
-                    continue;
-                } 
-                success = collectItemModel.Net_AD_N.TryGetValue(textInfoItem.Key, out temp);
-                if (success)
-                {
-                    textInfoItem.Value.Text = $"Force: {temp:F3}kN";
-                }
+                var success = collectItemModel.CollectData.TryGetValue(textInfoItem.Key, out var temp);
+                //if (success)
+                //{
+                //    textInfoItem.Value.Text = $"Position: {temp.Item1:F3}{temp.Item2}";
+                //    continue;
+                //} 
+                //success = collectItemModel.CollectData.TryGetValue(textInfoItem.Key, out temp);
+                //if (success)
+                //{
+                //    textInfoItem.Value.Text = $"Force: {temp.Item1:F3}{temp.Item2}";
+                //}
             }
             CollectionDataLabels.Invalidate();
         } 

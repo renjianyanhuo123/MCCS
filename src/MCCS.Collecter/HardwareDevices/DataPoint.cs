@@ -7,13 +7,12 @@
         Bad = 2
     }
 
-    public record DataPoint
+    public record DataPoint<T>
     {
         public long DeviceId { get; init; } 
         public long Timestamp { get; init; }
-        public object Value { get; init; }
+        public T Value { get; init; }
         public string Unit { get; init; }
-        public DataQuality DataQuality { get; init; }
-        public T GetValue<T>() => (T)Convert.ChangeType(Value, typeof(T));
+        public DataQuality DataQuality { get; init; } 
     }
 }

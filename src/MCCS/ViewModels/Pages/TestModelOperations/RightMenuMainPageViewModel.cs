@@ -1,4 +1,4 @@
-﻿using MCCS.Collecter.Services;
+﻿using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.StationSites;
@@ -14,10 +14,10 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         private string _modelId = string.Empty;
 
         private readonly IEventAggregator _eventAggregator;
-        private readonly IControllerService _controllerService;
+        private readonly IControllerManager _controllerService;
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
-            IControllerService controllerService) : base(eventAggregator)
+            IControllerManager controllerService) : base(eventAggregator)
         {
             _eventAggregator = eventAggregator;
             _controllerService = controllerService;

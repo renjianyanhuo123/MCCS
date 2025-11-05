@@ -1,5 +1,5 @@
 ﻿using System.Reactive.Linq;
-using MCCS.Collecter.Services;
+using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers;
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.TestModels;
@@ -18,13 +18,13 @@ namespace MCCS.ViewModels.Pages.Controllers
     {
         public const string Tag = "ControllerMainPage";  
         private readonly IEventAggregator _eventAggregator;
-        private readonly IControllerService _controllerService;
+        private readonly IControllerManager _controllerService;
         private readonly INotificationService _notificationService;
         private readonly long _controllerId = -1;
         private readonly long _deviceId = -1;
 
         public ControllerMainPageViewModel(
-            IControllerService controllerService,
+            IControllerManager controllerService,
             INotificationService notificationService,
             IEventAggregator eventAggregator)
         {
@@ -35,7 +35,7 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         public ControllerMainPageViewModel(
             long modelId,
-            IControllerService controllerService,
+            IControllerManager controllerService,
             INotificationService notificationService,
             IEventAggregator eventAggregator) : this(controllerService, notificationService, eventAggregator)
         {

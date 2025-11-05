@@ -1,13 +1,14 @@
 ﻿using MCCS.Collecter.HardwareDevices;
 
-namespace MCCS.Collecter.SignalInterfaceManager
+namespace MCCS.Collecter.ControllerManagers.Signals
 {
     public sealed class HardwareSignalChannel : IDisposable
-    { 
+    {
 
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
             Configuration = signalConfig;
+            SignalAddressIndex = (long)signalConfig.SignalAddress;
             ConnectedDeviceId = signalConfig.DeviceId;
             SignalId = signalConfig.SignalId;
         }
@@ -18,21 +19,7 @@ namespace MCCS.Collecter.SignalInterfaceManager
 
         public HardwareSignalConfiguration Configuration { get; }
 
-        public long SignalAddressIndex
-        {
-            get
-            {
-                var index = (long)Configuration.SignalAddress;
-                if (index < 10)
-                {
-                    return index;
-                }
-                else
-                {
-                    return index % 10;
-                }
-            }
-        }
+        public long SignalAddressIndex { get; }
 
         public void Start()
         {
