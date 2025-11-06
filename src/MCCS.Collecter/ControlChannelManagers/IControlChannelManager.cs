@@ -29,7 +29,7 @@ namespace MCCS.Collecter.ControlChannelManagers
         /// 单个控制通道手动控制
         /// </summary>
         /// <param name="channelId"></param>
-        /// <param name="speed"></param>
+        /// <param name="speed">速度</param>
         /// <returns></returns>
         DeviceCommandContext ManualControl(long channelId, float speed);
         /// <summary>

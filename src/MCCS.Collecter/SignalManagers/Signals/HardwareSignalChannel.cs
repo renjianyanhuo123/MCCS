@@ -1,21 +1,24 @@
-﻿using MCCS.Collecter.HardwareDevices;
-
-namespace MCCS.Collecter.ControllerManagers.Signals
+﻿namespace MCCS.Collecter.SignalManagers.Signals
 {
     public sealed class HardwareSignalChannel : IDisposable
-    {
-
+    { 
         public HardwareSignalChannel(HardwareSignalConfiguration signalConfig)
         {
             Configuration = signalConfig;
             SignalAddressIndex = (long)signalConfig.SignalAddress;
             ConnectedDeviceId = signalConfig.DeviceId;
             SignalId = signalConfig.SignalId;
+            BelongControllerId = signalConfig.BelongControllerId;
         }
 
         public long SignalId { get; private set; }
 
         public long? ConnectedDeviceId { get; private set; }
+
+        /// <summary>
+        /// 所属的控制器ID
+        /// </summary>
+        public long BelongControllerId { get; set; }
 
         public HardwareSignalConfiguration Configuration { get; }
 

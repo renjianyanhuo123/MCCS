@@ -1,6 +1,7 @@
 ﻿using MCCS.Collecter.DllNative.Models;
+using MCCS.Collecter.HardwareDevices;
 
-namespace MCCS.Collecter.HardwareDevices
+namespace MCCS.Collecter.SignalManagers.Signals
 {
     /// <summary>
     /// Bw控制器所有的信号接口信息
@@ -9,6 +10,10 @@ namespace MCCS.Collecter.HardwareDevices
     public record HardwareSignalConfiguration
     {
         public long SignalId { get; set; }                            // 信号物理ID，如 "AI0", "AO1"
+        /// <summary>
+        /// 所属的控制器ID
+        /// </summary>
+        public long BelongControllerId { get; set; }
         public string SignalName { get; set; } = string.Empty;        // 信号名称
         public SignalAddressEnum SignalAddress { get; init; }         // 信号地址
         public SignalType SignalType { get; set; }                   // 信号类型
@@ -21,8 +26,8 @@ namespace MCCS.Collecter.HardwareDevices
         /// <summary>
         /// 所连接的设备ID
         /// </summary>
-        public long? DeviceId { get; set; } = 0;                         
-        public int SampleRate { get; set; } = 50; 
+        public long? DeviceId { get; set; } = 0;
+        public int SampleRate { get; set; } = 50;
         public int BufferSize { get; set; } = 1000;                     // 每个信号独立的缓冲区大小
     }
 }

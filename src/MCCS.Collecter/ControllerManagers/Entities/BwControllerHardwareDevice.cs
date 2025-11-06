@@ -106,32 +106,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             if (Status != HardwareConnectionStatus.Connected) return false;
             var result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)controlState);
             return result == AddressContanst.OP_SUCCESSFUL;
-        }
-
-        //public override DeviceCommandContext ManualControl(long deviceId, float outValue)
-        //{
-        //    // 创建或获取设备上下文
-        //    var context = _deviceContexts.GetOrAdd(deviceId, new DeviceCommandContext
-        //    {
-        //        DeviceId = deviceId,
-        //        IsValid = false
-        //    });
-        //    if (Status != HardwareConnectionStatus.Connected) return context;
-        //    if (ControlState != SystemControlState.Static)
-        //    {
-        //        var setCtrlstateResult = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)SystemControlState.Static);
-        //        if (setCtrlstateResult != AddressContanst.OP_SUCCESSFUL) return context;
-        //        ControlState = SystemControlState.Static;
-        //    }
-        //    var setCtrlModeResult = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)StaticLoadControlEnum.CTRLMODE_LoadS, outValue, 0);
-        //    if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
-        //    {
-        //        context.IsValid = true;
-        //        context.ControlMode = SystemControlState.OpenLoop;
-        //        context.CurrentStatus = CommandExecuteStatusEnum.Executing;
-        //    }
-        //    return context;
-        //}
+        } 
 
         //public override DeviceCommandContext StaticControl(StaticControlParams controlParams)
         //{
@@ -246,7 +221,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                     _ =>
                     {
                         // 发送错误数据点而不是停止流
-                        var errorReading = new DataPoint<List<BatchCollectItemModel>>
+                        var errorReading = new DataPoint<List<TNet_ADHInfo>>
                         {
                             Value = [],
                             Timestamp = Stopwatch.GetTimestamp(),
@@ -262,23 +237,23 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint<List<BatchCollectItemModel>> AcquireReading()
+        private DataPoint<List<TNet_ADHInfo>> AcquireReading()
         {
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
                 return CreateBadDataPoint();
             if (_singleBuffer == nint.Zero)
                 _singleBuffer = BufferPool.Rent();
-            var results = new List<BatchCollectItemModel>((int)count);
+            var results = new List<TNet_ADHInfo>((int)count);
             for (uint i = 0; i < count; i++)
             {
                 if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
                     return CreateBadDataPoint();
                 var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer);
-                results.Add(StructDataToCollectModel(tempValue));
+                results.Add(tempValue);
             }
 
-            return new DataPoint<List<BatchCollectItemModel>>
+            return new DataPoint<List<TNet_ADHInfo>>
             {
                 DeviceId = DeviceId,
                 Value = results,
@@ -287,7 +262,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             };
         }
 
-        private static DataPoint<List<BatchCollectItemModel>> CreateBadDataPoint() => new()
+        private static DataPoint<List<TNet_ADHInfo>> CreateBadDataPoint() => new()
         {
             Value = [],
             Timestamp = Stopwatch.GetTimestamp(),

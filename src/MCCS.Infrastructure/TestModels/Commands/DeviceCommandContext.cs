@@ -46,6 +46,8 @@
             }
         }
 
+        public string? Errmesage { get; set; }
+
         public event Action? StatusChangedEvent;
     }
 }

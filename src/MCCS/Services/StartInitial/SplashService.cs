@@ -6,6 +6,7 @@ using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
 using MCCS.Collecter.HardwareDevices;
+using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Core.Models.StationSites;

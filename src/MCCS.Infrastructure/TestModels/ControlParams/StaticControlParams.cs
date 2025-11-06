@@ -28,6 +28,7 @@
         public StaticLoadControlEnum StaticLoadControl { get; init; }
         /// <summary>
         /// 速度
+        /// kN(mm)/min
         /// </summary>
         public float Speed { get; init; }
         /// <summary>

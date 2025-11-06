@@ -3,15 +3,13 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.ControllerManagers.Signals;
-using Newtonsoft.Json.Linq;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
     public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice
     { 
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
-        protected readonly ReplaySubject<DataPoint<List<BatchCollectItemModel>>> _dataSubject;
+        protected readonly ReplaySubject<DataPoint<List<TNet_ADHInfo>>> _dataSubject;
         protected readonly int _sampleRate;
         protected IDisposable? _statusSubscription; 
          
@@ -29,8 +27,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         public long DeviceId { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
-        public HardwareConnectionStatus Status { get; protected set; }
-        public List<HardwareSignalChannel> Signals { get; protected set; }
+        public HardwareConnectionStatus Status { get; protected set; } 
 
         /// <summary>
         /// 控制器当前所处的控制状态 
@@ -39,7 +36,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// <summary>
         /// 批量数据流
         /// </summary>
-        public IObservable<DataPoint<List<BatchCollectItemModel>>> DataStream { get; protected set; }
+        public IObservable<DataPoint<List<TNet_ADHInfo>>> DataStream { get; protected set; }
         /// <summary>
         /// 状态流
         /// </summary>
@@ -48,7 +45,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// 不预先展开，而是提供展开后的Observable;
         /// 单个的数据流
         /// </summary>
-        public IObservable<DataPoint<BatchCollectItemModel>> IndividualDataStream { get; protected set; }
+        public IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; protected set; }
 
         protected ControllerHardwareDeviceBase(HardwareDeviceConfiguration configuration)
         {
@@ -57,13 +54,12 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             DeviceType = configuration.DeviceType;
             _sampleRate = configuration.SampleRate;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
-            _dataSubject = new ReplaySubject<DataPoint<List<BatchCollectItemModel>>>(bufferSize: 1000);
-            Signals = configuration.Signals.Select(s => new HardwareSignalChannel(s)).ToList();
+            _dataSubject = new ReplaySubject<DataPoint<List<TNet_ADHInfo>>>(bufferSize: 1000); 
             DataStream = _dataSubject.AsObservable();
             IndividualDataStream = _dataSubject.Where(dp => dp is { DataQuality: DataQuality.Good, Value: not null })
                 .SelectMany(dataPoint =>
                     dataPoint.Value.Select(item =>
-                        new DataPoint<BatchCollectItemModel>
+                        new DataPoint<TNet_ADHInfo>
                         {
                             Value = item,
                             Timestamp = dataPoint.Timestamp,
@@ -92,46 +88,46 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// <param name="controlState"></param>
         /// <returns></returns>
         public abstract bool OperationControlMode(SystemControlState controlState);
-        //public DeviceCommandContext GetDeviceCommandContext(long deviceId)
-        //{
-        //    return _deviceContexts.GetValueOrDefault(deviceId, new DeviceCommandContext
-        //    {
-        //        DeviceId = deviceId,
-        //        IsValid = false,
-        //        CurrentStatus = CommandExecuteStatusEnum.NoExecute
-        //    });
-        //}  
 
-        protected BatchCollectItemModel StructDataToCollectModel(TNet_ADHInfo model)
+        /// <summary>
+        /// 获取当前设备链接成功的句柄指针
+        /// 注意句柄的所有资源需要清理
+        /// </summary>
+        /// <returns></returns>
+        public virtual nint GetDeviceHandle()
         {
-            var res = new BatchCollectItemModel
-            {
-                Net_PosVref = model.Net_PosVref,
-                Net_PosE = model.Net_PosE,
-                Net_CtrlDA = model.Net_CtrlDA,
-                Net_CycleCount = model.Net_CycleCount,
-                Net_SysState = model.Net_SysState,
-                Net_DIVal = model.Net_DIVal,
-                Net_DOVal = model.Net_DOVal,
-                Net_D_PosVref = model.Net_D_PosVref,
-                Net_FeedLoadN = model.Net_FeedLoadN,
-                Net_PrtErrState = model.Net_PrtErrState,
-                Net_TimeCnt = model.Net_TimeCnt
-            };
-            foreach (var signal in Signals)
-            {
-                var t = signal.SignalAddressIndex;
-                if (t < 10 && t < model.Net_AD_N.Length)
-                {
-                    res.CollectData.Add(signal.SignalId, model.Net_AD_N[t]);
-                    continue;
-                }
-                t %= 10;
-                if (t < model.Net_AD_S.Length)
-                    res.CollectData.Add(signal.SignalId, model.Net_AD_S[t]);
-            }
-            return res;
+            return _deviceHandle;
         }
+        //protected BatchCollectItemModel StructDataToCollectModel(TNet_ADHInfo model)
+        //{
+        //    var res = new BatchCollectItemModel
+        //    {
+        //        Net_PosVref = model.Net_PosVref,
+        //        Net_PosE = model.Net_PosE,
+        //        Net_CtrlDA = model.Net_CtrlDA,
+        //        Net_CycleCount = model.Net_CycleCount,
+        //        Net_SysState = model.Net_SysState,
+        //        Net_DIVal = model.Net_DIVal,
+        //        Net_DOVal = model.Net_DOVal,
+        //        Net_D_PosVref = model.Net_D_PosVref,
+        //        Net_FeedLoadN = model.Net_FeedLoadN,
+        //        Net_PrtErrState = model.Net_PrtErrState,
+        //        Net_TimeCnt = model.Net_TimeCnt
+        //    };
+        //    foreach (var signal in Signals)
+        //    {
+        //        var t = signal.SignalAddressIndex;
+        //        if (t < 10 && t < model.Net_AD_N.Length)
+        //        {
+        //            res.CollectData.Add(signal.SignalId, model.Net_AD_N[t]);
+        //            continue;
+        //        }
+        //        t %= 10;
+        //        if (t < model.Net_AD_S.Length)
+        //            res.CollectData.Add(signal.SignalId, model.Net_AD_S[t]);
+        //    }
+        //    return res;
+        //}
 
         public virtual void StartDataAcquisition()
         {

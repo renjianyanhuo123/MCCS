@@ -268,11 +268,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint<List<BatchCollectItemModel>> MockAcquireReading()
+        private DataPoint<List<TNet_ADHInfo>> MockAcquireReading()
         {
             // 模拟数据采集
             var rand = new Random();
-            var res = new List<BatchCollectItemModel>();
+            var res = new List<TNet_ADHInfo>();
             var mockValue = new TNet_ADHInfo()
             {
                 Net_AD_N =
@@ -290,8 +290,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                     [1] = (float)AddNormalNoise(_position)
                 }
             };
-            res.Add(StructDataToCollectModel(mockValue));
-            return new DataPoint<List<BatchCollectItemModel>>
+            res.Add(mockValue);
+            return new DataPoint<List<TNet_ADHInfo>>
             {
                 DeviceId = DeviceId,
                 Value = res,

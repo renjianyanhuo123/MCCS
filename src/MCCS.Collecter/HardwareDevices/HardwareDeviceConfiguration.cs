@@ -13,6 +13,6 @@
         /// 采样频率
         /// </summary>
         public int SampleRate { get; init; }
-        public List<HardwareSignalConfiguration> Signals { get; init; } = []; 
+        // public List<HardwareSignalConfiguration> Signals { get; init; } = []; 
     }
 }
