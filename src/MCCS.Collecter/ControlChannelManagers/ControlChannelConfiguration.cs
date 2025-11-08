@@ -27,7 +27,7 @@ namespace MCCS.Collecter.ControlChannelManagers
 
         public string ChannelName { get; init; } = string.Empty;
 
-        public List<ControlChannelSignalConfiguration> SignalConfiguratetion { get; init; }
+        public List<ControlChannelSignalConfiguration> SignalConfiguration { get; init; }
     }
 
     public record ControlChannelSignalConfiguration

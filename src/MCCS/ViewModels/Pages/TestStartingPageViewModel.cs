@@ -38,6 +38,8 @@ using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
 using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using MCCS.Services.NotificationService;
+using MCCS.Collecter.ControlChannelManagers;
+using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -55,7 +57,8 @@ namespace MCCS.ViewModels.Pages
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService; 
         private readonly IModel3DDataRepository _model3DDataRepository; 
-        private readonly IControllerManager _controllerService;
+        private readonly IControllerManager _controllerManager;
+        private readonly IControlChannelManager _controlChannelManager;
         private readonly INotificationService _notificationService;
         private IDisposable? _subscribeDispose;
         // 存储所有的广告牌引用,方便后期快速更新
@@ -96,17 +99,19 @@ namespace MCCS.ViewModels.Pages
             IEffectsManager effectsManager,
             IEventAggregator eventAggregator,
             IModel3DLoaderService model3DLoaderService,
-            IControllerManager controllerService,
+            IControllerManager controllerManager,
+            IControlChannelManager controlChannelManager,
             IModel3DDataRepository model3DDataRepository,
             INotificationService notificationService,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds"); 
             _model3DLoaderService = model3DLoaderService;
-            _controllerService = controllerService;
+            _controllerManager = controllerManager;
             _model3DDataRepository = model3DDataRepository; 
             _effectsManager = effectsManager;
             _notificationService = notificationService;
+            _controlChannelManager = controlChannelManager;
             LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
             Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
             Model3DMouseMoveCommand = new DelegateCommand<object>(OnModel3DMouseMove);
@@ -406,7 +411,7 @@ namespace MCCS.ViewModels.Pages
                     return;
                 } 
                 // 终止当前实验时,将会重置整个实验
-                if (_controllerService.OperationTest(false) && GlobalDataManager.Instance.CurrentTestInfo.Stop())
+                if (_controllerManager.OperationTest(false) && GlobalDataManager.Instance.CurrentTestInfo.Stop())
                 {
                     _notificationService.Show("成功", "成功停止实验!", NotificationType.Success);
                     GlobalDataManager.Instance.SetValue(new CurrentTestInfo());
@@ -419,7 +424,7 @@ namespace MCCS.ViewModels.Pages
             }
             else
             { 
-                if (_controllerService.OperationTest(true) && GlobalDataManager.Instance.CurrentTestInfo.Start())
+                if (_controllerManager.OperationTest(true) && GlobalDataManager.Instance.CurrentTestInfo.Start())
                 {
                     _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
                     IsStartedTest = true;  
@@ -476,7 +481,7 @@ namespace MCCS.ViewModels.Pages
             if (multipleControllerMainPageViewModel == null) return;
             foreach (var item in multipleControllerMainPageViewModel.Children)
             {
-                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerService, _notificationService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerManager, _controlChannelManager, _notificationService, _eventAggregator));
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
@@ -538,7 +543,7 @@ namespace MCCS.ViewModels.Pages
             if (controllers == null) return;
              
             _subscribeDispose = controllers
-                .Select(controller => _controllerService.GetControllerInfo(controller.Id))
+                .Select(controller => _controllerManager.GetControllerInfo(controller.Id))
                 .Where(controllerInfo => controllerInfo != null)
                 .Select(controllerInfo => controllerInfo.IndividualDataStream
                     .Sample(TimeSpan.FromMilliseconds(400))
@@ -759,7 +764,7 @@ namespace MCCS.ViewModels.Pages
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
                 && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentModelId == clickedModel.Model3DData.Id)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerService, _notificationService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerManager, _controlChannelManager, _notificationService, _eventAggregator));
                 IsShowController = Controllers.Count > 0;
             }
         }

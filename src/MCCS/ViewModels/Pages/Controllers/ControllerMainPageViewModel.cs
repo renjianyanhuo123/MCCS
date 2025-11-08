@@ -1,8 +1,7 @@
-﻿using System.Reactive.Linq;
+﻿using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers;
 using MCCS.Events.Controllers;
-using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
@@ -18,26 +17,30 @@ namespace MCCS.ViewModels.Pages.Controllers
     {
         public const string Tag = "ControllerMainPage";  
         private readonly IEventAggregator _eventAggregator;
-        private readonly IControllerManager _controllerService;
+        private readonly IControlChannelManager _controlChannelManager;
         private readonly INotificationService _notificationService;
+        private readonly IControllerManager _controllerManager;
         private readonly long _controllerId = -1;
-        private readonly long _deviceId = -1;
+        private readonly IReadOnlyList<long> _controlChannelIds;
 
         public ControllerMainPageViewModel(
-            IControllerManager controllerService,
+            IControllerManager controllerManager,
+            IControlChannelManager controlChannelManager,
             INotificationService notificationService,
             IEventAggregator eventAggregator)
         {
-            _controllerService = controllerService;
+            _controlChannelManager = controlChannelManager;
             _eventAggregator = eventAggregator;
             _notificationService = notificationService;
+            _controllerManager = controllerManager;
         }
 
         public ControllerMainPageViewModel(
             long modelId,
-            IControllerManager controllerService,
+            IControllerManager controllerManager,
+            IControlChannelManager controlChannelManager,
             INotificationService notificationService,
-            IEventAggregator eventAggregator) : this(controllerService, notificationService, eventAggregator)
+            IEventAggregator eventAggregator) : this(controllerManager, controlChannelManager, notificationService, eventAggregator)
         {
             IsParticipateControl = true;
             CurrentModelId = modelId;
@@ -46,12 +49,14 @@ namespace MCCS.ViewModels.Pages.Controllers
             ControlModeSelectionChangedCommand = new DelegateCommand(ExecuteControlModeSelectionChangedCommand);
             ApplyCommand = new DelegateCommand(ExecuteApplyCommand);
             StopCommand = new DelegateCommand(ExecuteStopCommand);
+            LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             // 查找当前模型对应的设备ID  的  控制器ID
-            var tempDevice = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId)?.MappingDevice;
+            var modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId);
+            var tempDevice = modelInfo?.MappingDevice;
             // var controlChannels = GlobalDataManager.Instance.Model3Ds
-            if (tempDevice?.ParentDeviceId== null) throw new ArgumentNullException("未配置连接到控制器");
+            if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");
             _controllerId = (long)tempDevice.ParentDeviceId;
-            _deviceId = tempDevice.Id;
+            _controlChannelIds = modelInfo?.ControlChannelInfos.Select(s => s.Id).ToList() ?? [];
         }
 
         #region Proterty
@@ -131,6 +136,8 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         #region Command
 
+        public AsyncDelegateCommand LoadCommand { get; }
+
         /// <summary>
         /// 是否参与控制
         /// </summary>
@@ -152,6 +159,11 @@ namespace MCCS.ViewModels.Pages.Controllers
         #endregion
 
         #region private method 
+        private async Task ExecuteLoadCommand()
+        {
+
+        }
+
         /// <summary>
         /// 根据静态控制视图模型获取静态控制枚举
         /// </summary>
@@ -187,16 +199,15 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         private void ExecuteApplyCommand()
-        {
-            if (_controllerId == -1 || _deviceId == -1) return;
+        { 
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             var controlMode = (ControlMode)SelectedControlMode;
             switch (controlMode)
             {
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
-                    {
-                        var commandContext = _controllerService.DynamicControl(_controllerId, new DynamicControlParams
+                    { 
+                        var commandContext = _controlChannelManager.DynamicControl(channelId, new DynamicControlParams
                         {
                             DeviceId = _deviceId,
                             ControlMode = fatigueControlViewModel.ControlUnitType,
@@ -205,8 +216,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                             Frequency = fatigueControlViewModel.Frequency,
                             MeanValue = fatigueControlViewModel.Median,
                             CompensateAmplitude = fatigueControlViewModel.CompensateAmplitude,
-                            CompensationPhase = fatigueControlViewModel.CompensatePhase,
-                            IsAdjustedMedian = false,
+                            CompensationPhase = fatigueControlViewModel.CompensatePhase, 
                             CycleCount = fatigueControlViewModel.CycleTimes
                         });
                         if (commandContext.IsValid)
@@ -272,49 +282,37 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         private void SetView() 
         {
-            var controlMode = (ControlMode)SelectedControlMode; 
+            var controlMode = (ControlMode)SelectedControlMode;
+            var controller = _controllerManager.GetControllerInfo(_controllerId);
             switch (controlMode)
             {
                 case ControlMode.Fatigue: 
-                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Dynamic))
+                    var fatigue = new ViewFatigueControl
                     {
-                        var fatigue = new ViewFatigueControl
-                        {
-                            DataContext = new ViewFatigueControlViewModel()
-                        };
-                        CurrentPage = fatigue;
-                    } 
+                        DataContext = new ViewFatigueControlViewModel()
+                    };
+                    CurrentPage = fatigue;
                     break;
-                case ControlMode.Static: 
-                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Static))
+                case ControlMode.Static:  
+                    var staticView = new ViewStaticControl
                     {
-                        var staticView = new ViewStaticControl
-                        {
-                            DataContext = new ViewStaticControlViewModel()
-                        };
-                        CurrentPage = staticView;
-                    } 
+                        DataContext = new ViewStaticControlViewModel()
+                    };
+                    CurrentPage = staticView;
                     break;
-                case ControlMode.Programmable: 
-                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.Static))
+                case ControlMode.Programmable:  
+                    var programView = new ViewProgramControl
                     {
-                        var programView = new ViewProgramControl
-                        {
-                            DataContext = new ViewProgramControlViewModel()
-                        };
-                        CurrentPage = programView;
-                    } 
+                        DataContext = new ViewProgramControlViewModel()
+                    };
+                    CurrentPage = programView;
                     break;
-                case ControlMode.Manual:
-                    
-                    if (_controllerService.OperationControlMode(_controllerId, SystemControlState.OpenLoop))
+                case ControlMode.Manual: 
+                    var manualView = new ViewManualControl
                     {
-                        var manualView = new ViewManualControl
-                        {
-                            DataContext = new ViewManualControlViewModel()
-                        };
-                        CurrentPage = manualView;
-                    }
+                        DataContext = new ViewManualControlViewModel()
+                    };
+                    CurrentPage = manualView;
                     break;
                 default:
                     break;

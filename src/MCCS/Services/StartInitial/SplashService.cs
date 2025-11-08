@@ -1,4 +1,5 @@
 ﻿
+using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Common.DataManagers;
@@ -6,6 +7,7 @@ using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Core.Repositories;
 using MCCS.Collecter.HardwareDevices;
+using MCCS.Collecter.SignalManagers;
 using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
@@ -21,16 +23,22 @@ namespace MCCS.Services.StartInitial
         private readonly IDeviceInfoRepository _deviceInfoRepository;
         private readonly IControllerManager _controllerService;
         private readonly IConfiguration _configuration;
+        private readonly ISignalManager _signalManager;
+        private readonly IControlChannelManager _controlChannelManager;
 
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository,
+            IControlChannelManager controlChannelManager,
             IDeviceInfoRepository deviceInfoRepository,
             IControllerManager controllerService,
+            ISignalManager signalManager,
             IConfiguration configuration)
         {
+            _controlChannelManager = controlChannelManager;
             _configuration = configuration;
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
             _deviceInfoRepository = deviceInfoRepository;
             _controllerService = controllerService;
+            _signalManager = signalManager;
         }
 
         public async Task InitialHardwareDevicesAsync()
@@ -79,25 +87,32 @@ namespace MCCS.Services.StartInitial
                 controllerDevice.SignalInfos.AddRange(bindSignals);
             }
             GlobalDataManager.Instance.SetValue(globalDevices);
-            // 创建所有的控制通道
+            // 创建所有的控制通道 
+            var controlChannelConfigurations = new List<ControlChannelConfiguration>(); 
             foreach (var controlChannelSignalInfo in currentUseStation.ControlChannelSignalInfos)
             {
-                var tempChannel = new StationSiteControlChannelInfo(controlChannelSignalInfo.ControlChannelInfo.Id, controlChannelSignalInfo.ControlChannelInfo.ChannelName, controlChannelSignalInfo.ControlChannelInfo.ChannelType);
+                var tempChannel = new ControlChannelConfiguration
+                {
+                    ChannelId = controlChannelSignalInfo.ControlChannelInfo.Id,
+                    ChannelName = controlChannelSignalInfo.ControlChannelInfo.ChannelName,
+                    CancellationConfiguration = new ControlCompletionConfiguration(),
+                    SignalConfiguration = []
+                };
                 foreach (var signal in controlChannelSignalInfo.Signals)
                 {
-                    if (GlobalDataManager.Instance.ControllerInfos == null) continue;
-                    foreach (var signalInfoTemp in GlobalDataManager.Instance.ControllerInfos
-                                 .Select(controller => controller.SignalInfos
-                                 .FirstOrDefault(c => c.Id == signal.SignalInfo.Id))
-                                 .OfType<StationSiteControllerSignalInfo>())
+                    tempChannel.SignalConfiguration.Add(new ControlChannelSignalConfiguration
                     {
-                        signalInfoTemp.ControlChannelSignalType = signal.SignalType;
-                        tempChannel.BindSignals.Add(signalInfoTemp);
-                        break;
-                    }
-                } 
-                stationSiteInfo.ControlChannels.Add(tempChannel);
+                        SignalId = signal.SignalInfo.Id,
+                        BelongControllerId = signal.SignalInfo.BelongToControllerId,
+                        SignalName = signal.SignalInfo.SignalName,
+                        SignalAddress = (SignalAddressEnum)signal.SignalInfo.SignalAddress,
+                        SignalType = (ControlChannelSignalTypeEnum)signal.SignalType,
+                        DeviceId = signal.SignalInfo.ConnectedDeviceId
+                    });
+                }
+                controlChannelConfigurations.Add(tempChannel);
             }
+            _controlChannelManager.Initialization(controlChannelConfigurations);
             // 当前使用的所有3D模型
             var model3Ds = new List<Model3DMainInfo>();
             if (currentUseStation.Model3DAggregate != null && model3DAndControlChannels != null)
@@ -107,7 +122,7 @@ namespace MCCS.Services.StartInitial
                     var temp = new Model3DMainInfo(modelFileItem.Id, modelFileItem.Key, modelFileItem.Name); 
                     var controlChannelIds = model3DAndControlChannels.Where(c => c.ModelFileId == modelFileItem.Key).Select(s => s.ControlChannelId).ToList();
                     var stationSiteControlChannels = stationSiteInfo.ControlChannels.Where(s => controlChannelIds.Contains(s.Id)).ToList();
-                    temp.ControlChannelInfos = stationSiteControlChannels;
+                    temp.ControlChannelInfos = stationSiteControlChannels; 
                     // 默认取一个控制通道的输出信号接口所链接的设备
                     var tempDevice = stationSiteControlChannels.FirstOrDefault()?.BindSignals
                         .FirstOrDefault(s => s.ControlChannelSignalType == SignalTypeEnum.Output)?.LinkedDevice;
@@ -144,24 +159,20 @@ namespace MCCS.Services.StartInitial
                     DeviceType = item.DeviceType.ToString(),
                     IsSimulation = isMock, 
                     ConnectionString = ""
-                };
-                configuration.Signals.AddRange(signals
-                    .Where(c => c.BelongToControllerId == item.Id)
-                    .Select(s =>
-                    {
-                        // var signalBinded = GlobalDataManager.Instance.ControllerInfos.Fi
-                        return new HardwareSignalConfiguration
-                        {
-                            SignalId = s.Id,
-                            SignalName = s.SignalName,
-                            SignalAddress = (SignalAddressEnum)s.SignalAddress, 
-                            MinValue = s.DownLimitRange,
-                            MaxValue = s.UpLimitRange,
-                            DeviceId = s.ConnectedDeviceId
-                        };
-                    }));
+                }; 
                 _controllerService.CreateController(configuration);
             }
+            // 初始化注册所有的信号接口
+            _signalManager.Initialization(signals.Select(s => new HardwareSignalConfiguration
+            {
+                SignalId = s.Id,
+                SignalName = s.SignalName,
+                SignalAddress = (SignalAddressEnum)s.SignalAddress,
+                MinValue = s.DownLimitRange,
+                MaxValue = s.UpLimitRange,
+                BelongControllerId = s.BelongToControllerId,
+                DeviceId = s.ConnectedDeviceId
+            }));
             _controllerService.StartAllControllers();
         }
     }

@@ -27,4 +27,8 @@
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ValidatorRules\CommonRules\" />
+  </ItemGroup>
+
 </Project>

@@ -10,8 +10,7 @@ public class BaseDevice(long id, string name, DeviceTypeEnum type, long? parentD
 {
     public long Id { get; } = id;
 
-    public string Name { get; } = name;
-
+    public string Name { get; } = name; 
     public long? ParentDeviceId { get; set; } = parentDeviceId;
 
     public DeviceTypeEnum Type { get; private set; } = type;

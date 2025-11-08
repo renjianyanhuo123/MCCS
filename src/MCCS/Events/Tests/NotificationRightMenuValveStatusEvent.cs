@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Events.Tests
 {
-    public class NotificationRightMenuValveStatusEvent : PubSubEvent<NotificationRightMenuValveStatusEventParam>
+    public class  NotificationRightMenuValveStatusEvent : PubSubEvent<NotificationRightMenuValveStatusEventParam>
     {
     }
 }

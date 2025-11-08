@@ -36,9 +36,27 @@
         /// </summary>
         public float CompensationPhase { get; init; }
         /// <summary>
-        /// 是否调整中值
+        /// 是否启用中值控制
+        /// 启用起振过程
+        /// 启用停振过程
         /// </summary>
-        public bool IsAdjustedMedian { get; init; }
+        private OscillatorControlOptions _options = OscillatorControlOptions.All;
+        public OscillatorControlOptions CtrlOpt {
+            get
+            {
+                if (Frequency < 1)
+                {
+                    _options &= ~OscillatorControlOptions.Start;
+                    _options &= ~OscillatorControlOptions.Stop;
+                }
+                return _options;
+            }
+        }
+
+        /// <summary>
+        /// 超限次数
+        /// </summary> 
+        public int ValleyPeakFilterNum => Frequency < 1 ? 1 : 5;
 
         /// <summary>
         /// 循环次数

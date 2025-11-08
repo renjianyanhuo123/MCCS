@@ -45,6 +45,6 @@ namespace MCCS.Collecter.ControlChannelManagers
         /// <param name="channelId"></param>
         /// <param name="dynamicControlParam"></param>
         /// <returns></returns>
-        DeviceCommandContext DynamicControl(long channelId, DynamicControlParams dynamicControlParam);
+        DeviceCommandContext DynamicControl(long channelId, DynamicControlParams dynamicControlParam); 
     }
 }

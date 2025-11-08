@@ -25,9 +25,13 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// 设备ID
         /// </summary>
         public long DeviceId { get; }
+        /// <summary>
+        /// 设备号
+        /// </summary>
+        public int DeviceHandleIndex { get; }
         public string DeviceName { get; }
         public string DeviceType { get; }
-        public HardwareConnectionStatus Status { get; protected set; } 
+        public HardwareConnectionStatus Status { get; protected set; }  
 
         /// <summary>
         /// 控制器当前所处的控制状态 
@@ -52,6 +56,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             DeviceId = configuration.DeviceId;
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType;
+            DeviceHandleIndex = configuration.DeviceAddressId;
             _sampleRate = configuration.SampleRate;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
             _dataSubject = new ReplaySubject<DataPoint<List<TNet_ADHInfo>>>(bufferSize: 1000); 

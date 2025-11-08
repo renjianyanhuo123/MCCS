@@ -52,6 +52,25 @@ namespace MCCS.Collecter.SignalManagers
             return POPNetCtrl.NetCtrl01_S_SetCtrlMod(deviceHandle, (uint)tmpCtrlMode, tmpVelo, tmpPos);
         }
 
+        public int SetValleyPeakFilterNum(long signalId, int freq)
+        {
+            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
+            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
+            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId);
+            var deviceHandle = controller.GetDeviceHandle();
+            return POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_ValleyPeak_FilterNum, (byte)freq);
+        }
+
+        public int SetDynamicControlMode(long signalId, float tmpMeanA, float tmpA,
+            float tmpFreq, byte tmpWaveShap, byte tmpCtrlMode, float tmpAP, float tmpPH,
+            int tmpCountSet, int tmpCtrlOpt)
+        {
+            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
+            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
+            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId); 
+            return POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(controller.DeviceHandleIndex, tmpMeanA, tmpA, tmpFreq, tmpWaveShap, tmpCtrlMode, tmpAP, tmpPH, tmpCountSet, tmpCtrlOpt);
+        }
+
         public IObservable<DataPoint<float>> GetSignalDataStream(long signalId)
         {
             var signChannel = _signals.FirstOrDefault(s => s.SignalId == signalId);

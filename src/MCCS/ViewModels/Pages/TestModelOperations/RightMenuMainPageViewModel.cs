@@ -4,6 +4,7 @@ using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.StationSites;
 using MCCS.Core.Models.Devices;
 using MCCS.Events.Tests;
+using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.ViewModels.Pages.TestModelOperations
 {
@@ -14,13 +15,13 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         private string _modelId = string.Empty;
 
         private readonly IEventAggregator _eventAggregator;
-        private readonly IControllerManager _controllerService;
+        private readonly IControllerManager _controllerManager;
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
-            IControllerManager controllerService) : base(eventAggregator)
+            IControllerManager controllerManager) : base(eventAggregator)
         {
             _eventAggregator = eventAggregator;
-            _controllerService = controllerService;
+            _controllerManager = controllerManager; 
             OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
             eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>()
                 .Subscribe(param =>
@@ -57,7 +58,7 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
             if (!success) return;
             var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(s => s.Id == _deviceId);
             if (device is not ActuatorDevice actuatorDevice || actuatorDevice.ParentDeviceId == null) return;  
-            if (!_controllerService.OperationSigngleValve((long)actuatorDevice.ParentDeviceId, isOpen)) return;
+            if (!_controllerManager.OperationSigngleValve((long)actuatorDevice.ParentDeviceId, isOpen)) return;
             actuatorDevice.OperationValve(isOpen);
             IsOpen = isOpen;
             _eventAggregator.GetEvent<OperationValveEvent>().Publish(new OperationValveEventParam

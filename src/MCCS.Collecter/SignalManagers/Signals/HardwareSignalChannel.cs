@@ -1,4 +1,6 @@
-﻿namespace MCCS.Collecter.SignalManagers.Signals
+﻿using MCCS.Infrastructure.TestModels;
+
+namespace MCCS.Collecter.SignalManagers.Signals
 {
     public sealed class HardwareSignalChannel : IDisposable
     { 
@@ -13,8 +15,7 @@
 
         public long SignalId { get; private set; }
 
-        public long? ConnectedDeviceId { get; private set; }
-
+        public long? ConnectedDeviceId { get; private set; } 
         /// <summary>
         /// 所属的控制器ID
         /// </summary>

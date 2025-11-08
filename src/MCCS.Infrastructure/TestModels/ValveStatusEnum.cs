@@ -1,4 +1,4 @@
-﻿namespace MCCS.Common.DataManagers.StationSites
+﻿namespace MCCS.Infrastructure.TestModels
 {
     public enum ValveStatusEnum : int
     {
