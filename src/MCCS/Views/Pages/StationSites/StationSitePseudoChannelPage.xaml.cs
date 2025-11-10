@@ -30,5 +30,20 @@ namespace MCCS.Views.Pages.StationSites
                 Log.Error("{ExMessage}", ex.Message);
             }
         }
+
+        private async void EditPseudoChannel_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is Button { Tag: long id } && DataContext is StationSitePseudoChannelPageViewModel vm)
+                {
+                    await vm.EditPseudoChannelCommand.Execute(id);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("{ExMessage}", ex.Message);
+            }
+        }
     }
 }

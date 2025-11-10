@@ -25,12 +25,11 @@
         </StackPanel>
         <DataGrid
     Grid.Row="1"
+    Name="PseudoChannelDataGrid"
     CanUserAddRows="False"
     ColumnWidth="*"
-    ItemsSource="{Binding Channels}"
-    SelectionMode="Extended"
-    AutoGenerateColumns="False"
-    SelectionUnit="Cell" >
+    ItemsSource="{Binding Channels}" 
+    AutoGenerateColumns="False"  >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" Visibility="Hidden"></DataGridTextColumn>
                 <DataGridTextColumn Header="虚拟通道名称" Binding="{Binding Name}" IsReadOnly="True" Width="*"/>
@@ -42,11 +41,13 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="编辑" Width="80" Margin="5"
-                                    Command="{Binding DataContext.EditPseudoChannelCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                    CommandParameter="{Binding Id}"></Button>
+                                        Click="EditPseudoChannel_Click"
+                                        Tag="{Binding Id}"
+                                        Style="{StaticResource MaterialDesignFlatMidBgButton}" ></Button>
                                 <Button Content="删除" Width="80" Margin="5"
                                         Click="DeletePseudoChannel_Click" 
-                                    Tag="{Binding Id}"></Button>
+                                        Style="{StaticResource MaterialDesignPaperLightButton}"
+                                        Tag="{Binding Id}"></Button>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

@@ -7,6 +7,7 @@ using MCCS.Events.StationSites.PseudoChannels;
 using MCCS.Views.Pages.StationSites.PseudoChannels;
 using MCCS.Views.Dialogs.Common;
 using MCCS.Events.Common;
+using Serilog;
 
 namespace MCCS.ViewModels.Pages.StationSites
 {
@@ -31,9 +32,33 @@ namespace MCCS.ViewModels.Pages.StationSites
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
 
             _eventAggregator.GetEvent<NotificationAddPseudoChannelEvent>()
-                .Subscribe(async param => await ExecuteLoadCommand());
+                .Subscribe(AddPseudoChannel_Refresh);
             _eventAggregator.GetEvent<NotificationUpdatePseudoChannelEvent>()
-                .Subscribe(async param => await ExecuteLoadCommand());
+                .Subscribe(UpdatePseudoChannel_Refresh);
+        }
+
+        private async void AddPseudoChannel_Refresh(NotificationAddPseudoChannelEventParam param)
+        {
+            try
+            {
+                await ExecuteLoadCommand();
+            }
+            catch (Exception e)
+            {
+                Log.Error("添加通道后刷新失败！");
+            }
+        }
+
+        private async void UpdatePseudoChannel_Refresh(NotificationUpdatePseudoChannelEventParam param)
+        {
+            try
+            {
+                await ExecuteLoadCommand();
+            }
+            catch (Exception e)
+            {
+                Log.Error("添加通道后刷新失败！");
+            }
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
@@ -102,7 +127,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 {
                     Id = channel.Id,
                     Name = channel.ChannelName,
-                    Unit = channel.Unit,
+                    Unit = channel.Unit ?? "",
                     CreateTime = channel.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"),
                     UpdateTime = channel.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
                 });

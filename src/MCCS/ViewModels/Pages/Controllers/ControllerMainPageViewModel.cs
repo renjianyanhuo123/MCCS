@@ -7,8 +7,11 @@ using MCCS.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 using MCCS.Collecter.DllNative.Models;
+using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Components.GlobalNotification.Models;
+using MCCS.Core.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
+using MCCS.Models.ControlCommand;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Pages.Controllers
@@ -21,7 +24,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         private readonly INotificationService _notificationService;
         private readonly IControllerManager _controllerManager;
         private readonly long _controllerId = -1;
-        private readonly IReadOnlyList<long> _controlChannelIds;
+        private readonly Model3DMainInfo _modelInfo;
 
         public ControllerMainPageViewModel(
             IControllerManager controllerManager,
@@ -51,12 +54,11 @@ namespace MCCS.ViewModels.Pages.Controllers
             StopCommand = new DelegateCommand(ExecuteStopCommand);
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             // 查找当前模型对应的设备ID  的  控制器ID
-            var modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId);
-            var tempDevice = modelInfo?.MappingDevice;
+            _modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId) ?? throw new ArgumentNullException("modeInfo is null");
+            var tempDevice = _modelInfo?.MappingDevice;
             // var controlChannels = GlobalDataManager.Instance.Model3Ds
             if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");
-            _controllerId = (long)tempDevice.ParentDeviceId;
-            _controlChannelIds = modelInfo?.ControlChannelInfos.Select(s => s.Id).ToList() ?? [];
+            _controllerId = (long)tempDevice.ParentDeviceId; 
         }
 
         #region Proterty
@@ -207,9 +209,9 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
                     { 
-                        var commandContext = _controlChannelManager.DynamicControl(channelId, new DynamicControlParams
+                        var selectedChannel = fatigueControlViewModel.SelectedChannel;
+                        var commandContext = _controlChannelManager.DynamicControl(selectedChannel.ChannelId, new DynamicControlParams
                         {
-                            DeviceId = _deviceId,
                             ControlMode = fatigueControlViewModel.ControlUnitType,
                             Amplitude = fatigueControlViewModel.Amplitude,
                             WaveType = fatigueControlViewModel.WaveformType,
@@ -232,19 +234,17 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Static:
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
-                        var commandContext = _controllerService.StaticControl(_controllerId,
+                        var selectedChannel = staticControlViewModel.SelectedChannel;
+                        var commandContext = _controlChannelManager.StaticControl(selectedChannel.ChannelId,
                             new StaticControlParams
                             {
-                                DeviceId = _deviceId,
                                 StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
                                 Speed = staticControlViewModel.Speed,
                                 TargetValue = staticControlViewModel.TargetValue
                             });
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
-                            // 开启订阅流检查指令是否完成 
-                            var controller = _controllerService.GetControllerInfo(_controllerId); 
+                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success); 
                         }
                         else
                         {
@@ -255,12 +255,27 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Programmable:
                     if (CurrentPage.DataContext is ViewProgramControlViewModel programControlViewModel)
                     {
-
+                         
                     }
                     break;
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
-                    { 
+                    {
+                        var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType == ChannelTypeEnum.Position);
+                        if (controlChannel == null)
+                        {
+                            _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
+                            break;
+                        } 
+                        var commandContext = _controlChannelManager.ManualControl(controlChannel.Id, (float)manualControlViewModel.OutPutValue);
+                        if (commandContext.IsValid)
+                        {
+                            _notificationService.Show("成功", "该通道成功启动手动控制！", NotificationType.Success);
+                        }
+                        else
+                        {
+                            _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
+                        }
                     }
                     break;
                 default:
@@ -283,27 +298,32 @@ namespace MCCS.ViewModels.Pages.Controllers
         private void SetView() 
         {
             var controlMode = (ControlMode)SelectedControlMode;
-            var controller = _controllerManager.GetControllerInfo(_controllerId);
+            var controlChannels = _modelInfo.ControlChannelInfos.Select(s => new ControlChannelBindModel
+            {
+                ChannelId = s.Id,
+                ChannelName = s.Name,
+                ChannelType = s.ChannelType
+            });
             switch (controlMode)
             {
                 case ControlMode.Fatigue: 
                     var fatigue = new ViewFatigueControl
                     {
-                        DataContext = new ViewFatigueControlViewModel()
+                        DataContext = new ViewFatigueControlViewModel(controlChannels)
                     };
                     CurrentPage = fatigue;
                     break;
                 case ControlMode.Static:  
                     var staticView = new ViewStaticControl
                     {
-                        DataContext = new ViewStaticControlViewModel()
+                        DataContext = new ViewStaticControlViewModel(controlChannels)
                     };
                     CurrentPage = staticView;
                     break;
                 case ControlMode.Programmable:  
                     var programView = new ViewProgramControl
                     {
-                        DataContext = new ViewProgramControlViewModel()
+                        DataContext = new ViewProgramControlViewModel(controlChannels)
                     };
                     CurrentPage = programView;
                     break;

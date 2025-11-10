@@ -1,9 +1,12 @@
-﻿namespace MCCS.ViewModels.Pages.ControlCommandPages
+﻿using MCCS.Models.ControlCommand;
+
+namespace MCCS.ViewModels.Pages.ControlCommandPages
 {
     public class ViewManualControlViewModel : BindableBase
     {
         public const string Tag = "ManualControl";
          
+
         private double _outputMaxValue = 100.0;
         public double OutputMaxValue
         {

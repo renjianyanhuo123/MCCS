@@ -13,7 +13,14 @@ namespace MCCS.Core.Models.Model3D
         /// <summary>
         /// 绑定的控制通道ID
         /// </summary>
+        [Obsolete]
         public long ControlChannelId { get; set; }
+
+        /// <summary>
+        /// 绑定的虚拟通道
+        /// </summary>
+        public long PseudoChannelId { get; set; }
+
         /// <summary>
         /// 绑定的整体模型ID(方便加载)
         /// </summary>

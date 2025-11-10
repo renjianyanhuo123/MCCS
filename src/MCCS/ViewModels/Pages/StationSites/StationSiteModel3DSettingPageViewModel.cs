@@ -180,6 +180,11 @@ namespace MCCS.ViewModels.Pages.StationSites
         
         public ObservableCollection<Model3DFileItemModel> Model3DFiles { get; private set; } = [];
 
+        /// <summary>
+        /// 绑定的的所有的虚拟通道
+        /// </summary>
+        public ObservableCollection<BindingPseudoChannelItemModel> BindingPseudoChannels { get; private set; } = [];
+
         public List<BindedChannelModelBillboardTextInfo> BindedChannelModelBillboardTextInfos { get; private set; } = [];
         /// <summary>
         /// 采集数据显示的标签
@@ -377,6 +382,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     BillboardType = (int)billboardInfos[i].BillboardType,
                     Scale = billboardInfos[i].Scale,
                     SelectedBindedChannel = selectedBindChannel,
+                    SelectedPseudoChannel = BindingPseudoChannels.FirstOrDefault(s => s.Id == billboardInfos[i].PseudoChannelId),
                     SelectedModel = selectedModel,
                     FontColor = fontColor,
                     XDistance = position.X,
@@ -456,7 +462,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                 };
                 if (tempType == BillboardTypeEnum.DataShow)
                 {
-                    res.ControlChannelId = s.SelectedBindedChannel.Id;
+                    res.ControlChannelId = s.SelectedBindedChannel?.Id ?? 0;
+                    res.PseudoChannelId = s.SelectedPseudoChannel?.Id ?? 0;
                 } 
                 return res;
             }).ToList(); 
@@ -494,12 +501,14 @@ namespace MCCS.ViewModels.Pages.StationSites
         {
             if (_stationId == -1) throw new ArgumentNullException("StationId is null");
             var modelInfo = await _model3DDataRepository.GetModelAggregateByStationIdAsync(_stationId);
-            var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId); 
+            var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId);
+            var pseudoChannels = await _stationSiteAggregateRepository.GetStationSitePseudoChannels(_stationId);
             Model3DFiles.Clear();
             GroupModel.Clear();
             GroupModel.Dispose();
             SelectedBillBoradInfo = null;
             BindingControlChannels.Clear();
+            BindingPseudoChannels.Clear();
             foreach (var controlChannel in controlChannels)
             {
                 BindingControlChannels.Add(new BindingControlChannelItemModel
@@ -509,10 +518,24 @@ namespace MCCS.ViewModels.Pages.StationSites
                     Key = controlChannel.ChannelId,
                     IsSelected = false
                 });
+            } 
+            foreach (var pseudocChannel in pseudoChannels)
+            {
+                BindingPseudoChannels.Add(new BindingPseudoChannelItemModel
+                {
+                    Id = pseudocChannel.Id,
+                    PseudoChannelName = pseudocChannel.ChannelName,
+                    IsSelected = false
+                });
             }
             if (modelInfo != null)
             {
                 var bindedChannels = await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(modelInfo.BaseInfo.Id);
+                var bindedPseudoChannels = modelInfo.BillboardInfos.Select(s => s.PseudoChannelId).ToList();
+                foreach (var BindingPseudoChannel in BindingPseudoChannels)
+                {
+                    BindingPseudoChannel.IsSelected = bindedPseudoChannels?.Contains(BindingPseudoChannel.Id) ?? false;
+                }
                 _isAdded = true;
                 Id = modelInfo.BaseInfo.Id;
                 ModelName = modelInfo.BaseInfo.Name;

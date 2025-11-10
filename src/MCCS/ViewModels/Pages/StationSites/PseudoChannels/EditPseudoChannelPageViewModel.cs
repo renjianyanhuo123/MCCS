@@ -154,6 +154,7 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
                 RangeMax = RangeMax,
                 Formula = Formula,
                 HasTare = HasTare,
+                Unit = Unit,
                 StationId = _stationId
             };
             var signals = SignalModels

@@ -9,7 +9,7 @@ namespace MCCS.Collecter.ControlChannelManagers
 {
     public sealed class ControlChannelManager : IControlChannelManager 
     {
-        private readonly Dictionary<long, ControlChannel> _channelDics;
+        private readonly Dictionary<long, ControlChannel> _channelDics = [];
         private readonly IControllerManager _controllerManager;
         private readonly ISignalManager _signalManager;
 

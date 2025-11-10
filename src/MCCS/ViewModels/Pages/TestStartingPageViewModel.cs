@@ -30,7 +30,6 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers.CurrentTest;
-using MCCS.Common.DataManagers.StationSites;
 using MCCS.Components.GlobalNotification.Models;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;
@@ -339,10 +338,10 @@ namespace MCCS.ViewModels.Pages
                     };
                     if (billboardInfo.BillboardType == BillboardTypeEnum.DataShow)
                     {
-                        var channelInfo = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.ControlChannelId);
-                        if (channelInfo != null)
+                        var pseudoChannel = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.PseudoChannelId);
+                        if (pseudoChannel != null)
                         {
-                            var signalType = channelInfo.ChannelType switch
+                            var signalType = pseudoChannel.ChannelType switch
                             {
                                 ChannelTypeEnum.Position => SignalTypeEnum.Position,
                                 ChannelTypeEnum.Force => SignalTypeEnum.Force,

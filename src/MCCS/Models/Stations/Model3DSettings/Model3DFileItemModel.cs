@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Data;
 using System.Windows.Media;
 using MCCS.Models.Model3D;
 
@@ -52,13 +53,8 @@ namespace MCCS.Models.Stations.Model3DSettings
 
         /// <summary>
         /// 绑定的控制通道ID集合
-        /// </summary> 
-        private ObservableCollection<BindingControlChannelItemModel> _bindedControlChannelIds = [];
-        public ObservableCollection<BindingControlChannelItemModel> BindedControlChannelIds 
-        { 
-            get => _bindedControlChannelIds; 
-            set => SetProperty(ref _bindedControlChannelIds, value);
-        }
+        /// </summary>  
+        public ObservableCollection<BindingControlChannelItemModel> BindedControlChannelIds { get; } = [];
     }
 
     public class BindedChannelModelBillboardTextInfo : BindableBase
@@ -190,11 +186,21 @@ namespace MCCS.Models.Stations.Model3DSettings
             set => SetProperty(ref _billboardType, value);
         }
 
-        private BindingControlChannelItemModel _selectedBindedChannel; 
+        private BindingControlChannelItemModel _selectedBindedChannel;
+        [Obsolete]
         public BindingControlChannelItemModel SelectedBindedChannel
         {
             get => _selectedBindedChannel;
             set => SetProperty(ref _selectedBindedChannel, value);
+        }
+        /// <summary>
+        /// 选中的虚拟通道
+        /// </summary>
+        private BindingPseudoChannelItemModel _selectedPseudoChannel; 
+        public BindingPseudoChannelItemModel SelectedPseudoChannel
+        {
+            get => _selectedPseudoChannel;
+            set => SetProperty(ref _selectedPseudoChannel, value);
         }
     }
 }

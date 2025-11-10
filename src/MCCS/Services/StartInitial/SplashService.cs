@@ -158,6 +158,7 @@ namespace MCCS.Services.StartInitial
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
                     IsSimulation = isMock, 
+                    SampleRate = 20,
                     ConnectionString = ""
                 }; 
                 _controllerService.CreateController(configuration);

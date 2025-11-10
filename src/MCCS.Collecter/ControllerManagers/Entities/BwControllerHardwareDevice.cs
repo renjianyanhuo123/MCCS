@@ -85,7 +85,6 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             }
         }
 
-        //#region Control Method 
         public override bool OperationTest(uint isStart)
         {
             if (Status != HardwareConnectionStatus.Connected) return false;
