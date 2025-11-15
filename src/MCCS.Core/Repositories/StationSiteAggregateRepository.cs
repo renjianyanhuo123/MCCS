@@ -115,6 +115,18 @@ namespace MCCS.Core.Repositories
                     SignalInterfaceInfo = c,
                     LinkDeviceInfo = d
                 }, cancellationToken);
+            var pseudoChannelIds = pseudoChannels.Select(s => s.Id).ToList();
+            var pseudoChannelSignals = await freeSql
+                .Select<PseudoChannelAndSignalInfo, PseudoChannelInfo, SignalInterfaceInfo>()
+                .LeftJoin((a, b, c) => a.PseudoChannelId == b.Id)
+                .LeftJoin((a, b, c) => a.SignalId == c.Id)
+                .Where((a, b, c) => pseudoChannelIds.Contains(a.PseudoChannelId))
+                .ToListAsync((a, b, c) => new
+                {
+                    ChannelId = b.Id,
+                    PseudoChannelAndSignalInfo = a,
+                    SignalInterfaceInfo = c
+                }, cancellationToken);
             var controlChannelAggregate = new List<ControlChannelBindSignalInfo>();
             foreach (var controlChannel in controlChannels)
             {
@@ -132,6 +144,20 @@ namespace MCCS.Core.Repositories
                     .ToList();
                 item.Signals = tempSignals;
                 controlChannelAggregate.Add(item);
+            }
+            // 虚拟通道
+            var pseudoChannelAggregate = new List<PseudoChannelBindSignalInfo>();
+            foreach (var pseudoChannel in pseudoChannels)
+            {
+                var item = new PseudoChannelBindSignalInfo
+                {
+                    PseudoChannelInfo = pseudoChannel
+                };
+                var tempSignals = pseudoChannelSignals.Where(s => s.ChannelId == pseudoChannel.Id)
+                    .Select(s => s.SignalInterfaceInfo)
+                    .ToList();
+                item.Signals = tempSignals;
+                pseudoChannelAggregate.Add(item);
             }
             var signals = await freeSql.Select<StationSiteAndHardwareInfo, SignalInterfaceInfo>()
                 .LeftJoin((a, b) => a.SignalId == b.Id)
@@ -152,7 +178,7 @@ namespace MCCS.Core.Repositories
             {
                 StationSiteInfo = stationSite,
                 ControlChannelSignalInfos = controlChannelAggregate,
-                PseudoChannelInfos = pseudoChannels,
+                PseudoChannelInfos = pseudoChannelAggregate,
                 Signals = signals,
                 Model3DAggregate = modelAggregate
             };
@@ -329,6 +355,19 @@ namespace MCCS.Core.Repositories
                     SignalInterfaceInfo = c,
                     LinkDeviceInfo = d
                 }, cancellationToken);
+            var pseudoChannelIds = pseudoChannels.Select(s => s.Id).ToList();
+            var pseudoChannelSignals = await freeSql
+                .Select<PseudoChannelAndSignalInfo, PseudoChannelInfo, SignalInterfaceInfo>()
+                .LeftJoin((a, b, c) => a.PseudoChannelId == b.Id)
+                .LeftJoin((a, b, c) => a.SignalId == c.Id) 
+                .Where((a, b, c) => pseudoChannelIds.Contains(a.PseudoChannelId))
+                .ToListAsync((a, b, c) => new
+                {
+                    ChannelId = b.Id,
+                    PseudoChannelAndSignalInfo = a,
+                    SignalInterfaceInfo = c
+                }, cancellationToken);
+            // 控制通道
             var controlChannelAggregate = new List<ControlChannelBindSignalInfo>();
             foreach (var controlChannel in controlChannels)
             {
@@ -347,6 +386,21 @@ namespace MCCS.Core.Repositories
                 item.Signals = tempSignals;
                 controlChannelAggregate.Add(item);
             }
+            // 虚拟通道
+            var pseudoChannelAggregate = new List<PseudoChannelBindSignalInfo>(); 
+            foreach (var pseudoChannel in pseudoChannels)
+            {
+                var item = new PseudoChannelBindSignalInfo
+                {
+                    PseudoChannelInfo = pseudoChannel
+                };
+                var tempSignals = pseudoChannelSignals.Where(s => s.ChannelId == pseudoChannel.Id)
+                    .Select(s => s.SignalInterfaceInfo)
+                    .ToList();
+                item.Signals = tempSignals;
+                pseudoChannelAggregate.Add(item);
+            }
+
             modelAggregate.BaseInfo = modelBaseInfo;
             if (modelBaseInfo != null)
             {
@@ -358,7 +412,7 @@ namespace MCCS.Core.Repositories
             {
                 StationSiteInfo = stationSite,
                 ControlChannelSignalInfos = controlChannelAggregate,
-                PseudoChannelInfos = pseudoChannels,
+                PseudoChannelInfos = pseudoChannelAggregate,
                 Signals = signals, 
                 Model3DAggregate = modelAggregate
             };

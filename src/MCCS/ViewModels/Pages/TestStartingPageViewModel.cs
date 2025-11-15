@@ -38,6 +38,8 @@ using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
 using MCCS.Services.NotificationService;
 using MCCS.Collecter.ControlChannelManagers;
+using MCCS.Collecter.HardwareDevices;
+using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.ViewModels.Pages
@@ -58,6 +60,7 @@ namespace MCCS.ViewModels.Pages
         private readonly IModel3DDataRepository _model3DDataRepository; 
         private readonly IControllerManager _controllerManager;
         private readonly IControlChannelManager _controlChannelManager;
+        private readonly IPseudoChannelManager _pseudoChannelManager;
         private readonly INotificationService _notificationService;
         private IDisposable? _subscribeDispose;
         // 存储所有的广告牌引用,方便后期快速更新
@@ -102,6 +105,7 @@ namespace MCCS.ViewModels.Pages
             IControlChannelManager controlChannelManager,
             IModel3DDataRepository model3DDataRepository,
             INotificationService notificationService,
+            IPseudoChannelManager pseudoChannelManager,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds"); 
@@ -111,6 +115,7 @@ namespace MCCS.ViewModels.Pages
             _effectsManager = effectsManager;
             _notificationService = notificationService;
             _controlChannelManager = controlChannelManager;
+            _pseudoChannelManager = pseudoChannelManager;
             LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
             Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
             Model3DMouseMoveCommand = new DelegateCommand<object>(OnModel3DMouseMove);
@@ -338,22 +343,18 @@ namespace MCCS.ViewModels.Pages
                     };
                     if (billboardInfo.BillboardType == BillboardTypeEnum.DataShow)
                     {
-                        var pseudoChannel = GlobalDataManager.Instance.StationSiteInfo.ControlChannels.FirstOrDefault(c => c.Id == billboardInfo.PseudoChannelId);
-                        if (pseudoChannel != null)
+                        var pseudoChannel = _pseudoChannelManager.GetPseudoChannelById(billboardInfo.PseudoChannelId);
+                        pseudoChannel.GetPseudoChannelStream()
+                            .Sample(TimeSpan.FromMilliseconds(500))
+                            .ObserveOn(Scheduler.Default)
+                            .Subscribe(data =>
                         {
-                            var signalType = pseudoChannel.ChannelType switch
-                            {
-                                ChannelTypeEnum.Position => SignalTypeEnum.Position,
-                                ChannelTypeEnum.Force => SignalTypeEnum.Force,
-                                _ => SignalTypeEnum.Position
-                            };
-                            // 默认只寻找第一个采集信号作展示
-                            var signal = channelInfo.BindSignals.FirstOrDefault(s => s.ControlChannelSignalType == signalType);
-                            if (signal != null)
-                            {
-                                _textInfoDic.Add(signal.Id, textInfo);
-                            }
-                        }
+#if DEBUG
+                            Debug.WriteLine($"接收到的数据: {JsonConvert.SerializeObject(data)}");
+#endif
+                            textInfo.Text = $"{ChangeToStr(data.Unit)}: {data.Value:F3}{data.Unit}";
+                            CollectionDataLabels.Invalidate();
+                        });
                     }
                     else
                     {
@@ -365,7 +366,7 @@ namespace MCCS.ViewModels.Pages
                 ConnectionLineGeometry.Positions = positions;
                 ConnectionLineGeometry.Indices = connectionIndexs; 
                 // 初始化订阅链接
-                InitializeDataSubscriptions();  
+                // InitializeDataSubscriptions();  
             }
             catch (OperationCanceledException)
             {
@@ -571,33 +572,6 @@ namespace MCCS.ViewModels.Pages
                 textInfo.Text = param.IsOpen ? "ON" : "OFF";
                 IsShowContextMenu = false;
             }
-        }
-
-        /// <summary>
-        /// 处理设备数据更新
-        /// </summary>
-        /// <param name="collectItemModel">设备单个数据</param>
-        private void OnDeviceDataReceived(BatchCollectItemModel collectItemModel)
-        {
-            if (collectItemModel == null) return;
-#if DEBUG
-            Debug.WriteLine($"接收到的数据:{JsonConvert.SerializeObject(collectItemModel)}");
-#endif
-            foreach (var textInfoItem in _textInfoDic)
-            {
-                var success = collectItemModel.CollectData.TryGetValue(textInfoItem.Key, out var temp);
-                //if (success)
-                //{
-                //    textInfoItem.Value.Text = $"Position: {temp.Item1:F3}{temp.Item2}";
-                //    continue;
-                //} 
-                //success = collectItemModel.CollectData.TryGetValue(textInfoItem.Key, out temp);
-                //if (success)
-                //{
-                //    textInfoItem.Value.Text = $"Force: {temp.Item1:F3}{temp.Item2}";
-                //}
-            }
-            CollectionDataLabels.Invalidate();
         } 
         /// <summary>
         /// 接受到信息后移动
@@ -952,7 +926,18 @@ namespace MCCS.ViewModels.Pages
                 hitNode = hitNode.Parent;
             }
             return null;
-        } 
+        }
+
+        private static string ChangeToStr(string str)
+        {
+            return str switch
+            {
+                "mm" => "Position",
+                "kN" => "Force",
+                _ => string.Empty
+            };
+        }
+
         #endregion
          
     }

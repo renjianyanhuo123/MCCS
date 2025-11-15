@@ -346,6 +346,11 @@
                             <CheckBox IsChecked="{Binding IsCanControl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Content="是否可控制"/>
                         </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="15">
+                            <TextBlock Text="绑定实体设备(如果后期需要单独控制)" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                            <ComboBox SelectedIndex="{Binding SelectedBillBoradInfo.BillboardType, UpdateSourceTrigger=PropertyChanged}">
+                            </ComboBox>
+                        </StackPanel>
                     </StackPanel>
                 </Expander>
                 <Expander Header="广告牌信息" HorizontalAlignment="Stretch" Visibility="{Binding SelectedBillBoradInfo, Converter={StaticResource BillBoradInfoIsNullToVisilityConverter}}">

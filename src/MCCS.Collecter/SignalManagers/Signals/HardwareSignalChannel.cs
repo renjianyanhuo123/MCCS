@@ -1,6 +1,4 @@
-﻿using MCCS.Infrastructure.TestModels;
-
-namespace MCCS.Collecter.SignalManagers.Signals
+﻿namespace MCCS.Collecter.SignalManagers.Signals
 {
     public sealed class HardwareSignalChannel : IDisposable
     { 

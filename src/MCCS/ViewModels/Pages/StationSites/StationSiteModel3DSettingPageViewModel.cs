@@ -31,12 +31,15 @@ namespace MCCS.ViewModels.Pages.StationSites
         public const string Tag = "StationSiteModel3DSettingPage";
 
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
+        private readonly IDeviceInfoRepository _deviceInfoRepository;
         private readonly IModel3DDataRepository _model3DDataRepository;
         private readonly INotificationService _notificationService;
         private long _stationId = -1;
         private bool _isAdded = false;
 
-        public StationSiteModel3DSettingPageViewModel(IEventAggregator eventAggregator, 
+        public StationSiteModel3DSettingPageViewModel(
+            IDeviceInfoRepository deviceInfoRepository,
+            IEventAggregator eventAggregator, 
             IEffectsManager effectsManager,
             IStationSiteAggregateRepository stationSiteAggregateRepository,
             IModel3DDataRepository model3DDataRepository,
@@ -46,6 +49,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
             _model3DDataRepository = model3DDataRepository;
             _notificationService = notificationService;
+            _deviceInfoRepository = deviceInfoRepository;
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             ImportModelFileCommand = new AsyncDelegateCommand(ExecuteImportModelFileCommand);
             DeleteFileCommand = new DelegateCommand<string>(ExecuteDeleteFileCommand);
@@ -180,6 +184,10 @@ namespace MCCS.ViewModels.Pages.StationSites
         
         public ObservableCollection<Model3DFileItemModel> Model3DFiles { get; private set; } = [];
 
+        /// <summary>
+        /// 绑定到模型的所有设备
+        /// </summary>
+        public ObservableCollection<MapDeviceModel> MapDeviceModels { get; private set; } = [];
         /// <summary>
         /// 绑定的的所有的虚拟通道
         /// </summary>
@@ -503,12 +511,14 @@ namespace MCCS.ViewModels.Pages.StationSites
             var modelInfo = await _model3DDataRepository.GetModelAggregateByStationIdAsync(_stationId);
             var controlChannels = await _stationSiteAggregateRepository.GetStationSiteControlChannels(_stationId);
             var pseudoChannels = await _stationSiteAggregateRepository.GetStationSitePseudoChannels(_stationId);
+            var deviceInfos = await _deviceInfoRepository.GetAllDevicesAsync();
             Model3DFiles.Clear();
             GroupModel.Clear();
             GroupModel.Dispose();
             SelectedBillBoradInfo = null;
             BindingControlChannels.Clear();
             BindingPseudoChannels.Clear();
+            MapDeviceModels.Clear();
             foreach (var controlChannel in controlChannels)
             {
                 BindingControlChannels.Add(new BindingControlChannelItemModel

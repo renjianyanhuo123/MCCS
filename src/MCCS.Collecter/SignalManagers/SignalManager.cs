@@ -71,11 +71,12 @@ namespace MCCS.Collecter.SignalManagers
             return POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(controller.DeviceHandleIndex, tmpMeanA, tmpA, tmpFreq, tmpWaveShap, tmpCtrlMode, tmpAP, tmpPH, tmpCountSet, tmpCtrlOpt);
         }
 
+        #region 采集信号
         public IObservable<DataPoint<float>> GetSignalDataStream(long signalId)
         {
             var signChannel = _signals.FirstOrDefault(s => s.SignalId == signalId);
             if (signChannel == null) throw new ArgumentNullException("can't find signalInfo");
-            var controller = _controllerManager.GetControllerInfo(signChannel.BelongControllerId); 
+            var controller = _controllerManager.GetControllerInfo(signChannel.BelongControllerId);
             return controller.IndividualDataStream.Select(info =>
                 {
                     var tempModel = new DataPoint<float>
@@ -84,11 +85,14 @@ namespace MCCS.Collecter.SignalManagers
                         DeviceId = info.DeviceId,
                         Timestamp = info.Timestamp,
                         Value = signChannel.SignalAddressIndex < 10 ? info.Value.Net_AD_N[signChannel.SignalAddressIndex] : info.Value.Net_AD_S[signChannel.SignalAddressIndex % 10]
-                    }; 
+                    };
                     return tempModel;
                 }).Publish()
                 .RefCount();
         }
+
+
+        #endregion
 
     }
 }

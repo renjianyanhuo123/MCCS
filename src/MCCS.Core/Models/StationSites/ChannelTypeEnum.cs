@@ -3,6 +3,7 @@
     public enum ChannelTypeEnum:int
     {
         Position,
-        Force
+        Force,
+        Mix
     }
 }

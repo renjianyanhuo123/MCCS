@@ -261,7 +261,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
                     {
-                        var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType == ChannelTypeEnum.Position);
+                        var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Position or ChannelTypeEnum.Mix);
                         if (controlChannel == null)
                         {
                             _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);

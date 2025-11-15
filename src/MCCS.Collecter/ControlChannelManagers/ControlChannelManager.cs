@@ -37,6 +37,7 @@ namespace MCCS.Collecter.ControlChannelManagers
         {
             return _channelDics.Remove(channelId, out var tempChannel);
         } 
+
         public DeviceCommandContext DynamicControl(long channelId, DynamicControlParams dynamicControlParam)
         {
             // 创建或获取设备上下文

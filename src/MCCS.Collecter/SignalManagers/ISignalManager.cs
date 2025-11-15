@@ -54,6 +54,11 @@ namespace MCCS.Collecter.SignalManagers
         int SetDynamicControlMode(long signalId, float tmpMeanA, float tmpA,
             float tmpFreq, byte tmpWaveShap, byte tmpCtrlMode, float tmpAP, float tmpPH,
             int tmpCountSet, int tmpCtrlOpt);
+        /// <summary>
+        /// 根据单个信号ID获取数据流
+        /// </summary>
+        /// <param name="signalId"></param>
+        /// <returns></returns>
         IObservable<DataPoint<float>> GetSignalDataStream(long signalId);
     }
 }

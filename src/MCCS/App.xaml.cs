@@ -40,6 +40,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
 using MCCS.Collecter.DllNative;
+using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Collecter.SignalManagers;
 using MCCS.Core.Repositories;
 using MCCS.ViewModels.Pages.TestModelOperations;
@@ -105,6 +106,7 @@ namespace MCCS
             containerRegistry.RegisterSingleton<IControllerManager, ControllerManager>();
             containerRegistry.RegisterSingleton<ISignalManager, SignalManager>();
             containerRegistry.RegisterSingleton<IControlChannelManager, ControlChannelManager>();
+            containerRegistry.RegisterSingleton<IPseudoChannelManager, PseudoChannelManager>();
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();

@@ -1,20 +1,33 @@
 ﻿using MCCS.Collecter.ControllerManagers;
+using MCCS.Collecter.SignalManagers;
 
 namespace MCCS.Collecter.PseudoChannelManagers
 {
     public class PseudoChannelManager : IPseudoChannelManager
     {
-        private readonly IControllerManager _controllerManager;
-        // private readonly List<PseudoChannel> _pseudoChannels;
+        private readonly IControllerManager _controllerManager; 
+        private readonly List<PseudoChannel> _pseudoChannels = [];
+        private readonly ISignalManager _signalManager;
 
-        public PseudoChannelManager(IControllerManager controllerManager)
+        public PseudoChannelManager(IControllerManager controllerManager,
+            ISignalManager signalManager)
         {
             _controllerManager = controllerManager;
+            _signalManager = signalManager;
         }
 
-        public void Initial( )
+        public void Initialization(IEnumerable<PseudoChannelConfiguration> configuations)
         {
+            foreach (var configuration in configuations)
+            {
+                _pseudoChannels.Add(new PseudoChannel(configuration, _signalManager));
+            }
+        }
 
+        public PseudoChannel GetPseudoChannelById(long pseudoChannelId)
+        {
+            var res= _pseudoChannels.FirstOrDefault(s => s.ChannelId == pseudoChannelId) ?? throw new ArgumentNullException("pseudoChannelId is null");
+            return res;
         }
 
     }

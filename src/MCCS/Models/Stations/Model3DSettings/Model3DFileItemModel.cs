@@ -50,6 +50,15 @@ namespace MCCS.Models.Stations.Model3DSettings
             get => _isCanControl;
             set => SetProperty(ref _isCanControl, value);
         }
+        /// <summary>
+        /// 选中映射的硬件设备
+        /// </summary>
+        private MapDeviceModel _selectedMapDevice;
+        public MapDeviceModel SelectedMapDevice 
+        { 
+            get => _selectedMapDevice;
+            set => SetProperty(ref _selectedMapDevice, value);
+        }
 
         /// <summary>
         /// 绑定的控制通道ID集合
