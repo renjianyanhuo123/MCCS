@@ -30,20 +30,20 @@
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="速度" />
-            <TextBox materialDesign:HintAssist.Hint="请输入速度" 
-                     Text="{Binding Speed,Mode=TwoWay}"
+            <TextBox materialDesign:HintAssist.Hint="请输入速度"
+                     Text="{Binding Speed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      materialDesign:TextFieldAssist.SuffixText="{Binding SelectedControlUnitType, Converter={StaticResource EnumToSuffixTextConverter}, ConverterParameter=/min}">
             </TextBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">
-            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" /> 
+            <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="目标值" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.8*"></ColumnDefinition>
                     <ColumnDefinition Width="0.2*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" materialDesign:HintAssist.Hint="请输入目标值"  
-                         Text="{Binding TargetValue, Mode=TwoWay}" >
+                <TextBox Grid.Column="0" materialDesign:HintAssist.Hint="请输入目标值"
+                         Text="{Binding TargetValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                 </TextBox>
                 <ComboBox Grid.Column="1" SelectedIndex="{Binding SelectedTargetUnitType}">
                     <ComboBoxItem TabIndex="0">mm</ComboBoxItem>
