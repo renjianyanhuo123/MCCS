@@ -48,6 +48,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             IsParticipateControl = true;
             CurrentModelId = modelId;
             CurrentChannelName = "力/位移控制通道";
+            CurrentCommandStatus = CommandExecuteStatusEnum.NoExecute; // 初始化为未执行状态，确保输入框可用
             ParticipateControlCommand = new DelegateCommand<long?>(ExecuteParticipateControlCommand);
             ControlModeSelectionChangedCommand = new DelegateCommand(ExecuteControlModeSelectionChangedCommand);
             ApplyCommand = new DelegateCommand(ExecuteApplyCommand);
@@ -58,7 +59,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             var tempDevice = _modelInfo?.MappingDevice;
             // var controlChannels = GlobalDataManager.Instance.Model3Ds
             if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");
-            _controllerId = (long)tempDevice.ParentDeviceId; 
+            _controllerId = (long)tempDevice.ParentDeviceId;
         }
 
         #region Proterty
@@ -201,14 +202,15 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         private void ExecuteApplyCommand()
-        { 
+        {
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             var controlMode = (ControlMode)SelectedControlMode;
+            bool commandSuccess = false;
             switch (controlMode)
             {
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
-                    { 
+                    {
                         var selectedChannel = fatigueControlViewModel.SelectedChannel;
                         var commandContext = _controlChannelManager.DynamicControl(selectedChannel.ChannelId, new DynamicControlParams
                         {
@@ -218,12 +220,13 @@ namespace MCCS.ViewModels.Pages.Controllers
                             Frequency = fatigueControlViewModel.Frequency,
                             MeanValue = fatigueControlViewModel.Median,
                             CompensateAmplitude = fatigueControlViewModel.CompensateAmplitude,
-                            CompensationPhase = fatigueControlViewModel.CompensatePhase, 
+                            CompensationPhase = fatigueControlViewModel.CompensatePhase,
                             CycleCount = fatigueControlViewModel.CycleTimes
                         });
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
+                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success);
+                            commandSuccess = true;
                         }
                         else
                         {
@@ -244,7 +247,8 @@ namespace MCCS.ViewModels.Pages.Controllers
                             });
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success); 
+                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success);
+                            commandSuccess = true;
                         }
                         else
                         {
@@ -255,7 +259,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Programmable:
                     if (CurrentPage.DataContext is ViewProgramControlViewModel programControlViewModel)
                     {
-                         
+
                     }
                     break;
                 case ControlMode.Manual:
@@ -266,11 +270,12 @@ namespace MCCS.ViewModels.Pages.Controllers
                         {
                             _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
                             break;
-                        } 
+                        }
                         var commandContext = _controlChannelManager.ManualControl(controlChannel.Id, (float)manualControlViewModel.OutPutValue);
                         if (commandContext.IsValid)
                         {
                             _notificationService.Show("成功", "该通道成功启动手动控制！", NotificationType.Success);
+                            commandSuccess = true;
                         }
                         else
                         {
@@ -281,18 +286,27 @@ namespace MCCS.ViewModels.Pages.Controllers
                 default:
                     break;
             }
+
+            // 命令执行失败时，恢复为NoExecute状态，允许用户重新输入参数
+            if (!commandSuccess)
+            {
+                CurrentCommandStatus = CommandExecuteStatusEnum.NoExecute;
+            }
         }
 
         /// <summary>
         /// 执行停止指令
         /// </summary>
-        private void ExecuteStopCommand() 
+        private void ExecuteStopCommand()
         {
             //_eventAggregator.GetEvent<NotificationCommandStopedEvent>().Publish(new NotificationCommandStatusEventParam
-            //{ 
-            //    CommandId = CurrentChannelId, 
+            //{
+            //    CommandId = CurrentChannelId,
             //    CommandExecuteStatus = CommandExecuteStatusEnum.Stoping
             //});
+
+            // 停止后恢复为NoExecute状态，允许用户重新输入参数
+            CurrentCommandStatus = CommandExecuteStatusEnum.NoExecute;
         }
 
         private void SetView() 
