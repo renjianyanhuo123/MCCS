@@ -18,6 +18,17 @@ namespace MCCS.Collecter.SignalManagers
             _controllerManager = controllerManager;
         }
 
+        public int SetValveStatus(long signalId, bool isOpen)
+        { 
+            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
+            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
+            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId);
+            var deviceHandle = controller.GetDeviceHandle();
+            var status = isOpen ? 1u : 0u;
+            var res = POPNetCtrl.NetCtrl01_Set_StationCtrl(deviceHandle, status, status);
+            return res;
+        }
+
         public void Initialization(IEnumerable<HardwareSignalConfiguration> signalConfigurations)
         {
             foreach (var configuration in signalConfigurations)
@@ -89,8 +100,7 @@ namespace MCCS.Collecter.SignalManagers
                     return tempModel;
                 }).Publish()
                 .RefCount();
-        }
-
+        } 
 
         #endregion
 

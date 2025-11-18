@@ -55,10 +55,10 @@ namespace MCCS.ViewModels.Pages.Controllers
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             // 查找当前模型对应的设备ID  的  控制器ID
             _modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId) ?? throw new ArgumentNullException("modeInfo is null");
-            var tempDevice = _modelInfo?.MappingDevice;
+            // var tempDevice = _modelInfo?.MappingDevice;
             // var controlChannels = GlobalDataManager.Instance.Model3Ds
-            if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");
-            _controllerId = (long)tempDevice.ParentDeviceId; 
+            //if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");
+            //_controllerId = (long)tempDevice.ParentDeviceId; 
         }
 
         #region Proterty
@@ -204,13 +204,18 @@ namespace MCCS.ViewModels.Pages.Controllers
         { 
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             var controlMode = (ControlMode)SelectedControlMode;
+            var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
+            if (controlChannel == null)
+            {
+                _notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
+                return;
+            } 
             switch (controlMode)
             {
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
-                    { 
-                        var selectedChannel = fatigueControlViewModel.SelectedChannel;
-                        var commandContext = _controlChannelManager.DynamicControl(selectedChannel.ChannelId, new DynamicControlParams
+                    {  
+                        var commandContext = _controlChannelManager.DynamicControl(controlChannel.Id, new DynamicControlParams
                         {
                             ControlMode = fatigueControlViewModel.ControlUnitType,
                             Amplitude = fatigueControlViewModel.Amplitude,
@@ -234,13 +239,13 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Static:
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
-                        var selectedChannel = staticControlViewModel.SelectedChannel;
-                        var commandContext = _controlChannelManager.StaticControl(selectedChannel.ChannelId,
+                       
+                        var commandContext = _controlChannelManager.StaticControl(controlChannel.Id,
                             new StaticControlParams
                             {
                                 StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
                                 Speed = staticControlViewModel.Speed,
-                                TargetValue = staticControlViewModel.TargetValue
+                                TargetValue = Convert.ToSingle(staticControlViewModel.TargetValue)
                             });
                         if (commandContext.IsValid)
                         {
@@ -260,13 +265,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                     break;
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
-                    {
-                        var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Position or ChannelTypeEnum.Mix);
-                        if (controlChannel == null)
-                        {
-                            _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
-                            break;
-                        } 
+                    {  
                         var commandContext = _controlChannelManager.ManualControl(controlChannel.Id, (float)manualControlViewModel.OutPutValue);
                         if (commandContext.IsValid)
                         {
@@ -297,33 +296,27 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         private void SetView() 
         {
-            var controlMode = (ControlMode)SelectedControlMode;
-            var controlChannels = _modelInfo.ControlChannelInfos.Select(s => new ControlChannelBindModel
-            {
-                ChannelId = s.Id,
-                ChannelName = s.Name,
-                ChannelType = s.ChannelType
-            });
+            var controlMode = (ControlMode)SelectedControlMode; 
             switch (controlMode)
             {
                 case ControlMode.Fatigue: 
                     var fatigue = new ViewFatigueControl
                     {
-                        DataContext = new ViewFatigueControlViewModel(controlChannels)
+                        DataContext = new ViewFatigueControlViewModel()
                     };
                     CurrentPage = fatigue;
                     break;
                 case ControlMode.Static:  
                     var staticView = new ViewStaticControl
                     {
-                        DataContext = new ViewStaticControlViewModel(controlChannels)
+                        DataContext = new ViewStaticControlViewModel()
                     };
                     CurrentPage = staticView;
                     break;
                 case ControlMode.Programmable:  
                     var programView = new ViewProgramControl
                     {
-                        DataContext = new ViewProgramControlViewModel(controlChannels)
+                        DataContext = new ViewProgramControlViewModel()
                     };
                     CurrentPage = programView;
                     break;

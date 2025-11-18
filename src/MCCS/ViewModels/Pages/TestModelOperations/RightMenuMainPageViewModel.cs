@@ -1,4 +1,5 @@
-﻿using MCCS.Collecter.ControllerManagers;
+﻿using MCCS.Collecter.ControlChannelManagers;
+using MCCS.Collecter.ControllerManagers;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.StationSites;
@@ -11,28 +12,24 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
     public sealed class RightMenuMainPageViewModel : BaseViewModel
     {
         public const string Tag = "RightMenuMainPage";
-        private long _deviceId = -1;
+        private long _controlChannelId = -1;
         private string _modelId = string.Empty;
 
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IControllerManager _controllerManager;
+        private readonly IEventAggregator _eventAggregator; 
+        private readonly IControlChannelManager _controlChannelManager;
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
-            IControllerManager controllerManager) : base(eventAggregator)
+            IControlChannelManager controlChannelManager) : base(eventAggregator)
         {
-            _eventAggregator = eventAggregator;
-            _controllerManager = controllerManager; 
+            _eventAggregator = eventAggregator; 
+            _controlChannelManager = controlChannelManager;
             OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
             eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>()
                 .Subscribe(param =>
                 {
-                    _deviceId = param.DeviceId;
+                    _controlChannelId = param.ControlChannelId;
                     _modelId = param.ModelId;
-                    var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(c => c.Id == param.DeviceId);
-                    if (device is { Type: DeviceTypeEnum.Actuator } and ActuatorDevice actuatorDevice)
-                    {
-                        IsOpen = actuatorDevice.ValveStatus == ValveStatusEnum.Opened;
-                    }
+                    IsOpen = _controlChannelManager.GetControlChannel(_controlChannelId).ValveStatus == ValveStatusEnum.Opened;
                 });
         }
          
@@ -53,19 +50,22 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
 
         private void ExecuteOperationValveCommand(string obj)
         {
-            if (_deviceId == -1 || string.IsNullOrEmpty(_modelId)) return;
+            if (_controlChannelId == -1 && string.IsNullOrEmpty(_modelId)) return;
             var success = bool.TryParse(obj, out var isOpen);
             if (!success) return;
-            var device = GlobalDataManager.Instance.Devices?.FirstOrDefault(s => s.Id == _deviceId);
-            if (device is not ActuatorDevice actuatorDevice || actuatorDevice.ParentDeviceId == null) return;  
-            if (!_controllerManager.OperationSigngleValve((long)actuatorDevice.ParentDeviceId, isOpen)) return;
-            actuatorDevice.OperationValve(isOpen);
+            // if (!_controllerManager.OperationSigngleValve((long)actuatorDevice.ParentDeviceId, isOpen)) return;
+            // actuatorDevice.OperationValve(isOpen);
+            var channel = _controlChannelManager.GetControlChannel(_controlChannelId);
+            success = channel.OperationValve(isOpen);
             IsOpen = isOpen;
-            _eventAggregator.GetEvent<OperationValveEvent>().Publish(new OperationValveEventParam
+            if (success)
             {
-                ModelId = _modelId,
-                IsOpen = isOpen
-            });
+                _eventAggregator.GetEvent<OperationValveEvent>().Publish(new OperationValveEventParam
+                {
+                    ModelId = _modelId,
+                    IsOpen = isOpen
+                });
+            }
         }  
         #endregion
     }

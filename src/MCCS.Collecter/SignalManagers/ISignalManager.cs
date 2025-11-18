@@ -8,6 +8,14 @@ namespace MCCS.Collecter.SignalManagers
     public interface ISignalManager
     {
         void Initialization(IEnumerable<HardwareSignalConfiguration> signalConfigurations);
+
+        /// <summary>
+        /// 设置阀门状态
+        /// </summary>
+        /// <param name="signalId"></param>
+        /// <param name="isOpen"></param>
+        /// <returns></returns>
+        int SetValveStatus(long signalId, bool isOpen);
         /// <summary>
         /// 根据单信号ID获取控制状态
         /// </summary>

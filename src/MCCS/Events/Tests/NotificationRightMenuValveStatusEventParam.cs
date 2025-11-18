@@ -2,7 +2,7 @@
 {
     public record NotificationRightMenuValveStatusEventParam
     {
-        public long DeviceId { get; init; }
+        public long ControlChannelId { get; init; }
         /// <summary>
         /// 用于回传; 更新模型上界面的显示
         /// </summary>

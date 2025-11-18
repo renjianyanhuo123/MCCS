@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
-using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
@@ -25,6 +24,10 @@ namespace MCCS.Collecter.ControllerManagers.Entities
 
         private const float PositionMin = -1000.0f;
         private const float PositionMax = 1000.0f;
+
+        private CancellationTokenSource? _forceStaticCTS;
+        private CancellationTokenSource? _positionStaticCTS;
+        private CancellationTokenSource? _dynamicCTS;
 
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         { 
@@ -54,7 +57,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         {
             double time = 0; // 时间变量（秒）
 
-            while (time <= totalCount)
+            while (time <= totalCount && !_dynamicCTS.Token.IsCancellationRequested)
             {
                 // 根据波形类型计算值
                 var value = waveType switch
@@ -177,18 +180,22 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             switch (controlParams.StaticLoadControl)
             {
                 case StaticLoadControlEnum.CTRLMODE_LoadN:
+                    speed = controlParams.TargetValue > _force ? speed : -speed;
                     ForceChangeToTarget(speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadS:
+                    speed = controlParams.TargetValue > _position ? speed : -speed;
                     PositionChangeToTarget(speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadSVNP:
-                    PositionChangeToTarget(speed - 1, speed - 1 > 0 ? PositionMax : PositionMin);
+                    speed = controlParams.TargetValue > _force ? speed : -speed;
+                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
                     ForceChangeToTarget(speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadNVSP:
+                    speed = controlParams.TargetValue > _position ? speed : -speed;
                     PositionChangeToTarget(speed, controlParams.TargetValue);
-                    ForceChangeToTarget(speed - 1, speed - 1 > 0 ? ForceMax : ForceMin);
+                    ForceChangeToTarget(speed, speed > 0 ? ForceMax : ForceMin);
                     break;
                 default:
                     break;
@@ -199,17 +206,39 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         { 
             if (Status != HardwareConnectionStatus.Connected) return;
             ControlState = SystemControlState.Dynamic;
+            _dynamicCTS = new CancellationTokenSource();
             Task.Run(() =>
             {
                 GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
-            });
+            }, _dynamicCTS.Token);
+        }
+
+        public void MockStaticControlStop()
+        {
+            // 默认位移保持
+            _positionStaticCTS?.Cancel();
+            _positionStaticCTS?.Dispose();
+            _forceStaticCTS?.Cancel();
+            _forceStaticCTS?.Dispose();
+        }
+
+        public void MockDynamicControlStop()
+        {
+            _dynamicCTS?.Cancel();
+            _dynamicCTS?.Dispose();
         }
 
         private void ForceChangeToTarget(float speed, float target)
         {
+            if (_forceStaticCTS != null)
+            {
+                _forceStaticCTS.Cancel();
+                _forceStaticCTS?.Dispose();
+            }
+            _forceStaticCTS = new CancellationTokenSource(); 
             Task.Run(() =>
             {
-                while (true)
+                while (!_forceStaticCTS.Token.IsCancellationRequested)
                 {
                     if (speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)
                         || speed > 0 && Math.Abs(_force - target) < speed)
@@ -226,14 +255,20 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         _force += speed;
                     }
                 }
-            });
+            }, _forceStaticCTS.Token);
         }
 
         private void PositionChangeToTarget(float speed, float target)
         {
-            Task.Run(() =>
+            if (_positionStaticCTS != null)
             {
-                while (true)
+                _positionStaticCTS.Cancel();
+                _positionStaticCTS?.Dispose();
+            }
+            _positionStaticCTS = new CancellationTokenSource(); 
+            Task.Run(() =>
+            { 
+                while (!_positionStaticCTS.Token.IsCancellationRequested)
                 {
                     if (speed < 0 && Math.Abs(_position - target) < Math.Abs(speed)
                         || speed > 0 && Math.Abs(_position - target) < speed)
@@ -250,7 +285,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         _position += speed;
                     }
                 }
-            });
+            }, _positionStaticCTS.Token);
         }
 
         private IDisposable CreateAcquisitionLoop()

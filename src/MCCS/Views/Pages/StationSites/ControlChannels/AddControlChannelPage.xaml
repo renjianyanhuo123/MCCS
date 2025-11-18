@@ -85,6 +85,7 @@
                               SelectedIndex="{Binding ChannelType, Mode=TwoWay}">
                         <ComboBoxItem TabIndex="0">位移</ComboBoxItem>
                         <ComboBoxItem TabIndex="1">力</ComboBoxItem>
+                        <ComboBoxItem TabIndex="2">混合</ComboBoxItem>
                     </ComboBox>
                 </StackPanel> 
                 <UniformGrid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Columns="2">

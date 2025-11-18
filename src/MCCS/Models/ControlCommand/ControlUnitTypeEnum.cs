@@ -2,7 +2,7 @@
 {
     public enum ControlUnitTypeEnum:int
     {
-        Force,
-        Displacement
+        Displacement = 0,
+        Force = 1
     }
 }

@@ -9,7 +9,23 @@ namespace MCCS.Collecter.ControlChannelManagers
         /// 初始化控制通道
         /// </summary>
         /// <param name="configurations"></param>
-        void Initialization(IEnumerable<ControlChannelConfiguration> configurations);
+        /// <param name="isMock">是否开启模拟</param>
+        void Initialization(IEnumerable<ControlChannelConfiguration> configurations, bool isMock = false);
+
+        /// <summary>
+        /// 获取控制通道
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        ControlChannel GetControlChannel(long channelId);
+
+        /// <summary>
+        /// 操作阀门状态
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="isOpen"></param>
+        /// <returns></returns>
+        bool OperationValveStatus(long channelId, bool isOpen);
 
         /// <summary>
         /// 添加控制通道
@@ -45,6 +61,13 @@ namespace MCCS.Collecter.ControlChannelManagers
         /// <param name="channelId"></param>
         /// <param name="dynamicControlParam"></param>
         /// <returns></returns>
-        DeviceCommandContext DynamicControl(long channelId, DynamicControlParams dynamicControlParam); 
+        DeviceCommandContext DynamicControl(long channelId, DynamicControlParams dynamicControlParam);
+
+        /// <summary>
+        /// 单个通道的动态控制
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        DeviceCommandContext StopControl(long channelId);
     }
 }

@@ -18,13 +18,7 @@
         </i:EventTrigger> 
     </i:Interaction.Triggers>
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-            <!--<convert:BoolToWidthConverter x:Key="BoolToWidthConverter" />
-            <convert:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
-            <convert:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter" />-->
+        <ResourceDictionary> 
             <convert1:BooleanToColorConverter x:Key="BooleanToColorConverter" />
             <convert:CommandStatusToEnableConverter x:Key="CommandStatusToEnableConverter" />
             <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
@@ -37,88 +31,18 @@
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
-                <TextBlock IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
+                <TextBlock
                     Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                     Margin="0,5,0,10"
                     Text="{Binding CurrentChannelName, Mode=TwoWay}" Cursor="" />
-                <CheckBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                    Margin="5 5 5 8"
+                <CheckBox Margin="5 5 5 8"
                     Tag="{Binding CurrentModelId}"
                     IsChecked="{Binding IsParticipateControl, Mode=TwoWay}"
                     Content="{StaticResource IsParticipateControl}"
                     Style="{StaticResource MaterialDesignCheckBox}"
                     Command="{Binding ParticipateControlCommand}"
-                    CommandParameter="{Binding CurrentModelId}"/>
-                <!--<GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                    Margin="{StaticResource GroupMargin}" 
-                    Style="{StaticResource MaterialDesignCardGroupBox}"
-                    Header="{StaticResource ControlTypeText}">
-                    <StackPanel>
-                        <WrapPanel Margin="0 0 0 10">
-                            <RadioButton Content="组合控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Combine}"
-                                    Style="{StaticResource MaterialDesignRadioButton}" 
-                                    Command="{Binding ControlTypeChangedCommand}"
-                                    CommandParameter="Combine"
-                                    GroupName="ControlTypeGroup" Margin="0 0 10 0" />
-                            <RadioButton Content="单个控制" IsChecked="{Binding ControlType, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Single}"
-                                    Style="{StaticResource MaterialDesignRadioButton}"
-                                    Command="{Binding ControlTypeChangedCommand}"
-                                    CommandParameter="Single"
-                                    GroupName="ControlTypeGroup" />
-                        </WrapPanel>
-                        <ComboBox Margin="0,0,0,10"
-                                    materialDesign:HintAssist.Hint="请选择加入的组合(未选择默认为新组合)" 
-                                    ItemsSource="{Binding ControlCombineInfos}"
-                                    SelectedItem="{Binding SelectedControlCombineInfo}"
-                                    DisplayMemberPath="CombineChannelName"
-                                    SelectedValuePath="CombineChannelId">
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding ControlCombineSelectionChangedCommand}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                            <ComboBox.Visibility>
-                                <MultiBinding Converter="{StaticResource EnumToVisibilityConverter}"
-                                              ConverterParameter="ComboBox">
-                                    <Binding Path="SelectedControlCombineInfo" />
-                                    <Binding Path="ControlType" />
-                                </MultiBinding>
-                            </ComboBox.Visibility>
-                        </ComboBox>
-                        <TextBox x:Name="CombineName" 
-                                materialDesign:HintAssist.Hint="请填入组合控制名称"
-                                Text="{Binding CurrentCombineName, Mode=TwoWay}" >
-                            <TextBox.Visibility>
-                                <MultiBinding
-                                    Converter="{StaticResource EnumToVisibilityConverter}"
-                                    ConverterParameter="TextBox">
-                                    <Binding Path="SelectedControlCombineInfo" />
-                                    <Binding Path="ControlType" />
-                                </MultiBinding>
-                            </TextBox.Visibility>
-                        </TextBox>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox  IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                    Margin="{StaticResource GroupMargin}"
-                    Header="{StaticResource ControllerStep1}"
-                    Style="{StaticResource MaterialDesignCardGroupBox}">
-                    <ItemsControl Name="ChannelItem" ItemsSource="{Binding Channels}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <materialDesign:Chip
-                                    Content="{Binding ChannelName}"
-                                    Tag="{Binding ChannelId}"
-                                    Icon="{Binding Index}"
-                                    IconBackground="{DynamicResource PrimaryHueLightBrush}"
-                                    IconForeground="{DynamicResource PrimaryHueLightForegroundBrush}"
-                                    IsDeletable="True" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </GroupBox>-->
-                <GroupBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                    Margin="{StaticResource GroupMargin}"
+                    CommandParameter="{Binding CurrentModelId}"/> 
+                <GroupBox Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep2}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ComboBox 
@@ -139,28 +63,25 @@
                         <ComboBoxItem Content="疲劳控制" />
                     </ComboBox>
                 </GroupBox>
-                <GroupBox IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}" 
-                    Margin="{StaticResource GroupMargin}"
+                <GroupBox Margin="{StaticResource GroupMargin}"
                     Header="{StaticResource ControllerStep3}"
                     Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ContentControl Content="{Binding CurrentPage}" />
-                </GroupBox>
+                </GroupBox>  
             </StackPanel> 
         </ScrollViewer>
         <UniformGrid Grid.Row="1" Columns="2" Margin="0 20 0 0">
             <Button 
-                Content="应用" 
-                IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Apply}"
-                Width="80"
+                Content="应用" Width="80"
                 Style="{StaticResource MaterialDesignFlatSecondaryDarkBgButton}"
                 ToolTip="MaterialDesignFlatSecondaryDarkBgButton" 
                 Command="{Binding ApplyCommand}"/>
             <Button  
                 Content="暂停"
-                IsEnabled="{Binding CurrentCommandStatus, Converter={StaticResource CommandStatusToEnableConverter}, ConverterParameter=Stop}"
                 Width="80"
                 Style="{StaticResource MaterialDesignOutlinedSecondaryDarkButton}"
                 Command="{Binding StopCommand}"/>
         </UniformGrid>
+       
     </Grid>
 </UserControl>

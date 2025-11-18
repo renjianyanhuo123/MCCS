@@ -28,6 +28,7 @@ namespace MCCS.Services.StartInitial
         private readonly ISignalManager _signalManager;
         private readonly IControlChannelManager _controlChannelManager;
         private readonly IPseudoChannelManager _pseudoChannelManager;
+        private readonly bool _isMock;
 
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository,
             IPseudoChannelManager pseudoChannelManager,
@@ -37,6 +38,7 @@ namespace MCCS.Services.StartInitial
             ISignalManager signalManager,
             IConfiguration configuration)
         {
+            _isMock = Convert.ToBoolean(configuration["AppSettings:IsMock"]);
             _controlChannelManager = controlChannelManager;
             _configuration = configuration;
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
@@ -103,9 +105,7 @@ namespace MCCS.Services.StartInitial
                     ChannelName = controlChannelSignalInfo.ControlChannelInfo.ChannelName,
                     CancellationConfiguration = new ControlCompletionConfiguration(),
                     SignalConfiguration = []
-                };
-                var stationSiteControlChannel = new StationSiteControlChannelInfo(controlChannelSignalInfo.ControlChannelInfo.Id,
-                    controlChannelSignalInfo.ControlChannelInfo.ChannelName, controlChannelSignalInfo.ControlChannelInfo.ChannelType);
+                }; 
                 foreach (var signal in controlChannelSignalInfo.Signals)
                 {
                     tempChannel.SignalConfiguration.Add(new ControlChannelSignalConfiguration
@@ -120,7 +120,7 @@ namespace MCCS.Services.StartInitial
                 }
                 controlChannelConfigurations.Add(tempChannel);
             }
-            _controlChannelManager.Initialization(controlChannelConfigurations);
+            _controlChannelManager.Initialization(controlChannelConfigurations, _isMock);
             var pseudoChannelConfigurations = new List<PseudoChannelConfiguration>();
             // 创建所有的虚拟通道
             foreach (var pseudoChannelInfo in currentUseStation.PseudoChannelInfos)
@@ -154,20 +154,12 @@ namespace MCCS.Services.StartInitial
                 {
                     var temp = new Model3DMainInfo(modelFileItem.Id, modelFileItem.Key, modelFileItem.Name)
                         {
-                            ControlChannelInfos = model3DAndControlChannels.Where(c => c.ModelFileId == modelFileItem.Key)
-                                .Select(s =>
-                                {
-                                    var controlChannel =
-                                        currentUseStation.ControlChannelSignalInfos.FirstOrDefault(t =>
-                                            t.ControlChannelInfo.Id == s.Id);
-                                    return new StationSiteControlChannelInfo(controlChannel.ControlChannelInfo.Id, controlChannel.ControlChannelInfo.ChannelName, controlChannel.ControlChannelInfo.ChannelType);
-                                }) 
+                            ControlChannelInfos = currentUseStation.ControlChannelSignalInfos.Where(s => model3DAndControlChannels.Where(c => c.ModelFileId == modelFileItem.Key).Select(c => c.ControlChannelId).Contains(s.ControlChannelInfo.Id))
+                                .Select(s => new StationSiteControlChannelInfo(s.ControlChannelInfo.Id, s.ControlChannelInfo.ChannelName, s.ControlChannelInfo.ChannelType))
                                 .ToList()
                         };
                     // 默认取一个控制通道的输出信号接口所链接的设备
-                    //var tempDevice = stationSiteControlChannels.FirstOrDefault()?.BindSignals
-                    //    .FirstOrDefault(s => s.ControlChannelSignalType == SignalTypeEnum.Output)?.LinkedDevice;
-                    //temp.MappingDevice = tempDevice;
+                    // var tempDevice = deviceInfos.FirstOrDefault(c => c.Id == modelFileItem.MapDeviceId); 
                     model3Ds.Add(temp);
                 } 
             }
@@ -184,9 +176,8 @@ namespace MCCS.Services.StartInitial
         /// <returns></returns>
         private void StartUpAllControllers(IEnumerable<DeviceInfo> controllerInfos,
             List<SignalInterfaceInfo> signals)
-        {
-            var isMock = Convert.ToBoolean(_configuration["AppSettings:IsMock"]);
-            _controllerService.InitializeDll(isMock);
+        { 
+            _controllerService.InitializeDll(_isMock);
             var index = 0;
             foreach (var item in controllerInfos)
             {
@@ -196,7 +187,7 @@ namespace MCCS.Services.StartInitial
                     DeviceAddressId = index++,
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
-                    IsSimulation = isMock, 
+                    IsSimulation = _isMock, 
                     SampleRate = 20,
                     ConnectionString = ""
                 }; 

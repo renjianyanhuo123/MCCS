@@ -22,9 +22,9 @@
         <StackPanel>
             <TextBlock Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Margin="{StaticResource TextMargin}" Text="控制模式" />
             <ComboBox
-                x:Name="ControlMode" ItemsSource="{Binding Channels}"
-                SelectedItem="{Binding SelectedChannel}" 
-                DisplayMemberPath="ChannelName"> 
+                x:Name="ControlMode" SelectedIndex="{Binding ControlUnitType}">
+                <ComboBoxItem TabIndex="0" Content="位移"  Tag="mm"/>
+                <ComboBoxItem TabIndex="1" Content="试验力" Tag="kN" />
             </ComboBox>
         </StackPanel>
         <StackPanel Margin="{StaticResource StackPanelMargin}">

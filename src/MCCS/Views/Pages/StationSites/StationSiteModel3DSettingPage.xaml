@@ -348,7 +348,15 @@
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="15">
                             <TextBlock Text="绑定实体设备(如果后期需要单独控制)" FontSize="14" Margin="0,0,0,15"></TextBlock>
-                            <ComboBox SelectedIndex="{Binding SelectedBillBoradInfo.BillboardType, UpdateSourceTrigger=PropertyChanged}">
+                            <ComboBox ItemsSource="{Binding MapDeviceModels}" SelectedItem="{Binding SelectedModel3DFile.SelectedMapDevice, UpdateSourceTrigger=PropertyChanged}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <UniformGrid Columns="2" >
+                                            <TextBlock HorizontalAlignment="Left" Text="{Binding DeviceName}" FontWeight="Bold"/>
+                                            <materialDesign:PackIcon HorizontalAlignment="Center" Kind="Check" Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        </UniformGrid>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
                     </StackPanel>

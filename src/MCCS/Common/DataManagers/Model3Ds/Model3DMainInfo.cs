@@ -26,6 +26,6 @@ namespace MCCS.Common.DataManagers.Model3Ds
         /// <summary>
         /// 映射匹配的设备
         /// </summary>
-        public BaseDevice? MappingDevice { get; set; }
+        public long? MappingDeviceId { get; set; }
     }
 }

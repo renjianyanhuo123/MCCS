@@ -8,12 +8,8 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         public const string Tag = "ProgramControl"; 
         private string? _filePath = string.Empty;
 
-        public ViewProgramControlViewModel(IEnumerable<ControlChannelBindModel> channels)
-        {
-            foreach (var channel in channels)
-            {
-                Channels.Add(channel);
-            }
+        public ViewProgramControlViewModel()
+        { 
         }
 
         public ObservableCollection<ControlChannelBindModel> Channels { get; private set; } = [];

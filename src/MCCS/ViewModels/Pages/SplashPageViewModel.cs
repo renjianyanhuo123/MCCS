@@ -1,5 +1,4 @@
 ﻿using MCCS.Services.StartInitial;
-using Prism.Events;
 using System.Reflection;
 using System.Windows;
 using MCCS.Events.StartUp;

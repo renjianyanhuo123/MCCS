@@ -83,33 +83,27 @@ namespace MCCS.ViewModels.Pages.Controllers
         #region private method   
         private void SetView()
         {
-            var controlMode = (ControlMode)SelectedControlMode;
-            var controlChannels = _modelInfo.ControlChannelInfos.Select(s => new ControlChannelBindModel
-            {
-                ChannelId = s.Id,
-                ChannelName = s.Name,
-                ChannelType = s.ChannelType
-            });
+            var controlMode = (ControlMode)SelectedControlMode; 
             switch (controlMode)
             {
                 case ControlMode.Fatigue:
                     var fatigue = new ViewFatigueControl
                     {
-                        DataContext = new ViewFatigueControlViewModel(controlChannels)
+                        DataContext = new ViewFatigueControlViewModel()
                     };
                     CurrentPage = fatigue;
                     break;
                 case ControlMode.Static:
                     var staticView = new ViewStaticControl
                     {
-                        DataContext = new ViewStaticControlViewModel(controlChannels)
+                        DataContext = new ViewStaticControlViewModel()
                     };
                     CurrentPage = staticView;
                     break;
                 case ControlMode.Programmable:
                     var programView = new ViewProgramControl
                     {
-                        DataContext = new ViewProgramControlViewModel(controlChannels)
+                        DataContext = new ViewProgramControlViewModel()
                     };
                     CurrentPage = programView;
                     break;

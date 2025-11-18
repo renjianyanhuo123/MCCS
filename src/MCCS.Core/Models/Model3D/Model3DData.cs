@@ -52,8 +52,8 @@ namespace MCCS.Core.Models.Model3D
         [Column(IsNullable = false, StringLength = 80)]
         public string ScaleStr { get; set; } = "1,1,1";
 
-        [Column(IsNullable = true, StringLength = 100)]
-        public string? DeviceId { get; set; }
+        [Column(IsNullable = true)]
+        public long? MapDeviceId { get; set; }
 
         [Column(IsNullable = true, StringLength = 50)]
         public string? Orientation { get; set; } 

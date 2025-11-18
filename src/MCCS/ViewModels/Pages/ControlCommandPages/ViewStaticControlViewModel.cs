@@ -6,37 +6,21 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
     public class ViewStaticControlViewModel : BindableBase
     {
         public const string Tag = "StaticControl";
-
-        public ViewStaticControlViewModel(IEnumerable<ControlChannelBindModel> channels)
-        {
-            foreach (var channel in channels)
-            {
-                Channels.Add(channel);
-            }
-        }
-
+         
         #region 页面属性
 
         public ObservableCollection<ControlChannelBindModel> Channels { get; private set; } = [];
-
-        private ControlChannelBindModel _selectedChannel;
-        public ControlChannelBindModel SelectedChannel
-        {
-            get => _selectedChannel;
-            set
-            {
-                if (SetProperty(ref _selectedChannel, value))
-                {
-                    SelectedControlUnitType = (int)_selectedChannel.ChannelType;
-                }
-            }
-        }
 
         /// <summary>
         /// 0-位移
         /// 1-力 
         /// </summary>
-        public int SelectedControlUnitType { get; set; }
+        private int _selectedControlUnitType;
+        public int SelectedControlUnitType
+        {
+            get => _selectedControlUnitType; 
+            set =>SetProperty(ref _selectedControlUnitType, value);
+        }
 
         /// <summary>
         /// 0 - mm
@@ -55,7 +39,7 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
             get => _speed;
             set => SetProperty(ref _speed, value);
         }
-        private float _targetValue = 0.0f;
+        private float _targetValue;
         public float TargetValue
         {
             get => _targetValue;

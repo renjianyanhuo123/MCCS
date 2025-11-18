@@ -122,8 +122,7 @@ namespace MCCS
                         Type = ModelType.Actuator,
                         RotationStr = "1,0,0",
                         ScaleStr = "0.005,0.005,0.005",
-                        RotateAngle = -90.0,
-                        DeviceId = "1882785835a24a83aae53ac51f153c04",
+                        RotateAngle = -90.0, 
                         Orientation = "0,-1,0"
                     },
                     new()
@@ -241,8 +240,7 @@ namespace MCCS
                         Type = ModelType.Actuator,
                         RotationStr = "1,0,0",
                         ScaleStr = "0.005,0.005,0.005",
-                        RotateAngle = -90.0,
-                        DeviceId = "dd1d1798920e49cbaba9b4a59aead10f",
+                        RotateAngle = -90.0, 
                         Orientation = "1,0,0"
                     }
                 };

@@ -136,11 +136,11 @@ namespace MCCS.ViewModels.Pages
             _eventAggregator.GetEvent<UnLockCommandEvent>().Subscribe(ReceivedUnLockEvent);
             _eventAggregator.GetEvent<NotificationCommandStopedEvent>().Subscribe(x => 
             {
-                var model = Models.FirstOrDefault(s => s.Model3DData.DeviceId == x.CommandId);
-                if (model == null) return;
-                model.CancelModelMove.Cancel();
-                model.CancelModelMove.Dispose();
-                model.CancelModelMove = new CancellationTokenSource();
+                //var model = Models.FirstOrDefault(s => s.Model3DData.DeviceId == x.CommandId);
+                //if (model == null) return;
+                //model.CancelModelMove.Cancel();
+                //model.CancelModelMove.Dispose();
+                //model.CancelModelMove = new CancellationTokenSource();
             });
             _eventAggregator.GetEvent<OperationValveEvent>().Subscribe(OnOperationValveEvent);
         }
@@ -358,7 +358,16 @@ namespace MCCS.ViewModels.Pages
                     }
                     else
                     {
-                        _modelTextInfoDic.Add(billboardInfo.ModelFileId, textInfo);
+                        var channel = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == bindModelViewModel?.Model3DData.Id)?.ControlChannelInfos.FirstOrDefault();
+                        if (channel != null)
+                        {
+                            var channelOperation = _controlChannelManager.GetControlChannel(channel.Id); 
+                            if (channelOperation.ValveStatus == ValveStatusEnum.Closed)
+                            {
+                                textInfo.Text = "OFF";
+                                _modelTextInfoDic.Add(billboardInfo.ModelFileId, textInfo);
+                            }
+                        } 
                     }
                     CollectionDataLabels.TextInfo.Add(textInfo); 
                 }
@@ -579,48 +588,7 @@ namespace MCCS.ViewModels.Pages
         /// <param name="param"></param>
         private async void OnReceivedCommand(ReceivedCommandDataEventParam param)
         {
-            if (param.Param == null) throw new ArgumentNullException(nameof(param.Param));
-           var expander = new ControlProcessExpander(param.Param)
-            {
-                CommandId = param.ChannelIds.Count == 1 ? param.ChannelIds.First() : Guid.NewGuid().ToString("N"),
-                CommandName = param.ChannelIds.Count == 1 ? Models.First(s => s.Model3DData.DeviceId == param.ChannelIds.First()).Model3DData.Name : "组合控制",
-                ProgressRate = 0.0,
-                ControlType = param.ChannelIds.Count == 1 ? ControlTypeEnum.Single : ControlTypeEnum.Combine,
-                ControlMode = param.ControlMode
-            };
-            ControlProcessExpanders.Add(expander);
-            var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == expander.CommandId)
-                ?? throw new ArgumentNullException();
-            switch (param.ControlMode)
-            {
-                case ControlMode.Manual:
-                    break;
-                case ControlMode.Static:
-                    if (param.Param is StaticControlModel model
-                        && model.UnitType == ControlUnitTypeEnum.Displacement)
-                    {
-                        StaticMode_ModelMovePosition(model, targetModel);
-                    }
-                    break;
-                case ControlMode.Programmable:
-                    break;
-                case ControlMode.Fatigue:
-                    break;
-                default:
-                    break;
-            }
-            // var device = _deviceManager.GetDevice(expander.CommandId) ?? throw new ArgumentNullException(nameof(expander.CommandId));
-            //await device.SendCommandAsync(new DeviceCommand
-            //{
-            //    DeviceId = expander.CommandId,
-            //    Type = CommandTypeEnum.SetMove,
-            //    Parameters = expander.GetParamDic()
-            //}, targetModel.CancelModelMove.Token);
-
-            //// 事件完成后订阅
-            //targetModel.DeviceSubscription = device.CommandStatusStream
-            //    .Sample(TimeSpan.FromSeconds(1.5))
-            //    .Subscribe(OnChangedCommandStatus);
+            if (param.Param == null) throw new ArgumentNullException(nameof(param.Param)); 
         }
 
         //private void OnChangedCommandStatus(CommandResponse response) 
@@ -722,16 +690,14 @@ namespace MCCS.ViewModels.Pages
                 return;
             }
             // 如果阀门关闭则退出
-            if (GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.Id == clickedModel.Model3DData.Id)
-                    ?.MappingDevice is ActuatorDevice
-                {
-                    ValveStatus: ValveStatusEnum.Closed
-                })
-            {
+            var controlChannelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.Id == clickedModel.Model3DData.Id)?.ControlChannelInfos.FirstOrDefault();
+            if (controlChannelInfo == null) throw new ArgumentNullException("模型没有绑定控制通道");
+            var channel = _controlChannelManager.GetControlChannel(controlChannelInfo.Id);
+            if (channel.ValveStatus != ValveStatusEnum.Opened)
+            { 
                 _notificationService.Show("提示", "请先右键单击打开该作动器的阀门");
                 return;
             }
-
             // 切换当前模型的选中状态
             clickedModel.IsSelected = true;
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
@@ -765,8 +731,8 @@ namespace MCCS.ViewModels.Pages
                 _isCtrlPressed = true;
                 _multipleControllerMainPageViewModel = new MultipleControllerMainPageViewModel(_eventAggregator);
             } 
-
-            e.Handled = true;
+            //TODO：这个地方一定要注意，会捕获全局的键盘事件
+            // e.Handled = true;
         }
         /// <summary>
         /// 处理 Ctrl 键抬起事件
@@ -804,13 +770,13 @@ namespace MCCS.ViewModels.Pages
             var modelId = e.HitTestResult != null ? FindViewModel(e.HitTestResult.ModelHit) : null;
             if (modelId == null) return;
             _clearOperationModel = Models.FirstOrDefault(c => c.ModelId == modelId);
-            var mappingDevice = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.ModelFileKey == modelId)?.MappingDevice;
+            var controlChannelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(s => s.ModelFileKey == modelId)?.ControlChannelInfos.FirstOrDefault();
             // 是否可控制
-            if (mappingDevice != null && _clearOperationModel is { Model3DData.IsCanControl: true })
+            if (controlChannelInfo != null && _clearOperationModel is { Model3DData.IsCanControl: true })
             {
                 _eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>().Publish(new NotificationRightMenuValveStatusEventParam
                 {
-                    DeviceId = mappingDevice.Id,
+                    ControlChannelId = controlChannelInfo.Id,
                     ModelId = _clearOperationModel.ModelId
                 });
                 IsShowContextMenu = true;

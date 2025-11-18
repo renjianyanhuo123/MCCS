@@ -10,6 +10,7 @@ using HelixToolkit.Wpf.SharpDX;
 using MahApps.Metro.Controls;
 using MCCS.Common;
 using MCCS.Components.GlobalNotification.Models;
+using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.Model3D;
 using MCCS.Core.Models.StationSites;
 using MCCS.Core.Repositories;
@@ -178,7 +179,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     SelectedModel3DFile.IsCanControl = _isCanControl;
                 }
             }
-        }
+        } 
 
         public ObservableCollection<BindingControlChannelItemModel> BindingControlChannels { get; private set; } = [];
         
@@ -445,12 +446,12 @@ namespace MCCS.ViewModels.Pages.StationSites
                 FilePath = s.FilePath,
                 GroupKey = modelBaseInfo.Id,
                 Type = s.BindedControlChannelIds.Count == 0 ? ModelType.Other : ModelType.Actuator,
+                MapDeviceId = s.SelectedMapDevice?.DeviceId,
                 IsCanControl = s.IsCanControl,
                 PositionStr = "0,0,0",
                 RotationStr = "",
                 RotateAngle = 90,
-                ScaleStr = "1,1,1",
-                DeviceId = null,
+                ScaleStr = "1,1,1", 
                 Orientation = "0,-1,0"
             }).ToList();
             var billboardTextInfos = BindedChannelModelBillboardTextInfos.Select(s =>
@@ -519,6 +520,15 @@ namespace MCCS.ViewModels.Pages.StationSites
             BindingControlChannels.Clear();
             BindingPseudoChannels.Clear();
             MapDeviceModels.Clear();
+            foreach (var deviceInfo in deviceInfos)
+            {
+                if(deviceInfo.DeviceType != DeviceTypeEnum.Actuator) continue;
+                MapDeviceModels.Add(new MapDeviceModel
+                {
+                    DeviceId = deviceInfo.Id,
+                    DeviceName = deviceInfo.DeviceName
+                });
+            }
             foreach (var controlChannel in controlChannels)
             {
                 BindingControlChannels.Add(new BindingControlChannelItemModel
@@ -546,6 +556,10 @@ namespace MCCS.ViewModels.Pages.StationSites
                 {
                     BindingPseudoChannel.IsSelected = bindedPseudoChannels?.Contains(BindingPseudoChannel.Id) ?? false;
                 }
+                foreach (var mapDeviceModel in MapDeviceModels)
+                {
+                    mapDeviceModel.IsSelected = modelInfo.Model3DDataList.Any(s => s.MapDeviceId == mapDeviceModel.DeviceId);
+                }
                 _isAdded = true;
                 Id = modelInfo.BaseInfo.Id;
                 ModelName = modelInfo.BaseInfo.Name;
@@ -569,7 +583,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                         Id = item.Id,
                         Key = item.Key,
                         FileName = item.Name, 
-                        IsCanControl = item.IsCanControl
+                        IsCanControl = item.IsCanControl,
+                        SelectedMapDevice = MapDeviceModels.FirstOrDefault(c => c.DeviceId == item.MapDeviceId)
                     };
                     var temp = bindedChannels
                         .Where(c => c.ModelFileId == item.Key).ToList(); 

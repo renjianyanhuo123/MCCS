@@ -193,12 +193,12 @@
                           VerticalAlignment="Stretch"
                           ShowsPreview="True"
                           Visibility="{Binding IsShowController, Converter={StaticResource BoolToVisibilityConverter}}"
-                          ResizeBehavior="PreviousAndNext" />
+                          ResizeBehavior="PreviousAndNext" /> 
             <ItemsControl  Grid.Row="0" Grid.Column="2"
                            Visibility="{Binding IsShowController, Converter={StaticResource BoolToVisibilityConverter}}"
                            HorizontalAlignment="Left"  
                            Margin="5"
-                           ItemsSource="{Binding Controllers}">
+                           ItemsSource="{Binding Controllers}"> 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -206,8 +206,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Gray" BorderThickness="1"  CornerRadius="3"  >
-                            <!--<controllers:ControllerMainPage DataContext="{Binding}" />-->
+                        <Border BorderBrush="Gray" BorderThickness="1"  CornerRadius="3"  > 
                             <ContentControl Content="{Binding}" Margin="0,0,0,15"/>
                         </Border>
                     </DataTemplate>

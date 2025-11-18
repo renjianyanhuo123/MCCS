@@ -57,7 +57,13 @@ namespace MCCS.Models.Stations.Model3DSettings
         public MapDeviceModel SelectedMapDevice 
         { 
             get => _selectedMapDevice;
-            set => SetProperty(ref _selectedMapDevice, value);
+            set
+            {
+                if (Equals(_selectedMapDevice, value)) return;
+                if(_selectedMapDevice != null) _selectedMapDevice.IsSelected = false;
+                SetProperty(ref _selectedMapDevice, value);
+                _selectedMapDevice.IsSelected = true;
+            }
         }
 
         /// <summary>

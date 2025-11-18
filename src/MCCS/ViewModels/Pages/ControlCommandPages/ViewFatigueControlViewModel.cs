@@ -11,25 +11,9 @@ namespace MCCS.ViewModels.Pages.ControlCommandPages
         private int _waveformType = 0;   
         private int _cycleTimes = 0;
         private int _cycleCount = 0;
+         
 
-        public ViewFatigueControlViewModel(IEnumerable<ControlChannelBindModel> channels)
-        {
-            foreach (var channel in channels)
-            {
-                Channels.Add(channel);
-            }
-        }
-
-        #region 页面属性 
-        public ObservableCollection<ControlChannelBindModel> Channels { get; private set; } = [];
-
-        private ControlChannelBindModel _selectedChannel; 
-        public ControlChannelBindModel SelectedChannel
-        {
-            get => _selectedChannel;
-            set => SetProperty(ref _selectedChannel, value);
-        }
-
+        #region 页面属性  
         /// <summary>
         /// 控制模式
         /// 0-位移
