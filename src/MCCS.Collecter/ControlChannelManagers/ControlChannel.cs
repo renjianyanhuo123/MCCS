@@ -220,7 +220,11 @@ namespace MCCS.Collecter.ControlChannelManagers
         {
             if (IsDynamicVibration)
             { 
-                
+                // 动态控制暂停，暂停到当前位置
+            }
+            else
+            {
+                // 保持当前位置暂停
             }
         }
     }

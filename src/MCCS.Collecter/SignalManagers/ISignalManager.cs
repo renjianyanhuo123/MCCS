@@ -61,7 +61,7 @@ namespace MCCS.Collecter.SignalManagers
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
         int SetDynamicControlMode(long signalId, float tmpMeanA, float tmpA,
             float tmpFreq, byte tmpWaveShap, byte tmpCtrlMode, float tmpAP, float tmpPH,
-            int tmpCountSet, int tmpCtrlOpt);
+            int tmpCountSet, int tmpCtrlOpt); 
         /// <summary>
         /// 根据单个信号ID获取数据流
         /// </summary>
