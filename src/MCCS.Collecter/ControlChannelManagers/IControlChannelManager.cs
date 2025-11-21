@@ -3,7 +3,7 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.ControlChannelManagers
 {
-    public interface IControlChannelManager:IDisposable
+    public interface IControlChannelManager : IDisposable
     {
         /// <summary>
         /// 初始化控制通道

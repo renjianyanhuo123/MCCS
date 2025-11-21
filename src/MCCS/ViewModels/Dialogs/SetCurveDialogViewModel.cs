@@ -1,7 +1,9 @@
 ﻿using MaterialDesignThemes.Wpf;
 using MCCS.Models.Model3D;
-using System.Collections.ObjectModel; 
+using System.Collections.ObjectModel;
+using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Models;
+using MCCS.Models.CurveModels;
 
 namespace MCCS.ViewModels.Dialogs
 {
@@ -12,6 +14,8 @@ namespace MCCS.ViewModels.Dialogs
     {
         public const string Tag = "SetCurveDialog";
 
+        private readonly IPseudoChannelManager _pseudoChannelManager;
+
         #region Property
         // 选中的数字值
         private int _selectedCount = 1;
@@ -21,20 +25,35 @@ namespace MCCS.ViewModels.Dialogs
             set => SetProperty(ref _selectedCount, value);
         }
         // 数字选项集合
-        public ObservableCollection<int> CountOptions { get; set; }
-        public ObservableCollection<CurveShowModel> CurveModels { get; set; } = [];
+        public ObservableCollection<int> CountOptions { get; private set; }
+        public ObservableCollection<CurveMainModel> CurveModels { get; private set; } = [];
+         
+        /// <summary>
+        /// X轴绑定的集合
+        /// </summary>
+        public ObservableCollection<XYBindCollectionItem> XBindCollection { get; } = [];
+        /// <summary>
+        /// Y轴绑定的集合
+        /// </summary>
+        public ObservableCollection<XYBindCollectionItem> YBindCollection { get; } = [];
+
         #endregion
 
         #region Command
         public DelegateCommand OkCommand => new(ExecuteOkCommand);
         public DelegateCommand CancelCommand => new(ExecuteCancelCommand);
-        public AsyncDelegateCommand CurveSelectionChangedCommand => new(ExecuteCurveSelectionChangedCommand);
+        public DelegateCommand LoadCommand { get; }
+        public DelegateCommand CurveSelectionChangedCommand { get; } 
+
         #endregion
         
-        public SetCurveDialogViewModel()
+        public SetCurveDialogViewModel(IPseudoChannelManager pseudoManager)
         {
             //_containerProvider = containerProvider;
             // 初始化数字选项
+            _pseudoChannelManager = pseudoManager;
+            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
+            CurveSelectionChangedCommand = new DelegateCommand(ExecuteCurveSelectionChangedCommand); 
             CountOptions = [1, 2, 3, 4, 5, 6, 8, 9, 12];
         }
 
@@ -46,34 +65,50 @@ namespace MCCS.ViewModels.Dialogs
             } 
         }
         #region private methods
+        private void ExecuteLoadCommand()
+        {
+            XBindCollection.Clear();
+            YBindCollection.Clear(); 
+            var channels = _pseudoChannelManager.GetPseudoChannels();
+            foreach (var channel in channels)
+            {
+                var tempModel = new XYBindCollectionItem
+                {
+                    Id = channel.ChannelId,
+                    Name = channel.Configuration.ChannelName,
+                    Unit = channel.Configuration.Unit ?? "",
+                    DisplayName = channel.Configuration.ChannelName
+                };
+                XBindCollection.Add(tempModel);
+                YBindCollection.Add(tempModel);
+            }
+            XBindCollection.Add(new XYBindCollectionItem
+            {
+                Id = 0,
+                Name = "Time",
+                Unit = "s",
+                DisplayName = "时间"
+            });
+            ExecuteCurveSelectionChangedCommand();
+        } 
         /// <summary>
         /// 选择曲线触发
         /// </summary>
         /// <exception cref="ArgumentNullException"></exception>
-        public Task ExecuteCurveSelectionChangedCommand()
+        public void ExecuteCurveSelectionChangedCommand()
         {
+            foreach (var item in CurveModels) item.Curve?.Dispose();
             CurveModels.Clear();
             for (var i = 0; i < SelectedCount; i++)
             {
-                if (i % 2 == 0)
+                var xAxisInfo = XBindCollection.FirstOrDefault(s => s.Id == 0);
+                var yAxisInfo = YBindCollection.FirstOrDefault();
+                if (xAxisInfo != null && yAxisInfo != null)
                 {
-                    var displacementModel = new CurveShowModel("Time(s)", "kN")
-                    {
-                        Title = "Time-Force"
-                    };
-                    CurveModels.Add(displacementModel);
-                }
-                else
-                {
-                    var forceModel = new CurveShowModel("Time(s)", "mm")
-                    {
-                        Title = "Time-Displace"
-                    };
+                    var forceModel = new CurveMainModel(xAxisInfo, yAxisInfo, _pseudoChannelManager);
                     CurveModels.Add(forceModel);
                 }
             }
-
-            return Task.CompletedTask;
         }
         private void ExecuteOkCommand()
         {

@@ -4,9 +4,11 @@ using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
+using MCCS.Core.Models.Devices;
 using MCCS.Core.Models.StationSites;
 using MCCS.Events.StationSites.ControlChannels;
 using MCCS.Infrastructure.Helper;
+using MCCS.Models.ControlCommand;
 
 namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
 {
@@ -28,7 +30,9 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             InternalId = $"ChannelId_{HighPerformanceRandomHash.GenerateRandomHash6()}";
         } 
 
-        #region Property
+        #region Property 
+        public ObservableCollection<ControlChannelBindControllerItemModel> BindControllerInfos { get; } = [];
+         
         private string _channelName = string.Empty;
         public string ChannelName
         {
@@ -160,9 +164,18 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
         { 
             if (_stationId == -1) throw new ArgumentNullException("StationId is invalid!");
             SelectableControlChannels.Clear();
+            BindControllerInfos.Clear();
             var staionSelectedHardware = await _stationSiteAggregateRepository.GetStationSiteDevices(_stationId); 
-            var allDevices = await _deviceInfoRepository.GetAllDevicesAsync();
-            var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => allDevices.Select(s => s.Id).Contains(c.ConnectedDeviceId));
+            var allDevices = await _deviceInfoRepository.GetAllDevicesAsync(); 
+            foreach (var device in allDevices)
+            {
+                if (device.DeviceType != DeviceTypeEnum.Controller) continue;
+                BindControllerInfos.Add(new ControlChannelBindControllerItemModel
+                {
+                    DeviceId = device.Id,
+                    DeviceName = device.DeviceName
+                });
+            }
             foreach (var item in staionSelectedHardware)
             {
                 var parentInfo = allDevices.FirstOrDefault(c => c.Id == item.BelongToControllerId);

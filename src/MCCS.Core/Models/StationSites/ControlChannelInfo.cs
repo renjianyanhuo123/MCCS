@@ -15,6 +15,11 @@ namespace MCCS.Core.Models.StationSites
         [Column(IsNullable = false, StringLength = 50)]
         public required string ChannelId { get; set; } = string.Empty;
 
+        /// <summary>
+        /// 控制器ID
+        /// </summary>
+        public long ControllerId { get; set; }
+
         [Column(IsNullable = false, StringLength = 100)]
         public required string ChannelName { get; set; }
         /// <summary>

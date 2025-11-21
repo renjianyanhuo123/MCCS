@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Collecter.HardwareDevices
 {
-    public interface IControllerHardwareDevice : IDisposable
+    public interface IHardwareDevice : IDisposable
     {
         bool ConnectToHardware();
         bool DisconnectFromHardware(); 

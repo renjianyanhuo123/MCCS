@@ -26,6 +26,10 @@ namespace MCCS.Collecter.ControlChannelManagers
         public long ChannelId { get; init; }
 
         public string ChannelName { get; init; } = string.Empty;
+        /// <summary>
+        /// 每一个控制通道都必须要一个主控制器
+        /// </summary>
+        public long ControllerId { get; init; }
 
         public List<ControlChannelSignalConfiguration> SignalConfiguration { get; init; }
     }

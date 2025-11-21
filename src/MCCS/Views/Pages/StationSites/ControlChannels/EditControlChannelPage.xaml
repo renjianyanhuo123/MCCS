@@ -61,6 +61,7 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -86,7 +87,15 @@
                         <ComboBoxItem TabIndex="2">混合</ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
-                <UniformGrid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" Columns="2">
+                <StackPanel Grid.Column="3" Grid.Row="0" Margin="15">
+                    <TextBlock Text="绑定控制器" FontSize="14" Margin="0,0,0,15"></TextBlock>
+                    <ComboBox FontSize="15" Width="Auto" 
+                              ItemsSource="{Binding BindControllerInfos}"
+                              SelectedItem="{Binding BindControllerInfo}"
+                              DisplayMemberPath="DeviceName">
+                    </ComboBox>
+                </StackPanel>
+                <UniformGrid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" Columns="2">
                     <StackPanel Margin="15">
                         <TextBlock Text="是否可见" FontSize="14" Margin="0,0,0,15"></TextBlock>
                         <ToggleButton HorizontalAlignment="Left" IsChecked="{Binding IsShowable}"></ToggleButton>
@@ -97,7 +106,7 @@
                     </StackPanel>
                 </UniformGrid>
                 <Border Grid.Row="2" Grid.Column="0" Background="#F9FAFB"
-                    Grid.ColumnSpan="3"
+                    Grid.ColumnSpan="4"
                     Margin="15"
                     Height="Auto"
                     Width="Auto">
@@ -123,7 +132,7 @@
                         </UniformGrid>
                     </StackPanel>
                 </Border>
-                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="15,0,0,0">
+                <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Margin="15,0,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -144,7 +153,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-                <ItemsControl Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" ItemsSource="{Binding SignalModels}">
+                <ItemsControl Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="4" ItemsSource="{Binding SignalModels}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderThickness="2" BorderBrush="Gray" Background="#F9FAFB"

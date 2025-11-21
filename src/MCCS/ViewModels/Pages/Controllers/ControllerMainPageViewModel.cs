@@ -287,11 +287,22 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// </summary>
         private void ExecuteStopCommand() 
         {
-            //_eventAggregator.GetEvent<NotificationCommandStopedEvent>().Publish(new NotificationCommandStatusEventParam
-            //{ 
-            //    CommandId = CurrentChannelId, 
-            //    CommandExecuteStatus = CommandExecuteStatusEnum.Stoping
-            //});
+            var controlMode = (ControlMode)SelectedControlMode;
+            var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
+            if (controlChannel == null)
+            {
+                _notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
+                return;
+            }
+            var commandContext = _controlChannelManager.StopControl(controlChannel.Id);
+            if (commandContext.IsValid)
+            {
+                _notificationService.Show("成功", "暂停通道动作!", NotificationType.Success);
+            }
+            else
+            {
+                _notificationService.Show("失败", "暂停通道动作失败!", NotificationType.Error);
+            }
         }
 
         private void SetView() 

@@ -103,6 +103,7 @@ namespace MCCS.Services.StartInitial
                 {
                     ChannelId = controlChannelSignalInfo.ControlChannelInfo.Id,
                     ChannelName = controlChannelSignalInfo.ControlChannelInfo.ChannelName,
+                    ControllerId = controlChannelSignalInfo.ControlChannelInfo.ControllerId,
                     CancellationConfiguration = new ControlCompletionConfiguration(),
                     SignalConfiguration = []
                 }; 

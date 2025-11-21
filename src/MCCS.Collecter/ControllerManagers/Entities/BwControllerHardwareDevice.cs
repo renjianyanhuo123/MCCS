@@ -7,16 +7,18 @@ using MCCS.Collecter.DllNative;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
-    public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase
+    public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
         private readonly IDisposable _acquisitionSubscription;
         private readonly EventLoopScheduler _highPriorityScheduler; 
         private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
         private nint _singleBuffer = nint.Zero;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
+        private ValveStatusEnum _valveStatus;
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
@@ -42,70 +44,6 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                     _statusSubject.OnNext(HardwareConnectionStatus.Disconnected);
                 });
         }
-
-        public override bool ConnectToHardware()
-        {
-            var result = POPNetCtrl.NetCtrl01_ConnectToDev(_hardwareDeviceConfiguration.DeviceAddressId, ref _deviceHandle);
-            if (result == AddressContanst.OP_SUCCESSFUL)
-            {
-#if DEBUG
-                Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{DeviceId:X}");
-#endif 
-                return true;
-            }
-            else
-            {
-#if DEBUG
-                Debug.WriteLine($"✗ 设备连接失败，错误码: {result}");
-#endif
-                return false;
-            }
-        }
-
-        public override bool DisconnectFromHardware()
-        {
-            if (_deviceHandle == nint.Zero) return false;
-            // 软件退出（关闭阀台，DA=0）
-            POPNetCtrl.NetCtrl01_Soft_Ext(_deviceHandle);
-            var result = POPNetCtrl.NetCtrl01_DisConnectToDev(_deviceHandle);
-            if (result == AddressContanst.OP_SUCCESSFUL)
-            {
-#if DEBUG
-                Debug.WriteLine("✓ 设备断开成功");
-#endif
-                _deviceHandle = nint.Zero;
-                return true;
-            }
-            else
-            {
-#if DEBUG
-                Debug.WriteLine($"✗ 设备断开失败，错误码: {result}");
-#endif
-                return false;
-            }
-        }
-
-        public override bool OperationTest(uint isStart)
-        {
-            if (Status != HardwareConnectionStatus.Connected) return false;
-            var success = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, (byte)isStart);
-            return success == AddressContanst.OP_SUCCESSFUL;
-        }
-
-        public override bool OperationValveState(bool isOpen)
-        {
-            if (Status != HardwareConnectionStatus.Connected) return false;
-            var v = isOpen ? 1u : 0u;
-            var result = POPNetCtrl.NetCtrl01_Set_StationCtrl(_deviceHandle, v, 0);
-            return result == AddressContanst.OP_SUCCESSFUL;
-        }
-
-        public override bool OperationControlMode(SystemControlState controlState)
-        {
-            if (Status != HardwareConnectionStatus.Connected) return false;
-            var result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)controlState);
-            return result == AddressContanst.OP_SUCCESSFUL;
-        }  
 
         #region Private Method
         private EventLoopScheduler CreateHighPriorityScheduler()
@@ -140,7 +78,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         var errorReading = new DataPoint<List<TNet_ADHInfo>>
                         {
                             Value = [],
-                            Timestamp = Stopwatch.GetTimestamp(),
+                            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                             DataQuality = DataQuality.Bad
                         };
                         _dataSubject.OnNext(errorReading);
@@ -173,7 +111,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 DeviceId = DeviceId,
                 Value = results,
-                Timestamp = Stopwatch.GetTimestamp(),
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 DataQuality = DataQuality.Good
             };
         }
@@ -181,11 +119,110 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private static DataPoint<List<TNet_ADHInfo>> CreateBadDataPoint() => new()
         {
             Value = [],
-            Timestamp = Stopwatch.GetTimestamp(),
+            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             DataQuality = DataQuality.Bad
         };
-         
+
         #endregion
+
+        public bool ConnectToHardware()
+        {
+            var result = POPNetCtrl.NetCtrl01_ConnectToDev(_hardwareDeviceConfiguration.DeviceAddressId, ref _deviceHandle);
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+#if DEBUG
+                Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{DeviceId:X}");
+#endif 
+                return true;
+            }
+            else
+            {
+#if DEBUG
+                Debug.WriteLine($"✗ 设备连接失败，错误码: {result}");
+#endif
+                return false;
+            }
+        }
+
+        public bool DisconnectFromHardware()
+        {
+            if (_deviceHandle == nint.Zero) return false;
+            // 软件退出（关闭阀台，DA=0）
+            POPNetCtrl.NetCtrl01_Soft_Ext(_deviceHandle);
+            var result = POPNetCtrl.NetCtrl01_DisConnectToDev(_deviceHandle);
+            if (result == AddressContanst.OP_SUCCESSFUL)
+            {
+#if DEBUG
+                Debug.WriteLine("✓ 设备断开成功");
+#endif
+                _deviceHandle = nint.Zero;
+                return true;
+            }
+            else
+            {
+#if DEBUG
+                Debug.WriteLine($"✗ 设备断开失败，错误码: {result}");
+#endif
+                return false;
+            }
+        }
+
+        public bool OperationTest(uint isStart)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            var success = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, (byte)isStart);
+            return success == AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public ValveStatusEnum GetValveStatus()
+        { 
+            return _valveStatus;
+        } 
+
+        public int SetValveStatus(bool isOpen)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return AddressContanst.DEVICE_NOT_CONNECTED;
+            var v = isOpen ? 1u : 0u;
+            var result = POPNetCtrl.NetCtrl01_Set_StationCtrl(_deviceHandle, v, 0);
+            if (result == AddressContanst.OP_SUCCESSFUL) _valveStatus = isOpen ? ValveStatusEnum.Opened : ValveStatusEnum.Closed;
+            return result;
+        } 
+
+        public bool SetControlState(SystemControlState controlMode)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return false;
+            var result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, (byte)controlMode);
+            return result == AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public int SetStaticControlMode(StaticControlParams param)
+        {   
+            return POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)param.StaticLoadControl, param.Speed, param.TargetValue);
+        }
+
+        public int SetValleyPeakFilterNum(int freq)
+        {  
+            return POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_ValleyPeak_FilterNum, (byte)freq);
+        }
+
+        public int SetDynamicControlMode(DynamicControlParams param)
+        { 
+            return POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(_hardwareDeviceConfiguration.DeviceAddressId, param.MeanValue,
+                param.Amplitude,
+                param.Frequency,
+                (byte)param.WaveType,
+                (byte)param.ControlMode,
+                param.CompensateAmplitude,
+                param.CompensationPhase,
+                param.CycleCount,
+                (int)param.CtrlOpt);
+        }
+
+        public int SetDynamicStopControl(int tmpActMode, int tmpHaltState)
+        {
+            return POPNetCtrl.NetCtrl01_Osci_SetHaltState(_hardwareDeviceConfiguration.DeviceAddressId, (byte)tmpActMode, (byte)tmpHaltState);
+        }
+
         public void CleanupResources()
         {
             if (_singleBuffer != nint.Zero)
@@ -201,6 +238,6 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             _acquisitionSubscription?.Dispose();
             _dataSubject?.Dispose();
             CleanupResources();
-        }
+        } 
     }
 }

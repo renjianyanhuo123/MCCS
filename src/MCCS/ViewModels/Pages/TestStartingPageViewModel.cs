@@ -41,6 +41,7 @@ using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Infrastructure.TestModels;
+using MCCS.Models.CurveModels;
 
 namespace MCCS.ViewModels.Pages
 {

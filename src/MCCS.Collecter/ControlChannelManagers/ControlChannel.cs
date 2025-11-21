@@ -8,77 +8,50 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.ControlChannelManagers
 {
-    public class ControlChannel
+    public class ControlChannel : IControlChannel
     { 
         private readonly IControllerManager _controllerManager;
-        private readonly ISignalManager _signalManager;
-        private readonly bool _isMock = false;
-        private readonly ControlChannelSignalConfiguration _outPutSignalConfiguration;
+        private readonly ISignalManager _signalManager; 
+        private readonly IController _controller;
 
-        private ControlChannel(ControlChannelConfiguration configuration, bool isMock)
-        {
-            _isMock = isMock;
+        private ControlChannel(ControlChannelConfiguration configuration)
+        { 
             Configuration = configuration;
             ChannelId = configuration.ChannelId;
             ValveStatus = ValveStatusEnum.Closed; 
         }
 
-        public ControlChannel(ControlChannelConfiguration configuration, IControllerManager controllerManager, ISignalManager signalManager, bool isMock = false) : this(configuration, isMock)
+        public ControlChannel(ControlChannelConfiguration configuration, IControllerManager controllerManager, ISignalManager signalManager) : this(configuration)
         {
             _controllerManager = controllerManager;
             _signalManager = signalManager;
-            _outPutSignalConfiguration = Configuration.SignalConfiguration.FirstOrDefault(s => s.SignalType == ControlChannelSignalTypeEnum.Output) ?? throw new ArgumentNullException("没有对应的输出信号接口");
-            ControlState = _signalManager.GetControlStateBySignalId(_outPutSignalConfiguration.SignalId);
+            _controller = _controllerManager.GetControllerInfo(configuration.ControllerId);
+            ControlState = _controller.GetControlState();
         }
 
-        /// <summary>
-        /// 阀门状态
-        /// </summary>
+        
         public ValveStatusEnum ValveStatus { get; private set; }
-
-        /// <summary>
-        /// 控制通道是否处于起振状态
-        /// </summary>
+         
         public bool IsDynamicVibration { get; private set; } = false;
-        /// <summary>
-        /// 控制模式
-        /// </summary>
+        
         public SystemControlState ControlState { get; private set; }
 
         public ControlChannelConfiguration Configuration { get; }
 
         public long ChannelId { get; }
-        
-        /// <summary>
-        /// 操作控制阀门
-        /// </summary>
-        /// <param name="isOpen"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+         
         public bool OperationValve(bool isOpen)
         {
-            if ((isOpen && ValveStatus == ValveStatusEnum.Opened) || (!isOpen && ValveStatus == ValveStatusEnum.Closed)) return true;
-            var outputSignalId = Configuration.SignalConfiguration.FirstOrDefault(c => c.SignalType == ControlChannelSignalTypeEnum.Output)?.SignalId;
-            if (outputSignalId == null) throw new ArgumentNullException("没有找到对应的输出信号");
-            if (_isMock)
-            {
-                ValveStatus = isOpen ? ValveStatusEnum.Opened : ValveStatusEnum.Closed;
-                return true;
-            }
-            var res = _signalManager.SetValveStatus((long)outputSignalId, isOpen);
+            if ((isOpen && ValveStatus == ValveStatusEnum.Opened) || (!isOpen && ValveStatus == ValveStatusEnum.Closed)) return true; 
+            var res = _controller.SetValveStatus(isOpen);
             if (res == AddressContanst.OP_SUCCESSFUL)
             {
                 ValveStatus = isOpen ? ValveStatusEnum.Opened : ValveStatusEnum.Closed;
                 return true;
             }
             return false;
-        }
+        } 
 
-        /// <summary>
-        /// 手动控制
-        /// </summary>
-        /// <param name="speed"></param>
-        /// <returns></returns>
         public DeviceCommandContext ManualControl(float speed)
         {
             // 创建或获取设备上下文
@@ -94,14 +67,19 @@ namespace MCCS.Collecter.ControlChannelManagers
             }   
             if (ControlState != SystemControlState.Static)
             {
-                var success = _signalManager.SetControlStateBySignalId(_outPutSignalConfiguration.SignalId, SystemControlState.Static);
+                var success = _controller.SetControlState(SystemControlState.Static);
                 if (!success)
                 {
                     context.Errmesage = "信号设置静态模式失败";
                     return context;
                 }
             }
-            var setCtrlModeResult = _signalManager.SetStaticControlMode(_outPutSignalConfiguration.SignalId, StaticLoadControlEnum.CTRLMODE_LoadS, speed, 0);
+            var setCtrlModeResult = _controller.SetStaticControlMode(new StaticControlParams()
+            {
+                StaticLoadControl = StaticLoadControlEnum.CTRLMODE_OPEN,
+                Speed = speed, 
+                TargetValue = 0
+            });
             if (setCtrlModeResult != AddressContanst.OP_SUCCESSFUL)
             {
                 context.Errmesage = "命令发送失败";
@@ -112,12 +90,7 @@ namespace MCCS.Collecter.ControlChannelManagers
             context.CurrentStatus = CommandExecuteStatusEnum.Executing;
             return context;
         }
-
-        /// <summary>
-        /// 静态控制
-        /// </summary>
-        /// <param name="controlParam"></param>
-        /// <returns></returns>
+         
         public DeviceCommandContext StaticControl(StaticControlParams controlParam)
         {
             // 创建或获取设备上下文
@@ -125,35 +98,19 @@ namespace MCCS.Collecter.ControlChannelManagers
             {
                 ControlChannelId = ChannelId,
                 IsValid = false
-            };  
-            // 模拟操作
-            if (_isMock)
-            {
-                var controller = _controllerManager.GetControllerInfo(_outPutSignalConfiguration.BelongControllerId);
-                if (controller is MockControllerHardwareDevice mockController)
-                {
-                    mockController.MockStaticControl(controlParam);
-                    context.IsValid = true;
-                    context.ControlMode = SystemControlState.Static;
-                }
-                else
-                {
-                    context.Errmesage = "没有找到对应的模拟控制器";
-                }
-                return context;
-            }
+            };   
 
-            var controlState = _signalManager.GetControlStateBySignalId(_outPutSignalConfiguration.SignalId);
+            var controlState = _controller.GetControlState();
             if (controlState != SystemControlState.Static)
             {
-                var success = _signalManager.SetControlStateBySignalId(_outPutSignalConfiguration.SignalId, SystemControlState.Static);
+                var success = _controller.SetControlState(SystemControlState.Static);
                 if (!success)
                 {
                     context.Errmesage = "信号设置静态模式失败";
                     return context;
                 }
             }
-            var setCtrlModeResult = _signalManager.SetStaticControlMode(_outPutSignalConfiguration.SignalId, controlParam.StaticLoadControl, controlParam.Speed / 60.0f, controlParam.TargetValue);
+            var setCtrlModeResult = _controller.SetStaticControlMode(controlParam);
             if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
             {
                 // 暂时没有做监测
@@ -162,12 +119,7 @@ namespace MCCS.Collecter.ControlChannelManagers
             }
             return context;
         }
-
-        /// <summary>
-        /// 动态控制
-        /// </summary>
-        /// <param name="dynamicControlParam"></param>
-        /// <returns></returns>
+         
         public DeviceCommandContext DynamicControl(DynamicControlParams dynamicControlParam)
         {
             // 创建或获取设备上下文
@@ -176,8 +128,7 @@ namespace MCCS.Collecter.ControlChannelManagers
                 ControlChannelId = ChannelId,
                 IsValid = false
             };  
-            var setValleyPeakFilterNum = _signalManager.SetValleyPeakFilterNum(_outPutSignalConfiguration.SignalId,
-                dynamicControlParam.ValleyPeakFilterNum);
+            var setValleyPeakFilterNum = _controller.SetValleyPeakFilterNum(dynamicControlParam.ValleyPeakFilterNum);
             if (setValleyPeakFilterNum != AddressContanst.OP_SUCCESSFUL)
             {
                 context.Errmesage = "发送超限次数指令失败";
@@ -185,23 +136,14 @@ namespace MCCS.Collecter.ControlChannelManagers
             } 
             if (ControlState != SystemControlState.Dynamic)
             {
-                var success = _signalManager.SetControlStateBySignalId(_outPutSignalConfiguration.SignalId, SystemControlState.Dynamic);
+                var success = _controller.SetControlState(SystemControlState.Dynamic);
                 if (!success)
                 {
                     context.Errmesage = "信号设置动态模式失败";
                     return context;
                 }
             }
-            var setDynamicControlResult = _signalManager.SetDynamicControlMode(_outPutSignalConfiguration.SignalId,
-                dynamicControlParam.MeanValue,
-                dynamicControlParam.Amplitude,
-                dynamicControlParam.Frequency,
-                (byte)dynamicControlParam.WaveType,
-                (byte)dynamicControlParam.ControlMode,
-                dynamicControlParam.CompensateAmplitude,
-                dynamicControlParam.CompensationPhase,
-                dynamicControlParam.CycleCount,
-                (int)dynamicControlParam.CtrlOpt);
+            var setDynamicControlResult = _controller.SetDynamicControlMode(dynamicControlParam);
             if (setDynamicControlResult != AddressContanst.OP_SUCCESSFUL)
             {
                 context.Errmesage = "设置动态控制命令失败";
@@ -211,21 +153,36 @@ namespace MCCS.Collecter.ControlChannelManagers
             context.ControlMode = SystemControlState.Static;
             return context;
         }
-
-        /// <summary>
-        /// 停止控制
-        /// </summary>
-        /// <returns></returns>
+         
         public DeviceCommandContext StopControl()
         {
+            var context = new DeviceCommandContext
+            {
+                ControlChannelId = ChannelId,
+                IsValid = false
+            };
             if (IsDynamicVibration)
             { 
                 // 动态控制暂停，暂停到当前位置
+                var res = _controller.SetDynamicStopControl(1, 1);
+                if (res != AddressContanst.OP_SUCCESSFUL)
+                {
+                    context.Errmesage = "动态模式停止失败";
+                    return context;
+                }
             }
             else
             {
                 // 保持当前位置暂停
+                _controller.SetStaticControlMode(new StaticControlParams
+                {
+                    StaticLoadControl = StaticLoadControlEnum.CTRLMODE_HLoadS,
+                    Speed = 0,
+                    TargetValue = 0
+                });
             }
+            context.IsValid = true; 
+            return context;
         }
     }
 }

@@ -30,5 +30,9 @@ namespace MCCS.Collecter.PseudoChannelManagers
             return res;
         }
 
+        public IEnumerable<PseudoChannel> GetPseudoChannels()
+        {
+            return _pseudoChannels;
+        }
     }
 }

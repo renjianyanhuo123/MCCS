@@ -13,5 +13,10 @@
         /// <param name="pseudoChannelId"></param>
         /// <returns></returns>
         PseudoChannel GetPseudoChannelById(long pseudoChannelId);
+        /// <summary>
+        /// 获取所有的虚拟通道
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<PseudoChannel> GetPseudoChannels();
     }
 }

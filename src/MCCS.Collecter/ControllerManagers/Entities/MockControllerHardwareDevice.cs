@@ -1,14 +1,15 @@
-﻿using System.Diagnostics;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
+﻿using MCCS.Collecter.DllNative;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using System.Diagnostics;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
-    public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase
+    public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
         private readonly IDisposable _acquisitionSubscription; 
         private static readonly Random _rand = new();
@@ -24,16 +25,21 @@ namespace MCCS.Collecter.ControllerManagers.Entities
 
         private const float PositionMin = -1000.0f;
         private const float PositionMax = 1000.0f;
-
+        private int _valleyPeakFilterNum = 0;
         private CancellationTokenSource? _forceStaticCTS;
         private CancellationTokenSource? _positionStaticCTS;
         private CancellationTokenSource? _dynamicCTS;
 
+        /// <summary>
+        /// 阀门状态
+        /// </summary>
+        private ValveStatusEnum _valveStatus;
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         { 
             _acquisitionSubscription = CreateAcquisitionLoop();
         }
 
+        #region 私有方法
         /// <summary>
         /// 根据正态分布对输入值进行微扰。
         /// </summary>
@@ -53,11 +59,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             return value + noise;
         }
 
-        private void GenerateWaveform(int changeType, double amplitude, double frequency, int waveType, uint totalCount = 0)
+        private void GenerateWaveform(int changeType, double amplitude, double frequency, int waveType, uint totalCount, CancellationToken token)
         {
             double time = 0; // 时间变量（秒）
 
-            while (time <= totalCount && !_dynamicCTS.Token.IsCancellationRequested)
+            while (time <= totalCount && !token.IsCancellationRequested)
             {
                 // 根据波形类型计算值
                 var value = waveType switch
@@ -129,105 +135,6 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             // 前半个周期为正幅值，后半个周期为负幅值
             return phase < 0.5 ? amplitude : -amplitude;
         }
-
-        public override bool ConnectToHardware()
-        {
-            Status = HardwareConnectionStatus.Connected;
-            return true;
-        }
-
-        public override bool DisconnectFromHardware()
-        {
-            Status = HardwareConnectionStatus.Disconnected;
-            return true;
-        }
-
-        public override bool OperationTest(uint isStart)
-        {
-            return true;
-        }
-
-        public override bool OperationValveState(bool isOpen)
-        {
-            return true;
-        }
-
-        public override bool OperationControlMode(SystemControlState controlState)
-        {
-            ControlState = controlState;
-            return true;
-        }
-
-        public void MockManualControl(long deviceId, float outValue)
-        {
-            if (Status != HardwareConnectionStatus.Connected) return;
-            ControlState = SystemControlState.Static;
-            var speed = outValue / 60.0f;
-            speed = speed switch
-            {
-                < -1000.0f => -1000.0f,
-                > 1000.0f => 1000.0f,
-                _ => speed
-            };
-            PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
-        }
-
-        public void MockStaticControl(StaticControlParams controlParams)
-        { 
-            if (Status != HardwareConnectionStatus.Connected) return;
-            ControlState = SystemControlState.Static;
-            var speed = controlParams.Speed / 60.0f;
-            switch (controlParams.StaticLoadControl)
-            {
-                case StaticLoadControlEnum.CTRLMODE_LoadN:
-                    speed = controlParams.TargetValue > _force ? speed : -speed;
-                    ForceChangeToTarget(speed, controlParams.TargetValue);
-                    break;
-                case StaticLoadControlEnum.CTRLMODE_LoadS:
-                    speed = controlParams.TargetValue > _position ? speed : -speed;
-                    PositionChangeToTarget(speed, controlParams.TargetValue);
-                    break;
-                case StaticLoadControlEnum.CTRLMODE_LoadSVNP:
-                    speed = controlParams.TargetValue > _force ? speed : -speed;
-                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
-                    ForceChangeToTarget(speed, controlParams.TargetValue);
-                    break;
-                case StaticLoadControlEnum.CTRLMODE_LoadNVSP:
-                    speed = controlParams.TargetValue > _position ? speed : -speed;
-                    PositionChangeToTarget(speed, controlParams.TargetValue);
-                    ForceChangeToTarget(speed, speed > 0 ? ForceMax : ForceMin);
-                    break;
-                default:
-                    break;
-            } 
-        }
-
-        public void MockDynamicControl(DynamicControlParams controlParams)
-        { 
-            if (Status != HardwareConnectionStatus.Connected) return;
-            ControlState = SystemControlState.Dynamic;
-            _dynamicCTS = new CancellationTokenSource();
-            Task.Run(() =>
-            {
-                GenerateWaveform(controlParams.ControlMode, controlParams.Amplitude, controlParams.Frequency, controlParams.WaveType, (uint)controlParams.CycleCount);
-            }, _dynamicCTS.Token);
-        }
-
-        public void MockStaticControlStop()
-        {
-            // 默认位移保持
-            _positionStaticCTS?.Cancel();
-            _positionStaticCTS?.Dispose();
-            _forceStaticCTS?.Cancel();
-            _forceStaticCTS?.Dispose();
-        }
-
-        public void MockDynamicControlStop()
-        {
-            _dynamicCTS?.Cancel();
-            _dynamicCTS?.Dispose();
-        }
-
         private void ForceChangeToTarget(float speed, float target)
         {
             if (_forceStaticCTS != null)
@@ -235,10 +142,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                 _forceStaticCTS.Cancel();
                 _forceStaticCTS?.Dispose();
             }
-            _forceStaticCTS = new CancellationTokenSource(); 
+            _forceStaticCTS = new CancellationTokenSource();
+            var token = _forceStaticCTS.Token;
             Task.Run(() =>
             {
-                while (!_forceStaticCTS.Token.IsCancellationRequested)
+                while (!token.IsCancellationRequested)
                 {
                     if (speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)
                         || speed > 0 && Math.Abs(_force - target) < speed)
@@ -255,7 +163,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         _force += speed;
                     }
                 }
-            }, _forceStaticCTS.Token);
+            }, token);
         }
 
         private void PositionChangeToTarget(float speed, float target)
@@ -265,10 +173,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                 _positionStaticCTS.Cancel();
                 _positionStaticCTS?.Dispose();
             }
-            _positionStaticCTS = new CancellationTokenSource(); 
+            _positionStaticCTS = new CancellationTokenSource();
+            var token = _positionStaticCTS.Token;
             Task.Run(() =>
-            { 
-                while (!_positionStaticCTS.Token.IsCancellationRequested)
+            {
+                while (!token.IsCancellationRequested)
                 {
                     if (speed < 0 && Math.Abs(_position - target) < Math.Abs(speed)
                         || speed > 0 && Math.Abs(_position - target) < speed)
@@ -285,7 +194,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         _position += speed;
                     }
                 }
-            }, _positionStaticCTS.Token);
+            }, token);
         }
 
         private IDisposable CreateAcquisitionLoop()
@@ -330,10 +239,138 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 DeviceId = DeviceId,
                 Value = res,
-                Timestamp = Stopwatch.GetTimestamp(),
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 DataQuality = DataQuality.Good
             };
         }
+        #endregion
+
+        public bool ConnectToHardware()
+        {
+            Status = HardwareConnectionStatus.Connected;
+            return true;
+        }
+
+        public bool DisconnectFromHardware()
+        {
+            Status = HardwareConnectionStatus.Disconnected;
+            return true;
+        }
+
+        public bool OperationTest(uint isStart)
+        {
+            return true;
+        }
+
+        public ValveStatusEnum GetValveStatus()
+        {
+            return _valveStatus;
+        }
+
+        public int SetValveStatus(bool isOpen)
+        {
+            _valveStatus = isOpen ? ValveStatusEnum.Opened : ValveStatusEnum.Closed;
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public bool SetControlState(SystemControlState controlMode)
+        {
+            ControlState = controlMode;
+            return true;
+        }
+
+        public int SetStaticControlMode(StaticControlParams controlParams)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return AddressContanst.DEVICE_NOT_CONNECTED;
+            ControlState = SystemControlState.Static;
+            var speed = controlParams.Speed / 60.0f;
+            switch (controlParams.StaticLoadControl)
+            {
+                case StaticLoadControlEnum.CTRLMODE_LoadN:
+                    speed = controlParams.TargetValue > _force ? speed : -speed;
+                    ForceChangeToTarget(speed, controlParams.TargetValue);
+                    break;
+                case StaticLoadControlEnum.CTRLMODE_LoadS:
+                    speed = controlParams.TargetValue > _position ? speed : -speed;
+                    PositionChangeToTarget(speed, controlParams.TargetValue);
+                    break;
+                case StaticLoadControlEnum.CTRLMODE_LoadSVNP:
+                    speed = controlParams.TargetValue > _force ? speed : -speed;
+                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
+                    ForceChangeToTarget(speed, controlParams.TargetValue);
+                    break;
+                case StaticLoadControlEnum.CTRLMODE_LoadNVSP:
+                    speed = controlParams.TargetValue > _position ? speed : -speed;
+                    PositionChangeToTarget(speed, controlParams.TargetValue);
+                    ForceChangeToTarget(speed, speed > 0 ? ForceMax : ForceMin);
+                    break;
+                case StaticLoadControlEnum.CTRLMODE_OPEN:
+                    speed = speed switch
+                    {
+                        < -1000.0f => -1000.0f,
+                        > 1000.0f => 1000.0f,
+                        _ => speed
+                    };
+                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
+                    break; 
+                case StaticLoadControlEnum.CTRLMODE_HLoadN: 
+                case StaticLoadControlEnum.CTRLMODE_HLoadS:
+                    MockStaticControlStop();
+                    break;
+                case StaticLoadControlEnum.CTRLMODE_None:
+                case StaticLoadControlEnum.CTRLMODE_NOCTRL:
+                case StaticLoadControlEnum.CTRLMODE_TRACEN:
+                case StaticLoadControlEnum.CTRLMODE_TRACES:
+                case StaticLoadControlEnum.CTRLMODE_HALTS:
+                default:
+                    break;
+            } 
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public int SetValleyPeakFilterNum(int freq)
+        {  
+            _valleyPeakFilterNum = freq;
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public int SetDynamicControlMode(DynamicControlParams param)
+        {
+            if (Status != HardwareConnectionStatus.Connected) return AddressContanst.DEVICE_NOT_CONNECTED;
+            ControlState = SystemControlState.Dynamic;
+            if (_dynamicCTS != null)
+            {
+                _dynamicCTS.Cancel();
+                _dynamicCTS?.Dispose();
+            }
+
+            _dynamicCTS = new CancellationTokenSource();
+            var token = _dynamicCTS.Token;
+            Task.Run(() =>
+            {
+                GenerateWaveform(param.ControlMode, param.Amplitude, param.Frequency, param.WaveType, (uint)param.CycleCount, token);
+            }, token);
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public int SetDynamicStopControl(int tmpActMode, int tmpHaltState)
+        {
+            _dynamicCTS?.Cancel();
+            _dynamicCTS?.Dispose();
+            _dynamicCTS = null;
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        private void MockStaticControlStop()
+        {
+            // 默认位移保持
+            _positionStaticCTS?.Cancel();
+            _positionStaticCTS?.Dispose();
+            _forceStaticCTS?.Cancel();
+            _forceStaticCTS?.Dispose();
+            _positionStaticCTS = null;
+            _forceStaticCTS = null;
+        } 
 
         public override void Dispose()
         {

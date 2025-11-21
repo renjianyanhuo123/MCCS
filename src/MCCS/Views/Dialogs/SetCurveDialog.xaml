@@ -10,6 +10,11 @@
              xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF" xmlns:dialogs="clr-namespace:MCCS.ViewModels.Dialogs"
              prism:ViewModelLocator.AutoWireViewModel="True"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=dialogs:SetCurveDialogViewModel}">
+    <i:Interaction.Triggers> 
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <UserControl.Resources>
         <Thickness x:Key="TextBottomThickness">0,0,0,5</Thickness>
         <Thickness x:Key="StackPanelBottomThickness">0,0,0,10</Thickness>
@@ -30,10 +35,7 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="SelectionChanged">
                             <i:InvokeCommandAction Command="{Binding CurveSelectionChangedCommand}"/>
-                        </i:EventTrigger>
-                        <i:EventTrigger EventName="Loaded">
-                            <i:InvokeCommandAction Command="{Binding CurveSelectionChangedCommand}"/>
-                        </i:EventTrigger>
+                        </i:EventTrigger> 
                     </i:Interaction.Triggers>
                     <ComboBox.ItemTemplate>
                          <DataTemplate>
@@ -56,21 +58,26 @@
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="15">
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" 
+                                    <TextBlock Text="{Binding Curve.Title}" FontWeight="Bold" 
                                                FontSize="14"
                                                Margin="{StaticResource TextBottomThickness}" 
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="X轴：" Margin="80,0,0,0"></TextBlock>
-                                    <ComboBox Width="120"></ComboBox>
+                                    <ComboBox Width="120" ItemsSource="{Binding DataContext.XBindCollection, RelativeSource={RelativeSource AncestorType=local:SetCurveDialog}}"
+                                              SelectedItem="{Binding SelectedXBindItem}"
+                                              DisplayMemberPath="DisplayName"> 
+                                    </ComboBox>
                                     <TextBlock Text="Y轴：" Margin="15,0,0,0"></TextBlock>
-                                    <ComboBox Width="120"></ComboBox>
+                                    <ComboBox Width="120" ItemsSource="{Binding DataContext.YBindCollection, RelativeSource={RelativeSource AncestorType=local:SetCurveDialog}}"
+                                              DisplayMemberPath="DisplayName" SelectedItem="{Binding SelectedYBindItem}"> 
+                                    </ComboBox>
                                 </StackPanel>
                                 <lvc:CartesianChart
-                                    Grid.Row="1"
-                                    Title="{Binding Title}" 
-                                    Series="{Binding CurveSeries}"
-                                    XAxes="{Binding XAxes}"
-                                    YAxes="{Binding YAxes}">
+                                    Grid.Row="1" 
+                                    Title="{Binding Curve.Title}" 
+                                    Series="{Binding Curve.CurveSeries}" 
+                                    XAxes="{Binding Curve.XAxes}"
+                                    YAxes="{Binding Curve.YAxes}" >
                                 </lvc:CartesianChart>
                             </Grid>
                         </Border>

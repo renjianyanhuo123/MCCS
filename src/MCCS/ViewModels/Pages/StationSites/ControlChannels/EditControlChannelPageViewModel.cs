@@ -1,9 +1,11 @@
-﻿using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf;
+using MCCS.Core.Models.Devices;
+using MCCS.Core.Models.StationSites;
+using MCCS.Core.Repositories;
+using MCCS.Events.StationSites.ControlChannels;
+using MCCS.Models.ControlCommand;
 using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
-using MaterialDesignThemes.Wpf;
-using MCCS.Events.StationSites.ControlChannels;
-using MCCS.Core.Models.StationSites;
 
 namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
 {
@@ -30,6 +32,15 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
         }
 
         #region Property
+        public ObservableCollection<ControlChannelBindControllerItemModel> BindControllerInfos { get; } = [];
+
+        private ControlChannelBindControllerItemModel _bindControllerInfo;
+        public ControlChannelBindControllerItemModel BindControllerInfo
+        {
+            get => _bindControllerInfo;
+            set => SetProperty(ref _bindControllerInfo, value);
+        }
+
         private string _channelName = string.Empty;
         public string ChannelName
         {
@@ -112,12 +123,22 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             if (_stationId == -1 || _channelId == -1) throw new ArgumentNullException("StationId or ChannelId is invalid!");
             SelectableControlChannels.Clear();
             SignalModels.Clear();
+            BindControllerInfos.Clear();
             var controlChannel = await _stationSiteAggregateRepository.GetControlChannelById(_channelId);
             var staionSelectedHardware = await _stationSiteAggregateRepository.GetStationSiteDevices(_stationId);
             var allDevices = await _deviceInfoRepository.GetAllDevicesAsync();
             var signals =
                 await _stationSiteAggregateRepository.GetControlChannelAndSignalInfosAsync(c =>
                     c.ChannelId == _channelId);
+            foreach (var device in allDevices)
+            {
+                if (device.DeviceType != DeviceTypeEnum.Controller) continue;
+                BindControllerInfos.Add(new ControlChannelBindControllerItemModel
+                {
+                    DeviceId = device.Id,
+                    DeviceName = device.DeviceName
+                });
+            }
             ChannelName = controlChannel?.ChannelName ?? string.Empty;
             InternalId = controlChannel?.ChannelId ?? string.Empty;
             ControlCycle = controlChannel?.ControlCycle ?? 0;
@@ -126,6 +147,7 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
             IsShowable = controlChannel?.IsShowable ?? false;
             IsOpenSpecimenProtected = controlChannel?.IsOpenSpecimenProtected ?? false; 
             ChannelType = (int)controlChannel?.ChannelType!;
+            BindControllerInfo = BindControllerInfos.FirstOrDefault(c => c.DeviceId == controlChannel.ControllerId);
             foreach (var item in staionSelectedHardware)
             {
                 var parentInfo = allDevices.FirstOrDefault(c => c.Id == item.BelongToControllerId);
@@ -167,6 +189,7 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
                 ChannelId = InternalId,
                 ChannelName = ChannelName,
                 ControlCycle = ControlCycle,
+                ControllerId = BindControllerInfo?.DeviceId ?? 0,
                 ControlMode = (ControlChannelModeTypeEnum)ControlMode,
                 ChannelType = (ChannelTypeEnum)ChannelType,
                 OutputLimitation = OutputLimit,

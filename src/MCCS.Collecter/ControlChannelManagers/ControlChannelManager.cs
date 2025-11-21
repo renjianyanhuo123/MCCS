@@ -27,7 +27,7 @@ namespace MCCS.Collecter.ControlChannelManagers
             _isMock = isMock;
             foreach (var configuration in configurations)
             {
-                var channel = new ControlChannel(configuration, _controllerManager, _signalManager, isMock);
+                var channel = new ControlChannel(configuration, _controllerManager, _signalManager);
                 channel.OperationValve(false); // 默认关闭阀门
                 _channelDics.TryAdd(configuration.ChannelId, channel);
             } 

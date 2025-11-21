@@ -1,10 +1,7 @@
 ﻿using System.Reactive.Linq;
 using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.DllNative;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.SignalManagers.Signals;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Infrastructure.TestModels.ControlParams;
 
 namespace MCCS.Collecter.SignalManagers
 {
@@ -16,18 +13,7 @@ namespace MCCS.Collecter.SignalManagers
         public SignalManager(IControllerManager controllerManager)
         {
             _controllerManager = controllerManager;
-        }
-
-        public int SetValveStatus(long signalId, bool isOpen)
-        { 
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
-            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId);
-            var deviceHandle = controller.GetDeviceHandle();
-            var status = isOpen ? 1u : 0u;
-            var res = POPNetCtrl.NetCtrl01_Set_StationCtrl(deviceHandle, status, status);
-            return res;
-        }
+        } 
 
         public void Initialization(IEnumerable<HardwareSignalConfiguration> signalConfigurations)
         {
@@ -35,52 +21,7 @@ namespace MCCS.Collecter.SignalManagers
             {
                 _signals.Add(new HardwareSignalChannel(configuration));
             }
-        }
-
-        public SystemControlState GetControlStateBySignalId(long signalId)
-        {
-            // 目前还在控制器中, 后面要改进的
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
-            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId); 
-            return controller.ControlState;
-        }
-
-        public bool SetControlStateBySignalId(long signalId, SystemControlState controlMode)
-        {
-            // 目前还在控制器中, 后面要改进的
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal"); 
-            return _controllerManager.OperationControlMode(signalInfo.BelongControllerId, controlMode);
-        }
-
-        public int SetStaticControlMode(long signalId, StaticLoadControlEnum tmpCtrlMode, float tmpVelo, float tmpPos)
-        {
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
-            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId);
-            var deviceHandle = controller.GetDeviceHandle();
-            return POPNetCtrl.NetCtrl01_S_SetCtrlMod(deviceHandle, (uint)tmpCtrlMode, tmpVelo, tmpPos);
-        }
-
-        public int SetValleyPeakFilterNum(long signalId, int freq)
-        {
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
-            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId);
-            var deviceHandle = controller.GetDeviceHandle();
-            return POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_ValleyPeak_FilterNum, (byte)freq);
-        }
-
-        public int SetDynamicControlMode(long signalId, float tmpMeanA, float tmpA,
-            float tmpFreq, byte tmpWaveShap, byte tmpCtrlMode, float tmpAP, float tmpPH,
-            int tmpCountSet, int tmpCtrlOpt)
-        {
-            var signalInfo = _signals.FirstOrDefault(s => s.SignalId == signalId);
-            if (signalInfo == null) throw new ArgumentNullException("controller no find signal");
-            var controller = _controllerManager.GetControllerInfo(signalInfo.BelongControllerId); 
-            return POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(controller.DeviceHandleIndex, tmpMeanA, tmpA, tmpFreq, tmpWaveShap, tmpCtrlMode, tmpAP, tmpPH, tmpCountSet, tmpCtrlOpt);
-        }
+        } 
 
         #region 采集信号
         public IObservable<DataPoint<float>> GetSignalDataStream(long signalId)

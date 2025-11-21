@@ -6,7 +6,7 @@ using MCCS.Collecter.HardwareDevices;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
-    public abstract class ControllerHardwareDeviceBase : IControllerHardwareDevice
+    public abstract class ControllerHardwareDeviceBase
     { 
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
         protected readonly ReplaySubject<DataPoint<List<TNet_ADHInfo>>> _dataSubject;
@@ -20,18 +20,12 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// 当前设备句柄
         /// </summary>
         protected nint _deviceHandle = nint.Zero;
-
-        /// <summary>
-        /// 设备ID
-        /// </summary>
-        public long DeviceId { get; }
-        /// <summary>
-        /// 设备号
-        /// </summary>
-        public int DeviceHandleIndex { get; }
+         
+        public long DeviceId { get; } 
         public string DeviceName { get; }
         public string DeviceType { get; }
-        public HardwareConnectionStatus Status { get; protected set; }  
+
+        public HardwareConnectionStatus Status { get; protected set; } 
 
         /// <summary>
         /// 控制器当前所处的控制状态 
@@ -41,10 +35,12 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// 批量数据流
         /// </summary>
         public IObservable<DataPoint<List<TNet_ADHInfo>>> DataStream { get; protected set; }
+
         /// <summary>
         /// 状态流
         /// </summary>
-        public IObservable<HardwareConnectionStatus> StatusStream => _statusSubject.AsObservable();
+        public IObservable<HardwareConnectionStatus> StatusStream { get; protected set; }
+
         /// <summary>
         /// 不预先展开，而是提供展开后的Observable;
         /// 单个的数据流
@@ -55,11 +51,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         {
             DeviceId = configuration.DeviceId;
             DeviceName = configuration.DeviceName;
-            DeviceType = configuration.DeviceType;
-            DeviceHandleIndex = configuration.DeviceAddressId;
+            DeviceType = configuration.DeviceType; 
             _sampleRate = configuration.SampleRate;
             _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
-            _dataSubject = new ReplaySubject<DataPoint<List<TNet_ADHInfo>>>(bufferSize: 1000); 
+            _dataSubject = new ReplaySubject<DataPoint<List<TNet_ADHInfo>>>(bufferSize: 1000);
+            StatusStream = _statusSubject.AsObservable();
             DataStream = _dataSubject.AsObservable();
             IndividualDataStream = _dataSubject.Where(dp => dp is { DataQuality: DataQuality.Good, Value: not null })
                 .SelectMany(dataPoint =>
@@ -72,68 +68,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         }
                     ));
         }
-
-        // 抽象方法 
-        public abstract bool ConnectToHardware();
-        public abstract bool DisconnectFromHardware();
-        /// <summary>
-        /// 操作试验实验状态
-        /// </summary>
-        /// <param name="isStart">是否开始 0-停止  1-开始</param>
-        public abstract bool OperationTest(uint isStart);
-        /// <summary>
-        /// 操作阀门
-        /// </summary>
-        /// <param name="isOpen"></param>
-        /// <returns></returns>
-        public abstract bool OperationValveState(bool isOpen);
-        /// <summary>
-        /// 切换控制方式
-        /// </summary>
-        /// <param name="controlState"></param>
-        /// <returns></returns>
-        public abstract bool OperationControlMode(SystemControlState controlState);
-
-        /// <summary>
-        /// 获取当前设备链接成功的句柄指针
-        /// 注意句柄的所有资源需要清理
-        /// </summary>
-        /// <returns></returns>
-        public virtual nint GetDeviceHandle()
-        {
-            return _deviceHandle;
-        }
-        //protected BatchCollectItemModel StructDataToCollectModel(TNet_ADHInfo model)
-        //{
-        //    var res = new BatchCollectItemModel
-        //    {
-        //        Net_PosVref = model.Net_PosVref,
-        //        Net_PosE = model.Net_PosE,
-        //        Net_CtrlDA = model.Net_CtrlDA,
-        //        Net_CycleCount = model.Net_CycleCount,
-        //        Net_SysState = model.Net_SysState,
-        //        Net_DIVal = model.Net_DIVal,
-        //        Net_DOVal = model.Net_DOVal,
-        //        Net_D_PosVref = model.Net_D_PosVref,
-        //        Net_FeedLoadN = model.Net_FeedLoadN,
-        //        Net_PrtErrState = model.Net_PrtErrState,
-        //        Net_TimeCnt = model.Net_TimeCnt
-        //    };
-        //    foreach (var signal in Signals)
-        //    {
-        //        var t = signal.SignalAddressIndex;
-        //        if (t < 10 && t < model.Net_AD_N.Length)
-        //        {
-        //            res.CollectData.Add(signal.SignalId, model.Net_AD_N[t]);
-        //            continue;
-        //        }
-        //        t %= 10;
-        //        if (t < model.Net_AD_S.Length)
-        //            res.CollectData.Add(signal.SignalId, model.Net_AD_S[t]);
-        //    }
-        //    return res;
-        //}
-
+         
+        #region 抽象方法 
         public virtual void StartDataAcquisition()
         {
             if (Status != HardwareConnectionStatus.Connected)
@@ -148,11 +84,17 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             _isRunning = false;
         } 
 
+        public virtual SystemControlState GetControlState()
+        {
+            return ControlState;
+        } 
+        #endregion
+
         public virtual void Dispose()
-        { 
+        {
             _statusSubscription?.Dispose();
             _statusSubject.OnCompleted();
-            _statusSubject.Dispose(); 
-        }
+            _statusSubject.Dispose();
+        } 
     }
 }

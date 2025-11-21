@@ -2,7 +2,6 @@
 using MCCS.Collecter.DllNative;
 using MCCS.Collecter.HardwareDevices; 
 using MCCS.Infrastructure.Helper;
-using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.Collecter.ControllerManagers
 {
@@ -12,13 +11,8 @@ namespace MCCS.Collecter.ControllerManagers
     public sealed class ControllerManager : IControllerManager
     {
         private static volatile bool _isDllInitialized = false;
-        private readonly List<ControllerHardwareDeviceBase> _controllers = [];
-        private bool _isMock = false;
-
-        public ControllerManager()
-        {
-
-        }
+        private readonly Dictionary<long, IController> _controllers = [];
+        private bool _isMock = false; 
 
         public bool InitializeDll(bool isMock = false)
         {
@@ -37,32 +31,20 @@ namespace MCCS.Collecter.ControllerManagers
             throw new Exception($"DLL初始化失败,错误码:{result}"); 
         } 
          
-        public ControllerHardwareDeviceBase GetControllerInfo(long controllerId)
-        {
-            var controller = _controllers.FirstOrDefault(c => c.DeviceId == controllerId);
-            if (controller == null) throw new ArgumentNullException("controllerId is Null!");
-            return controller;
-        }
-         
-        public bool OperationSigngleValve(long controllerId, bool isOpen)
-        {
-            return GetControllerInfo(controllerId).OperationValveState(isOpen);
+        public IController GetControllerInfo(long controllerId)
+        { 
+            return _controllers[controllerId];
         } 
 
         public bool OperationTest(bool isStart)
         {
             var temp = isStart ? 1u : 0u;
-            return _controllers.Select(controller => controller.OperationTest(temp)).All(success => success);
-        }
-         
-        public bool OperationControlMode(long controllerId, SystemControlState controlMode)
-        {
-            return GetControllerInfo(controllerId).OperationControlMode(controlMode);
+            return _controllers.Select(controller => controller.Value.OperationTest(temp)).All(success => success);
         } 
-         
+
         public bool CreateController(HardwareDeviceConfiguration configuration)
         {
-            ControllerHardwareDeviceBase controller;
+            IController controller;
             if (_isMock)
             {
                 controller = new MockControllerHardwareDevice(configuration);
@@ -72,35 +54,30 @@ namespace MCCS.Collecter.ControllerManagers
                 controller = new BwControllerHardwareDevice(configuration);
             } 
             controller.ConnectToHardware();
-            _controllers.Add(controller);
+            _controllers.Add(configuration.DeviceId, controller);
             return true;
         }
          
         public bool RemoveController(int deviceId)
         {
-            var controller = _controllers.FirstOrDefault(c => c.DeviceId == deviceId);
-            if (controller == null) return true;
-            controller.DisconnectFromHardware();
+            var controller = _controllers[deviceId]; 
+            controller.DisconnectFromHardware(); 
+            _controllers.Remove(deviceId);
             controller.Dispose();
-            _controllers.Remove(controller);
             return true;
         }
          
         public void StartAllControllers()
         {
-            foreach (var controller in _controllers)
-            {
-                if (controller.Status != HardwareConnectionStatus.Connected)
-                {
-                    controller.ConnectToHardware();
-                }
+            foreach (var controller in _controllers.Values)
+            { 
                 controller.StartDataAcquisition();
             }
         }
          
         public void StopAllControllers()
         {
-            foreach (var controller in _controllers)
+            foreach (var controller in _controllers.Values)
             {
                 controller.StopDataAcquisition();
             }
@@ -108,7 +85,7 @@ namespace MCCS.Collecter.ControllerManagers
 
         public void Dispose()
         {
-            foreach (var controller in _controllers)
+            foreach (var controller in _controllers.Values)
             {
                 controller.Dispose();
             }
