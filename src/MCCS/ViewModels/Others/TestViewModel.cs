@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Models.TestInfo;
+﻿using MCCS.Infrastructure.Models.TestInfo;
 
 namespace MCCS.ViewModels.Others
 {

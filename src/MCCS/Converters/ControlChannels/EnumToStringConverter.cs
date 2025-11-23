@@ -1,6 +1,6 @@
-﻿using MCCS.Core.Models.StationSites;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
+using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Converters.ControlChannels
 {

@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Models.MethodManager;
+﻿using MCCS.Infrastructure.Models.MethodManager;
 using Newtonsoft.Json;
 
 namespace MCCS.Common.DataManagers.Methods

@@ -1,11 +1,10 @@
-﻿using MCCS.Core.Repositories;
-using MCCS.Models.Stations;
+﻿using MCCS.Models.Stations;
 using System.Collections.ObjectModel;
-using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using MCCS.Events.Common;
 using MCCS.Events.StationSites;
 using MCCS.Events.StationSites.ControlChannels;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Pages.StationSites.ControlChannels;
 

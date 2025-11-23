@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using MCCS.Core.Models.TestInfo;
+using MCCS.Infrastructure.Models.TestInfo;
 
 namespace MCCS.Converters
 {

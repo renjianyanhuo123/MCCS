@@ -47,5 +47,7 @@ namespace MCCS.Collecter.ControllerManagers
         /// 这里相当于硬件上的总开关
         /// </summary>
         void StopAllControllers();
+
+        // IObservable<IEnumerable<>>
     }
 }

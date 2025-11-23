@@ -1,0 +1,16 @@
+﻿using HelixToolkit.SharpDX.Core;
+using MCCS.Collecter.HardwareDevices;
+
+namespace MCCS.Models.Model3D
+{
+    public record Model3DRenderModel
+    {
+        public long PseudoChannelId { get; init; }
+
+        public long BillboardId { get; init; }
+
+        public string Model3DId { get; init; } 
+
+        public DataPoint<float> Data { get; init; } 
+    }
+}

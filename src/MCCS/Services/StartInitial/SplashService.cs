@@ -1,19 +1,16 @@
-﻿
-using System.Windows.Documents;
-using MCCS.Collecter.ControlChannelManagers;
+﻿using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.StationSites;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Repositories;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Collecter.SignalManagers;
 using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Core.Models.StationSites;
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using StationSiteInfo = MCCS.Common.DataManagers.StationSites.StationSiteInfo;
 
@@ -189,7 +186,7 @@ namespace MCCS.Services.StartInitial
                     DeviceName = item.DeviceName,
                     DeviceType = item.DeviceType.ToString(),
                     IsSimulation = _isMock, 
-                    SampleRate = 20,
+                    SampleRate = 100,
                     ConnectionString = ""
                 }; 
                 _controllerService.CreateController(configuration);

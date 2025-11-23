@@ -1,5 +1,5 @@
-﻿using MCCS.Collecter.Devices;
-using MCCS.Core.Models.Devices;
+﻿using MCCS.Collecter.Devices; 
+using MCCS.Infrastructure.Models.Devices;
 
 namespace MCCS.Common.DataManagers.Devices;
 

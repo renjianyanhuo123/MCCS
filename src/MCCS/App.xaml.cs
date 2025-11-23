@@ -39,10 +39,8 @@ using MCCS.Views.Pages.WorkflowSteps;
 using Microsoft.Extensions.DependencyInjection;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
-using MCCS.Collecter.DllNative;
 using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Collecter.SignalManagers;
-using MCCS.Core.Repositories;
 using MCCS.ViewModels.Pages.TestModelOperations;
 using MCCS.Views.Pages.TestModelOperations;
 

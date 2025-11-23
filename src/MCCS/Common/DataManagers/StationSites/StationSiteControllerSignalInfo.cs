@@ -1,5 +1,5 @@
 ﻿using MCCS.Common.DataManagers.Devices;
-using MCCS.Core.Models.StationSites;
+using MCCS.Infrastructure.Models.StationSites;
 using Newtonsoft.Json;
 
 namespace MCCS.Common.DataManagers.StationSites

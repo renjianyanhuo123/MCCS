@@ -1,10 +1,10 @@
 ﻿using MahApps.Metro.Controls;
-using MCCS.Common;
-using MCCS.Core.Repositories;
+using MCCS.Common; 
 using MCCS.Events;
 using MCCS.ViewModels.Others;
 using System.Collections.ObjectModel;
 using System.Windows;
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages
 {

@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows;
-using System.Windows.Data;
-using MCCS.Core.Models.Model3D;
+using System.Windows.Data; 
+using MCCS.Infrastructure.Models.Model3D;
 
 namespace MCCS.Converters.ModelSetttings
 {

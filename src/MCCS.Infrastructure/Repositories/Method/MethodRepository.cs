@@ -1,0 +1,50 @@
+﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.Models;
+using MCCS.Infrastructure.Models.MethodManager;
+
+namespace MCCS.Infrastructure.Repositories.Method
+{
+    public sealed class MethodRepository(IFreeSql freeSql) : IMethodRepository
+    {
+        public async ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken)
+        {
+            return await freeSql.Insert(method).ExecuteIdentityAsync(cancellationToken);
+        }
+
+        public async ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken)
+        {
+            var rows = await freeSql.Delete<MethodModel>()
+                .Where(a => a.Id == id)
+                .ExecuteAffrowsAsync(cancellationToken);
+            return rows > 0;
+        }
+
+        public Task<MethodModel> GetMethodAsync(long id)
+        {
+            return freeSql.Select<MethodModel>()
+                .Where(c => c.Id == id)
+                .ToOneAsync();
+        }
+
+        public Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression)
+        {
+            return freeSql.Select<MethodModel>()
+                .Where(expression)
+                .ToListAsync();
+        }
+
+        public async Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression)
+        {
+            var res = new PageModel<MethodModel>
+            {
+                TotalCount = await freeSql.Select<MethodModel>().Where(expression)
+                    .CountAsync(),
+                Items = await freeSql.Select<MethodModel>()
+                    .Where(expression) 
+                    .Page(pageIndex, pageSize)
+                    .ToListAsync()
+            };
+            return res;
+        }
+    }
+}

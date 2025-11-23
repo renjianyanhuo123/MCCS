@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
-using System.Windows.Data;
-using MCCS.Core.Models.MethodManager;
+using System.Windows.Data; 
+using MCCS.Infrastructure.Models.MethodManager;
 
 namespace MCCS.Converters.Methods
 {

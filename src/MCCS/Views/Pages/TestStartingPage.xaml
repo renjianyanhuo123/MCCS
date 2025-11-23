@@ -95,6 +95,7 @@
                 Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
                 Content="展示曲线图像"
                 Command="{Binding ShowCurveCommand}" />
+            <Button Visibility="Collapsed" Content="测试" Command="{Binding TestMoveModel3D}"></Button>
         </StackPanel>
         <!-- 3D视窗容器 - 第二个声明（作为背景层） -->
         <Grid Grid.Row="1" Grid.Column="0">

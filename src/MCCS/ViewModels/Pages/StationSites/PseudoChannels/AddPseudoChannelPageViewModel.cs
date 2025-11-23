@@ -1,11 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using MCCS.Core.Repositories;
+﻿using System.Collections.ObjectModel; 
 using MCCS.Models.Stations.PseudoChannels;
 using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.StationSites;
 using MCCS.Events.StationSites;
 using MCCS.Events.StationSites.PseudoChannels;
 using MCCS.Infrastructure.Helper;
+using MCCS.Infrastructure.Models.StationSites;
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
 {

@@ -1,5 +1,4 @@
-﻿using MCCS.Common.DataManagers.StationSites;
-using MCCS.Core.Models.Devices;
+﻿using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.TestModels;
 
 namespace MCCS.Common.DataManagers.Devices

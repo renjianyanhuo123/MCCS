@@ -3,8 +3,6 @@ using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Core.Models.CurveModels;
-using Newtonsoft.Json.Linq;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
@@ -16,7 +14,7 @@ namespace MCCS.Models.CurveModels
         private readonly IPseudoChannelManager _channelManager;
         private IDisposable? _tableDispose;
         private long _tableInitTime = 0;
-        private const int MaxVisiblePoints = 30;
+        private const int MaxVisiblePoints = 500;
 
         private readonly XYBindCollectionItem _selectedXBindItem;
         private readonly XYBindCollectionItem _selectedYBindItem;
@@ -35,6 +33,8 @@ namespace MCCS.Models.CurveModels
                     Mapping = (model, index) => new Coordinate(model.XValue, model.YValue),
                     Fill = null,
                     GeometrySize = 0,
+                    AnimationsSpeed = TimeSpan.Zero,
+                    EasingFunction = null,
                     LineSmoothness = 1
                 }
             ];
@@ -100,10 +100,15 @@ namespace MCCS.Models.CurveModels
                     YValue = s.Value
                 });
             } 
-            _tableDispose = combinedStream.Sample(TimeSpan.FromMilliseconds(400)).Subscribe(data =>
+            _tableDispose = combinedStream
+                .Buffer(TimeSpan.FromMilliseconds(400))
+                .Where(batch => batch.Count > 0)
+                .Subscribe(data =>
             {
-                ObservableValues.Add(data);
-                if (ObservableValues.Count > MaxVisiblePoints)
+                ObservableValues.AddRange(data);
+                var count = ObservableValues.Count - MaxVisiblePoints;
+                // 批量移除以提高性能
+                for (var i = 0; i < count; i++)
                 {
                     ObservableValues.RemoveAt(0);
                 }

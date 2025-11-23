@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Repositories;
+using MaterialDesignThemes.Wpf; 
 using MCCS.Events.Hardwares;
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.Hardwares;
 
 namespace MCCS.ViewModels.Dialogs.Hardwares

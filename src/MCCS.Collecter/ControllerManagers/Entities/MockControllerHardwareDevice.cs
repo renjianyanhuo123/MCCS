@@ -6,6 +6,7 @@ using MCCS.Infrastructure.TestModels.ControlParams;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
@@ -18,18 +19,25 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private float _force = 10.0f;
         private float _position = 50.0f;
 
-        private readonly object _lock = new();
+        private readonly object _lock = new(); 
 
         private const float ForceMin = -10000.0f;
         private const float ForceMax = 10000.0f;
 
         private const float PositionMin = -1000.0f;
         private const float PositionMax = 1000.0f;
+        //  单位/ms
+        private float _speed = 0.0f;
+
         private int _valleyPeakFilterNum = 0;
         private CancellationTokenSource? _forceStaticCTS;
         private CancellationTokenSource? _positionStaticCTS;
         private CancellationTokenSource? _dynamicCTS;
 
+        private PeriodicTimer? _forceTimer;
+        private PeriodicTimer? _positionTimer;
+        private PeriodicTimer? _dynamicTimer;
+        private const double _samplingInterval = 0.01;
         /// <summary>
         /// 阀门状态
         /// </summary>
@@ -58,47 +66,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
 
             return value + noise;
         }
-
-        private void GenerateWaveform(int changeType, double amplitude, double frequency, int waveType, uint totalCount, CancellationToken token)
-        {
-            double time = 0; // 时间变量（秒）
-
-            while (time <= totalCount && !token.IsCancellationRequested)
-            {
-                // 根据波形类型计算值
-                var value = waveType switch
-                {
-                    0 => // 正弦波
-                        amplitude * Math.Sin(2 * Math.PI * frequency * time),
-                    1 => // 三角波
-                        CalculateTriangleWave(amplitude, frequency, time),
-                    2 => // 方波
-                        CalculateSquareWave(amplitude, frequency, time),
-                    _ => 0
-                };
-                // 更新外部变量 位移 
-                if (changeType == 0)
-                {
-                    lock (_lock)
-                    {
-                        _position = (float)value;
-                    }
-                }
-                else
-                {
-                    lock (_lock)
-                    {
-                        _force = (float)value;
-                    }
-                }
-                var temp = 1 / frequency * 1000;
-                // 等待500ms
-                Thread.Sleep(500);
-
-                // 时间递增
-                time += temp;
-            }
-        }
+         
 
         /// <summary>
         /// 计算三角波的值
@@ -144,26 +112,28 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             }
             _forceStaticCTS = new CancellationTokenSource();
             var token = _forceStaticCTS.Token;
-            Task.Run(() =>
+            _forceTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(10)); 
+            _ = Task.Run(async () =>
             {
-                while (!token.IsCancellationRequested)
+                while (await _forceTimer.WaitForNextTickAsync(token))
                 {
-                    if (speed < 0 && Math.Abs(_force - target) < Math.Abs(speed)
-                        || speed > 0 && Math.Abs(_force - target) < speed)
-                    {
-                        lock (_lock)
-                        {
-                            _force = target;
-                        }
-                        break;
-                    }
-                    Thread.Sleep(1000);
+                    if (token.IsCancellationRequested) break; 
+                    bool reach;
                     lock (_lock)
                     {
-                        _force += speed;
+                        reach = speed < 0 && Math.Abs(_force - target) < Math.Abs(speed * 10)
+                                || speed > 0 && Math.Abs(_force - target) < speed * 10;
+
+                        if (reach)
+                        {
+                            _force = target;
+                            break;
+                        }
+
+                        _force += speed * 10;
                     }
                 }
-            }, token);
+            }, token); 
         }
 
         private void PositionChangeToTarget(float speed, float target)
@@ -175,23 +145,26 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             }
             _positionStaticCTS = new CancellationTokenSource();
             var token = _positionStaticCTS.Token;
-            Task.Run(() =>
+            var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(10)); 
+            _ = Task.Run(async () =>
             {
-                while (!token.IsCancellationRequested)
+                while (await timer.WaitForNextTickAsync(token))
                 {
-                    if (speed < 0 && Math.Abs(_position - target) < Math.Abs(speed)
-                        || speed > 0 && Math.Abs(_position - target) < speed)
-                    {
-                        lock (_lock)
-                        {
-                            _position = target;
-                        }
-                        break;
-                    }
-                    Thread.Sleep(1000);
+                    if (token.IsCancellationRequested) break;
+
+                    bool reach;
                     lock (_lock)
                     {
-                        _position += speed;
+                        reach = speed < 0 && Math.Abs(_position - target) < Math.Abs(speed * 10)
+                                || speed > 0 && Math.Abs(_position - target) < speed * 10;
+
+                        if (reach)
+                        {
+                            _position = target;
+                            break;
+                        }
+
+                        _position += speed * 10;
                     }
                 }
             }, token);
@@ -206,7 +179,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                 {
                     _dataSubject.OnNext(MockAcquireReading());
 #if DEBUG
-                    // Debug.WriteLine($"生成的模拟数据:{JsonConvert.SerializeObject(temp)}");
+                    // Debug.WriteLine($"运行位移:{_position}mm");
 #endif
                 });
         }
@@ -217,6 +190,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             // 模拟数据采集
             var rand = new Random();
             var res = new List<TNet_ADHInfo>();
+            // 根据当前时间模拟 100ms 更新一次数据的话，那么每次相当于要模拟出来100条数据
+            // 根据速度计算   
             var mockValue = new TNet_ADHInfo()
             {
                 Net_AD_N =
@@ -284,6 +259,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             if (Status != HardwareConnectionStatus.Connected) return AddressContanst.DEVICE_NOT_CONNECTED;
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
+            speed /= 1000.0f;
             switch (controlParams.StaticLoadControl)
             {
                 case StaticLoadControlEnum.CTRLMODE_LoadN:
@@ -342,13 +318,48 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 _dynamicCTS.Cancel();
                 _dynamicCTS?.Dispose();
+                _dynamicCTS = null;
+            }
+
+            if (_dynamicTimer != null)
+            {
+                _dynamicTimer.Dispose();
+                _dynamicTimer = null;
             }
 
             _dynamicCTS = new CancellationTokenSource();
+            _dynamicTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(10));
             var token = _dynamicCTS.Token;
-            Task.Run(() =>
+            double time = 0; // seconds 
+            double totalDuration = param.CycleCount / param.Frequency; // 总时长(秒) = 周期数 / 频率
+            Task.Run(async () =>
             {
-                GenerateWaveform(param.ControlMode, param.Amplitude, param.Frequency, param.WaveType, (uint)param.CycleCount, token);
+                while (time <= totalDuration && _dynamicTimer != null && await _dynamicTimer.WaitForNextTickAsync(token))
+                {
+                    if (token.IsCancellationRequested) break;
+                    // 计算波形值
+                    var value = param.WaveType switch
+                    {
+                        0 => param.Amplitude * Math.Sin(2 * Math.PI * param.Frequency * time) + param.MeanValue,
+                        1 => CalculateTriangleWave(param.Amplitude, param.Frequency, time),
+                        2 => CalculateSquareWave(param.Amplitude, param.Frequency, time),
+                        _ => 0
+                    };
+#if DEBUG
+                    Debug.WriteLine($"原始位移:{value:F2}mm");
+#endif
+                    // 更新变量
+                    lock (_lock)
+                    {
+                        if (param.ControlMode == 0)
+                            _position = (float)value;
+                        else
+                            _force = (float)value;
+                    }
+
+                    // 每10ms增加一次时间
+                    time += _samplingInterval;
+                }
             }, token);
             return AddressContanst.OP_SUCCESSFUL;
         }
@@ -357,6 +368,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         {
             _dynamicCTS?.Cancel();
             _dynamicCTS?.Dispose();
+            _dynamicTimer?.Dispose();
+            _dynamicTimer = null;
             _dynamicCTS = null;
             return AddressContanst.OP_SUCCESSFUL;
         }
@@ -364,17 +377,25 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private void MockStaticControlStop()
         {
             // 默认位移保持
+            _positionTimer?.Dispose();
             _positionStaticCTS?.Cancel();
             _positionStaticCTS?.Dispose();
+            _forceTimer?.Dispose();
             _forceStaticCTS?.Cancel();
             _forceStaticCTS?.Dispose();
+            _dynamicCTS?.Dispose();
+            _dynamicCTS = null;
             _positionStaticCTS = null;
             _forceStaticCTS = null;
+            _positionTimer = null;
+            _forceTimer = null;
         } 
 
         public override void Dispose()
         {
             base.Dispose();
+            MockStaticControlStop();
+            SetDynamicStopControl(0,0);
             _acquisitionSubscription.Dispose();
             _dataSubject?.OnCompleted();
             _dataSubject?.Dispose();

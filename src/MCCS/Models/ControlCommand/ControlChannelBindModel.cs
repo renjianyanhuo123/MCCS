@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Models.StationSites;
+﻿using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Models.ControlCommand
 {

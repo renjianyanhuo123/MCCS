@@ -1,47 +1,46 @@
 ﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
-using MCCS.Collecter.DllNative.Models;
+using MCCS.Collecter.ControlChannelManagers;
+using MCCS.Collecter.ControllerManagers;
+using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Common;
 using MCCS.Common.DataManagers;
-using MCCS.Common.DataManagers.Devices;
-using MCCS.Core.Models.Model3D;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Repositories;
+using MCCS.Common.DataManagers.CurrentTest;
+using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.Controllers;
 using MCCS.Events.Tests;
-using MCCS.Models;
+using MCCS.Infrastructure.TestModels;
 using MCCS.Models.ControlCommand;
+using MCCS.Models.CurveModels;
 using MCCS.Models.Model3D;
 using MCCS.Services.Model3DService;
 using MCCS.Services.Model3DService.EventParameters;
+using MCCS.Services.NotificationService;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Others;
 using MCCS.ViewModels.Pages.Controllers;
-using Newtonsoft.Json;
 using Serilog;
 using SharpDX;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Common.DataManagers.CurrentTest;
-using MCCS.Components.GlobalNotification.Models;
+using MCCS.Infrastructure.DbContexts;
+using MCCS.Infrastructure.Models.Model3D;
+using MCCS.Infrastructure.Models.ProjectManager;
+using MCCS.Infrastructure.Repositories;
+using MCCS.Infrastructure.Repositories.Project;
+using Microsoft.Extensions.Configuration;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;
 using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
 using OrthographicCamera = HelixToolkit.Wpf.SharpDX.OrthographicCamera;
 using Vector3D = System.Windows.Media.Media3D.Vector3D;
-using MCCS.Services.NotificationService;
-using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Models.CurveModels;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -63,7 +62,11 @@ namespace MCCS.ViewModels.Pages
         private readonly IControlChannelManager _controlChannelManager;
         private readonly IPseudoChannelManager _pseudoChannelManager;
         private readonly INotificationService _notificationService;
-        private IDisposable? _subscribeDispose;
+        private readonly IProjectRepository _projectRepository;
+        private readonly IProjectDbContext _projectDbContext; 
+        private readonly string _defaultSavePath;
+
+        private IDisposable? _combinedSubscription;
         // 存储所有的广告牌引用,方便后期快速更新
         private readonly Dictionary<long, TextInfoExt> _textInfoDic = [];
         private readonly Dictionary<string, TextInfoExt> _modelTextInfoDic = [];
@@ -85,7 +88,7 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<object> Model3DMouseDownCommand { get; }
         public DelegateCommand<object> Model3DMouseMoveCommand { get; }
         public DelegateCommand ClearSelectionCommand { get; }
-        public DelegateCommand StartTestCommand { get; }
+        public AsyncDelegateCommand StartTestCommand { get; }
         public DelegateCommand PauseTestCommand { get; }
         public DelegateCommand LoadCommand { get; }
         public DelegateCommand TestModelMoveCommand { get; }
@@ -96,6 +99,8 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<KeyEventArgs> CtrlKeyDownCommand { get; }
         public DelegateCommand<KeyEventArgs> CtrlKeyUpCommand { get; }
         public DelegateCommand ShowCurveCommand { get; }
+        public DelegateCommand TestMoveModel3D { get; }
+
         #endregion
 
         public TestStartingPageViewModel( 
@@ -107,6 +112,10 @@ namespace MCCS.ViewModels.Pages
             IModel3DDataRepository model3DDataRepository,
             INotificationService notificationService,
             IPseudoChannelManager pseudoChannelManager,
+            IProjectRepository projectRepository,
+            IProjectDbContext projectDbContext,
+            IProjectDataRecordRepository projectDataRecordRepository,
+            IConfiguration configuration,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds"); 
@@ -117,11 +126,14 @@ namespace MCCS.ViewModels.Pages
             _notificationService = notificationService;
             _controlChannelManager = controlChannelManager;
             _pseudoChannelManager = pseudoChannelManager;
+            _projectRepository = projectRepository;
+            _projectDbContext = projectDbContext; 
+            _defaultSavePath = configuration["DefaultProjectSavePath"] ?? "";
             LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
             Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
             Model3DMouseMoveCommand = new DelegateCommand<object>(OnModel3DMouseMove);
             ClearSelectionCommand = new DelegateCommand(ClearSelection);
-            StartTestCommand = new DelegateCommand(ExecuteStartTestCommand);
+            StartTestCommand = new AsyncDelegateCommand(ExecuteStartTestCommand);
             PauseTestCommand = new DelegateCommand(ExecutePauseTestCommand);
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             TestModelMoveCommand = new DelegateCommand(ExecuteTestModelMoveCommand);
@@ -132,6 +144,7 @@ namespace MCCS.ViewModels.Pages
             CtrlKeyDownCommand = new DelegateCommand<KeyEventArgs>(OnCtrlKeyDownCommand);
             CtrlKeyUpCommand = new DelegateCommand<KeyEventArgs>(OnCtrlKeyUpCommand);
             ShowCurveCommand = new DelegateCommand(ExecuteShowCurveCommand);
+            TestMoveModel3D = new DelegateCommand(StaticMode_ModelMovePosition);
             _eventAggregator.GetEvent<InverseControlEvent>().Subscribe(ReceivedInverseControlEvent);
             _eventAggregator.GetEvent<ReceivedCommandDataEvent>().Subscribe(OnReceivedCommand);
             _eventAggregator.GetEvent<UnLockCommandEvent>().Subscribe(ReceivedUnLockEvent);
@@ -314,7 +327,8 @@ namespace MCCS.ViewModels.Pages
                     Models.Add(wrapper);
                     GroupModel.AddNode(wrapper.SceneNode); 
                 } 
-                var index = 0;
+                var index = 0; 
+                var streamList = new List<IObservable<Model3DRenderModel>>();
                 foreach (var billboardInfo in modelAggregate.BillboardInfos)
                 {
                     var temp1 = (Color)ColorConverter.ConvertFromString(billboardInfo.BackgroundColor);
@@ -330,8 +344,7 @@ namespace MCCS.ViewModels.Pages
                         positions.Add(billboardInfo.PositionStr.ToVector<Vector3>());
                         connectionIndexs.AddRange([index, index + 1]); 
                         index += 2;
-                    }
-
+                    } 
                     var textInfo = new TextInfoExt
                     {
                         Text = billboardInfo.BillboardName,
@@ -344,18 +357,18 @@ namespace MCCS.ViewModels.Pages
                     };
                     if (billboardInfo.BillboardType == BillboardTypeEnum.DataShow)
                     {
-                        var pseudoChannel = _pseudoChannelManager.GetPseudoChannelById(billboardInfo.PseudoChannelId);
-                        pseudoChannel.GetPseudoChannelStream()
-                            .Sample(TimeSpan.FromMilliseconds(500))
-                            .ObserveOn(Scheduler.Default)
-                            .Subscribe(data =>
-                        {
-#if DEBUG
-                            Debug.WriteLine($"接收到的数据: {JsonConvert.SerializeObject(data)}");
-#endif
-                            textInfo.Text = $"{ChangeToStr(data.Unit)}: {data.Value:F3}{data.Unit}";
-                            CollectionDataLabels.Invalidate();
-                        });
+                        var pseudoChannel = _pseudoChannelManager.GetPseudoChannelById(billboardInfo.PseudoChannelId); 
+                        // 将流和对应的 textInfo 关联起来，添加到列表
+                        var stream = pseudoChannel.GetPseudoChannelStream() 
+                            .Select(data => new Model3DRenderModel
+                            {
+                                Model3DId = billboardInfo.ModelFileId,
+                                Data = data,
+                                BillboardId = billboardInfo.Id,
+                                PseudoChannelId = billboardInfo.PseudoChannelId, 
+                            }); 
+                        _textInfoDic.Add(billboardInfo.Id, textInfo);
+                        streamList.Add(stream);
                     }
                     else
                     {
@@ -371,6 +384,15 @@ namespace MCCS.ViewModels.Pages
                         } 
                     }
                     CollectionDataLabels.TextInfo.Add(textInfo); 
+                }
+
+                // 合并所有流，统一订阅
+                if (streamList.Any())
+                {
+                    _combinedSubscription = streamList.CombineLatest()
+                        .Sample(TimeSpan.FromMilliseconds(100))  
+                        .ObserveOn(Scheduler.Default)
+                        .Subscribe(ExecuteUpdateUI); 
                 }
                 // 渲染时机很重要,这里相当于首次设置
                 ConnectionLineGeometry.Positions = positions;
@@ -390,7 +412,32 @@ namespace MCCS.ViewModels.Pages
             {
                 IsLoading = false;
             }
-        } 
+        }
+
+        private void ExecuteUpdateUI(IList<Model3DRenderModel> allUpdates)
+        {
+#if DEBUG
+            // Debug.WriteLine($"CombineLatest 批量更新 {allUpdates.Count} 个广告牌");
+#endif
+            // 一次性更新所有 TextInfo
+            // TODO：这部分还需要大改，因为虚拟通道的类型没加上；以及对应的最大，最小值也没有加上
+            foreach (var data in allUpdates)
+            {
+                _textInfoDic[data.BillboardId].Text = $"{ChangeToStr(data.Data.Unit)}: {data.Data.Value:F3}{data.Data.Unit}";
+                if (data.Data.Unit != "mm") continue;
+                // 更新模型位置
+                var modelInfo = Models.First(c => c.ModelId == data.Model3DId);
+                var moveDirection = modelInfo.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);
+                var proportion = (data.Data.Value + 100) / 200.0f;
+#if DEBUG
+                Debug.WriteLine($"CombineLatest 批量更新 {allUpdates.Count} 个广告牌");
+#endif
+                modelInfo.SetPosition(moveDirection, proportion);
+                modelInfo.SceneNode.UpdateAllTransformMatrix();
+            }
+            // 只调用一次 Invalidate
+            CollectionDataLabels.Invalidate();
+        }
 
         /// <summary>
         /// 测试使用
@@ -410,7 +457,7 @@ namespace MCCS.ViewModels.Pages
              
         }
 
-        private void ExecuteStartTestCommand()
+        private async Task ExecuteStartTestCommand()
         {
             // TODO：后期如果更加复杂后，需要加入事务处理
             if (IsStartedTest)
@@ -433,11 +480,27 @@ namespace MCCS.ViewModels.Pages
                 }
             }
             else
-            { 
+            {
                 if (_controllerManager.OperationTest(true) && GlobalDataManager.Instance.CurrentTestInfo.Start())
-                {
-                    _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
-                    IsStartedTest = true;  
+                { 
+                    var name = $"{DateTime.Now:yyyy MMMM dd hh:mm:sss}_Proj"; 
+                    // 开始记录数据
+                    var projectSuccess = await _projectRepository.AddProjectAsync(new ProjectModel
+                    {
+                        Name = name,
+                        Code = "111",
+                        FilePath = Path.Combine(_defaultSavePath, name),
+                        Standard = "",
+                        MethodName = "",
+                        StartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    });
+                    _projectDbContext.Initial(Path.Combine(name, "project_data_record.dat"));
+                    if (projectSuccess > 0)
+                    { 
+                        
+                        _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
+                        IsStartedTest = true;
+                    }
                 }
                 else
                 {
@@ -495,84 +558,7 @@ namespace MCCS.ViewModels.Pages
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
-        }
-
-        /// <summary>
-        /// 初始化曲线
-        /// </summary>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task InitialCurves()
-        {
-            //var curveInfos = await _curveAggregateRepository.GetCurvesAsync();
-            //var devices= Models
-            //    .Where(s => s.Model3DData.DeviceId != null)
-            //    .Select(s => s.Model3DData).ToList();
-            //_currentTime = DateTime.Now;
-            //foreach (var device in devices) 
-            //{
-            //    var displacementModel = new CurveShowModel("Time(s)", "kN")
-            //    {
-            //        DeviceId = device.DeviceId ?? string.Empty,
-            //        ExpanderHeaderName = $"{device.Name}_时间-位移曲线",
-            //    };
-            //    var forceModel = new CurveShowModel("Time(s)", "mm")
-            //    {
-            //        DeviceId = device.DeviceId ?? string.Empty,
-            //        ExpanderHeaderName = $"{device.Name}_时间-力曲线",
-            //    };
-            //    CurveModels.Add(displacementModel);
-            //    CurveModels.Add(forceModel);
-            //    var actor = _deviceManager.GetDevice(device.DeviceId ?? string.Empty)?.DataStream
-            //    ?? throw new ArgumentNullException($"Device id {device.DeviceId} is not exist！"); 
-            //    actor.Sample(TimeSpan.FromSeconds(1))
-            //    .Subscribe(x => {
-            //        displacementModel.ObservableValues.Add(new CurveMeasureValueModel
-            //        {
-            //            XValue = (DateTime.Now - _currentTime).TotalSeconds,
-            //            YValue = x.Value is MockActuatorCollection v ? v.Displacement : 0
-            //        });
-            //        if (displacementModel.ObservableValues.Count > MaxPoints) displacementModel.ObservableValues.RemoveAt(0);
-            //    });
-            //    actor.Sample(TimeSpan.FromSeconds(1))
-            //    .Subscribe(x => {
-            //        forceModel.ObservableValues.Add(new CurveMeasureValueModel
-            //        {
-            //            XValue = (DateTime.Now - _currentTime).TotalSeconds,
-            //            YValue = x.Value is MockActuatorCollection v ? v.Force : 0
-            //        });
-            //        if (forceModel.ObservableValues.Count > MaxPoints) forceModel.ObservableValues.RemoveAt(0);
-            //    });
-            //}
-        }
-        /// <summary>
-        /// 初始化数据订阅
-        /// </summary>
-        public void InitializeDataSubscriptions()
-        {
-            var controllers = GlobalDataManager.Instance?.ControllerInfos;
-            if (controllers == null) return;
-             
-            _subscribeDispose = controllers
-                .Select(controller => _controllerManager.GetControllerInfo(controller.Id))
-                .Where(controllerInfo => controllerInfo != null)
-                .Select(controllerInfo => controllerInfo.IndividualDataStream
-                    .Sample(TimeSpan.FromMilliseconds(400))
-                    .Select(data => new
-                    {
-                        ControllerId = controllerInfo.DeviceId,
-                        Data = data,
-                        ReceiveTimestamp = DateTime.Now
-                    }))
-                .Merge()
-                // 关键：统一到一个线程处理
-                .ObserveOn(Scheduler.Default) 
-                .Subscribe(packet =>
-                {
-                    // 现在这个回调只会在一个线程上串行执行 
-                    // OnDeviceDataReceived(packet.Data);
-                });
-             
-        }
+        } 
 
         private void OnOperationValveEvent(OperationValveEventParam param)
         {
@@ -592,67 +578,20 @@ namespace MCCS.ViewModels.Pages
             if (param.Param == null) throw new ArgumentNullException(nameof(param.Param)); 
         }
 
-        //private void OnChangedCommandStatus(CommandResponse response) 
-        //{
-        //    var expander = ControlProcessExpanders.FirstOrDefault(c => c.CommandId == response.CommandId);
-        //    var targetModel = Models.FirstOrDefault(s => s.Model3DData.DeviceId == response.CommandId);
-        //    if (expander == null || targetModel == null) return;
-        //    expander.ProgressRate = Math.Round(response.Progress * 100.0, 2);
-        //    // Debug.WriteLine($"更新进度: {Math.Round(response.Progress * 100.0, 2)}");
-        //    if (response.CommandExecuteStatus is CommandExecuteStatusEnum.ExecuttionCompleted or CommandExecuteStatusEnum.Stoping) 
-        //    {
-        //        // 解绑状态订阅链接
-        //        targetModel.DeviceSubscription?.Dispose();
-        //        // 通知控制界面这条指令已经完成
-        //        _eventAggregator.GetEvent<NotificationCommandFinishedEvent>().Publish(new NotificationCommandStatusEventParam 
-        //        { 
-        //            CommandId = response.CommandId,
-        //            CommandExecuteStatus = response.CommandExecuteStatus
-        //        }); 
-        //        PropertyChangeAsync(() => 
-        //        {
-        //            ControlProcessExpanders.Remove(expander);
-        //        });
-        //    }
-        //}
-
+        private float sumDistance = 0.0f;
         /// <summary>
         /// 静态控制模式下 模型移动
-        /// </summary>
-        /// <param name="param"></param>
-        private void StaticMode_ModelMovePosition(StaticControlModel param, Model3DViewModel testModel)
-        {
-            var cancelToken = testModel.CancelModelMove.Token;
-            Task.Run(async () =>
-            {
-                if (testModel == null) return; 
-                var lastGap = double.MaxValue;
-                var stepSize = (float)param.Speed / 600.0f; // 60.0f * 0.1f 合并
-                var moveDirection = testModel.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);
-                while (true)
-                {
-                    // 检查取消
-                    testModel.CancelModelMove.Token.ThrowIfCancellationRequested();
-                    var currentGap = Math.Abs(testModel.DisplacementOffsetValue * 10.0 - param.TargetValue);
-                    if (currentGap >= lastGap) break;
-
-                    lastGap = currentGap;
-                    var direction = Math.Sign(param.TargetValue - testModel.DisplacementOffsetValue * 10);
-                    var movement = stepSize * direction;
-
-                    testModel.PositionChange(moveDirection, movement);
-                    testModel.SceneNode.UpdateAllTransformMatrix();
-                    testModel.DisplacementOffsetValue += movement;
-
-                    await Task.Delay(1000, testModel.CancelModelMove.Token);
-                }
-
-                // 达到最小差距后，直接设置为目标值
-                var finalMovement = (float)(param.TargetValue / 10.0 - testModel.DisplacementOffsetValue);
-                testModel.PositionChange(moveDirection, finalMovement);
-                testModel.SceneNode.UpdateAllTransformMatrix();
-                testModel.DisplacementOffsetValue = (float)(param.TargetValue / 10.0);
-            }, cancelToken);
+        /// </summary> 
+        private void StaticMode_ModelMovePosition()
+        { 
+            var testModel = Models.First(c => c.Model3DData.Id == 439);
+            var moveDirection = testModel.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);   
+            testModel.PositionChange(moveDirection, -5f);
+            sumDistance -= 5f;
+#if DEBUG
+            Debug.WriteLine($"当前移动的距离: {sumDistance:F2}");
+#endif
+            testModel.SceneNode.UpdateAllTransformMatrix();  
         }
 
         /// <summary>
@@ -660,8 +599,7 @@ namespace MCCS.ViewModels.Pages
         /// </summary>
         /// <param name="parameter"></param>
         private void OnModel3DMouseDown(object parameter)
-        {
-            Debug.WriteLine("Exec add!!!!!");
+        { 
             if (parameter is not MouseDown3DEventArgs args) return;
             IsShowContextMenu = false;
             // 检查是否按住了修饰键（如果按住修饰键，则不处理选择）

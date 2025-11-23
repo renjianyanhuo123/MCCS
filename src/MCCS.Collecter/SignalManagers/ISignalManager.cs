@@ -13,6 +13,7 @@ namespace MCCS.Collecter.SignalManagers
         /// </summary>
         /// <param name="signalId"></param>
         /// <returns></returns>
-        IObservable<DataPoint<float>> GetSignalDataStream(long signalId);
+        IObservable<DataPoint<float>> GetSignalDataStream(long signalId); 
+         
     }
 }

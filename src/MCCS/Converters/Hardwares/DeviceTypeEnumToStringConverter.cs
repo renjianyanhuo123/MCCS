@@ -1,6 +1,6 @@
-﻿using MCCS.Core.Models.Devices;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
+using MCCS.Infrastructure.Models.Devices;
 
 namespace MCCS.Converters.Hardwares
 {

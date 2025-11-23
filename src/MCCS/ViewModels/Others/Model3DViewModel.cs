@@ -1,9 +1,10 @@
-﻿using MCCS.Core.Models.Model3D;
+﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
-using MCCS.Common;
-using HelixToolkit.SharpDX.Core;
-using SharpDX;
 using HelixToolkit.Wpf.SharpDX;
+using MCCS.Common; 
+using SharpDX;
+using System.Diagnostics;
+using MCCS.Infrastructure.Models.Model3D;
 
 namespace MCCS.ViewModels.Others
 {
@@ -179,6 +180,37 @@ namespace MCCS.ViewModels.Others
             matrix.M41 = newPosition.X;
             matrix.M42 = newPosition.Y;
             matrix.M43 = newPosition.Z;
+            _sceneNode.ModelMatrix = matrix;
+        }
+
+
+        private const float _modelMaxPosition = 130.0f;
+        private const float _modelMinPosition = -1030.0f;
+        /// <summary>
+        /// 比例位置
+        /// </summary>
+        /// <param name="directionVec"></param>
+        /// <param name="proportionPosition">根据当前模型兼容的最大-最小的比例位置 </param> 
+        public void SetPosition(Vector3 directionVec, float proportionPosition)
+        {
+            var d = _modelMaxPosition - _modelMinPosition;
+            var newPosition = _modelMaxPosition - d * proportionPosition;
+            var matrix = _sceneNode.ModelMatrix;
+            if (directionVec.X != 0)
+            {
+                matrix.M41 = newPosition;
+            } 
+            if (directionVec.Y != 0)
+            {
+                matrix.M42 = newPosition;
+            }
+            if (directionVec.Z != 0)
+            {
+                matrix.M43 = newPosition;
+            }
+#if DEBUG
+            Debug.WriteLine($"移动位置:{newPosition:F2}");
+#endif
             _sceneNode.ModelMatrix = matrix;
         }
 

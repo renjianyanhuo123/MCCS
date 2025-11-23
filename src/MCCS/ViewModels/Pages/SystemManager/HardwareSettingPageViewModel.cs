@@ -1,5 +1,4 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf; 
 using MCCS.Events.Common;
 using MCCS.Events.Hardwares;
 using MCCS.Models.Hardwares;
@@ -9,6 +8,7 @@ using MCCS.Views.Dialogs.Hardwares;
 using Serilog;
 using System.Collections.ObjectModel;
 using System.Windows;
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {

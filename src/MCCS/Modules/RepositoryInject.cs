@@ -1,8 +1,10 @@
-﻿using FreeSql;
-using MCCS.Core.Repositories;
-using MCCS.Core.Repositories.Method;
+﻿using FreeSql; 
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
+using MCCS.Infrastructure.DbContexts;
+using MCCS.Infrastructure.Repositories;
+using MCCS.Infrastructure.Repositories.Method;
+using MCCS.Infrastructure.Repositories.Project;
 
 namespace MCCS.Modules
 {
@@ -18,17 +20,18 @@ namespace MCCS.Modules
                 .UseAutoSyncStructure(true) // 自动同步实体结构到数据库
                 .UseMonitorCommand(cmd => Debug.WriteLine($"SQL: {cmd.CommandText}")) // 监视 SQL 命令
                 .Build();
-            // if (freesql == null) throw new ArgumentNullException(nameof(freesql));
             containerRegistry.RegisterInstance(freesql);
+            containerRegistry.RegisterSingleton<IProjectDbContext, ProjectDbContext>();
             containerRegistry.Register<ISystemMenuRepository, SystemMenuRepository>();
             containerRegistry.Register<ITestInfoRepository, TestInfoRepository>();
             containerRegistry.Register<IModel3DDataRepository, Model3DDataRepository>();
-            containerRegistry.Register<IDeviceInfoRepository, DeviceInfoRepository>();
-            //containerRegistry.Register<IChannelAggregateRepository, ChannelAggregateRepository>();
+            containerRegistry.Register<IDeviceInfoRepository, DeviceInfoRepository>(); 
             containerRegistry.Register<IStationSiteAggregateRepository, StationSiteAggregateRepository>();
             containerRegistry.Register<ICurveAggregateRepository, CurveAggregateRepository>();
+            containerRegistry.Register<IProjectDataRecordRepository, ProjectDataRecordRepository>();
 
             containerRegistry.Register<IMethodRepository, MethodRepository>();
+            containerRegistry.Register<IProjectRepository, ProjectRepository>();
             SeedData.InitialData(freesql);
         }
     }

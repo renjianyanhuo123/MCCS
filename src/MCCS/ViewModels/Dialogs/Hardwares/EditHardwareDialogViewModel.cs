@@ -1,7 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf; 
 using MCCS.Events.Hardwares;
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Dialogs.Hardwares
 {

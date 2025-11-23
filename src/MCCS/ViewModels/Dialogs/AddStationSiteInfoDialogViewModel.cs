@@ -1,7 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf; 
 using MCCS.Events.StationSites;
+using MCCS.Infrastructure.Models.StationSites;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Dialogs

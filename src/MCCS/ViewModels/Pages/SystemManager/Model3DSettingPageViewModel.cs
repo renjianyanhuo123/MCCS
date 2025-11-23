@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using MaterialDesignThemes.Wpf;
-using MCCS.Core.Repositories;
+using MaterialDesignThemes.Wpf; 
 using MCCS.Events.SystemManager;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.Model3D;
 using MCCS.Views.Dialogs;
 

@@ -1,9 +1,10 @@
-﻿using MCCS.Core.Models.Devices;
-using MCCS.Core.Models.Model3D;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Models.SystemManager;
-using MCCS.Core.Models.SystemSetting;
-using MCCS.Core.Models.TestInfo;
+﻿
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Models.Model3D;
+using MCCS.Infrastructure.Models.StationSites;
+using MCCS.Infrastructure.Models.SystemManager;
+using MCCS.Infrastructure.Models.SystemSetting;
+using MCCS.Infrastructure.Models.TestInfo;
 using MCCS.ViewModels.Pages;
 using Newtonsoft.Json;
 

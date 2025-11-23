@@ -41,9 +41,8 @@ namespace MCCS.Collecter.SignalManagers
                     return tempModel;
                 }).Publish()
                 .RefCount();
-        } 
-
-        #endregion
+        }
+        #endregion 
 
     }
 }

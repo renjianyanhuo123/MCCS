@@ -1,4 +1,4 @@
-﻿using MCCS.Core.Models.Devices;
+﻿using MCCS.Infrastructure.Models.Devices;
 
 namespace MCCS.Models.Hardwares
 {

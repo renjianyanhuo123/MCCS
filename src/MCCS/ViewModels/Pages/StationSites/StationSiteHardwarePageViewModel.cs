@@ -1,26 +1,20 @@
-﻿using System.Collections.ObjectModel;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Repositories;
+﻿using System.Collections.ObjectModel; 
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Models.StationSites;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.Stations;
 
 namespace MCCS.ViewModels.Pages.StationSites
 {
-    public sealed class StationSiteHardwarePageViewModel : BaseViewModel
+    public sealed class StationSiteHardwarePageViewModel(
+        IEventAggregator eventAggregator,
+        IDeviceInfoRepository deviceInfoRepository,
+        IStationSiteAggregateRepository stationSiteRepository)
+        : BaseViewModel(eventAggregator)
     {
         public const string Tag = "StationSiteHardware";
 
-        private readonly IDeviceInfoRepository _deviceInfoRepository;
-        private readonly IStationSiteAggregateRepository _stationSiteRepository;
         private long _stationId = -1;
-
-        public StationSiteHardwarePageViewModel(IEventAggregator eventAggregator,
-            IDeviceInfoRepository deviceInfoRepository,
-            IStationSiteAggregateRepository stationSiteRepository) : base(eventAggregator)
-        {
-            _deviceInfoRepository = deviceInfoRepository;
-            _stationSiteRepository = stationSiteRepository;
-        }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
@@ -58,17 +52,17 @@ namespace MCCS.ViewModels.Pages.StationSites
             if (removeObj != null)
             {
                 StationSiteHardwareItems.Remove(removeObj);
-                await _stationSiteRepository.DeleteStationSiteHardwareInfosAsync(_stationId, signalId);
+                await stationSiteRepository.DeleteStationSiteHardwareInfosAsync(_stationId, signalId);
             } 
         }
 
         private async Task ExecuteCheckedCommand(long signalId)
         {
-            var signalInfo = await _deviceInfoRepository.GetSignalInterfaceByIdAsync(signalId);
+            var signalInfo = await deviceInfoRepository.GetSignalInterfaceByIdAsync(signalId);
             if (signalInfo == null) return;
             if (signalInfo.BelongToControllerId <= 0) return;
-            var parentInfo = await _deviceInfoRepository.GetDeviceByIdAsync(signalInfo.BelongToControllerId);
-            var hardwareInfo = await _deviceInfoRepository.GetDeviceByIdAsync(signalInfo.ConnectedDeviceId);
+            var parentInfo = await deviceInfoRepository.GetDeviceByIdAsync(signalInfo.BelongToControllerId);
+            var hardwareInfo = await deviceInfoRepository.GetDeviceByIdAsync(signalInfo.ConnectedDeviceId);
             StationSiteHardwareItems.Add(new StationSiteHardwareItemModel
             {
                 ControllerName = parentInfo.DeviceName,
@@ -85,7 +79,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     itemToRemove.IsSelectable = false;
                 }
             }
-            await _stationSiteRepository.AddStationSiteHardwareInfosAsync([
+            await stationSiteRepository.AddStationSiteHardwareInfosAsync([
                 new StationSiteAndHardwareInfo
                 {
                     StationId = _stationId,
@@ -101,9 +95,9 @@ namespace MCCS.ViewModels.Pages.StationSites
             HardwareListItems.Clear();
             // var devices = await _deviceInfoRepository.GetAllDevicesAsync();
             if (_stationId == -1) throw new ArgumentNullException("StationId is invalid!");
-            var stationSelectedHardware = await _stationSiteRepository.GetStationSiteDevices(_stationId);  
-            var allDevices = await _deviceInfoRepository.GetAllDevicesAsync();
-            var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => allDevices.Select(s => s.Id).Contains(c.ConnectedDeviceId));
+            var stationSelectedHardware = await stationSiteRepository.GetStationSiteDevices(_stationId);  
+            var allDevices = await deviceInfoRepository.GetAllDevicesAsync();
+            var allSignals = await deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => allDevices.Select(s => s.Id).Contains(c.ConnectedDeviceId));
             // 左侧选中的设备
             foreach (var item in stationSelectedHardware)
             {

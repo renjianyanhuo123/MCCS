@@ -1,5 +1,5 @@
-﻿using HelixToolkit.Wpf.SharpDX;
-using MCCS.Core.Models.Model3D;
+﻿using HelixToolkit.Wpf.SharpDX; 
+using MCCS.Infrastructure.Models.Model3D;
 using Color = SharpDX.Color;
 
 namespace MCCS.Common

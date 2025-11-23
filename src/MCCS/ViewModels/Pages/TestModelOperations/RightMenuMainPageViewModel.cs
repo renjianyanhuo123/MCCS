@@ -1,9 +1,4 @@
 ﻿using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Common.DataManagers;
-using MCCS.Common.DataManagers.Devices;
-using MCCS.Common.DataManagers.StationSites;
-using MCCS.Core.Models.Devices;
 using MCCS.Events.Tests;
 using MCCS.Infrastructure.TestModels;
 

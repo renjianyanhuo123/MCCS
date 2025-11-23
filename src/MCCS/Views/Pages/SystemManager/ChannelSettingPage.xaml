@@ -5,13 +5,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager"
-             xmlns:localDeviceStatus="clr-namespace:MCCS.Core.Models.Devices;assembly=MCCS.Core"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:devices="clr-namespace:MCCS.Collecter.Devices;assembly=MCCS.Collecter"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=systemmanager:ChannelSettingPageViewModel}">
+             d:DesignHeight="800" d:DesignWidth="800">
     <UserControl.Resources>
         <!-- 状态指示灯样式 -->
         <Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">

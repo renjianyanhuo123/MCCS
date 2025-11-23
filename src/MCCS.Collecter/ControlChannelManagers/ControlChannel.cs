@@ -80,6 +80,7 @@ namespace MCCS.Collecter.ControlChannelManagers
                 Speed = speed, 
                 TargetValue = 0
             });
+            ControlState = SystemControlState.OpenLoop;
             if (setCtrlModeResult != AddressContanst.OP_SUCCESSFUL)
             {
                 context.Errmesage = "命令发送失败";
@@ -110,13 +111,15 @@ namespace MCCS.Collecter.ControlChannelManagers
                     return context;
                 }
             }
+            ControlState = SystemControlState.Static;
             var setCtrlModeResult = _controller.SetStaticControlMode(controlParam);
             if (setCtrlModeResult == AddressContanst.OP_SUCCESSFUL)
             {
                 // 暂时没有做监测
                 context.IsValid = true;
+                IsDynamicVibration = false;
                 context.ControlMode = SystemControlState.Static;
-            }
+            }  
             return context;
         }
          
@@ -143,12 +146,14 @@ namespace MCCS.Collecter.ControlChannelManagers
                     return context;
                 }
             }
+            ControlState = SystemControlState.Dynamic;
             var setDynamicControlResult = _controller.SetDynamicControlMode(dynamicControlParam);
             if (setDynamicControlResult != AddressContanst.OP_SUCCESSFUL)
             {
                 context.Errmesage = "设置动态控制命令失败";
                 return context;
-            }
+            } 
+            IsDynamicVibration = true;
             context.IsValid = true;
             context.ControlMode = SystemControlState.Static;
             return context;
@@ -161,7 +166,7 @@ namespace MCCS.Collecter.ControlChannelManagers
                 ControlChannelId = ChannelId,
                 IsValid = false
             };
-            if (IsDynamicVibration)
+            if (IsDynamicVibration && ControlState == SystemControlState.Dynamic)
             { 
                 // 动态控制暂停，暂停到当前位置
                 var res = _controller.SetDynamicStopControl(1, 1);

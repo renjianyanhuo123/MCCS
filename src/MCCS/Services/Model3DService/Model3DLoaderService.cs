@@ -1,10 +1,10 @@
 ﻿using HelixToolkit.SharpDX.Core;
-using HelixToolkit.SharpDX.Core.Assimp;
-using MCCS.Core.Models.Model3D;
+using HelixToolkit.SharpDX.Core.Assimp; 
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 using Microsoft.Extensions.Configuration;
 using MCCS.Common;
+using MCCS.Infrastructure.Models.Model3D;
 using SharpDX;
 using Color = System.Windows.Media.Color;
 

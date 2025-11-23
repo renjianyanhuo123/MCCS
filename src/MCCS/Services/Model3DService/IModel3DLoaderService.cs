@@ -1,5 +1,5 @@
 ﻿using System.Windows.Media;
-using MCCS.Core.Models.Model3D;
+using MCCS.Infrastructure.Models.Model3D;
 using MCCS.Services.Model3DService.EventParameters;
 using MCCS.ViewModels.Others;
 

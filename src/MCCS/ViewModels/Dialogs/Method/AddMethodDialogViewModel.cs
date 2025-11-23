@@ -1,9 +1,8 @@
-﻿using System.IO;
-using MaterialDesignThemes.Wpf;
-using MCCS.Components.GlobalNotification.Models;
-using MCCS.Core.Models.MethodManager;
-using MCCS.Core.Repositories.Method;
+﻿using MaterialDesignThemes.Wpf;
+using MCCS.Components.GlobalNotification.Models; 
 using MCCS.Events.Mehtod;
+using MCCS.Infrastructure.Models.MethodManager;
+using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Dialogs.Method

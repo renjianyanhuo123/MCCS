@@ -1,7 +1,5 @@
-﻿using MCCS.Core.Repositories;
-using MCCS.Events;
+﻿using MCCS.Events;
 using MCCS.ViewModels.MethodManager;
-using MCCS.ViewModels.Others;
 using MCCS.ViewModels.ProjectManager;
 
 namespace MCCS.ViewModels.Pages

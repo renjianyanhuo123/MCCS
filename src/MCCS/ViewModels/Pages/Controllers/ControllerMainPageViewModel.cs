@@ -9,7 +9,7 @@ using MCCS.Views.Pages.ControlCommandPages;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Components.GlobalNotification.Models;
-using MCCS.Core.Models.StationSites;
+using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Models.ControlCommand;
 using MCCS.Services.NotificationService;

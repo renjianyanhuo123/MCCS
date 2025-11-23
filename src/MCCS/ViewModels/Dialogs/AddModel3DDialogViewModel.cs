@@ -1,7 +1,5 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.Model3D;
-using MCCS.Core.Repositories;
-using MCCS.Events.SystemManager;
+﻿using MaterialDesignThemes.Wpf;  
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Dialogs
 {

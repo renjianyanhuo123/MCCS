@@ -1,5 +1,5 @@
-﻿using MCCS.Core.Models.StationSites;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Models.Stations
 {

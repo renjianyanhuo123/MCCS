@@ -1,11 +1,11 @@
-﻿using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.Devices;
-using MCCS.Core.Models.StationSites;
-using MCCS.Core.Repositories;
+﻿using MaterialDesignThemes.Wpf; 
 using MCCS.Events.StationSites.ControlChannels;
 using MCCS.Models.ControlCommand;
 using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
+using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Models.StationSites;
+using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
 {

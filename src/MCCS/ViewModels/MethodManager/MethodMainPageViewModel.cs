@@ -1,10 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using MaterialDesignThemes.Wpf;
-using MCCS.Core.Models.MethodManager;
-using MCCS.Core.Repositories.Method;
+using MaterialDesignThemes.Wpf; 
 using MCCS.Events.Common;
 using MCCS.Events.Mehtod;
+using MCCS.Infrastructure.Models.MethodManager;
+using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager;
 using MCCS.UserControl.Params;
 using MCCS.Views.Dialogs.Common;
