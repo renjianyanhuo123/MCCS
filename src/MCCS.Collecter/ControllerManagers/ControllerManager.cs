@@ -34,7 +34,12 @@ namespace MCCS.Collecter.ControllerManagers
         public IController GetControllerInfo(long controllerId)
         { 
             return _controllers[controllerId];
-        } 
+        }
+
+        public IList<IController> GetControllers()
+        {
+            return _controllers.Values.ToList();
+        }
 
         public bool OperationTest(bool isStart)
         {

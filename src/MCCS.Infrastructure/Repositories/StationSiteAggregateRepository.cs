@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Domain;
 using MCCS.Infrastructure.Domain.StationSites;
 using MCCS.Infrastructure.Models.Devices;
@@ -7,7 +8,7 @@ using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class StationSiteAggregateRepository(IFreeSql freeSql) : IStationSiteAggregateRepository
+    public class StationSiteAggregateRepository(IFreeSql<SystemDbFlag> freeSql) : IStationSiteAggregateRepository
     {
         public async Task<bool> AddControlChannelAndModelInfoAsync(List<ControlChannelAndModel3DInfo> controlChannelAndModel3DInfos, CancellationToken cancellationToken)
         {

@@ -308,7 +308,7 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 确保目录存在
         /// </summary>
-        private static void EnsureDirectoryExists(string filePath)
+        public static void EnsureDirectoryExists(string filePath)
         {
             var directory = Path.GetDirectoryName(filePath);
             if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))

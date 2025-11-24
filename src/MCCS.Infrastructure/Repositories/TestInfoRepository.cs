@@ -1,9 +1,10 @@
 ﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Models.TestInfo;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class TestInfoRepository(IFreeSql freeSql) : ITestInfoRepository
+    public class TestInfoRepository(IFreeSql<SystemDbFlag> freeSql) : ITestInfoRepository
     {
         public async ValueTask<int> AddEntities(IEnumerable<Test> testInfos, CancellationToken cancellationToken) 
         {

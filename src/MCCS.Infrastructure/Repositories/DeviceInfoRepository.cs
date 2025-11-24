@@ -1,9 +1,10 @@
-﻿using System.Linq.Expressions;
+﻿using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Models.Devices;
+using System.Linq.Expressions;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class DeviceInfoRepository(IFreeSql freeSql) : IDeviceInfoRepository
+    public class DeviceInfoRepository(IFreeSql<SystemDbFlag> freeSql) : IDeviceInfoRepository
     {
         public async Task<List<DeviceInfo>> GetAllDevicesAsync(CancellationToken cancellationToken = default)
         {

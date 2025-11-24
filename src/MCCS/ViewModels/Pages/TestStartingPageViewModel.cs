@@ -4,12 +4,19 @@ using HelixToolkit.Wpf.SharpDX;
 using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.PseudoChannelManagers;
+using MCCS.Collecter.SignalManagers;
 using MCCS.Common;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.CurrentTest;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.Controllers;
 using MCCS.Events.Tests;
+using MCCS.Infrastructure.DbContexts;
+using MCCS.Infrastructure.Helper;
+using MCCS.Infrastructure.Models.Model3D;
+using MCCS.Infrastructure.Models.ProjectManager;
+using MCCS.Infrastructure.Repositories;
+using MCCS.Infrastructure.Repositories.Project;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Models.ControlCommand;
 using MCCS.Models.CurveModels;
@@ -20,22 +27,19 @@ using MCCS.Services.NotificationService;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Others;
 using MCCS.ViewModels.Pages.Controllers;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using SharpDX;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
-using MCCS.Infrastructure.DbContexts;
-using MCCS.Infrastructure.Models.Model3D;
-using MCCS.Infrastructure.Models.ProjectManager;
-using MCCS.Infrastructure.Repositories;
-using MCCS.Infrastructure.Repositories.Project;
-using Microsoft.Extensions.Configuration;
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;
 using HitTestResult = HelixToolkit.SharpDX.Core.HitTestResult;
@@ -64,9 +68,14 @@ namespace MCCS.ViewModels.Pages
         private readonly INotificationService _notificationService;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectDbContext _projectDbContext; 
+        private readonly ISignalManager _signalManager;
+        private readonly IProjectDataRecordRepository _projectDataRecordRepository;
         private readonly string _defaultSavePath;
 
-        private IDisposable? _combinedSubscription;
+        private IDisposable? _combinedSubscription; 
+        private IDisposable? _dataRecordSaveSubscription;
+        private readonly Subject<Unit> _stopSignal = new();
+
         // 存储所有的广告牌引用,方便后期快速更新
         private readonly Dictionary<long, TextInfoExt> _textInfoDic = [];
         private readonly Dictionary<string, TextInfoExt> _modelTextInfoDic = [];
@@ -81,6 +90,8 @@ namespace MCCS.ViewModels.Pages
         private Model3DViewModel? _clearOperationModel = null; 
         private MultipleControllerMainPageViewModel? _multipleControllerMainPageViewModel = null;
         private bool _isCtrlPressed = false;
+
+        private long _testStartFlag = 1;
         #endregion
 
         #region Command
@@ -113,9 +124,10 @@ namespace MCCS.ViewModels.Pages
             INotificationService notificationService,
             IPseudoChannelManager pseudoChannelManager,
             IProjectRepository projectRepository,
-            IProjectDbContext projectDbContext,
-            IProjectDataRecordRepository projectDataRecordRepository,
+            IProjectDbContext projectDbContext, 
             IConfiguration configuration,
+            ISignalManager signalManager,
+            IProjectDataRecordRepository projectDataRecordRepository,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             // EnvironmentMap = TextureModel.Create(@"F:\models\test\Cubemap_Grandcanyon.dds"); 
@@ -127,7 +139,9 @@ namespace MCCS.ViewModels.Pages
             _controlChannelManager = controlChannelManager;
             _pseudoChannelManager = pseudoChannelManager;
             _projectRepository = projectRepository;
-            _projectDbContext = projectDbContext; 
+            _projectDbContext = projectDbContext;
+            _signalManager = signalManager;
+            _projectDataRecordRepository = projectDataRecordRepository;
             _defaultSavePath = configuration["DefaultProjectSavePath"] ?? "";
             LoadModelsCommand = new AsyncDelegateCommand(LoadModelsAsync);
             Model3DMouseDownCommand = new DelegateCommand<object>(OnModel3DMouseDown);
@@ -470,9 +484,18 @@ namespace MCCS.ViewModels.Pages
                 // 终止当前实验时,将会重置整个实验
                 if (_controllerManager.OperationTest(false) && GlobalDataManager.Instance.CurrentTestInfo.Stop())
                 {
+                    _testStartFlag = 1;// 重置数据标志
                     _notificationService.Show("成功", "成功停止实验!", NotificationType.Success);
                     GlobalDataManager.Instance.SetValue(new CurrentTestInfo());
-                    IsStartedTest = false; 
+                    IsStartedTest = false;
+                    // 停止采集信号
+                    _stopSignal.OnNext(Unit.Default);
+                    _stopSignal.OnCompleted();
+                    _dataRecordSaveSubscription?.Dispose();
+                    // 终止试验后取消所有的选中
+                    Models.ForEach(c => c.IsSelected = false);
+                    Controllers.Clear();
+                    IsShowController = false;
                 }
                 else
                 {
@@ -482,8 +505,10 @@ namespace MCCS.ViewModels.Pages
             else
             {
                 if (_controllerManager.OperationTest(true) && GlobalDataManager.Instance.CurrentTestInfo.Start())
-                { 
-                    var name = $"{DateTime.Now:yyyy MMMM dd hh:mm:sss}_Proj"; 
+                {
+                    _testStartFlag = 1;
+                    var name = $"{DateTime.Now:yyyy_MM_dd_hhmmsss}_Proj/";
+                    var savePath = Path.Combine(_defaultSavePath, name);
                     // 开始记录数据
                     var projectSuccess = await _projectRepository.AddProjectAsync(new ProjectModel
                     {
@@ -494,10 +519,29 @@ namespace MCCS.ViewModels.Pages
                         MethodName = "",
                         StartTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
                     });
-                    _projectDbContext.Initial(Path.Combine(name, "project_data_record.dat"));
+                    FileHelper.EnsureDirectoryExists(savePath);
+                    _projectDbContext.Initial(Path.Combine(savePath, "project_data_record.dat"));
                     if (projectSuccess > 0)
-                    { 
-                        
+                    {
+                        _dataRecordSaveSubscription = _signalManager.GetProjectDataRecords()
+                            .Buffer(TimeSpan.FromSeconds(5), 1000)
+                            .TakeUntil(_stopSignal)
+                            .Subscribe(async void (datas) =>
+                            {
+                                try
+                                {
+#if DEBUG
+                                    Debug.WriteLine($"当前试验保存数据{datas.Count}个");
+#endif
+                                    var saveList = datas.SelectMany(x => x).ToList();
+                                    foreach (var item in saveList) item.Timestamp = _testStartFlag++;
+                                    await _projectDataRecordRepository.BatchAddRecordAsync(saveList);
+                                }
+                                catch (Exception e)
+                                {
+                                    Log.Error("试验数据保存数据错误");
+                                }
+                            });
                         _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
                         IsStartedTest = true;
                     }
@@ -509,6 +553,9 @@ namespace MCCS.ViewModels.Pages
             } 
         }
 
+        /// <summary>
+        /// 暂停/继续试验
+        /// </summary>
         private void ExecutePauseTestCommand()
         {
             if (IsPaused)

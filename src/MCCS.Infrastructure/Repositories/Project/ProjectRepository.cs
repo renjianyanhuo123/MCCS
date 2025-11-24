@@ -1,10 +1,11 @@
 ﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Models;
 using MCCS.Infrastructure.Models.ProjectManager;
 
 namespace MCCS.Infrastructure.Repositories.Project
 {
-    public class ProjectRepository(IFreeSql freeSql) : IProjectRepository
+    public class ProjectRepository(IFreeSql<SystemDbFlag> freeSql) : IProjectRepository
     {
         public Task<ProjectModel> GetProjectAsync(long id)
         {

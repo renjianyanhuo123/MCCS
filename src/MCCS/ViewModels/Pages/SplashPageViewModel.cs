@@ -14,8 +14,7 @@ namespace MCCS.ViewModels.Pages
         private string _statusText;
         private string _appName;
         private string _version;
-        private readonly ISplashService _splashService;
-        private readonly IContainerProvider _containerProvider;
+        private readonly ISplashService _splashService; 
         #endregion
 
         #region Properties
@@ -58,11 +57,9 @@ namespace MCCS.ViewModels.Pages
 
         #region Constructor 
         public SplashPageViewModel(ISplashService splashService,
-            IEventAggregator eventAggregator,
-            IContainerProvider containerProvider) : base(eventAggregator)
+            IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _splashService = splashService ?? throw new ArgumentNullException(nameof(splashService)); 
-            _containerProvider = containerProvider;
+            _splashService = splashService ?? throw new ArgumentNullException(nameof(splashService));  
             Initialize();
         }
         #endregion

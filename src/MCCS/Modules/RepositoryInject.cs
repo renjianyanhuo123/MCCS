@@ -19,8 +19,8 @@ namespace MCCS.Modules
                 .UseAdoConnectionPool(true)
                 .UseAutoSyncStructure(true) // 自动同步实体结构到数据库
                 .UseMonitorCommand(cmd => Debug.WriteLine($"SQL: {cmd.CommandText}")) // 监视 SQL 命令
-                .Build();
-            containerRegistry.RegisterInstance(freesql);
+                .Build<SystemDbFlag>();
+            containerRegistry.RegisterInstance<IFreeSql<SystemDbFlag>>(freesql);
             containerRegistry.RegisterSingleton<IProjectDbContext, ProjectDbContext>();
             containerRegistry.Register<ISystemMenuRepository, SystemMenuRepository>();
             containerRegistry.Register<ITestInfoRepository, TestInfoRepository>();

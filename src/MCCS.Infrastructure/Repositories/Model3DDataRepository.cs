@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Domain;
 using MCCS.Infrastructure.Models.Model3D;
 using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class Model3DDataRepository(IFreeSql freeSql) : IModel3DDataRepository
+    public class Model3DDataRepository(IFreeSql<SystemDbFlag> freeSql) : IModel3DDataRepository
     {
         public async Task<List<Model3DData>> GetModelAsync(long groupKey, CancellationToken cancellationToken)
         {

@@ -20,6 +20,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{98ABC4BB-C4AF-47DE-94F7-2ED22B82B6AE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		todolist.txt = todolist.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Dll.Example", "src\MCCS.Dll.Example\MCCS.Dll.Example.csproj", "{BC5CCD18-8FD7-4F3C-9524-7B8EA9F08090}"
 EndProject

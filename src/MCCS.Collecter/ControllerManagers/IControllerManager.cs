@@ -20,6 +20,11 @@ namespace MCCS.Collecter.ControllerManagers
         /// <exception cref="ArgumentNullException"></exception>
         IController GetControllerInfo(long controllerId);
         /// <summary>
+        /// 获取当前所有可用控制器
+        /// </summary>
+        /// <returns></returns>
+        IList<IController> GetControllers();
+        /// <summary>
         /// 创建控制器
         /// </summary>
         /// <param name="configuration"></param>

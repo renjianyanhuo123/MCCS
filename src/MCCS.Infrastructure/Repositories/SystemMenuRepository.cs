@@ -1,8 +1,9 @@
-﻿using MCCS.Infrastructure.Models.SystemSetting;
+﻿using MCCS.Infrastructure.DbContexts;
+using MCCS.Infrastructure.Models.SystemSetting;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class SystemMenuRepository(IFreeSql freeSql) : ISystemMenuRepository
+    public class SystemMenuRepository(IFreeSql<SystemDbFlag> freeSql) : ISystemMenuRepository
     {
         public async Task<List<SystemMenu>> GetChildMenusById(long parentId, CancellationToken cancellationToken) 
         {

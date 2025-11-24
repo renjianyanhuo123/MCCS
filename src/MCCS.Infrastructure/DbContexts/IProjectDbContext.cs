@@ -11,5 +11,5 @@ public interface IProjectDbContext
     /// 获取数据库操作
     /// </summary>
     /// <returns></returns>
-    IFreeSql GetDbFreeSql();
+    IFreeSql<ProjectDbFlag> GetDbFreeSql();
 }

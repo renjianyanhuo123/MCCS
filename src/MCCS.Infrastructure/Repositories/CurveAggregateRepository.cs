@@ -1,9 +1,10 @@
-﻿using MCCS.Infrastructure.Domain.Curves;
+﻿using MCCS.Infrastructure.DbContexts;
+using MCCS.Infrastructure.Domain.Curves;
 using MCCS.Infrastructure.Models.CurveModels;
 
 namespace MCCS.Infrastructure.Repositories
 {
-    public class CurveAggregateRepository(IFreeSql freeSql) : ICurveAggregateRepository
+    public class CurveAggregateRepository(IFreeSql<SystemDbFlag> freeSql) : ICurveAggregateRepository
     {
         public async Task<List<CurveAggregate>> GetCurvesAsync(CancellationToken cancellationToken = default)
         {

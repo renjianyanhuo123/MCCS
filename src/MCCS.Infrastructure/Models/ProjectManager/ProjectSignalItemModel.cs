@@ -3,16 +3,21 @@
 namespace MCCS.Infrastructure.Models.ProjectManager
 {
     [Table(Name = "project_SignalItem")]
-    public record ProjectSignalItemModel
+    public class ProjectSignalItemModel
     {
-        [Column(IsPrimary = true)]
-        public long RecordId { get; set; }
+        [Column(IsPrimary = true, IsIdentity = true)]
+        public long Id { get; set; }
 
-        [Column(IsPrimary = true)]
-        public required string SignalKey { get; init; }
+        [Column(IsNullable = false, StringLength = 30)]
+        public required string RecordId { get; set; }
 
-        public required float Value { get; init; }
+        [Column(IsNullable = false, StringLength = 30)]
+        public required string SignalKey { get; set; }
 
-        public required string Unit { get; init; }
+        public required long SignalId { get; set; }
+
+        public required float Value { get; set; }
+        [Column(IsNullable = false, StringLength = 20)]
+        public required string Unit { get; set; }
     }
 }

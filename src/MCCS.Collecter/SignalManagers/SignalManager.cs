@@ -2,6 +2,7 @@
 using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.SignalManagers.Signals;
+using MCCS.Infrastructure.Models.ProjectManager;
 
 namespace MCCS.Collecter.SignalManagers
 {
@@ -39,9 +40,39 @@ namespace MCCS.Collecter.SignalManagers
                         Value = signChannel.SignalAddressIndex < 10 ? info.Value.Net_AD_N[signChannel.SignalAddressIndex] : info.Value.Net_AD_S[signChannel.SignalAddressIndex % 10]
                     };
                     return tempModel;
-                }).Publish()
+                })
+                .Publish()
                 .RefCount();
         }
+
+        public IObservable<List<ProjectDataRecordModel>> GetProjectDataRecords()
+        {
+            // TODO：只能取第一个控制器了，后面肯定要根据实际情况修改的
+            var controller = _controllerManager.GetControllers().First();
+            return controller.DataStream.Select(s =>
+            {
+                var res = new List<ProjectDataRecordModel>();
+                foreach (var data in s.Value)
+                {
+                    var recordData = new ProjectDataRecordModel(); 
+                    // 一次性采集所有的信号
+                    foreach (var signal in _signals)
+                    {
+                        recordData.SignalItems.Add(new ProjectSignalItemModel
+                        {
+                            RecordId = recordData.RecordId,
+                            SignalKey = "",
+                            SignalId = signal.SignalId,
+                            Unit = signal.Configuration.Unit,
+                            Value = signal.SignalAddressIndex < 10 ? data.Net_AD_N[signal.SignalAddressIndex] : data.Net_AD_S[signal.SignalAddressIndex % 10]
+                        });
+                    }
+                    res.Add(recordData);
+                } 
+                return res;
+            });
+        }
+
         #endregion 
 
     }
