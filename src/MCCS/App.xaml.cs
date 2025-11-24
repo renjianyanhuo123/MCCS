@@ -30,9 +30,11 @@ using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
 using MCCS.ViewModels.Pages.WorkflowSteps;
+using MCCS.ViewModels.Dialogs.Project;
 using MCCS.Views.ProjectManager;
 using MCCS.ViewModels.ProjectManager;
 using MCCS.Views.Dialogs.Method;
+using MCCS.Views.Dialogs.Project;
 using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
 using MCCS.Views.Pages.WorkflowSteps;
@@ -137,6 +139,8 @@ namespace MCCS
             containerRegistry.RegisterDialog<EditPseudoChannelPage>(EditPseudoChannelPageViewModel.Tag);
             // Dialog  Methods
             containerRegistry.RegisterDialog<AddMethodDialog>(AddMethodDialogViewModel.Tag);
+            // Dialog Projects
+            containerRegistry.RegisterDialog<AddProjectDialog>(AddProjectDialogViewModel.Tag);
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);
