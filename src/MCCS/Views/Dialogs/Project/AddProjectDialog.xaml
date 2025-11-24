@@ -1,0 +1,118 @@
+<UserControl x:Class="MCCS.Views.Dialogs.Project.AddProjectDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:project="clr-namespace:MCCS.ViewModels.Dialogs.Project"
+             xmlns:prism="http://prismlibrary.com/"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             d:DataContext="{d:DesignInstance Type=project:AddProjectDialogViewModel}"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid Height="600" Width="800">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="100" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" BorderThickness="0,0,0,2" BorderBrush="#C5C5C5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="80" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="添加项目"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="20"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Left" />
+                <Border Grid.Column="1" Margin="20"
+                        HorizontalAlignment="Right"
+                        Background="#F1F1F1"
+                        BorderThickness="0"
+                        Width="30"
+                        Height="30"
+                        Cursor="Hand">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseDown">
+                            <b:InvokeCommandAction Command="{Binding CloseCommand}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Viewbox>
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Viewbox>
+                </Border>
+            </Grid>
+        </Border>
+        <ScrollViewer Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="15">
+                    <TextBlock Text="项目名称" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding Name}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="0" Margin="15">
+                    <TextBlock Text="项目编号" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding Code}" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="1" Margin="15">
+                    <TextBlock Text="试验方法" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding MethodName}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="1" Margin="15">
+                    <TextBlock Text="试验标准" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding Standard}" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="2" Margin="15">
+                    <TextBlock Text="试验人员" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding Person}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="2" Margin="15">
+                    <TextBlock Text="文件路径" FontSize="14" Margin="0,0,0,15" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Width="200" IsEnabled="False" Text="{Binding FilePath}" />
+                        <Button Content="{materialDesign:PackIcon FileMoveOutline}" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="3" Margin="15">
+                    <TextBlock Text="试验时长(秒)" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox Text="{Binding TestTime}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Grid.Row="3" Margin="15">
+                    <TextBlock Text="开始时间" FontSize="14" Margin="0,0,0,15" />
+                    <DatePicker SelectedDate="{Binding StartTime}" />
+                </StackPanel>
+                <StackPanel Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="15">
+                    <TextBlock Text="备注" FontSize="14" Margin="0,0,0,15" />
+                    <TextBox TextWrapping="Wrap" AcceptsReturn="True" Text="{Binding Remark}" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+        <Border Grid.Row="2" BorderThickness="0,2,0,0" BorderBrush="#C5C5C5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="取消"
+                        Width="80"
+                        Command="{Binding CloseCommand}"
+                        Style="{StaticResource MaterialDesignOutlinedSecondaryButton}" />
+                <Button Width="80"
+                        Content="提交"
+                        Margin="30,0,30,0"
+                        Command="{Binding SaveCommand}"
+                        Style="{StaticResource MaterialDesignFlatMidBgButton}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
