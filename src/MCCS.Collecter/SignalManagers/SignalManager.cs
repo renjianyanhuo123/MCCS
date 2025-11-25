@@ -3,6 +3,7 @@ using MCCS.Collecter.ControllerManagers;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Infrastructure.Models.ProjectManager;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Collecter.SignalManagers
 {
@@ -73,7 +74,23 @@ namespace MCCS.Collecter.SignalManagers
             });
         }
 
-        #endregion 
+        public DeviceCommandContext SetSignalTare(long signalId)
+        {
+            var context = new DeviceCommandContext
+            {
+                IsValid = true
+            };
+
+            var signalChannel = _signals.FirstOrDefault(c => c.SignalId == signalId);
+            if (signalChannel == null) throw new ArgumentNullException("signalId is null");
+            var controller = _controllerManager.GetControllerInfo(signalChannel.BelongControllerId);
+            // TODO: 为了兼容旧的模式;因为目前直接传入的位移或力，正确的方案应该是传入SignalID
+            var controlType = signalChannel.Configuration.Unit == "mm" ? 0 : 1;
+            controller.SetSignalTare(controlType);
+            return context;
+        }
+
+        #endregion
 
     }
 }

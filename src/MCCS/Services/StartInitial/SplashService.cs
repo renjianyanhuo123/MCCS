@@ -137,8 +137,7 @@ namespace MCCS.Services.StartInitial
                         SignalId = s.Id,
                         SignalName = s.SignalName,
                         BelongControllerId = s.BelongToControllerId,
-                        SignalAddress = (SignalAddressEnum)s.SignalAddress,
-
+                        SignalAddress = (SignalAddressEnum)s.SignalAddress
                     }).ToList()
                 };
                 pseudoChannelConfigurations.Add(tempPseudoChannel);
@@ -199,6 +198,7 @@ namespace MCCS.Services.StartInitial
                 SignalAddress = (SignalAddressEnum)s.SignalAddress,
                 MinValue = s.DownLimitRange,
                 MaxValue = s.UpLimitRange,
+                Unit = s.Unit,
                 BelongControllerId = s.BelongToControllerId,
                 DeviceId = s.ConnectedDeviceId
             }));

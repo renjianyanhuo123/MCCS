@@ -1,6 +1,7 @@
 ﻿using MCCS.Collecter.HardwareDevices;
 using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Infrastructure.Models.ProjectManager;
+using MCCS.Infrastructure.TestModels.Commands;
 
 namespace MCCS.Collecter.SignalManagers
 {
@@ -23,5 +24,12 @@ namespace MCCS.Collecter.SignalManagers
         /// </summary>
         /// <returns></returns>
         IObservable<List<ProjectDataRecordModel>> GetProjectDataRecords();
+
+        /// <summary>
+        /// 设置信号清零
+        /// </summary>
+        /// <param name="signalId"></param>
+        /// <returns></returns>
+        DeviceCommandContext SetSignalTare(long signalId);
     }
 }

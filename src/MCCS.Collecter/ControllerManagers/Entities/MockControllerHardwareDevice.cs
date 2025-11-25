@@ -18,6 +18,9 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private float _force = 10.0f;
         private float _position = 50.0f;
 
+        private float _absoultForce = 0.0f;
+        private float _absoultPosition = 0.0f;
+
         private readonly object _lock = new(); 
 
         private const float ForceMin = -10000.0f;
@@ -37,6 +40,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private PeriodicTimer? _positionTimer;
         private PeriodicTimer? _dynamicTimer;
         private const double _samplingInterval = 0.01;
+
+        private StaticLoadControlEnum _staticControl = StaticLoadControlEnum.CTRLMODE_LoadS;
         /// <summary>
         /// 阀门状态
         /// </summary>
@@ -195,8 +200,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 Net_AD_N =
                 {
-                    [0] = (float)AddNormalNoise(_force),
-                    [1] = (float)AddNormalNoise(_force),
+                    [0] = (float)AddNormalNoise(_force, 0.001),
+                    [1] = (float)AddNormalNoise(_force, 0.001),
                     [2] = (float)(rand.NextDouble() * 100),
                     [3] = (float)(rand.NextDouble() * 100),
                     [4] = (float)(rand.NextDouble() * 100),
@@ -204,8 +209,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                 },
                 Net_AD_S =
                 {
-                    [0] = (float)AddNormalNoise(_position),
-                    [1] = (float)AddNormalNoise(_position)
+                    [0] = (float)AddNormalNoise(_position, 0.001),
+                    [1] = (float)AddNormalNoise(_position, 0.001)
                 }
             };
             res.Add(mockValue);
@@ -259,6 +264,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             ControlState = SystemControlState.Static;
             var speed = controlParams.Speed / 60.0f;
             speed /= 1000.0f;
+            _staticControl = controlParams.StaticLoadControl;
             switch (controlParams.StaticLoadControl)
             {
                 case StaticLoadControlEnum.CTRLMODE_LoadN:
@@ -324,13 +330,13 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 _dynamicTimer.Dispose();
                 _dynamicTimer = null;
-            }
-
+            } 
             _dynamicCTS = new CancellationTokenSource();
             _dynamicTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(10));
             var token = _dynamicCTS.Token;
             double time = 0; // seconds 
             double totalDuration = param.CycleCount / param.Frequency; // 总时长(秒) = 周期数 / 频率
+            
             Task.Run(async () =>
             {
                 while (time <= totalDuration && _dynamicTimer != null && await _dynamicTimer.WaitForNextTickAsync(token))
@@ -371,6 +377,23 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             _dynamicTimer = null;
             _dynamicCTS = null;
             return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public int SetSignalTare(int controlType)
+        {
+            if (ControlState != SystemControlState.Static) return 10; 
+            if (_staticControl is StaticLoadControlEnum.CTRLMODE_LoadS or StaticLoadControlEnum.CTRLMODE_LoadSVNP
+                or StaticLoadControlEnum.CTRLMODE_TRACES) return 20;
+            _absoultForce = _force;
+            _absoultPosition = _position;
+            _force = 0.0f;
+            _position = 0.0f;
+            return AddressContanst.OP_SUCCESSFUL;
+        }
+
+        public StaticLoadControlEnum GetStaticLoadControl()
+        {
+            return _staticControl;
         }
 
         private void MockStaticControlStop()

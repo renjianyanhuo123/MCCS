@@ -1,10 +1,11 @@
 ﻿using System.Linq.Expressions;
+using MCCS.Infrastructure.DbContexts;
 using MCCS.Infrastructure.Models;
 using MCCS.Infrastructure.Models.MethodManager;
 
 namespace MCCS.Infrastructure.Repositories.Method
 {
-    public sealed class MethodRepository(IFreeSql freeSql) : IMethodRepository
+    public sealed class MethodRepository(IFreeSql<SystemDbFlag> freeSql) : IMethodRepository
     {
         public async ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken)
         {

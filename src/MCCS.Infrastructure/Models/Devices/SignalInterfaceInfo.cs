@@ -36,6 +36,12 @@ namespace MCCS.Infrastructure.Models.Devices
         public long SignalAddress { get; set; }
 
         /// <summary>
+        /// 单位
+        /// </summary>
+        [Column(IsNullable = true, StringLength = 20)]
+        public string Unit { get; set; }
+
+        /// <summary>
         /// 更新周期(单位毫秒)
         /// </summary>
         public double UpdateCycle { get; set; }

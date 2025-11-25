@@ -189,5 +189,36 @@ namespace MCCS.Collecter.ControlChannelManagers
             context.IsValid = true; 
             return context;
         }
+        /// <summary>
+        /// 设置控制通道清零
+        /// </summary>
+        /// <param name="controlType"></param>
+        /// <returns></returns>
+        public DeviceCommandContext SetControlChannelTare(int controlType)
+        {
+            var context = new DeviceCommandContext
+            {
+                ControlChannelId = ChannelId,
+                IsValid = false
+            };
+            var success = _controller.SetSignalTare(controlType);
+            switch (success)
+            {
+                case AddressContanst.OP_SUCCESSFUL:
+                    context.IsValid = true;
+                    break;
+                case 10:
+                    context.Errmesage = "控制器不处于静态状态";
+                    break;
+                case 20:
+                    context.Errmesage = "控制器正处于静态运行状态";
+                    break;
+                default:
+                    context.Errmesage = "其他错误类型";
+                    break;
+            }
+
+            return context;
+        }
     }
 }

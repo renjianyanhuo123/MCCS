@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using MaterialDesignThemes.Wpf;
+using MCCS.Events.Common;
 using MCCS.Events.Project;
 using MCCS.Infrastructure.Models.ProjectManager;
 using MCCS.Infrastructure.Repositories.Project;
@@ -110,7 +111,7 @@ namespace MCCS.ViewModels.ProjectManager
                 expression = expression.And(c => c.CreateTime <= EndTime);
             }
 
-            var res = await _projectRepository.GetPageMethodsAsync(_pageIndex, _pageSize, expression);
+            var res = await _projectRepository.GetPageMethodsAsync(1, _pageSize, expression);
             TotalCount = res.TotalCount;
             foreach (var project in res.Items)
             {

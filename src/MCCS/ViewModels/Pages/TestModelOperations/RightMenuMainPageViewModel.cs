@@ -1,4 +1,5 @@
-﻿using MCCS.Collecter.ControlChannelManagers;
+﻿using DryIoc;
+using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Events.Tests;
 using MCCS.Infrastructure.TestModels;
 
@@ -11,7 +12,7 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         private string _modelId = string.Empty;
 
         private readonly IEventAggregator _eventAggregator; 
-        private readonly IControlChannelManager _controlChannelManager;
+        private readonly IControlChannelManager _controlChannelManager; 
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
             IControlChannelManager controlChannelManager) : base(eventAggregator)
@@ -19,6 +20,8 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
             _eventAggregator = eventAggregator; 
             _controlChannelManager = controlChannelManager;
             OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
+            ForceTareCommand = new DelegateCommand(ExecuteForceTareCommand);
+            PositionTareCommand = new DelegateCommand(ExecutePositionTareCommand);
             eventAggregator.GetEvent<NotificationRightMenuValveStatusEvent>()
                 .Subscribe(param =>
                 {
@@ -38,10 +41,42 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         #endregion
 
         #region Command  
-        public DelegateCommand<string> OperationValveCommand { get; } 
+        public DelegateCommand<string> OperationValveCommand { get; }
+
+        public DelegateCommand ForceTareCommand { get; }
+
+        public DelegateCommand PositionTareCommand { get; }
+
         #endregion
 
-        #region Private Method
+        #region Private Method 
+        private void ExecutePositionTareCommand()
+        {
+            if (_controlChannelId == -1 && string.IsNullOrEmpty(_modelId)) return;
+            var channel = _controlChannelManager.GetControlChannel(_controlChannelId);
+            var success = channel.SetControlChannelTare(0);
+            if (success.IsValid)
+            {
+                _eventAggregator.GetEvent<OperationTareEvent>().Publish(new OperationTareEventParam
+                { 
+                    ControlType = 0
+                });
+            }
+        }
+
+        private void ExecuteForceTareCommand()
+        {
+            if (_controlChannelId == -1 && string.IsNullOrEmpty(_modelId)) return;
+            var channel = _controlChannelManager.GetControlChannel(_controlChannelId);
+            var success = channel.SetControlChannelTare(1);
+            if (success.IsValid)
+            {
+                _eventAggregator.GetEvent<OperationTareEvent>().Publish(new OperationTareEventParam
+                {
+                    ControlType = 1
+                });
+            }
+        }
 
         private void ExecuteOperationValveCommand(string obj)
         {

@@ -76,6 +76,18 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         /// <param name="tmpActMode">0-当前位置暂停 1-有停振 起振过程</param>
         /// <param name="tmpHaltState">1-暂停，0-取消暂停</param>
         /// <returns></returns>
-        int SetDynamicStopControl(int tmpActMode, int tmpHaltState); 
+        int SetDynamicStopControl(int tmpActMode, int tmpHaltState);
+
+        /// <summary>
+        /// 控制通道清零 
+        /// </summary>
+        /// <param name="controlType">0=位移通道   1=试验力通道</param>
+        /// <returns>0-成功  10-控制器不在静态状态 20-控制器正处于静态运行状态</returns>
+        int SetSignalTare(int controlType);
+        /// <summary>
+        /// 获取控制器的静态控制模式
+        /// </summary>
+        /// <returns></returns>
+        StaticLoadControlEnum GetStaticLoadControl();
     }
 }

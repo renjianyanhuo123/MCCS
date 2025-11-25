@@ -171,6 +171,11 @@ namespace MCCS.ViewModels.Pages
                 //model.CancelModelMove = new CancellationTokenSource();
             });
             _eventAggregator.GetEvent<OperationValveEvent>().Subscribe(OnOperationValveEvent);
+            _eventAggregator.GetEvent<OperationTareEvent>().Subscribe(param =>
+            {
+                if (param.ControlType == 0) _notificationService.Show("成功", "位移清零成功", NotificationType.Success);
+                else _notificationService.Show("失败", "力清零成功", NotificationType.Success);
+            });
         }
 
         #region Property

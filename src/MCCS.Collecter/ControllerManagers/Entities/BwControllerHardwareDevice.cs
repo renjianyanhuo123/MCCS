@@ -1,13 +1,14 @@
-﻿using System.Diagnostics;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using MCCS.Collecter.DllNative;
+﻿using MCCS.Collecter.DllNative;
 using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using System;
+using System.Diagnostics;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MCCS.Collecter.ControllerManagers.Entities
 {
@@ -221,6 +222,26 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         public int SetDynamicStopControl(int tmpActMode, int tmpHaltState)
         {
             return POPNetCtrl.NetCtrl01_Osci_SetHaltState(_hardwareDeviceConfiguration.DeviceAddressId, (byte)tmpActMode, (byte)tmpHaltState);
+        }
+
+        public int SetSignalTare(int controlType)
+        {
+            if (ControlState != SystemControlState.Static) return 10;
+            var staticState = GetStaticLoadControl();
+            if (staticState is StaticLoadControlEnum.CTRLMODE_LoadS or StaticLoadControlEnum.CTRLMODE_LoadSVNP
+                or StaticLoadControlEnum.CTRLMODE_TRACES) return 20;
+            var res = POPNetCtrl.NetCtrl01_Set_offSet(_deviceHandle, (byte)controlType);
+            return res;
+        }
+
+        public StaticLoadControlEnum GetStaticLoadControl()
+        {
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_S_CtrlMode); 
+            // TODO: 需要做成异步操作
+            Thread.Sleep(200); 
+            byte result = 0;
+            POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_S_CtrlMode, ref result);
+            return (StaticLoadControlEnum)result;
         }
 
         public void CleanupResources()

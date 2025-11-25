@@ -110,10 +110,24 @@
                 <Rectangle Style="{StaticResource MenuSeparatorStyle}"/>
                 <!-- 力清零 -->
                 <Border x:Name="ForceClearZero" Style="{StaticResource CustomMenuItemStyle}"   Tag="力清零">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonDown">
+                            <b:InvokeCommandAction 
+                                Command="{Binding ForceTareCommand}"
+                                CommandParameter="False"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
                     <TextBlock Margin="12,0" Text="力清零" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
                 <!-- 位移清零 -->
                 <Border x:Name="PositionClearZero" Style="{StaticResource CustomMenuItemStyle}"   Tag="位移清零">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="MouseLeftButtonDown">
+                            <b:InvokeCommandAction 
+                                Command="{Binding PositionTareCommand}"
+                                CommandParameter="False"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
                     <TextBlock Margin="12,0" Text="位移清零" VerticalAlignment="Center" FontSize="14" Foreground="#333"/>
                 </Border>
                 <!-- 分割线 -->
