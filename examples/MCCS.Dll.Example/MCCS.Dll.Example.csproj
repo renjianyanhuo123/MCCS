@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MCCS.Collecter\MCCS.Collecter.csproj" />
+    <ProjectReference Include="..\..\src\MCCS.Collecter\MCCS.Collecter.csproj" />
   </ItemGroup>
 
 </Project>

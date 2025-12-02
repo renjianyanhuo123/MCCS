@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-Windows</TargetFramework>
@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MCCS\MCCS.csproj" />
+    <ProjectReference Include="..\..\src\MCCS\MCCS.csproj" />
   </ItemGroup>
 
   <ItemGroup>
