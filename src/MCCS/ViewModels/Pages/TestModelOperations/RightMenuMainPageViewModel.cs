@@ -10,14 +10,12 @@ namespace MCCS.ViewModels.Pages.TestModelOperations
         public const string Tag = "RightMenuMainPage";
         private long _controlChannelId = -1;
         private string _modelId = string.Empty;
-
-        private readonly IEventAggregator _eventAggregator; 
+         
         private readonly IControlChannelManager _controlChannelManager; 
 
         public RightMenuMainPageViewModel(IEventAggregator eventAggregator,
             IControlChannelManager controlChannelManager) : base(eventAggregator)
-        {
-            _eventAggregator = eventAggregator; 
+        { 
             _controlChannelManager = controlChannelManager;
             OperationValveCommand = new DelegateCommand<string>(ExecuteOperationValveCommand);
             ForceTareCommand = new DelegateCommand(ExecuteForceTareCommand);

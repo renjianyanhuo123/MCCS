@@ -9,7 +9,7 @@ namespace MCCS.Infrastructure.Models.Model3D
         /// 绑定的3D模型文件ID
         /// </summary>
         [Column(IsNullable = false, StringLength = 100)]
-        public string ModelFileId { get; set; }
+        public required string ModelFileId { get; set; }
         /// <summary>
         /// 绑定的控制通道ID
         /// </summary>

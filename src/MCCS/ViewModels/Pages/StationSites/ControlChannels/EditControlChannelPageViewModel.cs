@@ -34,8 +34,8 @@ namespace MCCS.ViewModels.Pages.StationSites.ControlChannels
         #region Property
         public ObservableCollection<ControlChannelBindControllerItemModel> BindControllerInfos { get; } = [];
 
-        private ControlChannelBindControllerItemModel _bindControllerInfo;
-        public ControlChannelBindControllerItemModel BindControllerInfo
+        private ControlChannelBindControllerItemModel? _bindControllerInfo;
+        public ControlChannelBindControllerItemModel? BindControllerInfo
         {
             get => _bindControllerInfo;
             set => SetProperty(ref _bindControllerInfo, value);

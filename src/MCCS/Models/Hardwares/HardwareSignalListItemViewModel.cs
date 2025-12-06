@@ -33,7 +33,7 @@
             set => SetProperty(ref _id, value);
         }
 
-        private string _tempId; 
+        private string _tempId = string.Empty; 
         public string TempId
         {
             get => _tempId;
@@ -54,7 +54,7 @@
             set => SetProperty(ref _isAdded, value);
         }
 
-        private string _signalName;
+        private string _signalName = string.Empty;
         public string SignalName
         {
             get => _signalName;
@@ -110,8 +110,8 @@
             set => SetProperty(ref _downLimitRange, value);
         }
 
-        private HardwareSignalBindDevicesItemViewModel _connectedDevice;
-        public HardwareSignalBindDevicesItemViewModel ConnectedDevice
+        private HardwareSignalBindDevicesItemViewModel? _connectedDevice = new();
+        public HardwareSignalBindDevicesItemViewModel? ConnectedDevice
         {
             get => _connectedDevice;
             set => SetProperty(ref _connectedDevice, value);

@@ -1,8 +1,5 @@
-﻿using MCCS.Common.DataManagers;
-using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Infrastructure.TestModels.Commands;
+﻿using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Models;
-using MCCS.Models.ControlCommand;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 
@@ -10,13 +7,9 @@ namespace MCCS.ViewModels.Pages.Controllers
 {
     public class MultipleControllerChildPageViewModel : BindableBase
     { 
-        private bool _isShowController = false;
-        private bool _isParticipateControl = false; 
-
-        private ControlTypeEnum _controlType = ControlTypeEnum.Single;
         private int _selectedControlMode = 0;
         private string _currentChannelName = string.Empty;
-        private readonly Model3DMainInfo _modelInfo;
+        //private readonly Model3DMainInfo _modelInfo;
 
         private CommandExecuteStatusEnum _currentCommandStatus;
          
@@ -25,15 +18,15 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             CurrentModelId = currentModelId;
             CurrentChannelName = "多力/位移控制通道";
-            _modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == currentModelId) ?? throw new ArgumentNullException("modelInfo is null");
+            //_modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == currentModelId) ?? throw new ArgumentNullException("modelInfo is null");
         }
 
         #region Proterty
         /// <summary>
         /// 选择的控制方式界面
         /// </summary>
-        private System.Windows.Controls.UserControl _currentPage;
-        public System.Windows.Controls.UserControl CurrentPage
+        private System.Windows.Controls.UserControl? _currentPage;
+        public System.Windows.Controls.UserControl? CurrentPage
         {
             get => _currentPage;
             set => SetProperty(ref _currentPage, value);

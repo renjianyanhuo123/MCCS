@@ -74,7 +74,7 @@ namespace MCCS.ViewModels.MethodManager
                 methodBaseInfo.TestType,
                 methodBaseInfo.Standard,
                 methodBaseInfo.Code,
-                methodBaseInfo.Remark));
+                methodBaseInfo.Remark ?? ""));
             if (FileHelper.FileExists(methodBaseInfo.FilePath))
             {
                 var temp = await FileHelper.ReadJsonAsync<MethodContentItemModel>(methodBaseInfo.FilePath);

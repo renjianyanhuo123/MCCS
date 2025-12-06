@@ -53,7 +53,7 @@ namespace MCCS.ViewModels.Pages.StationSites.PseudoChannels
         /// <summary>
         /// 单位
         /// </summary>
-        private string _unit;
+        private string _unit = string.Empty;
         public string Unit
         {
             get => _unit;

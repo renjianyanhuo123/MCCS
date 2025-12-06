@@ -21,7 +21,7 @@ namespace MCCS.Collecter.ControlChannelManagers
 
     public record ControlChannelConfiguration
     {
-        public ControlCompletionConfiguration CancellationConfiguration { get; init; }
+        public required ControlCompletionConfiguration CancellationConfiguration { get; init; }
 
         public long ChannelId { get; init; }
 
@@ -31,7 +31,7 @@ namespace MCCS.Collecter.ControlChannelManagers
         /// </summary>
         public long ControllerId { get; init; }
 
-        public List<ControlChannelSignalConfiguration> SignalConfiguration { get; init; }
+        public required List<ControlChannelSignalConfiguration> SignalConfiguration { get; init; }
     }
 
     public record ControlChannelSignalConfiguration

@@ -11,8 +11,8 @@
     {
         public long DeviceId { get; init; } 
         public long Timestamp { get; init; }
-        public T Value { get; init; }
-        public string Unit { get; init; }
+        public required T Value { get; init; }
+        public required string Unit { get; init; }
         public DataQuality DataQuality { get; init; } 
     }
 }

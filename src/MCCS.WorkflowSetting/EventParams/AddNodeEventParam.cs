@@ -8,6 +8,6 @@ namespace MCCS.WorkflowSetting.EventParams
         /// 保存发布者引用
         /// </summary>
         public required string Source { get; set; }
-        public BaseNode Node { get; init; }
+        public required BaseNode Node { get; init; }
     }
 }

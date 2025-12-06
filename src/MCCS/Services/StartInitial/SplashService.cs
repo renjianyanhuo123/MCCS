@@ -51,7 +51,8 @@ namespace MCCS.Services.StartInitial
             if (currentUseStation?.StationSiteInfo == null) throw new ArgumentNullException("Current Use Station Site is Null");
             var deviceInfos = await _deviceInfoRepository.GetAllDevicesAsync();
             if (deviceInfos == null) throw new ArgumentNullException("Current Controllers is Null");
-            if (currentUseStation.Model3DAggregate == null) throw new ArgumentNullException("Station Site's Model3D is Null");
+            if (currentUseStation.Model3DAggregate == null || currentUseStation.Model3DAggregate.BaseInfo == null)
+                throw new ArgumentNullException("Station Site's Model3D or Model3D BaseInfo is Null");
             var model3DAndControlChannels = await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(currentUseStation.Model3DAggregate.BaseInfo.Id);
             var stationSiteInfo = new StationSiteInfo(currentUseStation.StationSiteInfo.Id, currentUseStation.StationSiteInfo.StationName);
             var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => c.IsDeleted == false);

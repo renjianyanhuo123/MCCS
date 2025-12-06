@@ -43,7 +43,6 @@ namespace MCCS.Common.DataManagers
                     StationSiteInfo = stationSiteInfo;
                     break; 
                 case CurrentTestInfo currentTestInfo:
-                    CurrentTestInfo = null;
                     CurrentTestInfo = currentTestInfo;
                     break;
                 case List<BaseDevice> devices:

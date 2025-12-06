@@ -9,9 +9,9 @@ namespace POPNetCtrlConsoleTest
 {
     class Program
     {
-        private static IntPtr deviceHandle = IntPtr.Zero;
-        private static bool isRunning = false;
-        private static Thread dataMonitorThread;
+        private static IntPtr _deviceHandle = IntPtr.Zero;
+        private static bool _isRunning = false;
+        private static Thread? _dataMonitorThread;
 
         static void Main(string[] args)
         {
@@ -106,10 +106,10 @@ namespace POPNetCtrlConsoleTest
                 
                 for (var t1 = 0; 1 <= 3;t1++) 
                 {
-                    int result = POPNetCtrl.NetCtrl01_ConnectToDev(t1, ref deviceHandle);
+                    int result = POPNetCtrl.NetCtrl01_ConnectToDev(t1, ref _deviceHandle);
                     if (result == AddressContanst.OP_SUCCESSFUL)
                     {
-                        Console.WriteLine($"✓ 设备连接成功，句柄: 0x{deviceHandle.ToString("X")}");
+                        Console.WriteLine($"✓ 设备连接成功，句柄: 0x{_deviceHandle:X}");
 
                         // 读取设备版本信息
                         ReadDeviceVersion();
@@ -137,21 +137,21 @@ namespace POPNetCtrlConsoleTest
         /// </summary>
         static void DisconnectDevice()
         {
-            if (deviceHandle != IntPtr.Zero)
+            if (_deviceHandle != IntPtr.Zero)
             {
                 Console.WriteLine("\n正在断开设备连接...");
 
                 // 停止数据监控
-                isRunning = false;
-                if (dataMonitorThread != null && dataMonitorThread.IsAlive)
+                _isRunning = false;
+                if (_dataMonitorThread != null && _dataMonitorThread.IsAlive)
                 {
-                    dataMonitorThread.Join(1000);
+                    _dataMonitorThread.Join(1000);
                 }
 
                 // 软件退出（关闭阀台，DA=0）
-                POPNetCtrl.NetCtrl01_Soft_Ext(deviceHandle);
+                POPNetCtrl.NetCtrl01_Soft_Ext(_deviceHandle);
 
-                int result = POPNetCtrl.NetCtrl01_DisConnectToDev(deviceHandle);
+                int result = POPNetCtrl.NetCtrl01_DisConnectToDev(_deviceHandle);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
                     Console.WriteLine("✓ 设备断开成功");
@@ -161,7 +161,7 @@ namespace POPNetCtrlConsoleTest
                     Console.WriteLine($"✗ 设备断开失败，错误码: {result}");
                 }
 
-                deviceHandle = IntPtr.Zero;
+                _deviceHandle = IntPtr.Zero;
             }
         }
 
@@ -189,8 +189,12 @@ namespace POPNetCtrlConsoleTest
                 Console.WriteLine("========================================");
                 Console.Write("请选择操作 (0-9): ");
 
-                string input = Console.ReadLine();
-                Console.WriteLine();
+                string? input = Console.ReadLine();
+                if (string.IsNullOrEmpty(input))
+                {
+                    Console.WriteLine("无效的选择，请重新输入");
+                    continue;
+                }
 
                 switch (input)
                 {
@@ -245,11 +249,11 @@ namespace POPNetCtrlConsoleTest
 
             // 1. 读写AI采样频率
             Console.WriteLine("1. 测试AI采样频率读写...");
-            int result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AI_SampleRate);
+            int result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AI_SampleRate);
             Thread.Sleep(50); // 等待数据返回
 
             int sampleRate = 0;
-            result = POPNetCtrl.NetCtrl01_nReadAddrVal(deviceHandle, AddressContanst.Addr_AI_SampleRate, ref sampleRate);
+            result = POPNetCtrl.NetCtrl01_nReadAddrVal(_deviceHandle, AddressContanst.Addr_AI_SampleRate, ref sampleRate);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前AI采样频率: {sampleRate} Hz");
@@ -257,7 +261,7 @@ namespace POPNetCtrlConsoleTest
 
             // 写入新的采样频率
             int newSampleRate = 1000;
-            result = POPNetCtrl.NetCtrl01_nWriteAddr(deviceHandle, AddressContanst.Addr_AI_SampleRate, newSampleRate);
+            result = POPNetCtrl.NetCtrl01_nWriteAddr(_deviceHandle, AddressContanst.Addr_AI_SampleRate, newSampleRate);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   ✓ 设置AI采样频率为: {newSampleRate} Hz");
@@ -265,11 +269,11 @@ namespace POPNetCtrlConsoleTest
 
             // 2. 读写AI通道使能
             Console.WriteLine("\n2. 测试AI通道1使能状态...");
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AI_Enabled);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AI_Enabled);
             Thread.Sleep(50);
 
             byte enabled = 0;
-            result = POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_AI_Enabled, ref enabled);
+            result = POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_AI_Enabled, ref enabled);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前AI通道1使能状态: {(enabled == 1 ? "启用" : "禁用")}");
@@ -277,11 +281,11 @@ namespace POPNetCtrlConsoleTest
 
             // 3. 读写传感器极性
             Console.WriteLine("\n3. 测试传感器极性...");
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AI_Polarity);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AI_Polarity);
             Thread.Sleep(50);
 
             byte polarity = 0;
-            result = POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_AI_Polarity, ref polarity);
+            result = POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_AI_Polarity, ref polarity);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前传感器极性: {(polarity == 0 ? "正极性" : "负极性")}");
@@ -289,11 +293,11 @@ namespace POPNetCtrlConsoleTest
 
             // 4. 读写软件增益
             Console.WriteLine("\n4. 测试软件增益...");
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AI_SoftG);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AI_SoftG);
             Thread.Sleep(50);
 
             float softG = 0;
-            result = POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_AI_SoftG, ref softG);
+            result = POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_AI_SoftG, ref softG);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前软件增益: {softG}");
@@ -301,7 +305,7 @@ namespace POPNetCtrlConsoleTest
 
             // 写入新的软件增益
             float newSoftG = 1.5f;
-            result = POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_AI_SoftG, newSoftG);
+            result = POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_AI_SoftG, newSoftG);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   ✓ 设置软件增益为: {newSoftG}");
@@ -309,11 +313,11 @@ namespace POPNetCtrlConsoleTest
 
             // 5. 读写PID参数
             Console.WriteLine("\n5. 测试静态力控PID参数...");
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_N_S_SP);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_N_S_SP);
             Thread.Sleep(50);
 
             float kp = 0;
-            result = POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_N_S_SP, ref kp);
+            result = POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_N_S_SP, ref kp);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前Kp: {kp}");
@@ -336,10 +340,10 @@ namespace POPNetCtrlConsoleTest
             Console.WriteLine("1. 设置控制方式...");
             Console.WriteLine("   0=开环  1=静态  2=动态");
             Console.Write("   请输入控制方式: ");
-            string input = Console.ReadLine();
-            if (byte.TryParse(input, out byte ctrlState) && ctrlState <= 2)
+            string? ctrlInput = Console.ReadLine();
+            if (byte.TryParse(ctrlInput, out byte ctrlState) && ctrlState <= 2)
             {
-                int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(deviceHandle, ctrlState);
+                int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, ctrlState);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
                     string[] modes = ["开环", "静态", "动态"];
@@ -354,10 +358,10 @@ namespace POPNetCtrlConsoleTest
             // 2. 阀台控制
             Console.WriteLine("\n2. 阀台控制...");
             Console.Write("   打开阀台? (Y/N): ");
-            string valve = Console.ReadLine();
-            if (valve.ToUpper() == "Y")
+            string? valve = Console.ReadLine();
+            if (string.Equals(valve, "Y", StringComparison.OrdinalIgnoreCase))
             {
-                int result = POPNetCtrl.NetCtrl01_Set_StationCtrl(deviceHandle, 1, 0);
+                int result = POPNetCtrl.NetCtrl01_Set_StationCtrl(_deviceHandle, 1, 0);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
                     Console.WriteLine("   ✓ 阀台已打开");
@@ -369,7 +373,7 @@ namespace POPNetCtrlConsoleTest
             }
             else
             {
-                int result = POPNetCtrl.NetCtrl01_Set_StationCtrl(deviceHandle, 0, 0);
+                int result = POPNetCtrl.NetCtrl01_Set_StationCtrl(_deviceHandle, 0, 0);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
                     Console.WriteLine("   ✓ 阀台已关闭");
@@ -383,9 +387,9 @@ namespace POPNetCtrlConsoleTest
             // 3. 试验开始/停止
             Console.WriteLine("\n3. 试验控制...");
             Console.Write("   启动试验? (Y/N): ");
-            string test = Console.ReadLine();
-            byte startState = test.ToUpper() == "Y" ? (byte)1 : (byte)0;
-            int res = POPNetCtrl.NetCtrl01_Set_TestStartState(deviceHandle, startState);
+            string? test = Console.ReadLine() ?? string.Empty;
+            byte startState = test.Equals("Y", StringComparison.CurrentCultureIgnoreCase) ? (byte)1 : (byte)0;
+            int res = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, startState);
             if (res == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   ✓ 试验{(startState == 1 ? "已启动" : "已停止")}");
@@ -397,7 +401,7 @@ namespace POPNetCtrlConsoleTest
             Console.Write("   请选择清零通道: ");
             if (byte.TryParse(Console.ReadLine(), out byte zeroMode) && zeroMode <= 1)
             {
-                res = POPNetCtrl.NetCtrl01_Set_offSet(deviceHandle, zeroMode);
+                res = POPNetCtrl.NetCtrl01_Set_offSet(_deviceHandle, zeroMode);
                 if (res == AddressContanst.OP_SUCCESSFUL)
                 {
                     Console.WriteLine($"   ✓ {(zeroMode == 0 ? "位移" : "力")}通道已清零");
@@ -427,34 +431,34 @@ namespace POPNetCtrlConsoleTest
                 }
 
                 // 读取试验力
-                POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_LoadN);
+                POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_LoadN);
                 Thread.Sleep(20);
                 float force = 0;
-                POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst .Addr_LoadN, ref force);
+                POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst .Addr_LoadN, ref force);
 
                 // 读取位移
-                POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_LoadS);
+                POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_LoadS);
                 Thread.Sleep(20);
                 float displacement = 0;
-                POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_LoadS, ref displacement);
+                POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_LoadS, ref displacement);
 
                 // 读取控制电压
-                POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_CtrlDA);
+                POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_CtrlDA);
                 Thread.Sleep(20);
                 float voltage = 0;
-                POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_CtrlDA, ref voltage);
+                POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_CtrlDA, ref voltage);
 
                 // 读取AI原始值
-                POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AI_Value);
+                POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AI_Value);
                 Thread.Sleep(20);
                 float aiValue = 0;
-                POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_AI_Value, ref aiValue);
+                POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_AI_Value, ref aiValue);
 
                 // 读取SSI位移值
-                POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_SSI_Val);
+                POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_SSI_Val);
                 Thread.Sleep(20);
                 float ssiValue = 0;
-                POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_SSI_Val, ref ssiValue);
+                POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_SSI_Val, ref ssiValue);
 
                 // 清屏并显示数据
                 Console.SetCursorPosition(0, 5);
@@ -515,7 +519,7 @@ namespace POPNetCtrlConsoleTest
             }
 
             // 设置控制方式为静态
-            int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(deviceHandle, 1);
+            int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, 1);
             if (result != AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"设置控制方式失败，错误码: {result}");
@@ -524,7 +528,7 @@ namespace POPNetCtrlConsoleTest
             }
 
             // 设置静态控制模式
-            result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(deviceHandle, ctrlMode, velocity, target);
+            result = POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, ctrlMode, velocity, target);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"\n✓ 静态控制设置成功");
@@ -534,9 +538,10 @@ namespace POPNetCtrlConsoleTest
 
                 // 启动试验
                 Console.Write("\n是否启动试验? (Y/N): ");
-                if (Console.ReadLine().ToUpper() == "Y")
+                string? startTestInput = Console.ReadLine();
+                if (string.Equals(startTestInput, "Y", StringComparison.OrdinalIgnoreCase))
                 {
-                    result = POPNetCtrl.NetCtrl01_Set_TestStartState(deviceHandle, 1);
+                    result = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, 1);
                     if (result == AddressContanst.OP_SUCCESSFUL)
                     {
                         Console.WriteLine("✓ 试验已启动");
@@ -545,15 +550,15 @@ namespace POPNetCtrlConsoleTest
                         while (!Console.KeyAvailable)
                         {
                             // 读取当前值
-                            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_LoadN);
+                            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_LoadN);
                             Thread.Sleep(20);
                             float force = 0;
-                            POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_LoadN, ref force);
+                            POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_LoadN, ref force);
 
-                            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_LoadS);
+                            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_LoadS);
                             Thread.Sleep(20);
                             float disp = 0;
-                            POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_LoadS, ref disp);
+                            POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_LoadS, ref disp);
 
                             Console.SetCursorPosition(0, Console.CursorTop - 1);
                             Console.WriteLine($"当前力: {force,8:F3} kN    当前位移: {disp,8:F3} mm    ");
@@ -563,7 +568,7 @@ namespace POPNetCtrlConsoleTest
                         Console.ReadKey(true);
 
                         // 停止试验
-                        POPNetCtrl.NetCtrl01_Set_TestStartState(deviceHandle, 0);
+                        POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, 0);
                         Console.WriteLine("\n✓ 试验已停止");
                     }
                 }
@@ -641,7 +646,7 @@ namespace POPNetCtrlConsoleTest
             }
 
             // 设置控制方式为动态
-            int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(deviceHandle, 2);
+            int result = POPNetCtrl.NetCtrl01_Set_SysCtrlstate(_deviceHandle, 2);
             if (result != AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"设置控制方式失败，错误码: {result}");
@@ -680,9 +685,10 @@ namespace POPNetCtrlConsoleTest
 
                 // 启动试验
                 Console.Write("\n是否启动动态试验? (Y/N): ");
-                if (Console.ReadLine().ToUpper() == "Y")
+                string? startDynamicTestInput = Console.ReadLine();
+                if (string.Equals(startDynamicTestInput, "Y", StringComparison.OrdinalIgnoreCase))
                 {
-                    result = POPNetCtrl.NetCtrl01_Set_TestStartState(deviceHandle, 1);
+                    result = POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, 1);
                     if (result == AddressContanst.OP_SUCCESSFUL)
                     {
                         Console.WriteLine("✓ 动态试验已启动");
@@ -726,21 +732,21 @@ namespace POPNetCtrlConsoleTest
                             }
 
                             // 读取当前循环次数
-                            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_D_TestCycleCount);
+                            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_D_TestCycleCount);
                             Thread.Sleep(20);
                             int currentCycle = 0;
-                            POPNetCtrl.NetCtrl01_nReadAddrVal(deviceHandle, AddressContanst.Addr_D_TestCycleCount, ref currentCycle);
+                            POPNetCtrl.NetCtrl01_nReadAddrVal(_deviceHandle, AddressContanst.Addr_D_TestCycleCount, ref currentCycle);
 
                             // 读取极大值和极小值
-                            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_CycleMaxLoadN);
+                            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_CycleMaxLoadN);
                             Thread.Sleep(20);
                             float maxForce = 0;
-                            POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_CycleMaxLoadN, ref maxForce);
+                            POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_CycleMaxLoadN, ref maxForce);
 
-                            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_CycleMinLoadN);
+                            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_CycleMinLoadN);
                             Thread.Sleep(20);
                             float minForce = 0;
-                            POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_CycleMinLoadN, ref minForce);
+                            POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_CycleMinLoadN, ref minForce);
 
                             Console.SetCursorPosition(0, Console.CursorTop - 1);
                             Console.WriteLine($"循环: {currentCycle,6}    极大值: {maxForce,8:F3}    极小值: {minForce,8:F3}    ");
@@ -749,7 +755,7 @@ namespace POPNetCtrlConsoleTest
                         }
 
                         // 停止试验
-                        POPNetCtrl.NetCtrl01_Set_TestStartState(deviceHandle, 0);
+                        POPNetCtrl.NetCtrl01_Set_TestStartState(_deviceHandle, 0);
                         Console.WriteLine("\n✓ 动态试验已停止");
                     }
                 }
@@ -774,10 +780,10 @@ namespace POPNetCtrlConsoleTest
 
             // 读取DI状态
             Console.WriteLine("1. 读取数字输入 (DI) 状态...");
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_DigIn_InVal);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_DigIn_InVal);
             Thread.Sleep(50);
             int diValue = 0;
-            int result = POPNetCtrl.NetCtrl01_nReadAddrVal(deviceHandle, AddressContanst.Addr_DigIn_InVal, ref diValue);
+            int result = POPNetCtrl.NetCtrl01_nReadAddrVal(_deviceHandle, AddressContanst.Addr_DigIn_InVal, ref diValue);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   DI值: 0x{diValue:X4} (二进制: {Convert.ToString(diValue, 2).PadLeft(16, '0')})");
@@ -791,10 +797,10 @@ namespace POPNetCtrlConsoleTest
             // 设置DO输出
             Console.WriteLine("\n2. 设置数字输出 (DO)...");
             Console.Write("   请输入DO值 (十六进制，如 00FF): 0x");
-            string doInput = Console.ReadLine();
+            string doInput = Console.ReadLine() ?? string.Empty;
             if (int.TryParse(doInput, System.Globalization.NumberStyles.HexNumber, null, out int doValue))
             {
-                result = POPNetCtrl.NetCtrl01_DigOut(deviceHandle, doValue);
+                result = POPNetCtrl.NetCtrl01_DigOut(_deviceHandle, doValue);
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
                     Console.WriteLine($"   ✓ DO设置成功: 0x{doValue:X4}");
@@ -808,10 +814,10 @@ namespace POPNetCtrlConsoleTest
 
             // 读取DO当前值
             Console.WriteLine("\n3. 读取当前DO输出值...");
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_DigOut_OutVal);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_DigOut_OutVal);
             Thread.Sleep(50);
             int doReadValue = 0;
-            result = POPNetCtrl.NetCtrl01_nReadAddrVal(deviceHandle, AddressContanst.Addr_DigOut_OutVal, ref doReadValue);
+            result = POPNetCtrl.NetCtrl01_nReadAddrVal(_deviceHandle, AddressContanst.Addr_DigOut_OutVal, ref doReadValue);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"   当前DO值: 0x{doReadValue:X4}");
@@ -833,15 +839,15 @@ namespace POPNetCtrlConsoleTest
             // 1. 失控保护
             Console.WriteLine("1. 失控保护设置");
             Console.Write("   启用失控保护? (Y/N): ");
-            byte prtEnabled = Console.ReadLine().ToUpper() == "Y" ? (byte)1 : (byte)0;
-            POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_PrtPosE_Enabled, prtEnabled);
+            byte prtEnabled = string.Equals(Console.ReadLine(), "Y", StringComparison.OrdinalIgnoreCase) ? (byte)1 : (byte)0;
+            POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_PrtPosE_Enabled, prtEnabled);
 
             if (prtEnabled == 1)
             {
                 Console.Write("   最大允许误差 (kN 或 mm): ");
                 if (float.TryParse(Console.ReadLine(), out float maxError))
                 {
-                    POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_PrtPosE_MaxE, maxError);
+                    POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_PrtPosE_MaxE, maxError);
                     Console.WriteLine($"   ✓ 失控保护已启用，最大误差: {maxError}");
                 }
             }
@@ -853,29 +859,29 @@ namespace POPNetCtrlConsoleTest
             // 2. 力保护
             Console.WriteLine("\n2. 力保护设置");
             Console.Write("   启用最大力保护? (Y/N): ");
-            byte maxNEnabled = Console.ReadLine().ToUpper() == "Y" ? (byte)1 : (byte)0;
-            POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_NMaxLmt_E, maxNEnabled);
+            byte maxNEnabled = Console.ReadLine()?.ToUpper() == "Y" ? (byte)1 : (byte)0;
+            POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_NMaxLmt_E, maxNEnabled);
 
             if (maxNEnabled == 1)
             {
                 Console.Write("   最大力保护值 (kN): ");
                 if (float.TryParse(Console.ReadLine(), out float maxN))
                 {
-                    POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_NMaxLmt_Val, maxN);
+                    POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_NMaxLmt_Val, maxN);
                     Console.WriteLine($"   ✓ 最大力保护: {maxN} kN");
                 }
             }
 
             Console.Write("   启用最小力保护? (Y/N): ");
-            byte minNEnabled = Console.ReadLine().ToUpper() == "Y" ? (byte)1 : (byte)0;
-            POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_NMinLmt_E, minNEnabled);
+            byte minNEnabled = Console.ReadLine()?.ToUpper() == "Y" ? (byte)1 : (byte)0;
+            POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_NMinLmt_E, minNEnabled);
 
             if (minNEnabled == 1)
             {
                 Console.Write("   最小力保护值 (kN): ");
                 if (float.TryParse(Console.ReadLine(), out float minN))
                 {
-                    POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_NMinLmt_Val, minN);
+                    POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_NMinLmt_Val, minN);
                     Console.WriteLine($"   ✓ 最小力保护: {minN} kN");
                 }
             }
@@ -883,39 +889,39 @@ namespace POPNetCtrlConsoleTest
             // 3. 位移保护
             Console.WriteLine("\n3. 位移保护设置");
             Console.Write("   启用最大位移保护? (Y/N): ");
-            byte maxSEnabled = Console.ReadLine().ToUpper() == "Y" ? (byte)1 : (byte)0;
-            POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_SMaxLmt_E, maxSEnabled);
+            byte maxSEnabled = Console.ReadLine()?.ToUpper() == "Y" ? (byte)1 : (byte)0;
+            POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_SMaxLmt_E, maxSEnabled);
 
             if (maxSEnabled == 1)
             {
                 Console.Write("   最大位移保护值 (mm): ");
                 if (float.TryParse(Console.ReadLine(), out float maxS))
                 {
-                    POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_SMaxLmt_Val, maxS);
+                    POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_SMaxLmt_Val, maxS);
                     Console.WriteLine($"   ✓ 最大位移保护: {maxS} mm");
                 }
             }
 
             Console.Write("   启用最小位移保护? (Y/N): ");
-            byte minSEnabled = Console.ReadLine().ToUpper() == "Y" ? (byte)1 : (byte)0;
-            POPNetCtrl.NetCtrl01_bWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_SMinLmt_E, minSEnabled);
+            byte minSEnabled = Console.ReadLine()?.ToUpper() == "Y" ? (byte)1 : (byte)0;
+            POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_SMinLmt_E, minSEnabled);
 
             if (minSEnabled == 1)
             {
                 Console.Write("   最小位移保护值 (mm): ");
                 if (float.TryParse(Console.ReadLine(), out float minS))
                 {
-                    POPNetCtrl.NetCtrl01_fWriteAddr(deviceHandle, AddressContanst.Addr_PrtSys_SMinLmt_Val, minS);
+                    POPNetCtrl.NetCtrl01_fWriteAddr(_deviceHandle, AddressContanst.Addr_PrtSys_SMinLmt_Val, minS);
                     Console.WriteLine($"   ✓ 最小位移保护: {minS} mm");
                 }
             }
 
             // 4. 读取保护状态
             Console.WriteLine("\n4. 当前保护状态");
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_PrtErrState);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_PrtErrState);
             Thread.Sleep(50);
             int errState = 0;
-            POPNetCtrl.NetCtrl01_nReadAddrVal(deviceHandle, AddressContanst.Addr_PrtErrState, ref errState);
+            POPNetCtrl.NetCtrl01_nReadAddrVal(_deviceHandle, AddressContanst.Addr_PrtErrState, ref errState);
 
             Console.WriteLine($"   保护状态码: 0x{errState:X}");
             if (errState == 0)
@@ -950,10 +956,11 @@ namespace POPNetCtrlConsoleTest
             Console.WriteLine("警告: 写入Flash操作会永久保存参数到控制器");
             Console.Write("确定要将当前参数写入Flash? (Y/N): ");
 
-            if (Console.ReadLine().ToUpper() == "Y")
+            string? flashInput = Console.ReadLine();
+            if (string.Equals(flashInput, "Y", StringComparison.OrdinalIgnoreCase))
             {
                 Console.WriteLine("\n正在写入Flash，请稍候...");
-                int result = POPNetCtrl.NetCtrl01_WriteToFlash(deviceHandle);
+                int result = POPNetCtrl.NetCtrl01_WriteToFlash(_deviceHandle);
 
                 if (result == AddressContanst.OP_SUCCESSFUL)
                 {
@@ -993,73 +1000,73 @@ namespace POPNetCtrlConsoleTest
 
             // 力传感器编号
             StringBuilder sensorNo = new StringBuilder(16);
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AD_SensorNO);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AD_SensorNO);
             Thread.Sleep(50);
-            POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_AD_SensorNO, sensorNo, 16);
+            POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_AD_SensorNO, sensorNo, 16);
             Console.WriteLine($"力传感器编号: {sensorNo}");
 
             // 力传感器单位
             StringBuilder unit = new StringBuilder(8);
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_AD_Unit);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_AD_Unit);
             Thread.Sleep(50);
-            POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_AD_Unit, unit, 8);
+            POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_AD_Unit, unit, 8);
             Console.WriteLine($"力传感器单位: {unit}");
 
             // 位移传感器编号
             StringBuilder ssiSensorNo = new StringBuilder(16);
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_SSI_SensorNO);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_SSI_SensorNO);
             Thread.Sleep(50);
-            POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_SSI_SensorNO, ssiSensorNo, 16);
+            POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_SSI_SensorNO, ssiSensorNo, 16);
             Console.WriteLine($"位移传感器编号: {ssiSensorNo}");
 
             // 位移传感器单位
             StringBuilder ssiUnit = new StringBuilder(8);
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_SSI_Unit);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_SSI_Unit);
             Thread.Sleep(50);
-            POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_SSI_Unit, ssiUnit, 8);
+            POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_SSI_Unit, ssiUnit, 8);
             Console.WriteLine($"位移传感器单位: {ssiUnit}");
 
             // 标定日期
             StringBuilder caliDate = new StringBuilder(10);
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_CaliDate);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_CaliDate);
             Thread.Sleep(50);
-            POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_CaliDate, caliDate, 10);
+            POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_CaliDate, caliDate, 10);
             Console.WriteLine($"标定日期: {caliDate}");
 
             // 读取系统状态
             Console.WriteLine("\n系统状态:");
             Console.WriteLine("------------");
 
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_SysState);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_SysState);
             Thread.Sleep(50);
             byte sysState = 0;
-            POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_SysState, ref sysState);
+            POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_SysState, ref sysState);
             Console.WriteLine($"系统状态: {sysState}");
 
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_SysCtrlstate);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_SysCtrlstate);
             Thread.Sleep(50);
             byte ctrlState = 0;
-            POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_SysCtrlstate, ref ctrlState);
+            POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_SysCtrlstate, ref ctrlState);
             string[] ctrlModes = { "开环", "静态", "动态" };
             Console.WriteLine($"控制方式: {(ctrlState < 3 ? ctrlModes[ctrlState] : "未知")}");
 
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_StationState);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_StationState);
             Thread.Sleep(50);
             byte stationState = 0;
-            POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_StationState, ref stationState);
+            POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_StationState, ref stationState);
             Console.WriteLine($"阀台状态: {(stationState == 1 ? "打开" : "关闭")}");
 
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_StartState);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_StartState);
             Thread.Sleep(50);
             byte startState = 0;
-            POPNetCtrl.NetCtrl01_bReadAddrVal(deviceHandle, AddressContanst.Addr_StartState, ref startState);
+            POPNetCtrl.NetCtrl01_bReadAddrVal(_deviceHandle, AddressContanst.Addr_StartState, ref startState);
             Console.WriteLine($"试验状态: {(startState == 1 ? "运行中" : "停止")}");
 
             // 读取控制频率
-            POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_CtrlTime);
+            POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_CtrlTime);
             Thread.Sleep(50);
             float ctrlTime = 0;
-            POPNetCtrl.NetCtrl01_fReadAddrVal(deviceHandle, AddressContanst.Addr_CtrlTime, ref ctrlTime);
+            POPNetCtrl.NetCtrl01_fReadAddrVal(_deviceHandle, AddressContanst.Addr_CtrlTime, ref ctrlTime);
             Console.WriteLine($"控制频率: {ctrlTime} ms ({1000.0f / ctrlTime:F1} Hz)");
 
             Console.WriteLine("\n按任意键返回主菜单...");
@@ -1079,9 +1086,9 @@ namespace POPNetCtrlConsoleTest
 
             // 读取控制器固件版本
             StringBuilder elfVer = new StringBuilder(16);
-            int result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_ELF_Ver);
+            int result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_ELF_Ver);
             Thread.Sleep(50);
-            result = POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_ELF_Ver, elfVer, 16);
+            result = POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_ELF_Ver, elfVer, 16);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"控制器固件版本: {elfVer}");
@@ -1089,9 +1096,9 @@ namespace POPNetCtrlConsoleTest
 
             // 读取DLL版本
             StringBuilder dllVer = new StringBuilder(16);
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_DLL_Ver);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_DLL_Ver);
             Thread.Sleep(50);
-            result = POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_DLL_Ver, dllVer, 16);
+            result = POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_DLL_Ver, dllVer, 16);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"DLL版本: {dllVer}");
@@ -1099,9 +1106,9 @@ namespace POPNetCtrlConsoleTest
 
             // 读取POPNet版本
             StringBuilder popnetVer = new StringBuilder(16);
-            result = POPNetCtrl.NetCtrl01_AskReadAddr(deviceHandle, AddressContanst.Addr_POPNET_Ver);
+            result = POPNetCtrl.NetCtrl01_AskReadAddr(_deviceHandle, AddressContanst.Addr_POPNET_Ver);
             Thread.Sleep(50);
-            result = POPNetCtrl.NetCtrl01_strReadAddrVal(deviceHandle, AddressContanst.Addr_POPNET_Ver, popnetVer, 16);
+            result = POPNetCtrl.NetCtrl01_strReadAddrVal(_deviceHandle, AddressContanst.Addr_POPNET_Ver, popnetVer, 16);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
                 Console.WriteLine($"POPNet硬件版本: {popnetVer}");
@@ -1113,10 +1120,10 @@ namespace POPNetCtrlConsoleTest
         /// </summary>
         static void StartDataMonitor()
         {
-            isRunning = true;
-            dataMonitorThread = new Thread(DataMonitorProc);
-            dataMonitorThread.IsBackground = true;
-            dataMonitorThread.Start();
+            _isRunning = true;
+            _dataMonitorThread = new Thread(DataMonitorProc);
+            _dataMonitorThread.IsBackground = true;
+            _dataMonitorThread.Start();
         }
         // 打印数组数据
         private static void PrintADInfoArray(TNet_ADHInfo[] infoArray)
@@ -1149,7 +1156,7 @@ namespace POPNetCtrlConsoleTest
         /// </summary>
         static void DataMonitorProc()
         {
-            while (isRunning)
+            while (_isRunning)
             {
                 try
                 {
@@ -1157,7 +1164,7 @@ namespace POPNetCtrlConsoleTest
                     uint dataCount1 = 1;
                     var stopwatch = Stopwatch.StartNew();
                     uint dataCount = 0;
-                    int result = POPNetCtrl.NetCtrl01_GetAD_HDataCount(deviceHandle, ref dataCount);
+                    int result = POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref dataCount);
                     Console.WriteLine($"当前数据数量: {dataCount}, 返回码: {result}");
                     //if (result == AddressContanst.OP_SUCCESSFUL && dataCount > 0)
                     //{
@@ -1182,7 +1189,7 @@ namespace POPNetCtrlConsoleTest
                         {
                             // 调用DLL函数
                             int result1 = POPNetCtrl.NetCtrl01_GetAD_HInfo(
-                                deviceHandle,
+                                _deviceHandle,
                                 buffer,
                                 totalSize
                             );

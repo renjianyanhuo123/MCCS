@@ -9,7 +9,7 @@
             set => SetProperty(ref _deviceId, value);
         }
 
-        private string _deviceName; 
+        private string _deviceName = string.Empty;
         public string DeviceName
         {
             get => _deviceName;

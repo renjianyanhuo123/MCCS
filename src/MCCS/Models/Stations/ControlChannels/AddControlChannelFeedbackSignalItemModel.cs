@@ -2,7 +2,7 @@
 {
     public class AddControlChannelFeedbackSignalItemModel : BindableBase
     {
-        private string _tempId;
+        private string _tempId = string.Empty;
         public string TempId
         {
             get => _tempId;
@@ -16,13 +16,13 @@
             set => SetProperty(ref _signalType, value);
         }
 
-        private ControlChannelSelectableItemModel _selectedSignalModel;
-        public ControlChannelSelectableItemModel SelectedSignalModel
+        private ControlChannelSelectableItemModel? _selectedSignalModel;
+        public ControlChannelSelectableItemModel? SelectedSignalModel
         {
             get => _selectedSignalModel;
             set
             {
-                if (value.IsSelected) return;
+                if (value == null || value.IsSelected) return;
                 if (_selectedSignalModel != null) _selectedSignalModel.IsSelected = false;
                 value.IsSelected = true;
                 SetProperty(ref _selectedSignalModel, value);
@@ -38,7 +38,7 @@
             get => _id;
             set => SetProperty(ref _id, value);
         }
-        private string _tempId;
+        private string _tempId = string.Empty;
         public string TempId
         {
             get => _tempId;
@@ -52,8 +52,8 @@
             set => SetProperty(ref _signalType, value);
         }
 
-        private ControlChannelSelectableItemModel _selectedSignalModel;
-        public ControlChannelSelectableItemModel SelectedSignalModel
+        private ControlChannelSelectableItemModel? _selectedSignalModel;
+        public ControlChannelSelectableItemModel? SelectedSignalModel
         {
             get => _selectedSignalModel;
             set

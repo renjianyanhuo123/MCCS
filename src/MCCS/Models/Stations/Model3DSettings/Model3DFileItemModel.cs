@@ -53,8 +53,8 @@ namespace MCCS.Models.Stations.Model3DSettings
         /// <summary>
         /// 选中映射的硬件设备
         /// </summary>
-        private MapDeviceModel _selectedMapDevice;
-        public MapDeviceModel SelectedMapDevice 
+        private MapDeviceModel? _selectedMapDevice;
+        public MapDeviceModel? SelectedMapDevice 
         { 
             get => _selectedMapDevice;
             set
@@ -62,7 +62,7 @@ namespace MCCS.Models.Stations.Model3DSettings
                 if (Equals(_selectedMapDevice, value)) return;
                 if(_selectedMapDevice != null) _selectedMapDevice.IsSelected = false;
                 SetProperty(ref _selectedMapDevice, value);
-                _selectedMapDevice.IsSelected = true;
+                if (_selectedMapDevice != null) _selectedMapDevice.IsSelected = true;
             }
         }
 
@@ -185,8 +185,8 @@ namespace MCCS.Models.Stations.Model3DSettings
             set => SetProperty(ref _zDistance, value);
         }
 
-        private Model3DFileItemModel _selectedModel;
-        public Model3DFileItemModel SelectedModel
+        private Model3DFileItemModel? _selectedModel;
+        public Model3DFileItemModel? SelectedModel
         {
             get => _selectedModel;
             set => SetProperty(ref _selectedModel, value);
@@ -200,19 +200,12 @@ namespace MCCS.Models.Stations.Model3DSettings
             get => _billboardType;
             set => SetProperty(ref _billboardType, value);
         }
-
-        private BindingControlChannelItemModel _selectedBindedChannel;
-        [Obsolete]
-        public BindingControlChannelItemModel SelectedBindedChannel
-        {
-            get => _selectedBindedChannel;
-            set => SetProperty(ref _selectedBindedChannel, value);
-        }
+         
         /// <summary>
         /// 选中的虚拟通道
         /// </summary>
-        private BindingPseudoChannelItemModel _selectedPseudoChannel; 
-        public BindingPseudoChannelItemModel SelectedPseudoChannel
+        private BindingPseudoChannelItemModel? _selectedPseudoChannel; 
+        public BindingPseudoChannelItemModel? SelectedPseudoChannel
         {
             get => _selectedPseudoChannel;
             set => SetProperty(ref _selectedPseudoChannel, value);

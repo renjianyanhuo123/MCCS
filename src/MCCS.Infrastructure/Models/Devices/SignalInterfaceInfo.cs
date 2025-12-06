@@ -38,8 +38,8 @@ namespace MCCS.Infrastructure.Models.Devices
         /// <summary>
         /// 单位
         /// </summary>
-        [Column(IsNullable = true, StringLength = 20)]
-        public string Unit { get; set; }
+        [Column(IsNullable = false, StringLength = 20)]
+        public required string Unit { get; set; }
 
         /// <summary>
         /// 更新周期(单位毫秒)

@@ -21,7 +21,7 @@ namespace MCCS.Infrastructure.Models.Model3D
         /// 相机背景色
         /// </summary>
         [Column(StringLength = 20, IsNullable = false)]
-        public string CameraBackgroundColor { get; set; }
+        public required string CameraBackgroundColor { get; set; }
 
         /// <summary>
         /// 站点ID
@@ -31,18 +31,18 @@ namespace MCCS.Infrastructure.Models.Model3D
         /// <summary>
         /// 相机的位置
         /// </summary>
-        [Column(StringLength = 50, IsNullable = true)]
-        public string CameraPosition { get; set; }
+        [Column(StringLength = 50, IsNullable = false)]
+        public required string CameraPosition { get; set; }
         /// <summary>
         /// 相机的朝向方向
         /// </summary>
-        [Column(StringLength = 50, IsNullable = true)]
-        public string CameraLookDirection { get; set; }
+        [Column(StringLength = 50, IsNullable = false)]
+        public required string CameraLookDirection { get; set; }
         /// <summary>
         /// 相机的上方向
         /// </summary>
-        [Column(StringLength = 50, IsNullable = true)]
-        public string CameraUpDirection { get; set; }
+        [Column(StringLength = 50, IsNullable = false)]
+        public required string CameraUpDirection { get; set; }
 
         /// <summary>
         /// 近裁剪平面

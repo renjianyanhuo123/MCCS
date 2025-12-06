@@ -84,7 +84,7 @@ namespace MCCS.Infrastructure
                     {
                         handler.Invoke(null, message);
                     }
-                    catch (Exception ex)
+                    catch
                     { 
                     }
                 }

@@ -111,7 +111,7 @@ namespace MCCS.ViewModels.ProjectManager
                 expression = expression.And(c => c.CreateTime <= EndTime);
             }
 
-            var res = await _projectRepository.GetPageMethodsAsync(1, _pageSize, expression);
+            var res = await _projectRepository.GetPageMethodsAsync(_pageIndex, _pageSize, expression);
             TotalCount = res.TotalCount;
             foreach (var project in res.Items)
             {

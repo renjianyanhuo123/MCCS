@@ -11,7 +11,7 @@ namespace MCCS.Models.ControlCommand
             set => SetProperty(ref _channelId, value); 
         }
 
-        private string _channelName; 
+        private string _channelName = string.Empty; 
         public string ChannelName
         {
             get => _channelName; 

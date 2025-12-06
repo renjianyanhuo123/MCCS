@@ -9,7 +9,7 @@
             set => SetProperty(ref _id, value);
         }
 
-        private string _key;
+        private string _key = string.Empty;
         public string Key
         {
             get => _key;

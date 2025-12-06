@@ -32,7 +32,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
             set => SetProperty(ref _deviceType, value);
         }
 
-        private string _desprition;
+        private string _desprition = string.Empty;
         public string Desprition
         {
             get => _desprition;

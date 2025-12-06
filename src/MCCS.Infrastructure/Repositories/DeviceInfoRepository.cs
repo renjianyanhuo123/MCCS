@@ -78,8 +78,7 @@ namespace MCCS.Infrastructure.Repositories
 
         public async Task<bool> UpdateSignalInfoAsync(SignalInterfaceInfo signalInterfaceInfo, CancellationToken cancellationToken = default)
         {
-            var count = await freeSql.Update<SignalInterfaceInfo>()
-                .Set(c => c.Address, signalInterfaceInfo.Address)
+            var count = await freeSql.Update<SignalInterfaceInfo>() 
                 .Set(c => c.SignalAddress, signalInterfaceInfo.SignalAddress)
                 .Set(c => c.DataType, signalInterfaceInfo.DataType)
                 .Set(c => c.SignalName, signalInterfaceInfo.SignalName)

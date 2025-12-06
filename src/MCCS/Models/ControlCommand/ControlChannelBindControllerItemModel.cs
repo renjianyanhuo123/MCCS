@@ -4,6 +4,6 @@
     {
         public long DeviceId { get; init; }
 
-        public string DeviceName { get; init; }
+        public required string DeviceName { get; init; }
     }
 }

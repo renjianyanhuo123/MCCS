@@ -37,6 +37,7 @@ namespace MCCS.Collecter.SignalManagers
                     {
                         DataQuality = info.DataQuality,
                         DeviceId = info.DeviceId,
+                        Unit = "",
                         Timestamp = info.Timestamp,
                         Value = signChannel.SignalAddressIndex < 10 ? info.Value.Net_AD_N[signChannel.SignalAddressIndex] : info.Value.Net_AD_S[signChannel.SignalAddressIndex % 10]
                     };

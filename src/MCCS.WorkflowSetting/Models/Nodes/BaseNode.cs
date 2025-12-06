@@ -21,7 +21,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// <summary>
         /// 节点变更事件
         /// </summary>
-        public event EventHandler<NodeChangedEventArgs> NodeChanged;
+        public event EventHandler<NodeChangedEventArgs>? NodeChanged;
         /// <summary>
         /// 用于快速查找父级节点
         /// 000001-000002,000004-000008-000009
@@ -74,7 +74,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// <summary>
         /// 触发变更事件（从当前节点开始向上冒泡）
         /// </summary>
-        protected void RaiseNodeChanged(string changeType, object changeData = null)
+        protected void RaiseNodeChanged(string changeType, object? changeData = null)
         {
             var args = new NodeChangedEventArgs(this, changeType, changeData);
             OnNodeChanged(args);

@@ -1,49 +1,36 @@
 ﻿using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
-using MCCS.Common.DataManagers;
-using MCCS.Events.Controllers;
-using MCCS.Infrastructure.TestModels.ControlParams;
-using MCCS.Models;
-using MCCS.ViewModels.Pages.ControlCommandPages;
-using MCCS.Views.Pages.ControlCommandPages;
 using MCCS.Collecter.DllNative.Models;
+using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Components.GlobalNotification.Models;
+using MCCS.Events.Controllers;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
-using MCCS.Models.ControlCommand;
+using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Models;
 using MCCS.Services.NotificationService;
+using MCCS.ViewModels.Pages.ControlCommandPages;
+using MCCS.Views.Pages.ControlCommandPages;
 
 namespace MCCS.ViewModels.Pages.Controllers
 {
-    public class ControllerMainPageViewModel : BindableBase
+    public class ControllerMainPageViewModel( 
+        IControlChannelManager controlChannelManager,
+        INotificationService notificationService,
+        IEventAggregator eventAggregator) : BindableBase
     {
         public const string Tag = "ControllerMainPage";  
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IControlChannelManager _controlChannelManager;
-        private readonly INotificationService _notificationService;
-        private readonly IControllerManager _controllerManager;
-        private readonly long _controllerId = -1;
-        private readonly Model3DMainInfo _modelInfo;
+        private readonly IEventAggregator _eventAggregator = eventAggregator;
+        private readonly IControlChannelManager _controlChannelManager = controlChannelManager;
+        private readonly INotificationService _notificationService = notificationService; 
+        private readonly Model3DMainInfo? _modelInfo;
 
         public ControllerMainPageViewModel(
-            IControllerManager controllerManager,
+            long modelId, 
             IControlChannelManager controlChannelManager,
             INotificationService notificationService,
-            IEventAggregator eventAggregator)
-        {
-            _controlChannelManager = controlChannelManager;
-            _eventAggregator = eventAggregator;
-            _notificationService = notificationService;
-            _controllerManager = controllerManager;
-        }
-
-        public ControllerMainPageViewModel(
-            long modelId,
-            IControllerManager controllerManager,
-            IControlChannelManager controlChannelManager,
-            INotificationService notificationService,
-            IEventAggregator eventAggregator) : this(controllerManager, controlChannelManager, notificationService, eventAggregator)
+            IEventAggregator eventAggregator) : this(controlChannelManager, notificationService, eventAggregator)
         {
             IsParticipateControl = true;
             CurrentModelId = modelId;
@@ -65,8 +52,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <summary>
         /// 选择的控制方式界面
         /// </summary>
-        private System.Windows.Controls.UserControl _currentPage;
-        public System.Windows.Controls.UserControl CurrentPage
+        private System.Windows.Controls.UserControl? _currentPage;
+        public System.Windows.Controls.UserControl? CurrentPage
         {
             get => _currentPage;
             set => SetProperty(ref _currentPage, value);
@@ -138,26 +125,26 @@ namespace MCCS.ViewModels.Pages.Controllers
 
         #region Command
 
-        public AsyncDelegateCommand LoadCommand { get; }
+        public AsyncDelegateCommand? LoadCommand { get; init; }
 
         /// <summary>
         /// 是否参与控制
         /// </summary>
-        public DelegateCommand<long?> ParticipateControlCommand { get; }
+        public DelegateCommand<long?>? ParticipateControlCommand { get; init; }
 
         /// <summary>
         /// 控制模式切换命令
         /// </summary>
-        public DelegateCommand ControlModeSelectionChangedCommand { get; }
+        public DelegateCommand? ControlModeSelectionChangedCommand { get; init; }
 
         /// <summary>
         /// 应用命令
         /// </summary>
-        public DelegateCommand ApplyCommand { get; }
+        public DelegateCommand? ApplyCommand { get; init; }
         /// <summary>
         /// 暂停命令
         /// </summary>
-        public DelegateCommand StopCommand { get; }
+        public DelegateCommand? StopCommand { get; init; }
         #endregion
 
         #region private method 
@@ -201,7 +188,8 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         private void ExecuteApplyCommand()
-        { 
+        {
+            if (_modelInfo == null || CurrentPage == null) return;
             CurrentCommandStatus = CommandExecuteStatusEnum.Executing;
             var controlMode = (ControlMode)SelectedControlMode;
             var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
@@ -287,6 +275,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         /// </summary>
         private void ExecuteStopCommand() 
         {
+            if (_modelInfo == null) return;
             var controlMode = (ControlMode)SelectedControlMode;
             var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
             if (controlChannel == null)

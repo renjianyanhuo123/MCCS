@@ -21,6 +21,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public BoxListNodes(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
+            LoadedCommand = new DelegateCommand(() => { });
             NodeClickCommand = new DelegateCommand<object?>(ExecuteNodeClickCommand);
             _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(ExecuteAddNode);
             _eventAggregator.GetEvent<DeleteNodeEvent>().Subscribe(ExecuteDeleteNode);

@@ -100,7 +100,7 @@ namespace MCCS.ViewModels.Pages
         }
         private void OnCancelSelectedMenu(NotificationCancelSelectedEventParam param)
         { 
-            SelectedMenuItem = null;
+            SelectedMenuItem = null!;
         }
         #endregion
          

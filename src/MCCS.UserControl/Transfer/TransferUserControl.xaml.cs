@@ -239,7 +239,7 @@ public partial class TransferUserControl
         var operation = SourceItems.FirstOrDefault(c => c.Id == id);
         if (operation != null)
         {
-            operation.IsSelected = (bool)checkBox.IsChecked;
+            operation.IsSelected = checkBox?.IsChecked ?? false;
             UpdateSelectAllCheckStatus();
         }
     }
@@ -250,7 +250,7 @@ public partial class TransferUserControl
         var operation = TargetItems.FirstOrDefault(c => c.Id == id);
         if (operation != null)
         {
-            operation.IsSelected = (bool)checkBox.IsChecked;
+            operation.IsSelected =  checkBox?.IsChecked ?? false;
             UpdateSelectAllCheckStatus();
         }
     } 

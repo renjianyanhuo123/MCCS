@@ -123,15 +123,15 @@ namespace MCCS.ViewModels.Pages.StationSites
             set => SetProperty(ref _cameraBackground, value);
         } 
 
-        private HelixToolkit.Wpf.SharpDX.Camera _camera;
-        public HelixToolkit.Wpf.SharpDX.Camera Camera
+        private HelixToolkit.Wpf.SharpDX.Camera? _camera;
+        public HelixToolkit.Wpf.SharpDX.Camera? Camera
         {
             get => _camera; 
             set => SetProperty(ref _camera, value);
         }
 
-        private IEffectsManager _effectsManager;
-        public IEffectsManager EffectsManager
+        private IEffectsManager? _effectsManager;
+        public IEffectsManager? EffectsManager
         {
             get => _effectsManager;
             set => SetProperty(ref _effectsManager, value);
@@ -139,8 +139,8 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         public SceneNodeGroupModel3D GroupModel { get; } = new();
 
-        private Model3DFileItemModel _selectedModel3DFile; 
-        public Model3DFileItemModel SelectedModel3DFile
+        private Model3DFileItemModel? _selectedModel3DFile; 
+        public Model3DFileItemModel? SelectedModel3DFile
         {
             get => _selectedModel3DFile;
             set
@@ -175,7 +175,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             {
                 if (SetProperty(ref _isCanControl, value))
                 {
-                    SelectedModel3DFile.IsCanControl = _isCanControl;
+                    if(SelectedModel3DFile != null) SelectedModel3DFile.IsCanControl = _isCanControl;
                 }
             }
         } 
@@ -211,7 +211,7 @@ namespace MCCS.ViewModels.Pages.StationSites
         /// <summary>
         /// 文本内容
         /// </summary>
-        private string _textContent;
+        private string _textContent = string.Empty;
         public string TextContent
         {
             get => _textContent;
@@ -367,8 +367,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 var temp2 = (Color)ColorConverter.ConvertFromString(billboardInfos[i].FontColor);
                 var backgroundColor = new SharpDX.Color(temp1.R, temp1.G, temp1.B, temp1.A);
                 var fontColor = new SharpDX.Color(temp2.R, temp2.G, temp2.B, temp2.A);
-                var selectedModel = Model3DFiles.FirstOrDefault(c => c.Key == billboardInfos[i].ModelFileId);
-                var selectedBindChannel = selectedModel?.BindedControlChannelIds.FirstOrDefault(c => c.Id == billboardInfos[i].ControlChannelId);
+                var selectedModel = Model3DFiles.FirstOrDefault(c => c.Key == billboardInfos[i].ModelFileId); 
                 CollectionDataLabels.TextInfo.Add(new TextInfoExt()
                 {
                     Background = backgroundColor,
@@ -379,7 +378,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     Size = billboardInfos[i].FontSize,
                     Text = billboardInfos[i].BillboardName
                 });
-                
+
                 BindedChannelModelBillboardTextInfos.Add(new BindedChannelModelBillboardTextInfo
                 {
                     Index = i,
@@ -388,8 +387,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                     FontColor1 = temp2,
                     BillboardName = billboardInfos[i].BillboardName,
                     BillboardType = (int)billboardInfos[i].BillboardType,
-                    Scale = billboardInfos[i].Scale,
-                    SelectedBindedChannel = selectedBindChannel,
+                    Scale = billboardInfos[i].Scale, 
                     SelectedPseudoChannel = BindingPseudoChannels.FirstOrDefault(s => s.Id == billboardInfos[i].PseudoChannelId),
                     SelectedModel = selectedModel,
                     FontColor = fontColor,
@@ -398,7 +396,6 @@ namespace MCCS.ViewModels.Pages.StationSites
                     ZDistance = position.Z,
                     FontSize = billboardInfos[i].FontSize
                 });
-                
             }
         }
 
@@ -415,13 +412,14 @@ namespace MCCS.ViewModels.Pages.StationSites
 
         private void ExecuteCheckBoxSelectionChangedCommand()
         {
-            SelectedModel3DFile.BindedControlChannelIds.Clear();
-            SelectedModel3DFile.BindedControlChannelIds.AddRange(BindingControlChannels.Where(s => s.IsSelected));
+            SelectedModel3DFile?.BindedControlChannelIds.Clear();
+            SelectedModel3DFile?.BindedControlChannelIds.AddRange(BindingControlChannels.Where(s => s.IsSelected));
         }
 
         private async Task ExecuteSaveModelCommand()
         {
             var orthographicCamera = Camera as HelixToolkit.Wpf.SharpDX.OrthographicCamera;
+            if(Camera == null) throw new ArgumentNullException("Camera is null");
             var modelBaseInfo = new Model3DBaseInfo
             {
                 Id = Id,
@@ -458,7 +456,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                 var tempType = (BillboardTypeEnum)s.BillboardType;
                 var res = new ModelBillboardInfo
                 {
-                    ModelFileId = s.SelectedModel.Key,
+                    ModelFileId = s.SelectedModel?.Key ?? "",
                     ModelId = modelBaseInfo.Id, 
                     BackgroundColor = $"#{s.BackgroundColor.A:X2}{s.BackgroundColor.R:X2}{s.BackgroundColor.G:X2}{s.BackgroundColor.B:X2}",
                     FontColor = $"#{s.FontColor.A:X2}{s.FontColor.R:X2}{s.FontColor.G:X2}{s.FontColor.B:X2}",
@@ -470,7 +468,6 @@ namespace MCCS.ViewModels.Pages.StationSites
                 };
                 if (tempType == BillboardTypeEnum.DataShow)
                 {
-                    res.ControlChannelId = s.SelectedBindedChannel?.Id ?? 0;
                     res.PseudoChannelId = s.SelectedPseudoChannel?.Id ?? 0;
                 } 
                 return res;
@@ -547,7 +544,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                     IsSelected = false
                 });
             }
-            if (modelInfo != null)
+            // 替换原有的 if (modelInfo != null) { ... } 代码块，确保 BaseInfo 不为 null 后再访问其属性
+            if (modelInfo != null && modelInfo.BaseInfo != null)
             {
                 var bindedChannels = await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(modelInfo.BaseInfo.Id);
                 var bindedPseudoChannels = modelInfo.BillboardInfos.Select(s => s.PseudoChannelId).ToList();
@@ -576,6 +574,8 @@ namespace MCCS.ViewModels.Pages.StationSites
                 };
                 foreach (var item in modelInfo.Model3DDataList)
                 {
+                    var selectedMapDevice = MapDeviceModels.FirstOrDefault(c => c.DeviceId == item.MapDeviceId);
+                    // 若 selectedMapDevice 可能为 null，需显式允许赋值或提供默认值
                     var addModel = new Model3DFileItemModel
                     {
                         FilePath = item.FilePath,
@@ -583,7 +583,7 @@ namespace MCCS.ViewModels.Pages.StationSites
                         Key = item.Key,
                         FileName = item.Name, 
                         IsCanControl = item.IsCanControl,
-                        SelectedMapDevice = MapDeviceModels.FirstOrDefault(c => c.DeviceId == item.MapDeviceId)
+                        SelectedMapDevice = selectedMapDevice ?? new MapDeviceModel()
                     };
                     var temp = bindedChannels
                         .Where(c => c.ModelFileId == item.Key).ToList(); 
@@ -598,7 +598,6 @@ namespace MCCS.ViewModels.Pages.StationSites
                         });
                     }
                     Model3DFiles.Add(addModel);
-
                 }
                 await LoadFileAsync(Model3DFiles.Select(s => s.FilePath).ToArray());
                 AddBillboardTextInfo(modelInfo.BillboardInfos);

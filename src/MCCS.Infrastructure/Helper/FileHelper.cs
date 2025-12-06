@@ -10,10 +10,10 @@ namespace MCCS.Infrastructure.Helper
     public static class FileHelper
     {
         // 默认配置
-        private const int DefaultBufferSize = 65536; // 64KB
-        private static readonly Encoding DefaultEncoding = Encoding.UTF8;
+        private const int _defaultBufferSize = 65536; // 64KB
+        private static readonly Encoding _defaultEncoding = Encoding.UTF8;
 
-        private static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings
+        private static readonly JsonSerializerSettings _defaultJsonSettings = new JsonSerializerSettings
         {
             Formatting = Formatting.None,
             NullValueHandling = NullValueHandling.Ignore,
@@ -26,12 +26,12 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 同步写入文本文件
         /// </summary>
-        public static void WriteText(string filePath, string content, bool append = false, int? bufferSize = null, Encoding encoding = null)
+        public static void WriteText(string filePath, string content, bool append = false, int? bufferSize = null, Encoding? encoding = null)
         {
             EnsureDirectoryExists(filePath);
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             using var stream = new FileStream(
                 filePath,
@@ -47,13 +47,13 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 同步读取文本文件
         /// </summary>
-        public static string ReadText(string filePath, int? bufferSize = null, Encoding encoding = null)
+        public static string ReadText(string filePath, int? bufferSize = null, Encoding? encoding = null)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             using var stream = new FileStream(
                 filePath,
@@ -73,12 +73,12 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 异步写入文本文件
         /// </summary>
-        public static async Task WriteTextAsync(string filePath, string content, bool append = false, int? bufferSize = null, Encoding encoding = null)
+        public static async Task WriteTextAsync(string filePath, string content, bool append = false, int? bufferSize = null, Encoding? encoding = null)
         {
             EnsureDirectoryExists(filePath);
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             await using var stream = new FileStream(
                 filePath,
@@ -94,13 +94,13 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 异步读取文本文件
         /// </summary>
-        public static async Task<string> ReadTextAsync(string filePath, int? bufferSize = null, Encoding encoding = null)
+        public static async Task<string> ReadTextAsync(string filePath, int? bufferSize = null, Encoding? encoding = null)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             await using var stream = new FileStream(
                 filePath,
@@ -120,19 +120,19 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 同步序列化对象并写入 JSON 文件
         /// </summary>
-        public static void WriteJson<T>(string filePath, T obj, Formatting formatting = Formatting.None, int? bufferSize = null, Encoding encoding = null)
+        public static void WriteJson<T>(string filePath, T obj, Formatting formatting = Formatting.None, int? bufferSize = null, Encoding? encoding = null)
         {
             EnsureDirectoryExists(filePath);
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             var settings = new JsonSerializerSettings
             {
                 Formatting = formatting,
-                NullValueHandling = DefaultJsonSettings.NullValueHandling,
-                ReferenceLoopHandling = DefaultJsonSettings.ReferenceLoopHandling,
-                TypeNameHandling = DefaultJsonSettings.TypeNameHandling
+                NullValueHandling = _defaultJsonSettings.NullValueHandling,
+                ReferenceLoopHandling = _defaultJsonSettings.ReferenceLoopHandling,
+                TypeNameHandling = _defaultJsonSettings.TypeNameHandling
             };
 
             using var stream = new FileStream(
@@ -151,13 +151,13 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 同步读取 JSON 文件并反序列化
         /// </summary>
-        public static T? ReadJson<T>(string filePath, int? bufferSize = null, Encoding encoding = null)
+        public static T? ReadJson<T>(string filePath, int? bufferSize = null, Encoding? encoding = null)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
-            var buffer = bufferSize ?? DefaultBufferSize;
-            var enc = encoding ?? DefaultEncoding;
+            var buffer = bufferSize ?? _defaultBufferSize;
+            var enc = encoding ?? _defaultEncoding;
 
             using var stream = new FileStream(
                 filePath,
@@ -168,7 +168,7 @@ namespace MCCS.Infrastructure.Helper
                 FileOptions.SequentialScan);
             using var reader = new StreamReader(stream, enc, true, buffer);
             using var jsonReader = new JsonTextReader(reader);
-            var serializer = JsonSerializer.Create(DefaultJsonSettings);
+            var serializer = JsonSerializer.Create(_defaultJsonSettings);
             return serializer.Deserialize<T>(jsonReader);
         }
 
@@ -179,16 +179,16 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 异步序列化对象并写入 JSON 文件
         /// </summary>
-        public static async Task WriteJsonAsync<T>(string filePath, T obj, Formatting formatting = Formatting.None, int? bufferSize = null, Encoding encoding = null)
+        public static async Task WriteJsonAsync<T>(string filePath, T obj, Formatting formatting = Formatting.None, int? bufferSize = null, Encoding? encoding = null)
         {
             EnsureDirectoryExists(filePath);
 
             var settings = new JsonSerializerSettings
             {
                 Formatting = formatting,
-                NullValueHandling = DefaultJsonSettings.NullValueHandling,
-                ReferenceLoopHandling = DefaultJsonSettings.ReferenceLoopHandling,
-                TypeNameHandling = DefaultJsonSettings.TypeNameHandling
+                NullValueHandling = _defaultJsonSettings.NullValueHandling,
+                ReferenceLoopHandling = _defaultJsonSettings.ReferenceLoopHandling,
+                TypeNameHandling = _defaultJsonSettings.TypeNameHandling
             };
 
             var json = await Task.Run(() => JsonConvert.SerializeObject(obj, settings))
@@ -200,14 +200,14 @@ namespace MCCS.Infrastructure.Helper
         /// <summary>
         /// 异步读取 JSON 文件并反序列化
         /// </summary>
-        public static async Task<T?> ReadJsonAsync<T>(string filePath, int? bufferSize = null, Encoding encoding = null)
+        public static async Task<T?> ReadJsonAsync<T>(string filePath, int? bufferSize = null, Encoding? encoding = null)
         {
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
             var json = await ReadTextAsync(filePath, bufferSize, encoding).ConfigureAwait(false);
 
-            return await Task.Run(() => JsonConvert.DeserializeObject<T>(json, DefaultJsonSettings))
+            return await Task.Run(() => JsonConvert.DeserializeObject<T>(json, _defaultJsonSettings))
                 .ConfigureAwait(false);
         }
 
@@ -222,7 +222,7 @@ namespace MCCS.Infrastructure.Helper
         {
             EnsureDirectoryExists(filePath);
 
-            var buffer = bufferSize ?? DefaultBufferSize;
+            var buffer = bufferSize ?? _defaultBufferSize;
 
             using var stream = new FileStream(
                 filePath,
@@ -242,7 +242,7 @@ namespace MCCS.Infrastructure.Helper
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
-            var buffer = bufferSize ?? DefaultBufferSize;
+            var buffer = bufferSize ?? _defaultBufferSize;
 
             using var stream = new FileStream(
                 filePath,
@@ -267,7 +267,7 @@ namespace MCCS.Infrastructure.Helper
         {
             EnsureDirectoryExists(filePath);
 
-            var buffer = bufferSize ?? DefaultBufferSize;
+            var buffer = bufferSize ?? _defaultBufferSize;
 
             await using var stream = new FileStream(
                 filePath,
@@ -287,7 +287,7 @@ namespace MCCS.Infrastructure.Helper
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"文件不存在: {filePath}");
 
-            var buffer = bufferSize ?? DefaultBufferSize;
+            var buffer = bufferSize ?? _defaultBufferSize;
 
             await using var stream = new FileStream(
                 filePath,

@@ -58,7 +58,7 @@ namespace MCCS.ViewModels.Pages
         private Model3DViewModel? _lastHoveredModel = null;
         private ObservableCollection<ControlProcessExpander> _controlProcessExpanders = [];
 
-        private Camera _camera;
+        private Camera _camera = new OrthographicCamera();
         private IEffectsManager _effectsManager;
         private readonly IModel3DLoaderService _model3DLoaderService; 
         private readonly IModel3DDataRepository _model3DDataRepository; 
@@ -84,8 +84,8 @@ namespace MCCS.ViewModels.Pages
         private ImportProgressEventArgs _loadingProgress = new(); 
 
         private DateTime _lastMouseMoveTime = DateTime.MinValue;
-        private const int MouseMoveThrottleMs = 50; // 50ms 节流 
-        private const int MaxPoints = 20; 
+        private const int _mouseMoveThrottleMs = 50; // 50ms 节流 
+        private const int _maxPoints = 20; 
 
         private Model3DViewModel? _clearOperationModel = null; 
         private MultipleControllerMainPageViewModel? _multipleControllerMainPageViewModel = null;
@@ -182,7 +182,7 @@ namespace MCCS.ViewModels.Pages
         /// <summary>
         /// 背景环境配置
         /// </summary>
-        public TextureModel EnvironmentMap { get; private set; }
+        public TextureModel? EnvironmentMap { get; private set; }
 
         /// <summary>
         /// 是否显示右键菜单
@@ -254,9 +254,9 @@ namespace MCCS.ViewModels.Pages
 
         #region 状态显示模型 
         // TODO: 暂时先保留后面如果用到
-        public BillboardSingleImage3D BillboardModel { private set; get; }
-        public SharpDX.Matrix[] BillboardInstances { private set; get; }
-        public BillboardInstanceParameter[] BillboardInstanceParams { private set; get; }
+        // public BillboardSingleImage3D BillboardModel { private set; get; }
+        public SharpDX.Matrix[] BillboardInstances { private set; get; } = [];
+        public BillboardInstanceParameter[] BillboardInstanceParams { private set; get; } = [];
         #endregion
 
         public SceneNodeGroupModel3D GroupModel { get; } = new();
@@ -317,7 +317,8 @@ namespace MCCS.ViewModels.Pages
             IsLoading = true;
             if (GlobalDataManager.Instance.StationSiteInfo == null) throw new ArgumentNullException("StationSiteInfo is NULL");
             var modelAggregate = await _model3DDataRepository.GetModelAggregateByStationIdAsync(GlobalDataManager.Instance.StationSiteInfo.Id);
-            if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL"); 
+            if (modelAggregate == null) throw new ArgumentNullException("ModelAggregate is NULL");
+            if (modelAggregate.BaseInfo == null) throw new ArgumentNullException("ModelAggregate.BaseInfo is NULL");
             Camera = new OrthographicCamera()
             {
                 LookDirection = modelAggregate.BaseInfo.CameraLookDirection.ToVector<Vector3D>(),
@@ -327,7 +328,7 @@ namespace MCCS.ViewModels.Pages
                 NearPlaneDistance = modelAggregate.BaseInfo.NearPlaneDistance,
                 Width = modelAggregate.BaseInfo.FieldViewWidth
             };
-            BackgroundColor = (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.CameraBackgroundColor); 
+            BackgroundColor = (Color)ColorConverter.ConvertFromString(modelAggregate.BaseInfo.CameraBackgroundColor);
             try
             {
                 // 清理旧模型
@@ -544,7 +545,7 @@ namespace MCCS.ViewModels.Pages
                                 }
                                 catch (Exception e)
                                 {
-                                    Log.Error("试验数据保存数据错误");
+                                    Log.Error($"试验数据保存数据错误{e.Message}");
                                 }
                             });
                         _notificationService.Show("成功", "成功开启实验!", NotificationType.Success);
@@ -606,7 +607,7 @@ namespace MCCS.ViewModels.Pages
             if (multipleControllerMainPageViewModel == null) return;
             foreach (var item in multipleControllerMainPageViewModel.Children)
             {
-                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controllerManager, _controlChannelManager, _notificationService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(item.CurrentModelId, _controlChannelManager, _notificationService, _eventAggregator));
             }
             // (2) 移除掉组合控制器部分
             Controllers.Remove(multipleControllerMainPageViewModel);
@@ -614,15 +615,15 @@ namespace MCCS.ViewModels.Pages
 
         private void OnOperationValveEvent(OperationValveEventParam param)
         {
-            var success = _modelTextInfoDic.TryGetValue(param.ModelId, out var textInfo);
-            if (success)
+            if (param == null) return;
+            if (_modelTextInfoDic.TryGetValue(param.ModelId, out var textInfo) && textInfo != null)
             {
                 textInfo.Text = param.IsOpen ? "ON" : "OFF";
                 IsShowContextMenu = false;
             }
         } 
         /// <summary>
-        /// 接受到信息后移动
+        /// 接收到信息后移动
         /// </summary>
         /// <param name="param"></param>
         private async void OnReceivedCommand(ReceivedCommandDataEventParam param)
@@ -630,7 +631,7 @@ namespace MCCS.ViewModels.Pages
             if (param.Param == null) throw new ArgumentNullException(nameof(param.Param)); 
         }
 
-        private float sumDistance = 0.0f;
+        private float _sumDistance = 0.0f;
         /// <summary>
         /// 静态控制模式下 模型移动
         /// </summary> 
@@ -639,9 +640,9 @@ namespace MCCS.ViewModels.Pages
             var testModel = Models.First(c => c.Model3DData.Id == 439);
             var moveDirection = testModel.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);   
             testModel.PositionChange(moveDirection, -5f);
-            sumDistance -= 5f;
+            _sumDistance -= 5f;
 #if DEBUG
-            Debug.WriteLine($"当前移动的距离: {sumDistance:F2}");
+            Debug.WriteLine($"当前移动的距离: {_sumDistance:F2}");
 #endif
             testModel.SceneNode.UpdateAllTransformMatrix();  
         }
@@ -694,7 +695,7 @@ namespace MCCS.ViewModels.Pages
             if (Controllers.OfType<ControllerMainPageViewModel>().All(c => c.CurrentModelId != clickedModel.Model3DData.Id)
                 && !Controllers.OfType<MultipleControllerMainPageViewModel>().Any(c => c.Children.Any(s => s.CurrentModelId == clickedModel.Model3DData.Id)))
             {
-                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controllerManager, _controlChannelManager, _notificationService, _eventAggregator));
+                Controllers.Add(new ControllerMainPageViewModel(clickedModel.Model3DData.Id, _controlChannelManager, _notificationService, _eventAggregator));
                 IsShowController = Controllers.Count > 0;
             }
         }
@@ -816,7 +817,7 @@ namespace MCCS.ViewModels.Pages
 
             // 节流处理，避免过于频繁的更新
             var now = DateTime.Now;
-            if ((now - _lastMouseMoveTime).TotalMilliseconds < MouseMoveThrottleMs) return;
+            if ((now - _lastMouseMoveTime).TotalMilliseconds < _mouseMoveThrottleMs) return;
             _lastMouseMoveTime = now;
             var hoveredModelId = FindViewModel(res.ModelHit);
             var hoveredModel = Models.FirstOrDefault(c => c.ModelId == hoveredModelId);

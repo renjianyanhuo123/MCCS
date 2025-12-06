@@ -78,9 +78,10 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
             if (temp == null) return;
             if (temp.IsAdded)
             {
-                var success = await _deviceInfoRepository.UpdateSignalInfoAsync(new SignalInterfaceInfo()
+                bool success = await _deviceInfoRepository.UpdateSignalInfoAsync(new SignalInterfaceInfo()
                 {
                     Id = temp.Id,
+                    Unit = "",
                     SignalAddress = temp.Address,
                     DataType = (SignalDataTypeEnum)temp.DataType,
                     SignalName = temp.SignalName,
@@ -102,6 +103,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
                 var newId = await _deviceInfoRepository.AddSignalInfoAsync(new SignalInterfaceInfo()
                 {
                     SignalAddress = temp.Address,
+                    Unit = "",
                     DataType = (SignalDataTypeEnum)temp.DataType,
                     SignalName = temp.SignalName,
                     DownLimitRange = temp.DownLimitRange,

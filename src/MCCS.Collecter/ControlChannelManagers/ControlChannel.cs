@@ -19,6 +19,9 @@ namespace MCCS.Collecter.ControlChannelManagers
             Configuration = configuration;
             ChannelId = configuration.ChannelId;
             ValveStatus = ValveStatusEnum.Closed; 
+            _controllerManager = null!;
+            _signalManager = null!;
+            _controller = null!;
         }
 
         public ControlChannel(ControlChannelConfiguration configuration, IControllerManager controllerManager, ISignalManager signalManager) : this(configuration)

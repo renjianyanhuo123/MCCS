@@ -130,7 +130,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             }
             catch (Exception e)
             {
-                Log.Error("添加设备后刷新失败！");
+                Log.Error($"添加设备后刷新失败！{e.Message}");
             }
         } 
         private async void UpdateHardware_Refresh(NotificationEditHardwareEventParam param)
@@ -141,7 +141,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
             }
             catch (Exception e)
             {
-                Log.Error("更新设备后刷新失败！");
+                Log.Error($"更新设备后刷新失败！{e.Message}");
             }
         }
         #endregion

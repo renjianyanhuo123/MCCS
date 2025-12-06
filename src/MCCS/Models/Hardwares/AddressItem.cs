@@ -3,6 +3,6 @@
     public record AddressItem
     {
         public long Value { get; init; }
-        public string Display { get; init; }
+        public required string Display { get; init; }
     }
 }

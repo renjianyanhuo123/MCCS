@@ -63,6 +63,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         new DataPoint<TNet_ADHInfo>
                         {
                             Value = item,
+                            Unit = "",
                             Timestamp = dataPoint.Timestamp,
                             DeviceId = dataPoint.DeviceId
                         }

@@ -28,7 +28,7 @@ namespace MCCS.ViewModels.Dialogs.Method
         /// <summary>
         /// 方法名称
         /// </summary> 
-        private string _name;
+        private string _name = string.Empty;
         public string Name
         {
             get => _name;
@@ -37,7 +37,7 @@ namespace MCCS.ViewModels.Dialogs.Method
         /// <summary>
         /// 编号
         /// </summary>
-        private string _code; 
+        private string _code = string.Empty;
         public string Code
         {
             get => _code;
@@ -66,7 +66,7 @@ namespace MCCS.ViewModels.Dialogs.Method
         /// <summary>
         /// 方法标准
         /// </summary> 
-        private string _standard;
+        private string _standard = string.Empty;
         public string Standard
         {
             get => _standard;
@@ -76,7 +76,7 @@ namespace MCCS.ViewModels.Dialogs.Method
         /// <summary>
         /// 文件路径
         /// </summary> 
-        private string _filePath;
+        private string _filePath = string.Empty;
         public string FilePath
         {
             get => _filePath;
@@ -86,7 +86,7 @@ namespace MCCS.ViewModels.Dialogs.Method
         /// <summary>
         /// 备注
         /// </summary>
-        private string _remark;
+        private string _remark = string.Empty;
         public string Remark
         {
             get => _remark;

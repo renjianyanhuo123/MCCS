@@ -11,9 +11,9 @@ namespace MCCS.ViewModels.Pages
 
         #region Fields
         private double _progress;
-        private string _statusText;
-        private string _appName;
-        private string _version;
+        private string _statusText = string.Empty;
+        private string _appName = string.Empty;
+        private string _version = string.Empty;
         private readonly ISplashService _splashService; 
         #endregion
 

@@ -2,14 +2,14 @@
 {
     public class TransferItemModel : BindingBase
     {
-        private string _id;
+        private string _id = string.Empty;
         public string Id
         {
             get => _id;
             set => SetProperty(ref _id, value);
         }
 
-        private string _name; 
+        private string _name = string.Empty;
         public string Name
         {
             get => _name;

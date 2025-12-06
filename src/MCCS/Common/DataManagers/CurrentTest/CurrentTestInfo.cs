@@ -19,7 +19,7 @@ namespace MCCS.Common.DataManagers.CurrentTest
         /// <summary>
         /// 试验名称
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
         /// <summary>
         /// 当前试验开始时间
         /// </summary>

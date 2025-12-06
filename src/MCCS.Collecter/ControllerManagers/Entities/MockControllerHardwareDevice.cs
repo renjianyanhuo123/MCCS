@@ -23,13 +23,11 @@ namespace MCCS.Collecter.ControllerManagers.Entities
 
         private readonly object _lock = new(); 
 
-        private const float ForceMin = -10000.0f;
-        private const float ForceMax = 10000.0f;
+        private const float _forceMin = -10000.0f;
+        private const float _forceMax = 10000.0f;
 
-        private const float PositionMin = -1000.0f;
-        private const float PositionMax = 1000.0f;
-        //  单位/ms
-        private float _speed = 0.0f;
+        private const float _positionMin = -1000.0f;
+        private const float _positionMax = 1000.0f;
 
         private int _valleyPeakFilterNum = 0;
         private CancellationTokenSource? _forceStaticCTS;
@@ -218,6 +216,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 DeviceId = DeviceId,
                 Value = res,
+                Unit = "",
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 DataQuality = DataQuality.Good
             };
@@ -277,13 +276,13 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadSVNP:
                     speed = controlParams.TargetValue > _force ? speed : -speed;
-                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
+                    PositionChangeToTarget(speed, speed > 0 ? _positionMax : _positionMin);
                     ForceChangeToTarget(speed, controlParams.TargetValue);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_LoadNVSP:
                     speed = controlParams.TargetValue > _position ? speed : -speed;
                     PositionChangeToTarget(speed, controlParams.TargetValue);
-                    ForceChangeToTarget(speed, speed > 0 ? ForceMax : ForceMin);
+                    ForceChangeToTarget(speed, speed > 0 ? _forceMax : _forceMin);
                     break;
                 case StaticLoadControlEnum.CTRLMODE_OPEN:
                     speed = speed switch
@@ -292,7 +291,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         > 1000.0f => 1000.0f,
                         _ => speed
                     };
-                    PositionChangeToTarget(speed, speed > 0 ? PositionMax : PositionMin);
+                    PositionChangeToTarget(speed, speed > 0 ? _positionMax : _positionMin);
                     break; 
                 case StaticLoadControlEnum.CTRLMODE_HLoadN: 
                 case StaticLoadControlEnum.CTRLMODE_HLoadS:

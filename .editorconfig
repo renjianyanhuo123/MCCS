@@ -12,8 +12,7 @@ indent_size = 2
 #           C# 代码风格（与你项目的风格一致）             #
 ###########################################################
 
-[*.cs]
-
+[*.cs] 
 # 使用 var，但对基本类型使用明确类型
 csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_when_type_is_apparent = true:suggestion
@@ -33,4 +32,212 @@ dotnet_style_null_propagation = true:suggestion
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_diagnostic.CS8618.severity = warning  # 未初始化引用
 dotnet_diagnostic.CS8602.severity = warning  # 可能为空引用
+###########################################################
+#                  命名规范（MVVM + DI）                  #
+###########################################################
+
+# 私有字段必须 _camelCase
+dotnet_naming_rule.private_fields_should_be_underscored.severity = error
+dotnet_naming_rule.private_fields_should_be_underscored.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_underscored.style = underscored
+
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_style.underscored.capitalization = camel_case
+dotnet_naming_style.underscored.required_prefix = _
+
+# 异步方法必须以 Async 结尾
+dotnet_naming_rule.async_methods_end_with_async.severity = warning
+dotnet_naming_rule.async_methods_end_with_async.symbols = async_methods
+dotnet_naming_rule.async_methods_end_with_async.style = end_with_async
+
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_style.end_with_async.required_suffix = Async
+
+# 接口以 I 开头
+dotnet_naming_rule.interfaces_start_with_I.symbols = interfaces
+dotnet_naming_rule.interfaces_start_with_I.style = prefix_I
+dotnet_naming_rule.interfaces_start_with_I.severity = error
+
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_style.prefix_I.required_prefix = I
+
+###########################################################
+#                 WPF + Prism + MVVM 专项规则             #
+###########################################################
+
+# ViewModel 必须以 ViewModel 结尾
+dotnet_naming_rule.viewmodel_suffix.severity = error
+dotnet_naming_rule.viewmodel_suffix.symbols = viewmodels
+dotnet_naming_rule.viewmodel_suffix.style = viewmodel_style
+
+dotnet_naming_symbols.viewmodels.applicable_kinds = class
+dotnet_naming_symbols.viewmodels.applicable_names = *ViewModel
+dotnet_naming_style.viewmodel_style.required_suffix = ViewModel
+
+# DependencyProperty 必须使用 nameof
+dotnet_diagnostic.WPF0010.severity = error
+dotnet_diagnostic.WPF0005.severity = error
+
+# XAML 绑定路径必须存在（来自 WPFAnalyzers）
+dotnet_diagnostic.WPF0015.severity = warning
+dotnet_diagnostic.WPF0018.severity = warning
+
+# Prism: 自动引用 ViewModelLocator 时提示潜在错误
+dotnet_diagnostic.PRISM001.severity = warning
+dotnet_diagnostic.PRISM002.severity = warning
+
+###########################################################
+#             Rx.NET / 并发 / 工控实时数据规范            #
+###########################################################
+
+# 禁止在 UI 线程执行阻塞操作
+dotnet_diagnostic.AsyncFixer03.severity = error  # 不要 Task.Result/Wait
+
+# 检查 Unobserved exception
+dotnet_diagnostic.AsyncFixer05.severity = warning
+
+# 检查被遗忘的订阅
+dotnet_diagnostic.RX0001.severity = warning
+
+# 禁止在 Rx pipeline 中使用 async void
+dotnet_diagnostic.RX0005.severity = error
+
+# 建议在可取消操作中传入 CancellationToken
+dotnet_diagnostic.CA2016.severity = warning
+
+###########################################################
+#                   性能优化（实时系统）                  #
+###########################################################
+
+# 避免不必要的装箱
+dotnet_diagnostic.CA1800.severity = warning
+dotnet_diagnostic.CA1853.severity = suggestion
+
+# 建议使用 Span<T>/Memory<T>
+dotnet_diagnostic.CA1835.severity = suggestion
+
+# 避免频繁分配
+dotnet_diagnostic.CA1825.severity = suggestion
+
+###########################################################
+#                WPF / XAML 专用 EditorConfig             #
+###########################################################
+
+[*.xaml]
+
+# ========== 基本格式风格 ==========
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# 属性换行策略（长行自动换行）
+xaml_wrap_attributes = true
+xaml_max_attribute_length = 80
+
+# 属性应按类别排序（布局 → 外观 → 行为 → 绑定）
+xaml_sort_attributes = true
+
+# XML 声明格式
+charset = utf-8
+xml_space = preserve
+
+# ========== XAML 命名规范（强烈推荐） ==========
+
+# 控件必须按类型命名前缀：Grid → grd、TextBox → txt 等
+xaml_naming_rule.controls_prefix.severity = suggestion
+xaml_naming_rule.controls_prefix.symbols = controls
+xaml_naming_rule.controls_prefix.style = control_prefix_style
+
+# 控件种类匹配
+xaml_naming_symbols.controls.applicable_kinds = element
+
+# 定义命名前缀风格
+xaml_naming_style.control_prefix_style.capitalization = pascal_case
+
+# 常用控件命名前缀（简化 MVVM 绑定）
+xaml_naming_style.control_prefix_style.required_prefixes = 
+    grd; # Grid
+    stk; # StackPanel
+    brd; # Border
+    txt; # TextBox/TextBlock
+    cmb; # ComboBox
+    lst; # ListBox
+    dtg; # DataGrid
+    chk; # CheckBox
+    btn; # Button
+    img; # Image
+    mdl; # HelixToolkit ModelVisual3D
+    cam; # Camera
+    vwp; # Viewport3DX
+
+# ========== Binding / MVVM 规则（重点） ==========
+
+# Binding 必须使用 Path= 明确路径
+dotnet_diagnostic.WPF0012.severity = warning
+
+# 绑定必须能解析为真实属性（防止拼错）
+dotnet_diagnostic.WPF0015.severity = error
+
+# View 必须绑定到 ViewModelLocator 或 DataContext
+dotnet_diagnostic.WPF0036.severity = suggestion
+
+# 避免 Binding 使用 x:Reference 绑定性能差
+dotnet_diagnostic.WPF0018.severity = warning
+
+# Mode=TwoWay 必须带 UpdateSourceTrigger
+dotnet_diagnostic.WPF0020.severity = warning
+
+# x:Name 禁止重复
+dotnet_diagnostic.WPF0041.severity = error
+
+# ========== Prism 专用规则 ==========
+
+# Region 注册时建议加 IsNavigationTarget
+dotnet_diagnostic.PRISM1001.severity = suggestion
+
+# 建议使用 Prism 的 DelegateCommand 而不是事件
+dotnet_diagnostic.PRISM2001.severity = suggestion
+
+# View 注入 Region 时，x:Class 名与 ViewModel 名需匹配
+dotnet_diagnostic.PRISM3001.severity = warning
+
+# ========== HelixToolkit / 3D 场景 XAML 规则 ==========
+
+# Model3D 必须定义 Transform（避免 NullTransform）
+dotnet_diagnostic.HTX001.severity = warning
+
+# Camera 建议显式设置 Position / LookDirection
+dotnet_diagnostic.HTX002.severity = suggestion
+
+# MeshGeometry3D 必须带 Normals（避免渲染错误）
+dotnet_diagnostic.HTX003.severity = warning
+
+# ========== 性能相关（实时数据 / 控件较多） ==========
+
+# 禁止使用 ElementName 绑定过多（性能开销大）
+dotnet_diagnostic.WPF1001.severity = suggestion
+
+# Prefer Binding with x:Bind in UWP-like 位置（WPF 虽不支持，但保持格式风格）
+dotnet_diagnostic.WPF2001.severity = none
+
+# 避免控件滥用 DropShadowEffect（性能差）
+dotnet_diagnostic.WPF3001.severity = suggestion
+
+# 建议对复杂 UI 使用 VirtualizingPanel
+dotnet_diagnostic.WPF4001.severity = suggestion
+
+# DataGrid 建议开启虚拟化
+xaml_style.datagrid_enable_virtualization = true
+
+
+###########################################################
+#                  代码分析启用等级设置                   #
+###########################################################
+
+# 打开全部 .NET 分析器规则（高等级）
+analysis_level = latest
+enforce_code_style_in_build = true
 

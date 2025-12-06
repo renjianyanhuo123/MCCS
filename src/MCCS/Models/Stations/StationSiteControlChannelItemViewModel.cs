@@ -26,7 +26,7 @@ namespace MCCS.Models.Stations
             set => SetProperty(ref _signalType, value);
         }
 
-        private string _controllerName;
+        private string _controllerName = string.Empty;
         public string ControllerName
         {
             get => _controllerName;
@@ -50,7 +50,7 @@ namespace MCCS.Models.Stations
             set => SetProperty(ref _id, value);
         }
 
-        private string _channelId;
+        private string _channelId = string.Empty;
         public string ChannelId
         {
             get => _channelId; 
@@ -69,6 +69,6 @@ namespace MCCS.Models.Stations
             get => _controlMode;
             set => SetProperty(ref _controlMode, value);
         }
-        public ObservableCollection<StationSiteControlChannelSignalViewModel> Signals { get; set; }
+        public ObservableCollection<StationSiteControlChannelSignalViewModel> Signals { get; set; } = [];
     }
 }

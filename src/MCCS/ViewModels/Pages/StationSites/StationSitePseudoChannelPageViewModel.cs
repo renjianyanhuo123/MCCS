@@ -45,7 +45,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             }
             catch (Exception e)
             {
-                Log.Error("添加通道后刷新失败！");
+                Log.Error($"添加通道后刷新失败！{e.Message}");
             }
         }
 
@@ -57,7 +57,7 @@ namespace MCCS.ViewModels.Pages.StationSites
             }
             catch (Exception e)
             {
-                Log.Error("添加通道后刷新失败！");
+                Log.Error($"添加通道后刷新失败！{e.Message}");
             }
         }
 

@@ -79,6 +79,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                         var errorReading = new DataPoint<List<TNet_ADHInfo>>
                         {
                             Value = [],
+                            Unit = "",
                             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                             DataQuality = DataQuality.Bad
                         };
@@ -112,6 +113,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             {
                 DeviceId = DeviceId,
                 Value = results,
+                Unit = "",
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 DataQuality = DataQuality.Good
             };
@@ -120,6 +122,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private static DataPoint<List<TNet_ADHInfo>> CreateBadDataPoint() => new()
         {
             Value = [],
+            Unit = "",
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             DataQuality = DataQuality.Bad
         };

@@ -32,15 +32,15 @@ namespace MCCS.ViewModels.Pages.StationSites
         #region Property
         public ObservableCollection<StationMenuItemModel> MenuItems { get; set; }
 
-        private StationMenuItemModel _selectedMenuItem;
-        public StationMenuItemModel SelectedMenuItem
+        private StationMenuItemModel? _selectedMenuItem;
+        public StationMenuItemModel? SelectedMenuItem
         {
             get => _selectedMenuItem;
             set
             {
                 if (SetProperty(ref _selectedMenuItem, value))
                 {
-                    var targetView = _selectedMenuItem.Id switch
+                    var targetView = _selectedMenuItem?.Id switch
                     {
                         1 => StationSiteHardwarePageViewModel.Tag,
                         2 => StationSiteControlChannelPageViewModel.Tag,

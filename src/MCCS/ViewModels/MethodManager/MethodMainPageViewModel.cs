@@ -37,7 +37,7 @@ namespace MCCS.ViewModels.MethodManager
                 }
                 catch (Exception e)
                 {
-                    Log.Error("添加方法后刷新失败！");
+                    Log.Error($"添加方法后刷新失败！{e.Message}");
                 }
             });
             AddMethodCommand = new AsyncDelegateCommand(ExecuteAddMethodCommand);

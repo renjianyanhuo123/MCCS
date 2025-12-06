@@ -16,8 +16,8 @@ namespace MCCS.Views
             Closed += MainWindow_Closed; 
         } 
 
-        private const int WmSyscommand = 0x0112;
-        private const int ScMinimize = 0xF020;
+        private const int _wmSyscommand = 0x0112;
+        private const int _scMinimize = 0xF020;
 
         private HwndSource? _hwndSource; 
 
@@ -28,18 +28,18 @@ namespace MCCS.Views
             if (_hwndSource != null) _hwndSource.AddHook(WndProc);
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e)
+        private void MainWindow_Closed(object? sender, EventArgs e)
         {
             _hwndSource?.RemoveHook(WndProc);
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            if (msg == WmSyscommand)
+            if (msg == _wmSyscommand)
             {
                 var command = wParam.ToInt32() & 0xFFF0;
 
-                if (command == ScMinimize)
+                if (command == _scMinimize)
                 {
                     // 阻止最小化
                     handled = true;

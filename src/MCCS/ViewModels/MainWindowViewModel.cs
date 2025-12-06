@@ -1,8 +1,7 @@
 ﻿using System.Windows;
-using MahApps.Metro.Controls;
+
 using MCCS.Events.Common;
 using MCCS.Events.StartUp;
-using MCCS.Infrastructure;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting.EventParams;

@@ -31,7 +31,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// <summary>
         /// 节点背景色
         /// </summary>
-        private Brush _titleBackground;
+        private Brush _titleBackground = Brushes.Transparent;
         public Brush TitleBackground
         {
             get => _titleBackground;

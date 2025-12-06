@@ -6,13 +6,6 @@ namespace MCCS.Models.CurveModels
     {
         private readonly IPseudoChannelManager _pseudoChannelManager;
 
-        public CurveMainModel(XYBindCollectionItem xAxe, XYBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
-        {
-            _pseudoChannelManager = pseudoChannelManager;
-            SelectedXBindItem = xAxe;
-            SelectedYBindItem = yAxe; 
-        }
-
         private XYBindCollectionItem _selectedXBindItem;
         public XYBindCollectionItem SelectedXBindItem
         {
@@ -39,11 +32,19 @@ namespace MCCS.Models.CurveModels
             }
         }
 
-        private CurveShowModel _curve; 
+        private CurveShowModel _curve;
         public CurveShowModel Curve
         {
             get => _curve;
             set => SetProperty(ref _curve, value);
+        }
+
+        public CurveMainModel(XYBindCollectionItem xAxe, XYBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
+        {
+            _pseudoChannelManager = pseudoChannelManager;
+            _selectedXBindItem = xAxe ?? throw new ArgumentNullException(nameof(xAxe));
+            _selectedYBindItem = yAxe ?? throw new ArgumentNullException(nameof(yAxe));
+            _curve = new CurveShowModel(_selectedXBindItem, _selectedYBindItem, _pseudoChannelManager);
         }
 
         private void UpdateTable()

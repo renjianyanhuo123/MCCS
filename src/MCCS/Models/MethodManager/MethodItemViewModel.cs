@@ -12,7 +12,7 @@
         /// <summary>
         /// 方法名称
         /// </summary> 
-        private string _name;
+        private string _name = string.Empty;
         public string Name 
         { 
             get => _name; 
@@ -22,7 +22,7 @@
         /// <summary>
         /// 方法类型
         /// </summary>
-        private string _methodType; 
+        private string _methodType = string.Empty; 
         public string MethodType
         {
             get => _methodType; 
@@ -32,7 +32,7 @@
         /// <summary>
         /// 试验类型
         /// </summary>
-        private string _testType; 
+        private string _testType = string.Empty; 
         public string TestType
         {
             get => _testType; 
@@ -41,7 +41,7 @@
         /// <summary>
         /// 方法标准
         /// </summary> 
-        private string _standard;
+        private string _standard = string.Empty;
         public string Standard
         {
             get => _standard; 
@@ -51,21 +51,21 @@
         /// <summary>
         /// 文件路径
         /// </summary> 
-        private string _filePath;
+        private string _filePath = string.Empty;
         public string FilePath
         {
             get => _filePath; 
             set => SetProperty(ref _filePath, value);
         }
 
-        private string _createTime; 
+        private string _createTime = string.Empty; 
         public string CreateTime
         {
             get => _createTime;
             set => SetProperty(ref _createTime, value);
         }
 
-        private string _updateTime;
+        private string _updateTime = string.Empty;
         public string UpdateTime
         {
             get => _updateTime;

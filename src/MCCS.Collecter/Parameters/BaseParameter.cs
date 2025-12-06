@@ -3,6 +3,6 @@
     public class BaseParameter
     {
 
-        public string Id { get; protected set; }
+        public string Id { get; protected set; } = "";
     }
 }

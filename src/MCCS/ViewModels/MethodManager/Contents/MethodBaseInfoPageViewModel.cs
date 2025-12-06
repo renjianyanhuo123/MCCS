@@ -27,7 +27,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         /// <summary>
         /// 方法名称
         /// </summary> 
-        private string _name;
+        private string _name = string.Empty;
         public string Name
         {
             get => _name;
@@ -56,21 +56,21 @@ namespace MCCS.ViewModels.MethodManager.Contents
         /// <summary>
         /// 方法标准
         /// </summary> 
-        private string _standard;
+        private string _standard = string.Empty ;
         public string Standard
         {
             get => _standard;
             set => SetProperty(ref _standard, value);
         }
 
-        private string _code;
+        private string _code = string.Empty;
         public string Code
         {
             get => _code;
             set => SetProperty(ref _code, value);
         } 
 
-        private string _remark;
+        private string _remark = string.Empty;
         public string Remark
         {
             get => _remark;

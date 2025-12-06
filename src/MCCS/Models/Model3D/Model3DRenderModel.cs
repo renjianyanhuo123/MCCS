@@ -9,8 +9,8 @@ namespace MCCS.Models.Model3D
 
         public long BillboardId { get; init; }
 
-        public string Model3DId { get; init; } 
+        public required string Model3DId { get; init; }
 
-        public DataPoint<float> Data { get; init; } 
+        public required DataPoint<float> Data { get; init; }
     }
 }

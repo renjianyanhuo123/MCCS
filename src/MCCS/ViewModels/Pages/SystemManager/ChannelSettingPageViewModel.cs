@@ -6,9 +6,9 @@ using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
-    public class ChannelSettingPageViewModel:BaseViewModel
+    public class ChannelSettingPageViewModel : BaseViewModel
     {
-        public const string Tag = "ChannelSetting"; 
+        public const string Tag = "ChannelSetting";
 
         private readonly IDeviceInfoRepository _deviceInfoRepository;
         private readonly INotificationService _notificationService;
@@ -20,19 +20,20 @@ namespace MCCS.ViewModels.Pages.SystemManager
         {
             _deviceInfoRepository = deviceInfoRepository;
             _notificationService = notificationService;
+            _channelName = string.Empty; // CS8618: 显式初始化为非 null 值
         }
 
-        #region Property 
+        #region Property
         public long ChannelId { get; set; }
 
-        private string _internalChannelName = string.Empty; 
+        private string _internalChannelName = string.Empty;
         public string InternalChannelName
         {
             get => _internalChannelName;
             set => SetProperty(ref _internalChannelName, value);
-        } 
+        }
 
-        private string _channelName;
+        private string _channelName = string.Empty; // CS8618: 显式初始化为非 null 值
         public string ChannelName
         {
             get => _channelName;
