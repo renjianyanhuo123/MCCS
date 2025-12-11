@@ -25,14 +25,7 @@ namespace MCCS.ViewModels
         {
             get => _mainPageHeight;
             set => SetProperty(ref _mainPageHeight, value);
-        }
-
-        private WindowStyle _windowStyle; 
-        public WindowStyle WindowStyle
-        {
-            get => _windowStyle;
-            set => SetProperty(ref _windowStyle, value);
-        }
+        } 
 
         private WindowState _windowState;
         public WindowState WindowState
@@ -87,8 +80,7 @@ namespace MCCS.ViewModels
         private void ExecuteLoadCommand()
         { 
             ShowTitleBar = false;
-            ShowCloseButton = false;
-            WindowStyle = WindowStyle.None;
+            ShowCloseButton = false; 
             _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(SplashPageViewModel.Tag, UriKind.Relative));
         }
         private void JumpToMainPage(FinishStartUpNotificationEventParam param)

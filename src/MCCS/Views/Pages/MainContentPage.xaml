@@ -10,7 +10,8 @@
              xmlns:regions="http://prismlibrary.com/"
              regions:ViewModelLocator.AutoWireViewModel="True"
              xmlns:mccs="clr-namespace:MCCS"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
+             d:DataContext="{d:DesignInstance Type=pages:MainContentPageViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>

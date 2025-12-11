@@ -8,6 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <Platforms>AnyCPU;x64</Platforms>
+    <StartupObject>MCCS.App</StartupObject>
+    <ApplicationIcon>mccs.logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,12 +21,14 @@
 
   <ItemGroup>
     <None Remove="App.xaml~RF43ad201d.TMP" />
+    <None Remove="mccs.logo.ico" />
     <None Remove="Resources\mainpagemethod.png" />
     <None Remove="Resources\mainpagetest.png" />
     <None Remove="ViewModels\Pages\Controllers\ControllerMainPageViewModel.cs~RFac07cd45.TMP" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="mccs.logo.ico" />
     <Content Include="Resources\mainpagemethod.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -64,6 +68,10 @@
 
   <ItemGroup>
     <Folder Include="Models\ProjectManager\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="mccs.logo.ico" />
   </ItemGroup>
 
 </Project>

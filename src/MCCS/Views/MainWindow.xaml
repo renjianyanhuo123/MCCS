@@ -19,8 +19,7 @@
         ShowCloseButton="{Binding ShowCloseButton}"
         ShowTitleBar="{Binding ShowTitleBar}"
         Width="600"
-        Height="400" 
-        WindowStyle="{Binding WindowStyle}"
+        Height="400"  
         WindowState="{Binding WindowState}"
         ResizeMode="{Binding ResizeMode}">
     <i:Interaction.Triggers>  
@@ -29,7 +28,7 @@
                 Command="{Binding LoadCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <mah:MetroWindow.LeftWindowCommands>
+    <!--<mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button ToolTip="Open up the GitHub site"> 
             </Button>
@@ -47,7 +46,7 @@
                 </Button.ContentTemplate>
             </Button>
         </mah:WindowCommands>
-    </mah:MetroWindow.RightWindowCommands>
+    </mah:MetroWindow.RightWindowCommands>-->
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl x:Name="FlyoutsControl">
