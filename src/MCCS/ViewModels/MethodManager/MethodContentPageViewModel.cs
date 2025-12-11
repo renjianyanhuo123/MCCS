@@ -65,8 +65,7 @@ namespace MCCS.ViewModels.MethodManager
         private async Task ExexuteLoadCommand()
         {
             if (_methodId == -1) throw new ArgumentNullException("No MethodId!");
-            var methodBaseInfo = await _methodRepository.GetMethodAsync(_methodId);
-            if (methodBaseInfo == null) throw new ArgumentNullException("methodBaseInfo is null");
+            var methodBaseInfo = await _methodRepository.GetMethodAsync(_methodId) ?? throw new ArgumentNullException("methodBaseInfo is null");
             var methodInfo = new MethodContentItemModel(_methodId);
             methodInfo.SetBaseInfo(new MethodBaseInfo(
                 methodBaseInfo.Name,

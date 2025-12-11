@@ -1,11 +1,15 @@
-﻿using LiveChartsCore;
+﻿using System.Collections.ObjectModel;
+using System.Reactive.Linq;
+
+using LiveChartsCore;
+using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
+
 using MCCS.Collecter.PseudoChannelManagers;
+
 using SkiaSharp;
-using System.Collections.ObjectModel;
-using System.Reactive.Linq;
 
 namespace MCCS.Models.CurveModels
 {
@@ -14,7 +18,7 @@ namespace MCCS.Models.CurveModels
         private readonly IPseudoChannelManager _channelManager;
         private IDisposable? _tableDispose;
         private long _tableInitTime = 0;
-        private const int MaxVisiblePoints = 500;
+        private const int _maxVisiblePoints = 500;
 
         private readonly XYBindCollectionItem _selectedXBindItem;
         private readonly XYBindCollectionItem _selectedYBindItem;
@@ -106,7 +110,7 @@ namespace MCCS.Models.CurveModels
                 .Subscribe(data =>
             {
                 ObservableValues.AddRange(data);
-                var count = ObservableValues.Count - MaxVisiblePoints;
+                var count = ObservableValues.Count - _maxVisiblePoints;
                 // 批量移除以提高性能
                 for (var i = 0; i < count; i++)
                 {

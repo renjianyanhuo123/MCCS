@@ -59,7 +59,7 @@ namespace MCCS.ViewModels.Dialogs.Hardwares
         }
         private async Task ExecuteSaveCommand()
         {
-            var addId = await _deviceInfoRepository.AddDeviceAsync(new DeviceInfo()
+            long addId = await _deviceInfoRepository.AddDeviceAsync(new DeviceInfo()
             {
                 DeviceId = Guid.NewGuid().ToString("N"),
                 DeviceName = DeviceName,

@@ -161,7 +161,7 @@ public partial class TransferUserControl
     #region private method
     private void UpdateSelectAllCheckStatus()
     {
-        if (SourceItems.Count(c => c.IsSelected) == 0)
+        if (!SourceItems.Any(c => c.IsSelected))
         {
             SourceSelectAllCheckBox.IsChecked = false;
             LeftToRight.Background = new SolidColorBrush(Colors.White);
@@ -282,7 +282,7 @@ public partial class TransferUserControl
     }
     private void RightToLeft_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (TargetItems.Count(c => c.IsSelected) <= 0) return;
+        if (!TargetItems.Any(c => c.IsSelected)) return;
         var selectedItems = TargetItems.Where(x => x.IsSelected).ToList();
         foreach (var item in selectedItems)
         {
@@ -294,7 +294,7 @@ public partial class TransferUserControl
     }
     private void LeftToRight_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (SourceItems.Count(c => c.IsSelected) <= 0) return;
+        if (!SourceItems.Any(c => c.IsSelected)) return;
         var selectedItems = SourceItems.Where(x => x.IsSelected).ToList();
         foreach (var item in selectedItems)
         {

@@ -1,18 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using System.Reflection;
 
 namespace MCCS.Models.ControlCommand;
 
-public sealed class CommandParamter
+public sealed class CommandParamter(string key, string value)
 {
-    public CommandParamter(string key, string value) 
-    {
-        Key = key;
-        Value = value;
-    }
-    public string Key { get; set; }
+    public string Key { get; set; } = key;
 
-    public string Value { get; set; }
+    public string Value { get; set; } = value;
 }
 
 public sealed class ControlProcessExpander : BindableBase

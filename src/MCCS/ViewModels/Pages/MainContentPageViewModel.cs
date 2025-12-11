@@ -117,12 +117,12 @@ namespace MCCS.ViewModels.Pages
             _selectedMenuItem = selectedMenuItem;
             _selectedTabItem = selectedTabItem;
             var menus = systemMenuRepository.GetChildMenusById(0);
-            _menus = menus.Select(s => new HamburgerMenuIconItem
+            _menus = [.. menus.Select(s => new HamburgerMenuIconItem
             {
                 Icon = StringToIcon.ConvertToIcon(s.Icon),
                 Label = s.Name,
                 Tag = s.Key
-            }).ToList();
+            })];
             _tabs = [
                 new MainTabsViewModel
                 {

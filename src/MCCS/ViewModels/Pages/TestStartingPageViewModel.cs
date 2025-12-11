@@ -707,10 +707,7 @@ namespace MCCS.ViewModels.Pages
         {
             if (model.IsMultipleSelected) return;
             model.IsMultipleSelected = true;
-            if (_multipleControllerMainPageViewModel != null)
-            {
-                _multipleControllerMainPageViewModel.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.Id));
-            }
+            _multipleControllerMainPageViewModel?.Children.Add(new MultipleControllerChildPageViewModel(model.Model3DData.Id));
         }
         /// <summary>
         /// 处理 Ctrl 键按下事件
@@ -886,17 +883,14 @@ namespace MCCS.ViewModels.Pages
             return null;
         }
 
-        private static string ChangeToStr(string str)
+        private static string ChangeToStr(string str) => str switch
         {
-            return str switch
-            {
-                "mm" => "Position",
-                "kN" => "Force",
-                _ => string.Empty
-            };
-        }
+            "mm" => "Position",
+            "kN" => "Force",
+            _ => string.Empty
+        };
 
         #endregion
-         
+
     }
 }

@@ -133,13 +133,13 @@ namespace MCCS.Services.StartInitial
                     RangeMax = pseudoChannelInfo.PseudoChannelInfo.RangeMax,
                     RangeMin = pseudoChannelInfo.PseudoChannelInfo.RangeMin,
                     Unit = pseudoChannelInfo.PseudoChannelInfo.Unit,
-                    SignalConfigurations = pseudoChannelInfo.Signals.Select(s => new HardwareSignalConfiguration
+                    SignalConfigurations = [.. pseudoChannelInfo.Signals.Select(s => new HardwareSignalConfiguration
                     {
                         SignalId = s.Id,
                         SignalName = s.SignalName,
                         BelongControllerId = s.BelongToControllerId,
                         SignalAddress = (SignalAddressEnum)s.SignalAddress
-                    }).ToList()
+                    })]
                 };
                 pseudoChannelConfigurations.Add(tempPseudoChannel);
             }

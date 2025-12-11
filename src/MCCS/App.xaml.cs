@@ -77,10 +77,13 @@ namespace MCCS
         /// <param name="containerRegistry"></param>
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            // 获取当前环境
+            var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "";
             // 1. 读取配置文件
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true);
 
             // 配置Serilog 日志
             var logger = new LoggerConfiguration()
@@ -92,7 +95,9 @@ namespace MCCS
             // 确保是
             Log.Logger = logger;
             containerRegistry.RegisterInstance<ILogger>(logger);
-            var configuration = builder.Build(); 
+            var configuration = builder
+                .AddEnvironmentVariables()
+                .Build(); 
             // 创建 IServiceCollection
             var container = containerRegistry.GetContainer();
             var services = new ServiceCollection();

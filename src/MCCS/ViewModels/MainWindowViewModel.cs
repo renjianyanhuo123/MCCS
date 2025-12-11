@@ -87,17 +87,16 @@ namespace MCCS.ViewModels
         private void ExecuteLoadCommand()
         { 
             ShowTitleBar = false;
-            ShowCloseButton = false; 
+            ShowCloseButton = false;
+            WindowStyle = WindowStyle.None;
             _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(SplashPageViewModel.Tag, UriKind.Relative));
         }
         private void JumpToMainPage(FinishStartUpNotificationEventParam param)
         {
             if (param.IsSuccess)
-            {
-                ShowTitleBar = true;
+            { 
                 // 注意: 这里的顺序不能乱
-                WindowState = WindowState.Maximized;
-                ShowCloseButton = true;
+                WindowState = WindowState.Maximized; 
                 _regionManager.RequestNavigate(GlobalConstant.StartUpRegionName, new Uri(MainContentPageViewModel.Tag, UriKind.Relative));
             }
         }
