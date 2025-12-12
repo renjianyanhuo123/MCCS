@@ -4,10 +4,10 @@ namespace MCCS.Common
 {
     public class StringToIcon
     {
-        public static PackIcon ConvertToIcon(string iconStr)
+        public static PackIconKind ConvertToIcon(string iconStr)
         {
-            if (string.IsNullOrEmpty(iconStr)) return new PackIcon();
-            return Enum.TryParse<PackIconKind>(iconStr, out var result) ? new PackIcon() { Kind = result} : new PackIcon() { Kind = PackIconKind.Home };
+            if (string.IsNullOrEmpty(iconStr)) return PackIconKind.Home;
+            return Enum.TryParse<PackIconKind>(iconStr, out var result) ? result : PackIconKind.Home;
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿using MahApps.Metro.Controls;
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+
+using MahApps.Metro.Controls;
+
 using MCCS.Common; 
 using MCCS.Events;
-using MCCS.ViewModels.Others;
-using System.Collections.ObjectModel;
-using System.Windows;
 using MCCS.Infrastructure.Repositories;
+using MCCS.Models.MainPages;
+using MCCS.ViewModels.Others;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -24,34 +27,37 @@ namespace MCCS.ViewModels.Pages
             set => SetProperty(ref _tabs, value);
         }
 
-        private HamburgerMenuItem _selectedMenuItem;
-        public HamburgerMenuItem SelectedMenuItem
+        private MainMenuItemModel? _selectedMenuItem;
+        public MainMenuItemModel? SelectedMenuItem
         {
             get => _selectedMenuItem;
-            set => SetProperty(ref _selectedMenuItem, value);
+            set 
+            {
+                if (SetProperty(ref _selectedMenuItem, value)) 
+                    _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(_selectedMenuItem?.Key ?? "", UriKind.Relative));
+            }
         }
-        private MainTabsViewModel _selectedTabItem;
-        public MainTabsViewModel SelectedTabItem
+        private MainTabsViewModel? _selectedTabItem;
+        public MainTabsViewModel? SelectedTabItem
         {
             get => _selectedTabItem;
             set
             {
-                if (value == _selectedTabItem) return;
-                foreach (var tab in _tabs) tab.IsChecked = tab.Id == value.Id;
-                _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(value.Id, UriKind.Relative));
+                if (value == _selectedTabItem || value == null) return;
+                foreach (var tab in _tabs) tab.IsChecked = tab.Id == value?.Id; 
                 SetProperty(ref _selectedTabItem, value);
             }
         }
 
-        private List<HamburgerMenuIconItem> _menus;
-        public List<HamburgerMenuIconItem> Menus
+        private List<MainMenuItemModel> _menus;
+        public List<MainMenuItemModel> Menus
         {
             get => _menus;
             set => SetProperty(ref _menus, value);
         }
 
-        private List<HamburgerMenuIconItem> _optionsMenus;
-        public List<HamburgerMenuIconItem> OptionsMenus
+        private List<MainMenuItemModel> _optionsMenus;
+        public List<MainMenuItemModel> OptionsMenus
         {
             get => _optionsMenus;
             set => SetProperty(ref _optionsMenus, value);
@@ -76,7 +82,7 @@ namespace MCCS.ViewModels.Pages
         private void ExecuteCloseTabCommand(string id)
         {
             var delItem = _tabs.First(x => x.Id == id);
-            if (SelectedTabItem.Id == id)
+            if (SelectedTabItem?.Id == id)
             {
                 // 默认跳转首页
                 SelectedTabItem = _tabs.First(c => c.Id == HomePageViewModel.Tag);
@@ -86,7 +92,7 @@ namespace MCCS.ViewModels.Pages
 
         private void ExecuteMainRegionLoadedCommand(object parameter)
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem.Tag?.ToString() ?? "", UriKind.Relative));
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem?.Key?.ToString() ?? "", UriKind.Relative));
         }
         private void ExecuteJumpChildTabCommand(object param)
         {
@@ -108,20 +114,19 @@ namespace MCCS.ViewModels.Pages
             IContainerProvider containerProvider,
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager,
-            IEventAggregator eventAggregator, HamburgerMenuItem selectedMenuItem, MainTabsViewModel selectedTabItem) : base(eventAggregator)
+            IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu);
             _containerProvider = containerProvider;
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
-            _selectedMenuItem = selectedMenuItem;
-            _selectedTabItem = selectedTabItem;
             var menus = systemMenuRepository.GetChildMenusById(0);
-            _menus = [.. menus.Select(s => new HamburgerMenuIconItem
+            _menus = [.. menus.Select(s => new MainMenuItemModel
             {
-                Icon = StringToIcon.ConvertToIcon(s.Icon),
-                Label = s.Name,
-                Tag = s.Key
+                SelectedIcon = StringToIcon.ConvertToIcon(s.Icon),
+                UnselectedIcon = StringToIcon.ConvertToIcon(s.Icon),
+                Name = s.Name,
+                Key = s.Key
             })];
             _tabs = [
                 new MainTabsViewModel

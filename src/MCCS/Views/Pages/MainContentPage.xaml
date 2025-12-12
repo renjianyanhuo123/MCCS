@@ -8,6 +8,7 @@
              xmlns:globalNotification="clr-namespace:MCCS.Components.GlobalNotification"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:regions="http://prismlibrary.com/"
+             xmlns:menuItemModel="clr-namespace:MCCS.Models.MainPages"
              regions:ViewModelLocator.AutoWireViewModel="True"
              xmlns:mccs="clr-namespace:MCCS"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:pages="clr-namespace:MCCS.ViewModels.Pages" 
@@ -15,72 +16,32 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type mah:HamburgerMenuIconItem}">
-            <Grid Height="48">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type mah:HamburgerMenu}}, Path=CompactPaneLength, Mode=OneWay}" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Viewbox Grid.Column="0" 
-                     Width="24" 
-                     Height="24"
-                     Stretch="Uniform"
-                     StretchDirection="Both"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center">
-                    <ContentControl  
-                    Content="{Binding Icon}" />
-                </Viewbox>
-                <TextBlock Grid.Column="1"
-                       VerticalAlignment="Center"
-                       FontSize="16"
-                       Text="{Binding Label}" />
-            </Grid>
-        </DataTemplate>
-
-        <Style BasedOn="{StaticResource {x:Type Frame}}" TargetType="{x:Type Frame}">
-            <Setter Property="Background" Value="{DynamicResource MahApps.Brushes.Accent4}" />
-            <Setter Property="ClipToBounds" Value="True" />
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <mah:TransitioningContentControl Content="{Binding}"
-                                      RestartTransitionOnContentChange="True"
-                                      Transition="Custom">
-                            <mah:TransitioningContentControl.CustomVisualStates>
-                                <VisualState x:Name="CustomTransition">
-                                    <Storyboard>
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                       Storyboard.TargetName="CurrentContentPresentationSite"
-                                       Storyboard.TargetProperty="(UIElement.Opacity)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00.150" Value="1" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                       Storyboard.TargetName="CurrentContentPresentationSite"
-                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.Y)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="200" />
-                                            <SplineDoubleKeyFrame KeySpline="0.1, 0.9, 0.2, 1"
-                                KeyTime="00:00:00.300"
-                                Value="0" />
-                                        </DoubleAnimationUsingKeyFrames>
-
-                                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
-                                       Storyboard.TargetName="PreviousContentPresentationSite"
-                                       Storyboard.TargetProperty="(UIElement.Opacity)">
-                                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
-                                        </DoubleAnimationUsingKeyFrames>
-                                    </Storyboard>
-                                </VisualState>
-                            </mah:TransitioningContentControl.CustomVisualStates>
-                        </mah:TransitioningContentControl>
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
+        <Style x:Key="CustomColorMaterialDesign3NavigationListBoxItem"
+              TargetType="ListBoxItem"
+              BasedOn="{StaticResource MaterialDesign3.NavigationRailListBoxItem}">
+            <Setter Property="Background" Value="#4A4458" />
+            <Setter Property="Foreground" Value="#E8DEF8" />
         </Style>
+        <!-- 拉丝金属纹理背景画刷 -->
+        <LinearGradientBrush x:Key="BrushedMetalBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#2A2A2A" Offset="0"/>
+            <GradientStop Color="#1E1E1E" Offset="0.2"/>
+            <GradientStop Color="#2A2A2A" Offset="0.4"/>
+            <GradientStop Color="#1E1E1E" Offset="0.6"/>
+            <GradientStop Color="#2A2A2A" Offset="0.8"/>
+            <GradientStop Color="#1E1E1E" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- 细微高光效果 -->
+        <LinearGradientBrush x:Key="HighlightBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#33FFFFFF" Offset="0"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.3"/>
+            <GradientStop Color="#00FFFFFF" Offset="0.7"/>
+            <GradientStop Color="#11FFFFFF" Offset="1"/>
+        </LinearGradientBrush>
     </UserControl.Resources>
     <materialDesign:DialogHost Identifier="RootDialog">
-        <Grid>
+        <Grid Grid.Row="0" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -89,10 +50,51 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <mah:MetroContentControl />
-            <mah:HamburgerMenu 
-              Grid.Row="0"
-              Grid.Column="0" 
+            <Grid Width="160">
+                <Grid.Background>
+                    <ImageBrush ImageSource="/Resources/Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" Stretch="UniformToFill"/>
+                </Grid.Background>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions> 
+                <Button
+                Width="112"
+                Height="112"
+                Margin="0,120,0,240"
+                materialDesign:ButtonAssist.CornerRadius="32"
+                Background="#633B48"
+                BorderThickness="0"
+                Foreground="#FFD8E4"
+                Style="{StaticResource MaterialDesignFlatMidBgButton}" Cursor="Hand" ClipToBounds="True"> 
+                    <Image Source="/Resources/mainpageicon.png" Stretch="Uniform" />
+                </Button>
+                <Viewbox
+                Grid.Row="1"
+                Width="160"
+                VerticalAlignment="Top"
+                Stretch="Uniform">
+                    <ListBox
+                      Grid.Row="1"
+                      Margin="0,0,0,0"
+                      Foreground="#E8DEF8"
+                      ItemsSource="{Binding Menus}"
+                      SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource CustomColorMaterialDesign3NavigationListBoxItem}">
+                                <Setter Property="materialDesign:NavigationRailAssist.SelectedIcon" Value="{Binding SelectedIcon}" />
+                                <Setter Property="materialDesign:NavigationRailAssist.UnselectedIcon" Value="{Binding UnselectedIcon}" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.Resources>
+                            <DataTemplate DataType="{x:Type menuItemModel:MainMenuItemModel}">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ListBox.Resources>
+                    </ListBox>
+                </Viewbox>
+            </Grid>
+            <!--<mah:HamburgerMenu  
               x:Name="HamburgerMenuControl" 
               DisplayMode="CompactInline"
               CompactPaneLength="48"
@@ -102,19 +104,16 @@
               IsPaneOpen="False"
               SelectedItem="{Binding SelectedMenuItem, Mode=TwoWay}"
               ItemCommand="{Binding JumpToCommand}"
-              ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}"
-              ItemTemplate="{StaticResource MenuItemTemplate}"
-              ItemsSource="{Binding Menus}"
-              OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+              ItemCommandParameter="{Binding ElementName=HamburgerMenuControl, Path=SelectedItem}" 
+              ItemsSource="{Binding Menus}" 
               OptionsItemsSource="{Binding OptionsMenus}">
-            </mah:HamburgerMenu>
-            <Grid Grid.Row="0" Grid.Column="1">
+            </mah:HamburgerMenu>-->
+            <Grid Grid.Row="0" Grid.Column="1" Background="#2F343A">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <ContentControl Grid.Row="1" regions:RegionManager.RegionName="{x:Static mccs:GlobalConstant.MainContentRegionName}" 
-                Focusable="True" IsTabStop="False">
+                <ContentControl Grid.Row="1" regions:RegionManager.RegionName="{x:Static mccs:GlobalConstant.MainContentRegionName}" Focusable="True" IsTabStop="False">
                     <b:Interaction.Triggers>
                         <b:EventTrigger EventName="Loaded">
                             <b:InvokeCommandAction Command="{Binding MainRegionLoadedCommand}" CommandParameter="{Binding ElementName=TestDesignCanvas}"/>
@@ -127,6 +126,9 @@
                 <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />
                 <StatusBarItem>Time: 2025-02-26</StatusBarItem>
                 <StatusBarItem Content="{DynamicResource Company}" />
+                <StatusBar.Background>
+                    <ImageBrush ImageSource="/Resources/Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" Stretch="UniformToFill"/>
+                </StatusBar.Background>
             </StatusBar> 
             <globalNotification:NotificationContainer Height="Auto" Width="Auto" 
                                           Grid.Row="0" 

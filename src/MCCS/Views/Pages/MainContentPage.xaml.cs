@@ -9,13 +9,7 @@ namespace MCCS.Views.Pages
     {
         public MainContentPage()
         {
-            InitializeComponent();
-            HamburgerMenuControl.Width = 48;
-        }
-
-        private void HamburgerMenuControl_HamburgerButtonClick(object sender, RoutedEventArgs e)
-        {
-            HamburgerMenuControl.Width = HamburgerMenuControl.IsPaneOpen ? 48 : 200; 
-        }
+            InitializeComponent(); 
+        } 
     }
 }

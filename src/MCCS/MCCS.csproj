@@ -22,6 +22,8 @@
   <ItemGroup>
     <None Remove="App.xaml~RF43ad201d.TMP" />
     <None Remove="mccs.logo.ico" />
+    <None Remove="Resources\Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" />
+    <None Remove="Resources\mainpageicon.png" />
     <None Remove="Resources\mainpagemethod.png" />
     <None Remove="Resources\mainpagetest.png" />
     <None Remove="ViewModels\Pages\Controllers\ControllerMainPageViewModel.cs~RFac07cd45.TMP" />
@@ -29,6 +31,9 @@
 
   <ItemGroup>
     <Content Include="mccs.logo.ico" />
+    <Content Include="Resources\mainpageicon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\mainpagemethod.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -72,6 +77,9 @@
 
   <ItemGroup>
     <Resource Include="mccs.logo.ico" />
+    <Content Include="Resources\Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
