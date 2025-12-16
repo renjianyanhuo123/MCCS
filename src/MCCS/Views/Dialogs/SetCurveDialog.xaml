@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MCCS.Views.Dialogs.SetCurveDialog"
+<UserControl x:Class="MCCS.Views.Dialogs.SetCurveDialog"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -73,7 +73,8 @@
                                     </ComboBox>
                                 </StackPanel>
                                 <lvc:CartesianChart
-                                    Grid.Row="1" 
+                                    Grid.Row="1"
+                                    AnimationsSpeed="0:0:0"
                                     Title="{Binding Curve.Title}" 
                                     Series="{Binding Curve.CurveSeries}" 
                                     XAxes="{Binding Curve.XAxes}"

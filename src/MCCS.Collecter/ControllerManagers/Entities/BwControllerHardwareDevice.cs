@@ -3,6 +3,9 @@ using MCCS.Collecter.DllNative.Models;
 using MCCS.Collecter.HardwareDevices;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+
+using Newtonsoft.Json;
+
 using System;
 using System.Diagnostics;
 using System.Reactive.Concurrency;
@@ -30,8 +33,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
                 .Subscribe(onNext: c =>
                 {
                     uint t = 0;
-                    POPNetCtrl.NetCtrl01_ReadConectState(_deviceHandle, ref t);
-                    var res = t switch
+                    var success = POPNetCtrl.NetCtrl01_ReadConectState(_deviceHandle, ref t);
+                    var res = success switch
                     {
                         0 => HardwareConnectionStatus.Connected,
                         1 => HardwareConnectionStatus.Disconnected,
@@ -66,7 +69,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             return Observable
                 .Generate(
                     0L, // 初始状态
-                    _ => _isRunning, // 继续条件
+                    _ => true, // 继续条件
                     tick => tick + 1, // 状态更新
                     _ => AcquireReading(), // 结果选择器
                     _ => CalculateNextInterval()) // 时间选择器
@@ -89,7 +92,8 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         private TimeSpan CalculateNextInterval()
         {
             // 精确计算下次采样间隔
-            return TimeSpan.FromTicks(Stopwatch.Frequency / _sampleRate);
+            var temp = TimeSpan.FromTicks(Stopwatch.Frequency / _sampleRate);
+            return temp;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,7 +139,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
 #if DEBUG
-                Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{DeviceId:X}");
+                Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{_hardwareDeviceConfiguration.DeviceAddressId:X}");
 #endif 
                 return true;
             }

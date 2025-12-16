@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Reactive.Linq;
 
 using LiveChartsCore;
-using LiveChartsCore.Defaults;
 using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
@@ -17,7 +17,7 @@ namespace MCCS.Models.CurveModels
     {
         private readonly IPseudoChannelManager _channelManager;
         private IDisposable? _tableDispose;
-        private long _tableInitTime = 0;
+        private double _tableInitTime = 0.000;
         private const int _maxVisiblePoints = 500;
 
         private readonly XYBindCollectionItem _selectedXBindItem;
@@ -39,7 +39,7 @@ namespace MCCS.Models.CurveModels
                     GeometrySize = 0,
                     AnimationsSpeed = TimeSpan.Zero,
                     EasingFunction = null,
-                    LineSmoothness = 1
+                    LineSmoothness = 1,
                 }
             ];
             XAxes =
@@ -83,9 +83,8 @@ namespace MCCS.Models.CurveModels
         /// 开始更新表格数据
         /// </summary>
         private void StartUpdateDataShow()
-        { 
+        {
             IObservable<CurveMeasureValueModel> combinedStream;
-            _tableInitTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             var yChannelStream = _channelManager.GetPseudoChannelById(_selectedYBindItem.Id).GetPseudoChannelStream();
             if (_selectedXBindItem.Id != 0)
             {
@@ -98,18 +97,24 @@ namespace MCCS.Models.CurveModels
             }
             else
             {
-                combinedStream = yChannelStream.Select(s => new CurveMeasureValueModel
-                {
-                    XValue = (s.Timestamp - _tableInitTime) / 1000.0,
-                    YValue = s.Value
+                combinedStream = yChannelStream.Select(s => {
+                    _tableInitTime += 0.001;
+                    return new CurveMeasureValueModel
+                    {
+                        XValue = _tableInitTime,
+                        YValue = s.Value
+                    };
                 });
-            } 
+            }
             _tableDispose = combinedStream
-                .Buffer(TimeSpan.FromMilliseconds(400))
+                .Buffer(TimeSpan.FromMilliseconds(500))
                 .Where(batch => batch.Count > 0)
                 .Subscribe(data =>
             {
-                ObservableValues.AddRange(data);
+                ObservableValues.AddRange(data.Take(1).ToList());
+#if DEBUG
+                Debug.WriteLine($"当前点的个数：{ObservableValues.Count}");
+#endif
                 var count = ObservableValues.Count - _maxVisiblePoints;
                 // 批量移除以提高性能
                 for (var i = 0; i < count; i++)

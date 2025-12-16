@@ -14,7 +14,7 @@ namespace MCCS.Collecter.ControllerManagers.Entities
         protected IDisposable? _statusSubscription; 
          
         // 是否正在采集数据
-        protected bool _isRunning = false;
+        protected volatile bool _isRunning = false;
 
         /// <summary>
         /// 当前设备句柄

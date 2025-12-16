@@ -209,7 +209,7 @@ namespace MCCS.ViewModels.Others
                 matrix.M43 = newPosition;
             }
 #if DEBUG
-            Debug.WriteLine($"移动位置:{newPosition:F2}");
+            // Debug.WriteLine($"移动位置:{newPosition:F2}");
 #endif
             _sceneNode.ModelMatrix = matrix;
         }

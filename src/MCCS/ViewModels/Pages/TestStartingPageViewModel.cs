@@ -37,6 +37,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -438,8 +439,7 @@ namespace MCCS.ViewModels.Pages
         {
 #if DEBUG
             // Debug.WriteLine($"CombineLatest 批量更新 {allUpdates.Count} 个广告牌");
-#endif
-            // 一次性更新所有 TextInfo
+#endif 
             // TODO：这部分还需要大改，因为虚拟通道的类型没加上；以及对应的最大，最小值也没有加上
             foreach (var data in allUpdates)
             {
@@ -450,12 +450,11 @@ namespace MCCS.ViewModels.Pages
                 var moveDirection = modelInfo.Model3DData.Orientation?.ToVector<SharpDX.Vector3>() ?? new SharpDX.Vector3(0, -1, 0);
                 var proportion = (data.Data.Value + 100) / 200.0f;
 #if DEBUG
-                Debug.WriteLine($"CombineLatest 批量更新 {allUpdates.Count} 个广告牌");
+                //Debug.WriteLine($"CombineLatest 批量更新 {allUpdates.Count} 个广告牌");
 #endif
                 modelInfo.SetPosition(moveDirection, proportion);
                 modelInfo.SceneNode.UpdateAllTransformMatrix();
             }
-            // 只调用一次 Invalidate
             CollectionDataLabels.Invalidate();
         }
 
@@ -532,6 +531,7 @@ namespace MCCS.ViewModels.Pages
                         _dataRecordSaveSubscription = _signalManager.GetProjectDataRecords()
                             .Buffer(TimeSpan.FromSeconds(5), 1000)
                             .TakeUntil(_stopSignal)
+                            .ObserveOn(TaskPoolScheduler.Default)
                             .Subscribe(async void (datas) =>
                             {
                                 try
