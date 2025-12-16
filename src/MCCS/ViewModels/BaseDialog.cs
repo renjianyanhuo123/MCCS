@@ -9,10 +9,7 @@ public class BaseDialog : BindableBase, IDialogAware
         set => SetProperty(ref _title, value);
     }
 
-    public bool CanCloseDialog()
-    {
-        return true;
-    }
+    public bool CanCloseDialog() => true;
     public DelegateCommand CloseCommand => new(ExecuteCloseCommand);
 
     private void ExecuteCloseCommand()

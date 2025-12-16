@@ -3,11 +3,16 @@ using System.Windows;
 
 using MahApps.Metro.Controls;
 
+using MaterialDesignThemes.Wpf;
+
 using MCCS.Common; 
 using MCCS.Events;
+using MCCS.Events.Common;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.MainPages;
+using MCCS.Services.AppExitService;
 using MCCS.ViewModels.Others;
+using MCCS.Views.Dialogs.Common;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -18,6 +23,7 @@ namespace MCCS.ViewModels.Pages
         private readonly IRegionManager _regionManager;
         private readonly ISystemMenuRepository _systemMenuRepository;
         private readonly IContainerProvider _containerProvider;
+        private readonly IAppExitService _appExitService;
 
         #region 页面属性
         private ObservableCollection<MainTabsViewModel> _tabs;
@@ -76,6 +82,9 @@ namespace MCCS.ViewModels.Pages
         public DelegateCommand<object> JumpChildTabCommand => new(ExecuteJumpChildTabCommand);
         public DelegateCommand<object> JumpToCommand => new(ExecuteJumpToCommand);
         public DelegateCommand<string> CloseTabCommand => new(ExecuteCloseTabCommand);
+
+        public AsyncDelegateCommand LogoutCommand { get; }
+
         #endregion
 
         #region 命令执行
@@ -90,36 +99,43 @@ namespace MCCS.ViewModels.Pages
             _tabs.Remove(delItem);
         }
 
-        private void ExecuteMainRegionLoadedCommand(object parameter)
+        private async Task ExecuteLogoutCommand()
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem?.Key?.ToString() ?? "", UriKind.Relative));
+            var dialog = _containerProvider.Resolve<DeleteConfirmDialog>();
+            dialog.ShowContent = "确定是否退出应用程序?";
+            var result = await DialogHost.Show(dialog, "RootDialog");
+            if (result is DialogConfirmEvent { IsConfirmed: true })
+            {
+                await _appExitService.ExitAsync();
+            }
         }
-        private void ExecuteJumpChildTabCommand(object param)
-        {
-            SelectedTabItem = _tabs.First(c => c.Id == param.ToString());
-        }
+
+        private void ExecuteMainRegionLoadedCommand(object parameter) => _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(SelectedMenuItem?.Key ?? "", UriKind.Relative));
+        private void ExecuteJumpChildTabCommand(object param) => SelectedTabItem = _tabs.First(c => c.Id == param.ToString());
+
         private void ExecuteJumpToCommand(object parameter)
         {
             if (parameter is not HamburgerMenuIconItem iconItem) return;
             var item = iconItem ?? throw new NullReferenceException(nameof(HamburgerMenuIconItem));
             _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(item.Tag?.ToString() ?? "", UriKind.Relative));
         }
-        private void OnCancelSelectedMenu(NotificationCancelSelectedEventParam param)
-        { 
-            SelectedMenuItem = null!;
-        }
+        private void OnCancelSelectedMenu(NotificationCancelSelectedEventParam param) => SelectedMenuItem = null!;
+
         #endregion
          
         public MainContentPageViewModel(
             IContainerProvider containerProvider,
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager,
+            IAppExitService appExitService,
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
             _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu);
             _containerProvider = containerProvider;
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
+            _appExitService = appExitService;
+            LogoutCommand = new AsyncDelegateCommand(ExecuteLogoutCommand);
             var menus = systemMenuRepository.GetChildMenusById(0);
             _menus = [.. menus.Select(s => new MainMenuItemModel
             {

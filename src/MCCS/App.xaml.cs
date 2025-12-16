@@ -1,50 +1,58 @@
-﻿using MCCS.Modules;
-using MCCS.ViewModels.Pages;
-using MCCS.Views;
-using MCCS.Views.Pages;
-using Microsoft.Extensions.Configuration;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
-using Serilog;
 using System.Windows.Threading;
+
 using DryIoc.Microsoft.DependencyInjection;
+
 using MCCS.Collecter.ControlChannelManagers;
 using MCCS.Collecter.ControllerManagers;
+using MCCS.Collecter.PseudoChannelManagers;
+using MCCS.Collecter.SignalManagers;
 using MCCS.Core.WorkflowSettings;
+using MCCS.Modules;
+using MCCS.Services.AppExitService;
+using MCCS.Services.StartInitial;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Common;
-using MCCS.ViewModels.Pages.StationSites;
-using MCCS.Views.Dialogs;
-using MCCS.Views.Pages.SystemManager;
-using MCCS.ViewModels.Pages.SystemManager;
-using MCCS.Views.Pages.StationSites;
-using MCCS.Views.Dialogs.Common;
-using MCCS.Views.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
-using MCCS.ViewModels.Pages.StationSites.ControlChannels;
-using MCCS.Views.Pages.StationSites.ControlChannels;
-using MCCS.ViewModels.Pages.StationSites.PseudoChannels;
-using MCCS.Views.Pages.StationSites.PseudoChannels;
-using MCCS.Services.StartInitial;
 using MCCS.ViewModels.Dialogs.Method;
+using MCCS.ViewModels.Dialogs.Project;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
+using MCCS.ViewModels.Pages;
+using MCCS.ViewModels.Pages.StationSetup;
+using MCCS.ViewModels.Pages.StationSites;
+using MCCS.ViewModels.Pages.StationSites.ControlChannels;
+using MCCS.ViewModels.Pages.StationSites.PseudoChannels;
+using MCCS.ViewModels.Pages.StationSteup;
+using MCCS.ViewModels.Pages.SystemManager;
+using MCCS.ViewModels.Pages.TestModelOperations;
 using MCCS.ViewModels.Pages.WorkflowSteps;
-using MCCS.ViewModels.Dialogs.Project;
-using MCCS.Views.ProjectManager;
 using MCCS.ViewModels.ProjectManager;
+using MCCS.Views;
+using MCCS.Views.Dialogs;
+using MCCS.Views.Dialogs.Common;
+using MCCS.Views.Dialogs.Hardwares;
 using MCCS.Views.Dialogs.Method;
 using MCCS.Views.Dialogs.Project;
 using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
+using MCCS.Views.Pages;
+using MCCS.Views.Pages.StationSetup;
+using MCCS.Views.Pages.StationSites;
+using MCCS.Views.Pages.StationSites.ControlChannels;
+using MCCS.Views.Pages.StationSites.PseudoChannels;
+using MCCS.Views.Pages.SystemManager;
+using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.Pages.WorkflowSteps;
-using Microsoft.Extensions.DependencyInjection;
+using MCCS.Views.ProjectManager;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
-using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Collecter.SignalManagers;
-using MCCS.ViewModels.Pages.TestModelOperations;
-using MCCS.Views.Pages.TestModelOperations;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using Serilog;
 
 namespace MCCS
 {
@@ -113,6 +121,7 @@ namespace MCCS
             containerRegistry.RegisterSingleton<IControlChannelManager, ControlChannelManager>();
             containerRegistry.RegisterSingleton<IPseudoChannelManager, PseudoChannelManager>();
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
+            containerRegistry.RegisterSingleton<IAppExitService, AppExitService>();
             // containerRegistry.AddNotificationModule(configuration);
             // containerRegistry.RegisterSingleton<ISharedCommandService, SharedCommandService>();
             containerRegistry.RegisterForNavigation<SplashPage>(SplashPageViewModel.Tag);
@@ -161,6 +170,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
+            // StationSetup  
+            containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));
+            containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel));
             // Workflow Setting
             // 指定ViewModel创建
             containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>();
