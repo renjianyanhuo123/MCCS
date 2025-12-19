@@ -1,4 +1,6 @@
-﻿namespace MCCS.UserControl.DynamicGrid
+﻿using MCCS.UserControl.DynamicGrid.FlattenedGrid;
+
+namespace MCCS.UserControl.DynamicGrid
 {
     public class SplitRequestEventArgs : EventArgs
     {

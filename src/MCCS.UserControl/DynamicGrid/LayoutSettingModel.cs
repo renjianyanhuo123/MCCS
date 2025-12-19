@@ -1,11 +1,16 @@
-﻿namespace MCCS.UserControl.DynamicGrid
+﻿using MCCS.UserControl.DynamicGrid.FlattenedGrid;
+
+namespace MCCS.UserControl.DynamicGrid
 {
     public record LayoutSettingModel
     {
-        public required List<CellViewModel> Cells { get; init; } 
-
-        public required List<GridSizeDefinitionModel> Rows { get; init; }
-
-        public required List<GridSizeDefinitionModel> Columns { get; init; }
+        /// <summary>
+        /// 所有的内容单元(包含Splitter)
+        /// </summary>
+        public required List<UiContentElement> Contents { get; init; }
+        /// <summary>
+        /// 空间结构
+        /// </summary>
+        public required LayoutNode SpatialStructure { get; set; } 
     }
 }

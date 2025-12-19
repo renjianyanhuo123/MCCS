@@ -26,6 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assert\ChevronDown_16.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

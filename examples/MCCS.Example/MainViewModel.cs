@@ -1,10 +1,9 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 using MCCS.UserControl;
 using MCCS.UserControl.DynamicGrid;
-using MCCS.UserControl.Transfer;
+using MCCS.UserControl.DynamicGrid.FlattenedGrid;
 
 namespace MCCS.Example
 {
@@ -14,35 +13,96 @@ namespace MCCS.Example
         //private int _total;
         public MainViewModel()
         {
-            //Total = 317;
-            LayoutSetting = new LayoutSettingModel
+            var node1 = new CellLayoutNode();
+            var node2 = new CellLayoutNode();
+            var node3 = new CellLayoutNode();
+            var node4 = new CellLayoutNode();
+            var leftSplitterNode = new SplitterNode(CutDirectionEnum.Horizontal, node1, node2)
             {
-                Rows =
+                Ratio = 0.3
+            };
+            var rightSplitterNode = new SplitterNode(CutDirectionEnum.Horizontal, node3, node4)
+            {
+                Ratio = 0.7
+            };
+            var root = new SplitterNode(CutDirectionEnum.Vertical, leftSplitterNode, rightSplitterNode)
+            {
+                Ratio = 0.5
+            }; 
+            LayoutSetting = new LayoutSettingModel
+            { 
+                Contents =
                 [
-                    new GridSizeDefinitionModel
+                    new UiContentElement(node1.Id)
                     {
-                        Value = 1,
-                        UnitType = GridUnitType.Star
-                    }
-                ],
-                Columns = [
-                    new GridSizeDefinitionModel
-                {
-                    Value = 1,
-                    UnitType = GridUnitType.Star
-                }],
-                Cells = [
-                    new CellViewModel
-                    {
-                        Column = 0,
-                        Row = 0,
-                        Content = new CellItemControl()
+                        Content = new CellItemControl
                         {
-                            Width = 400,
-                            Height = 200
+                            Tag = node1.Id
+                        },
+                    },
+
+                    new UiContentElement(node2.Id)
+                    {
+                        Content = new CellItemControl
+                        {
+                            Tag = node2.Id
+                        },
+                    },
+
+                    new UiContentElement(node3.Id)
+                    {
+                        Content = new CellItemControl
+                        {
+                            Tag = node3.Id
+                        },
+                    },
+
+                    new UiContentElement(node4.Id)
+                    {
+                        Content = new CellItemControl
+                        {
+                            Tag = node4.Id
+                        },
+                    },
+                    new UiContentElement(leftSplitterNode.Id)
+                    {
+                        CellType = CellTypeEnum.SplitterElement,
+                        Content =new GridSplitter()
+                        {
+                            Height = 5,
+                            HorizontalAlignment = HorizontalAlignment.Stretch,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            ResizeDirection = GridResizeDirection.Rows,
+                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
+                            Background = System.Windows.Media.Brushes.OrangeRed
+                        }
+                    },
+                    new UiContentElement(rightSplitterNode.Id)
+                    {
+                        CellType = CellTypeEnum.SplitterElement,
+                        Content = new GridSplitter
+                        { 
+                            Height = 5,
+                            HorizontalAlignment = HorizontalAlignment.Stretch,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            ResizeDirection = GridResizeDirection.Rows,
+                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
+                            Background = System.Windows.Media.Brushes.OrangeRed
+                        }
+                    },
+                    new UiContentElement(root.Id)
+                    {
+                        Content = new GridSplitter
+                        { 
+                            Width = 5,
+                            Height = double.NaN,
+                            HorizontalAlignment = HorizontalAlignment.Stretch, 
+                            ResizeDirection = GridResizeDirection.Columns,
+                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
+                            Background = System.Windows.Media.Brushes.OrangeRed
                         }
                     }
-                ]
+                ], SpatialStructure = root
             };
         }
 

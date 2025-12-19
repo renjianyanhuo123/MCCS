@@ -95,6 +95,6 @@
             </Canvas>
         </ScrollViewer>-->
 
-        <dynamicGrid:DynamicGrid LayoutSettings="{Binding LayoutSetting}" />
+        <dynamicGrid:DynamicGrid Width="Auto" Height="Auto" LayoutSettings="{Binding LayoutSetting}" />
     </Grid>
 </Window>

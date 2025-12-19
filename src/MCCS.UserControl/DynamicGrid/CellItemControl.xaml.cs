@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 
+using MCCS.UserControl.DynamicGrid.FlattenedGrid;
+
 namespace MCCS.UserControl.DynamicGrid
 {
     /// <summary>

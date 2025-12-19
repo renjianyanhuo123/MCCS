@@ -2,6 +2,8 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 
+using MCCS.UserControl.DynamicGrid.FlattenedGrid;
+
 
 namespace MCCS.UserControl.DynamicGrid
 {
@@ -10,98 +12,103 @@ namespace MCCS.UserControl.DynamicGrid
     /// </summary>
     public partial class DynamicGrid
     {
+        private BinaryTreeManager? _binaryTreeManager;
+
         public DynamicGrid()
         {
-            InitializeComponent();
+            InitializeComponent(); 
         }
 
         private LayoutSettingModel? _layoutSettings;
 
         #region Private Method
-        public void AddCellItem(CellViewModel cell, int row, int column)
+
+        private void RefreshUi()
         {
-            cell.Content.Tag = cell.Id;
-            // 设置 Grid 附加属性
-            Grid.SetRow(cell.Content, cell.Row);
-            Grid.SetColumn(cell.Content, cell.Column);
-            if (cell.RowSpan > 1)
-                Grid.SetRowSpan(cell.Content, cell.RowSpan); 
-            if (cell.ColumnSpan > 1)
-                Grid.SetColumnSpan(cell.Content, cell.ColumnSpan);
-            if (cell is { CellType: CellTypeEnum.EditableElement, Content: CellItemControl cellItemControl })
+            if (_binaryTreeManager == null) return;
+            MainGrid.RowDefinitions.Clear();
+            MainGrid.ColumnDefinitions.Clear();
+            // 设置行列定义
+            (List<(GridUnitType, double)> rowDefs, List<(GridUnitType, double)> colDefs) = _binaryTreeManager.GetRowAndColumnDifitions();
+            foreach ((GridUnitType type, var value) in rowDefs)
             {
-                cellItemControl.SplitRequested += OnSplitRequested;
-            } 
-            MainGrid.Children.Add(cell.Content);
+                MainGrid.RowDefinitions.Add(new RowDefinition
+                {
+                    Height = new GridLength(value, type)
+                });
+            }
+            foreach ((GridUnitType type, var value) in colDefs)
+            {
+                MainGrid.ColumnDefinitions.Add(new ColumnDefinition
+                {
+                    Width = new GridLength(value, type)
+                });
+            }
+        }
+
+        public void AddCellItem(LayoutNode cell, int row, int column)
+        { 
         }
 
         private void OnSplitRequested(object? sender, SplitRequestEventArgs e)
         {
-            if (sender is not DependencyObject child && _layoutSettings == null)
-                return;
-            // 到这里，DynamicGrid 已经完全知道：
-            // ✔ 哪个子元素
-            // ✔ 哪个 Row / Column
-            // ✔ 横切还是竖切
-            /*
-             * <GridSplitter
-               Grid.Column="3"
-               Width="5"
-               ResizeDirection="Columns"
-               ResizeBehavior="PreviousAndNext"
-               Background="Transparent"/>
-             */
-            var cellItem = new CellItemControl()
+            if (sender is not DependencyObject child || _layoutSettings == null || _binaryTreeManager == null) return;
+            var contentId = Guid.NewGuid().ToString("N");
+            var splitterId = Guid.NewGuid().ToString("N");
+            var addNode = new CellItemControl
             {
-                Width = 400,
-                Height = 200
+                Tag = contentId
+            }; 
+            var gridSplitter = new GridSplitter
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch, 
+                ResizeBehavior = GridResizeBehavior.PreviousAndNext,
+                Background = System.Windows.Media.Brushes.OrangeRed
             };
             if (e.Direction == CutDirectionEnum.Horizontal)
             {
-                // 横切;只改变行
-                var gridSplitter = new GridSplitter()
-                {
-                    Height = 5,
-                    Width = double.NaN,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    ResizeDirection = GridResizeDirection.Rows,
-                    ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                    Background = System.Windows.Media.Brushes.AliceBlue
-                };
-                _layoutSettings?.Cells.Add(new CellViewModel
-                {
-                    CellType = CellTypeEnum.EditableElement,
-                    Content = cellItem
-                });
-                _layoutSettings?.Cells.Add(new CellViewModel
-                {
-                    CellType = CellTypeEnum.SplitterElement,
-                    Content = gridSplitter
-                });
-                MainGrid.Children.Add(gridSplitter);
-                MainGrid.Children.Add(cellItem);
+                gridSplitter.ResizeDirection = GridResizeDirection.Rows;
+                gridSplitter.Height = 5;
+                _binaryTreeManager.CutHorizontal(e.CellId, contentId, splitterId);
             }
             else
             {
-                // 竖切;只改变列
-                var gridSplitter = new GridSplitter()
-                {
-                    Height = double.NaN,
-                    Width = 5,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    ResizeDirection = GridResizeDirection.Columns,
-                    ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                    Background = System.Windows.Media.Brushes.AliceBlue
-                };
-            }
+                gridSplitter.ResizeDirection = GridResizeDirection.Columns;
+                gridSplitter.Width = 5;
+                _binaryTreeManager.CutVertical(e.CellId, contentId, splitterId);
+            } 
+            _layoutSettings.Contents.Add(new UiContentElement(contentId)
+            {
+                CellType = CellTypeEnum.EditableElement,
+                Content = addNode
+            });
+            _layoutSettings.Contents.Add(new UiContentElement(splitterId)
+            {
+                CellType = CellTypeEnum.SplitterElement,
+                Content = gridSplitter
+            });
+            addNode.SplitRequested += OnSplitRequested;
+            MainGrid.Children.Add(addNode);
+            MainGrid.Children.Add(gridSplitter); 
+            // 这里需要更新布局结构 
+            var elementPositions = _binaryTreeManager.GetElementDisplacement(_layoutSettings.SpatialStructure);
+            RefreshUi();
+            foreach (var content in _layoutSettings.Contents)
+            {
+                if (!elementPositions.TryGetValue(content.Id, out (int row, int col, int rSpan, int cSpan) position)) return;
+                Grid.SetRow(content.Content, position.row);
+                Grid.SetColumn(content.Content, position.col);
+                if (position.rSpan > 1)
+                    Grid.SetRowSpan(content.Content, position.rSpan);
+                if (position.cSpan > 1)
+                    Grid.SetColumnSpan(content.Content, position.cSpan); 
+            } 
         }
 
         #endregion
 
         /// <summary>
-        /// 布局设置, JSON格式
+        /// 布局设置
         /// </summary>
         public LayoutSettingModel LayoutSettings
         {
@@ -137,26 +144,25 @@ namespace MCCS.UserControl.DynamicGrid
             if (d is not DynamicGrid control) return;
             if (e.NewValue is not LayoutSettingModel layoutSettings) return;
             control._layoutSettings = layoutSettings;
-            control.MainGrid.RowDefinitions.Clear();
-            control.MainGrid.ColumnDefinitions.Clear();
+            control._binaryTreeManager = new BinaryTreeManager(layoutSettings.SpatialStructure); 
             control.MainGrid.Children.Clear();
-            foreach (var row in layoutSettings.Rows)
+            control.RefreshUi();
+            // 设置元素位置
+            var elementPositions = control._binaryTreeManager.GetElementDisplacement(layoutSettings.SpatialStructure);
+            foreach (var content in layoutSettings.Contents)
             {
-                control.MainGrid.RowDefinitions.Add(new RowDefinition
+                if (!elementPositions.TryGetValue(content.Id, out (int row, int col, int rSpan, int cSpan) position)) return; 
+                Grid.SetRow(content.Content, position.row);
+                Grid.SetColumn(content.Content, position.col);
+                if (position.rSpan >= 1)
+                    Grid.SetRowSpan(content.Content, position.rSpan);
+                if (position.cSpan >= 1)
+                    Grid.SetColumnSpan(content.Content, position.cSpan);
+                if (content.Content is CellItemControl cellItemControl)
                 {
-                    Height = new GridLength(row.Value, row.UnitType)
-                });
-            }
-            foreach (var column in layoutSettings.Columns)
-            {
-                control.MainGrid.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width = new GridLength(column.Value, column.UnitType)
-                });
-            }
-            foreach (var cell in layoutSettings.Cells)
-            {
-                control.AddCellItem(cell, cell.Row, cell.Column);
+                    cellItemControl.SplitRequested += control.OnSplitRequested;
+                }
+                control.MainGrid.Children.Add(content.Content);
             }
         } 
     }

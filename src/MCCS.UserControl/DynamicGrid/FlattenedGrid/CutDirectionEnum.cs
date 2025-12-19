@@ -1,4 +1,4 @@
-﻿namespace MCCS.UserControl.DynamicGrid
+﻿namespace MCCS.UserControl.DynamicGrid.FlattenedGrid
 {
     public enum CutDirectionEnum
     {
