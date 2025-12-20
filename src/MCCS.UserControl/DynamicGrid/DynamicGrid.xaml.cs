@@ -1,6 +1,8 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 using MCCS.UserControl.DynamicGrid.FlattenedGrid;
 
@@ -50,6 +52,45 @@ namespace MCCS.UserControl.DynamicGrid
         { 
         }
 
+        private void OnSplitterDraged(object? sender, DragCompletedEventArgs e)
+        {
+            if (sender is not GridSplitter splitter) return;
+            var grid = (Grid)splitter.Parent; 
+            double sumLength = 0;
+            // 行Splitter
+            if (splitter.ResizeDirection == GridResizeDirection.Rows)
+            {
+                var row = Grid.GetRow(splitter);
+                Dispatcher.BeginInvoke(
+                    DispatcherPriority.Loaded,
+                    new Action(() =>
+                    {
+                        for (var i = 0; i < row; i++)
+                            sumLength += grid.RowDefinitions[i].ActualHeight;
+
+                        var ratio = sumLength / grid.ActualHeight;
+                        // 更新UI
+                        MessageBox.Show($"更新后的比例: {ratio:P2}");
+                    }));
+            }
+            else
+            {
+                var col = Grid.GetColumn(splitter);
+                Dispatcher.BeginInvoke(
+                    DispatcherPriority.Loaded,
+                    new Action(() =>
+                    { 
+                        for (var i = 0; i < col; i++)
+                            sumLength += grid.ColumnDefinitions[i].ActualWidth;
+
+                        var ratio = sumLength / grid.ActualWidth;
+                        // 更新UI
+                        MessageBox.Show($"更新后的比例: {ratio:P2}");
+                    }));
+                
+            }
+        }
+
         private void OnSplitRequested(object? sender, SplitRequestEventArgs e)
         {
             if (sender is not DependencyObject child || _layoutSettings == null || _binaryTreeManager == null) return;
@@ -63,18 +104,19 @@ namespace MCCS.UserControl.DynamicGrid
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch, 
                 ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                Background = System.Windows.Media.Brushes.OrangeRed
+                Background = System.Windows.Media.Brushes.AliceBlue
             };
+            gridSplitter.DragCompleted += OnSplitterDraged;
             if (e.Direction == CutDirectionEnum.Horizontal)
             {
                 gridSplitter.ResizeDirection = GridResizeDirection.Rows;
-                gridSplitter.Height = 5;
+                gridSplitter.Height = 2;
                 _binaryTreeManager.CutHorizontal(e.CellId, contentId, splitterId);
             }
             else
             {
                 gridSplitter.ResizeDirection = GridResizeDirection.Columns;
-                gridSplitter.Width = 5;
+                gridSplitter.Width = 2;
                 _binaryTreeManager.CutVertical(e.CellId, contentId, splitterId);
             } 
             _layoutSettings.Contents.Add(new UiContentElement(contentId)
@@ -162,6 +204,12 @@ namespace MCCS.UserControl.DynamicGrid
                 {
                     cellItemControl.SplitRequested += control.OnSplitRequested;
                 }
+
+                if (content.Content is GridSplitter gridSplitter)
+                {
+                    gridSplitter.DragCompleted += control.OnSplitterDraged;
+                }
+
                 control.MainGrid.Children.Add(content.Content);
             }
         } 

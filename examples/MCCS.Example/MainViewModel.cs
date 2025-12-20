@@ -73,8 +73,9 @@ namespace MCCS.Example
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             VerticalAlignment = VerticalAlignment.Center,
                             ResizeDirection = GridResizeDirection.Rows,
+                            ShowsPreview=true,
                             ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.OrangeRed
+                            Background = System.Windows.Media.Brushes.AliceBlue
                         }
                     },
                     new UiContentElement(rightSplitterNode.Id)
@@ -86,8 +87,9 @@ namespace MCCS.Example
                             HorizontalAlignment = HorizontalAlignment.Stretch,
                             VerticalAlignment = VerticalAlignment.Center,
                             ResizeDirection = GridResizeDirection.Rows,
+                            ShowsPreview=true,
                             ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.OrangeRed
+                            Background = System.Windows.Media.Brushes.AliceBlue
                         }
                     },
                     new UiContentElement(root.Id)
@@ -96,10 +98,11 @@ namespace MCCS.Example
                         { 
                             Width = 5,
                             Height = double.NaN,
+                            ShowsPreview=true,
                             HorizontalAlignment = HorizontalAlignment.Stretch, 
                             ResizeDirection = GridResizeDirection.Columns,
                             ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.OrangeRed
+                            Background = System.Windows.Media.Brushes.AliceBlue
                         }
                     }
                 ], SpatialStructure = root

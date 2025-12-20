@@ -32,7 +32,7 @@ namespace MCCS.UserControl.DynamicGrid.FlattenedGrid
                 var x0 = xList[i];
                 var x1 = xList[i + 1];
                 columnDefinitions.Add(Math.Abs(Math.Abs(x1 - x0) - FlattenOperation._splitterThickness) < 1e-6
-                    ? (GridUnitType.Pixel, 5) 
+                    ? (GridUnitType.Pixel, 2) 
                     : (GridUnitType.Star, x1 - x0));
             }
 
@@ -41,7 +41,7 @@ namespace MCCS.UserControl.DynamicGrid.FlattenedGrid
                 var y0 = yList[i];
                 var y1 = yList[i + 1];
                 rowDefinitions.Add(Math.Abs(y1 - y0) - FlattenOperation._splitterThickness < 1e-6
-                    ? (GridUnitType.Pixel, 5)
+                    ? (GridUnitType.Pixel, 2)
                     : (GridUnitType.Star, y1 - y0));
             }
             return (rowDefinitions, columnDefinitions);
@@ -151,6 +151,16 @@ namespace MCCS.UserControl.DynamicGrid.FlattenedGrid
             _defaultColumnAddLength += _unitAddLength;
             // 恢复未刷新状态
             _rectInfos = null;
-        } 
+        }
+
+        /// <summary>
+        /// 移动Splitter
+        /// </summary>
+        /// <param name="splitterId"></param>
+        /// <param name="newRatio"></param>
+        public void MoveSplitter(string splitterId, double newRatio)
+        {
+
+        }
     }
 }
