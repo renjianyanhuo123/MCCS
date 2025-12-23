@@ -73,6 +73,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\MethodManager\InterfaceSettings\" />
     <Folder Include="Models\ProjectManager\" />
   </ItemGroup>
 

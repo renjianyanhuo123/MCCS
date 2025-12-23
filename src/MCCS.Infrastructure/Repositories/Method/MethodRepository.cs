@@ -7,10 +7,8 @@ namespace MCCS.Infrastructure.Repositories.Method
 {
     public sealed class MethodRepository(IFreeSql<SystemDbFlag> freeSql) : IMethodRepository
     {
-        public async ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken)
-        {
-            return await freeSql.Insert(method).ExecuteIdentityAsync(cancellationToken);
-        }
+        public async ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken) => 
+            await freeSql.Insert(method).ExecuteIdentityAsync(cancellationToken);
 
         public async ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken)
         {
@@ -20,19 +18,20 @@ namespace MCCS.Infrastructure.Repositories.Method
             return rows > 0;
         }
 
-        public Task<MethodModel> GetMethodAsync(long id)
-        {
-            return freeSql.Select<MethodModel>()
+        public Task<MethodInterfaceSettingModel> GetInterfaceSettingAsync(long methodId) =>
+            freeSql.Select<MethodInterfaceSettingModel>()
+                .Where(c => c.MethodId == methodId)
+                .ToOneAsync();
+
+        public Task<MethodModel> GetMethodAsync(long id) =>
+            freeSql.Select<MethodModel>()
                 .Where(c => c.Id == id)
                 .ToOneAsync();
-        }
 
-        public Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression)
-        {
-            return freeSql.Select<MethodModel>()
+        public Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression) =>
+            freeSql.Select<MethodModel>()
                 .Where(expression)
                 .ToListAsync();
-        }
 
         public async Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression)
         {
@@ -47,5 +46,6 @@ namespace MCCS.Infrastructure.Repositories.Method
             };
             return res;
         }
+
     }
 }

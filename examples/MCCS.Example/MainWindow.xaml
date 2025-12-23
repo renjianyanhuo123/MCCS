@@ -5,8 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MCCS.Example"
         xmlns:transferControl="clr-namespace:MCCS.UserControl.Transfer;assembly=MCCS.UserControl"
-        xmlns:pagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
-        xmlns:dynamicGrid="clr-namespace:MCCS.UserControl.DynamicGrid;assembly=MCCS.UserControl"
+        xmlns:pagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl" 
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="1000">
     <Window.DataContext>
@@ -95,6 +94,5 @@
             </Canvas>
         </ScrollViewer>-->
 
-        <dynamicGrid:DynamicGrid Width="Auto" Height="Auto" LayoutSettings="{Binding LayoutSetting}" />
     </Grid>
 </Window>

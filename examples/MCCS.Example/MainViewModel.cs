@@ -1,9 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-using MCCS.UserControl;
-using MCCS.UserControl.DynamicGrid;
-using MCCS.UserControl.DynamicGrid.FlattenedGrid;
+using MCCS.UserControl; 
 
 namespace MCCS.Example
 {
@@ -12,101 +10,7 @@ namespace MCCS.Example
         // private object _param;
         //private int _total;
         public MainViewModel()
-        {
-            var node1 = new CellLayoutNode();
-            var node2 = new CellLayoutNode();
-            var node3 = new CellLayoutNode();
-            var node4 = new CellLayoutNode();
-            var leftSplitterNode = new SplitterNode(CutDirectionEnum.Horizontal, node1, node2)
-            {
-                Ratio = 0.3
-            };
-            var rightSplitterNode = new SplitterNode(CutDirectionEnum.Horizontal, node3, node4)
-            {
-                Ratio = 0.7
-            };
-            var root = new SplitterNode(CutDirectionEnum.Vertical, leftSplitterNode, rightSplitterNode)
-            {
-                Ratio = 0.5
-            }; 
-            LayoutSetting = new LayoutSettingModel
-            { 
-                Contents =
-                [
-                    new UiContentElement(node1.Id)
-                    {
-                        Content = new CellItemControl
-                        {
-                            Tag = node1.Id
-                        },
-                    },
-
-                    new UiContentElement(node2.Id)
-                    {
-                        Content = new CellItemControl
-                        {
-                            Tag = node2.Id
-                        },
-                    },
-
-                    new UiContentElement(node3.Id)
-                    {
-                        Content = new CellItemControl
-                        {
-                            Tag = node3.Id
-                        },
-                    },
-
-                    new UiContentElement(node4.Id)
-                    {
-                        Content = new CellItemControl
-                        {
-                            Tag = node4.Id
-                        },
-                    },
-                    new UiContentElement(leftSplitterNode.Id)
-                    {
-                        CellType = CellTypeEnum.SplitterElement,
-                        Content =new GridSplitter()
-                        {
-                            Height = 5,
-                            HorizontalAlignment = HorizontalAlignment.Stretch,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            ResizeDirection = GridResizeDirection.Rows,
-                            ShowsPreview=true,
-                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.AliceBlue
-                        }
-                    },
-                    new UiContentElement(rightSplitterNode.Id)
-                    {
-                        CellType = CellTypeEnum.SplitterElement,
-                        Content = new GridSplitter
-                        { 
-                            Height = 5,
-                            HorizontalAlignment = HorizontalAlignment.Stretch,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            ResizeDirection = GridResizeDirection.Rows,
-                            ShowsPreview=true,
-                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.AliceBlue
-                        }
-                    },
-                    new UiContentElement(root.Id)
-                    {
-                        Content = new GridSplitter
-                        { 
-                            Width = 5,
-                            Height = double.NaN,
-                            ShowsPreview=true,
-                            HorizontalAlignment = HorizontalAlignment.Stretch, 
-                            ResizeDirection = GridResizeDirection.Columns,
-                            ResizeBehavior = GridResizeBehavior.PreviousAndNext,
-                            Background = System.Windows.Media.Brushes.AliceBlue
-                        }
-                    }
-                ], SpatialStructure = root
-            };
+        { 
         }
 
         //public int Total
@@ -153,10 +57,7 @@ namespace MCCS.Example
         //    }
         //];
 
-        //public ObservableCollection<TransferItemModel> TargetList { get; } = [];
-
-        private LayoutSettingModel _layoutSettingModel;
-        public LayoutSettingModel LayoutSetting { get => _layoutSettingModel; set => SetProperty(ref _layoutSettingModel, value); }
+        //public ObservableCollection<TransferItemModel> TargetList { get; } = []; 
 
     }
 }

@@ -8,12 +8,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\新文件夹\**" />
+    <EmbeddedResource Remove="Repositories\新文件夹\**" />
+    <None Remove="Repositories\新文件夹\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FreeSql" Version="3.5.303" />
     <PackageReference Include="FreeSql.DbContext" Version="3.5.303" />
     <PackageReference Include="FreeSql.Provider.Sqlite" Version="3.5.303" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
     <PackageReference Include="WorkflowCore" Version="3.17.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Repositories\Method\" />
   </ItemGroup>
 
 </Project>

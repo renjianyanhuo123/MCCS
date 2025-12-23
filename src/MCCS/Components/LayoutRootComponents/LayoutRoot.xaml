@@ -3,31 +3,85 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:MCCS.Components.LayoutRootComponents" d:DataContext="{d:DesignInstance Type=local:LayoutRootViewModel}"
+             xmlns:local="clr-namespace:MCCS.Components.LayoutRootComponents"
+             xmlns:vm="clr-namespace:MCCS.Components.LayoutRootComponents.ViewModels"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             d:DataContext="{d:DesignInstance Type=vm:LayoutRootViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid x:Name="MainGrid">
-        <ItemsControl ItemsSource="{Binding Cells}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type local:CellEditableComponentViewModel}">
+            <Border BorderThickness="1" BorderBrush="Gray" Tag="{Binding Id}">
+                <local:CellEditableComponent />
+            </Border>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SplitterHorizontalLayoutNode}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="{Binding LeftRatio, Mode=TwoWay}" />
+                    <RowDefinition Height="{Binding SplitterSize}" />
+                    <RowDefinition Height="{Binding RightRatio, Mode=TwoWay}" />
+                </Grid.RowDefinitions>
 
-            <ItemsControl.ItemContainerStyle>
-                <Style TargetType="ContentPresenter">
-                    <Setter Property="Grid.Row" Value="{Binding Row}" />
-                    <Setter Property="Grid.Column" Value="{Binding Column}" />
-                    <Setter Property="Grid.RowSpan" Value="{Binding RowSpan}" />
-                    <Setter Property="Grid.ColumnSpan" Value="{Binding ColumnSpan}" />
-                </Style>
-            </ItemsControl.ItemContainerStyle>
+                <ContentControl Grid.Row="0"
+                                Grid.Column="0"
+                                Content="{Binding LeftNode}" />
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <ContentPresenter Content="{Binding Content}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </Grid>
+                <GridSplitter Grid.Row="1"
+                              Grid.Column="0"
+                              Height="{Binding SplitterSize}"
+                              ResizeDirection="Rows"
+                              ShowsPreview="True"
+                              HorizontalAlignment="Stretch"
+                              ResizeBehavior="PreviousAndNext">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="DragCompleted">
+                            <b:InvokeCommandAction
+                                Command="{Binding SplitterDragCompletedCommand}"
+                                PassEventArgsToCommand="True" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </GridSplitter>
+
+                <ContentControl Grid.Row="2"
+                                Grid.Column="0"
+                                Content="{Binding RightNode}" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SplitterVerticalLayoutNode}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding LeftRatio, Mode=TwoWay}" />
+                    <ColumnDefinition Width="{Binding SplitterSize}" />
+                    <ColumnDefinition Width="{Binding RightRatio, Mode=TwoWay}" />
+                </Grid.ColumnDefinitions>
+
+                <ContentControl Grid.Column="0"
+                                Grid.Row="0"
+                                Content="{Binding LeftNode}" />
+
+                <GridSplitter Grid.Column="1"
+                              Grid.Row="0"
+                              ResizeDirection="Columns"
+                              Width="{Binding SplitterSize}"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch"
+                              ShowsPreview="True"
+                              ResizeBehavior="PreviousAndNext" >
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="DragCompleted">
+                            <b:InvokeCommandAction
+                                Command="{Binding SplitterDragCompletedCommand}"
+                                PassEventArgsToCommand="True" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                </GridSplitter>
+
+                <ContentControl Grid.Column="2"
+                                Grid.Row="0"
+                                Content="{Binding RightNode}" />
+            </Grid>
+        </DataTemplate> 
+    </UserControl.Resources>
+    <ContentControl Content="{Binding RootNode}"></ContentControl>
 </UserControl>
