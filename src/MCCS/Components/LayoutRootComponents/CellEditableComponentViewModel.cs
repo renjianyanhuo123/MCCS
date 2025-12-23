@@ -1,14 +1,13 @@
 ﻿using System.Windows.Media;
 
 using MCCS.Components.LayoutRootComponents.ViewModels;
-using MCCS.Events.Mehtod.DynamicGridOperationEvents;
-using MCCS.Models.MethodManager.InterfaceSettings;
+using MCCS.Events.Mehtod.DynamicGridOperationEvents; 
 
 namespace MCCS.Components.LayoutRootComponents
 {
     public class CellEditableComponentViewModel : LayoutNode
     {
-        private readonly IEventAggregator _eventAggregator;
+        private readonly IEventAggregator _eventAggregator; 
 
         public CellEditableComponentViewModel(IEventAggregator eventAggregator)
         {
@@ -47,6 +46,29 @@ namespace MCCS.Components.LayoutRootComponents
             get => _viewTypeName;
             set => SetProperty(ref _viewTypeName, value);
         }
+
+        private bool _isCanSetParam; 
+        public bool IsCanSetParam
+        {
+            get => _isCanSetParam;
+            set => SetProperty(ref _isCanSetParam, value);
+        }
+
+        private long _nodeId;
+        public long NodeId
+        {
+            get => _nodeId;
+            set => SetProperty(ref _nodeId, value);
+        }
+
+        private string _nodeSettingParamText; 
+        public string NodeSettingParamText
+        {
+            get => _nodeSettingParamText;
+            set => SetProperty(ref _nodeSettingParamText, value);
+        }
+         
+        public long NodeSettingParamId { get; private set; } 
         #endregion
 
         #region Private Method

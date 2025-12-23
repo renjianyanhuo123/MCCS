@@ -8,11 +8,19 @@
              d:DataContext="{d:DesignInstance Type=local:CellEditableComponentViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
+    </UserControl.Resources>
     <Grid>
         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
             <Border Background="AliceBlue" Width="200" Height="100" CornerRadius="5"
                     Cursor="Hand" Margin="0,0,0, 5">
-                <TextBlock Text="{Binding }"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{Binding Icon}" />
+                    <TextBlock Text="{Binding Title}" Foreground="Blue" />
+                    <TextBlock Visibility="{Binding IsCanSetParam, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               Text="{Binding NodeSettingParamText}" Foreground="Blue" />
+                </StackPanel>
             </Border>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <Button Name="HorizontalCut" Width="60" Height="60" Margin="0,0,5,0" 
