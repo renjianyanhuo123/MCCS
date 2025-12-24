@@ -1,5 +1,6 @@
 ﻿
 using MCCS.Infrastructure.Models.Devices;
+using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.Model3D;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Models.SystemManager;
@@ -485,6 +486,52 @@ namespace MCCS
                     }
                 };
                 freeSql.Insert(variables).ExecuteAffrows();
+            }
+            if (!freeSql.Select<MethodUiComponentsModel>().Any())
+            { 
+                var uiComponents = new List<MethodUiComponentsModel>
+                {
+                    new()
+                    { 
+                        ComponentType = UiComponentTypeEnum.Display,
+                        Title = "图表组件",
+                        Icon = "ChartBar",
+                        ViewTypeName = "",
+                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
+                        {
+                            { "Color", "Green" },
+                            { "Width", "100" },
+                            { "Height", "30" }
+                        })
+                    },
+                    new()
+                    {
+                        ComponentType = UiComponentTypeEnum.Display,
+                        Title = "原始数据监控组件",
+                        Icon = "Database",
+                        ViewTypeName = "",
+                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
+                        {
+                            { "Color", "Green" },
+                            { "Width", "100" },
+                            { "Height", "30" }
+                        })
+                    },
+                    new()
+                    {
+                        ComponentType = UiComponentTypeEnum.Interaction,
+                        Title = "控制参数输入组件",
+                        Icon = "PencilOutline",
+                        ViewTypeName = "",
+                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
+                        {
+                            { "Color", "Green" },
+                            { "Width", "100" },
+                            { "Height", "30" }
+                        })
+                    }
+                };
+                freeSql.Insert(uiComponents).ExecuteAffrows();
             }
         }
 

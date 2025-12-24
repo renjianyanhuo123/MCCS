@@ -16,5 +16,15 @@ namespace MCCS.Infrastructure.Models.MethodManager
 
         [Column(IsNullable = true, StringLength = -2)]
         public string? ParametersJson { get; set; }
+
+        /// <summary>
+        /// 是否可以设置参数
+        /// </summary>
+        public bool IsCanSetParam { get; set; }
+
+        /// <summary>
+        /// 组件类型
+        /// </summary>
+        public UiComponentTypeEnum ComponentType { get; set; }
     }
 }

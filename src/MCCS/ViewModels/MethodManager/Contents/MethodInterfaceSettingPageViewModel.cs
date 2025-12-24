@@ -26,7 +26,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
             var settingModel = await _methodRepository.GetInterfaceSettingAsync(_methodId);
             if (settingModel == null)
             {
-                LayoutRootViewModel = new LayoutRootViewModel(new CellEditableComponentViewModel(_eventAggregator), _eventAggregator);
+                LayoutRootViewModel = new LayoutRootViewModel(new CellEditableComponentViewModel(_eventAggregator, _methodRepository), _eventAggregator);
             }
         }
         #endregion

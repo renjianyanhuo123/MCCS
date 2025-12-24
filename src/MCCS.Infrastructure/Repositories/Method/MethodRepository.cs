@@ -47,5 +47,8 @@ namespace MCCS.Infrastructure.Repositories.Method
             return res;
         }
 
+        public Task<List<MethodUiComponentsModel>> GetUiComponentsAsync() =>
+            freeSql.Select<MethodUiComponentsModel>()
+                .ToListAsync();
     }
 }

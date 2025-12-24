@@ -20,14 +20,15 @@ namespace MCCS.ViewModels.MethodManager
             IRegionManager regionManager,
             IMethodRepository methodRepository) : base(eventAggregator)
         {
+            // 系统层 → 通道层 → 关系层 → 阶段层 
             Menus =
             [
                 new MethodMenuItemModel { Name = "常规", Id = 1, Url = MethodBaseInfoPageViewModel.Tag},
                 new MethodMenuItemModel { Name = "试样", Id = 2 },
                 new MethodMenuItemModel { Name = "测量变量", Id = 3 },
                 new MethodMenuItemModel { Name = "计算和结果变量", Id = 4 },
-                new MethodMenuItemModel { Name = "工作流配置", Id = 5, Url = MethodWorkflowSettingPageViewModel.Tag },
-                new MethodMenuItemModel { Name = "界面配置", Id = 5, Url = nameof(MethodInterfaceSettingPageViewModel) }
+                new MethodMenuItemModel { Name = "工作流配置", Id = 6, Url = MethodWorkflowSettingPageViewModel.Tag },
+                new MethodMenuItemModel { Name = "界面配置", Id = 7, Url = nameof(MethodInterfaceSettingPageViewModel) }
             ];
             _regionManager = regionManager;
             _methodRepository = methodRepository;

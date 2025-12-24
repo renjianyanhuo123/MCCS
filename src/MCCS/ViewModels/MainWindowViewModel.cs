@@ -1,7 +1,9 @@
 ﻿using System.Windows;
 
 using MCCS.Events.Common;
+using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Events.StartUp;
+using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting.EventParams;
@@ -109,6 +111,14 @@ namespace MCCS.ViewModels
              var paramters = new NavigationParameters { { "OpEventArgs", opEventArgs } }; 
              _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative), paramters);
         }
+
+        private void ExecuteShowComponentsCommand(OpenUiCompontsEventParam param)
+        {
+            IsOpenFlyout = true;
+            RightFlyoutName = "Ui节点配置";
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodComponentsPageViewModel), UriKind.Relative));
+        }
+
         #endregion
 
         public MainWindowViewModel( 
@@ -121,6 +131,7 @@ namespace MCCS.ViewModels
             _eventAggregator.GetEvent<FinishStartUpNotificationEvent>().Subscribe(JumpToMainPage);
             _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             _eventAggregator.GetEvent<AddOpEvent>().Subscribe(ExecuteShowStepsCommand);
+            _eventAggregator.GetEvent<OpenUiCompontsEvent>().Subscribe(ExecuteShowComponentsCommand);
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 
