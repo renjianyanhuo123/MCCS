@@ -126,7 +126,7 @@ namespace MCCS.ViewModels
             IsOpenFlyout = true;
             RightFlyoutName = "节点参数配置";
             var paramters = new NavigationParameters { { "OpenParameterSetEventParam", param } };
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodChartSetParamPageViewModel), UriKind.Relative), paramters);
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(param.ViewName, UriKind.Relative), paramters);
         }
         #endregion
 

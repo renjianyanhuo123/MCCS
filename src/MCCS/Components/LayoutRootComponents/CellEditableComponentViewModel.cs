@@ -14,7 +14,7 @@ namespace MCCS.Components.LayoutRootComponents
         public CellEditableComponentViewModel(IEventAggregator eventAggregator, IMethodRepository methodRepository)
         {
             _eventAggregator = eventAggregator;
-            _methodRepository = methodRepository;
+            _methodRepository = methodRepository; 
             CutHorizontalCommand = new DelegateCommand(ExecuteCutHorizontalCommand);
             CutVerticalCommand = new DelegateCommand(ExecuteCutVerticalCommand);
             DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
@@ -84,7 +84,10 @@ namespace MCCS.Components.LayoutRootComponents
                 _paramterJson = value;
                 NodeSettingParamText = "已设置参数";
             }
-        }  
+        }
+
+        public string? SetParamViewName { get; private set; }
+
         #endregion
 
         #region Private Method
@@ -178,6 +181,7 @@ namespace MCCS.Components.LayoutRootComponents
             _eventAggregator.GetEvent<OpenParamterSetEvent>().Publish(new OpenParamterSetEventParam
             {
                 SourceId = Id,
+                ViewName = SetParamViewName ?? "",
                 Parameter = ParamterJson
             });
 
@@ -192,6 +196,7 @@ namespace MCCS.Components.LayoutRootComponents
                 NodeId = param.NodeId;
                 Title = component.Title;
                 Icon = component.Icon ?? "";
+                SetParamViewName = component.SetParamViewName;
                 NodeSettingParamText = "未设置节点参数";
                 IsCanSetParam = component.IsCanSetParam;
             }

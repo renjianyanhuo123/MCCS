@@ -6,6 +6,7 @@ using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Models.SystemManager;
 using MCCS.Infrastructure.Models.SystemSetting;
 using MCCS.Infrastructure.Models.TestInfo;
+using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
 using Newtonsoft.Json;
 
@@ -495,7 +496,10 @@ namespace MCCS
                     { 
                         ComponentType = UiComponentTypeEnum.Display,
                         Title = "图表组件",
+                        Description = "设置图表的种类以及X,Y轴",
                         Icon = "ChartBar",
+                        IsCanSetParam = true,
+                        SetParamViewName = nameof(MethodChartSetParamPageViewModel),
                         ViewTypeName = ""
                     },
                     new()
@@ -503,6 +507,9 @@ namespace MCCS
                         ComponentType = UiComponentTypeEnum.Display,
                         Title = "原始数据监控组件",
                         Icon = "Database",
+                        IsCanSetParam = true,
+                        Description = "每一个组件内可展示多个不同的数值",
+                        SetParamViewName = nameof(DataMonitorSetParamPageViewModel),
                         ViewTypeName = ""
                     },
                     new()
@@ -510,6 +517,7 @@ namespace MCCS
                         ComponentType = UiComponentTypeEnum.Interaction,
                         Title = "控制参数输入组件",
                         Icon = "PencilOutline",
+                        IsCanSetParam = true,
                         ViewTypeName = ""
                     }
                 };

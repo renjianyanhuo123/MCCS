@@ -176,6 +176,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
 
             containerRegistry.RegisterForNavigation<MethodChartSetParamPage>(nameof(MethodChartSetParamPageViewModel));
+            containerRegistry.RegisterForNavigation<DataMonitorSetParamPage>(nameof(DataMonitorSetParamPageViewModel));
             // StationSetup  
             containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));
             containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel));

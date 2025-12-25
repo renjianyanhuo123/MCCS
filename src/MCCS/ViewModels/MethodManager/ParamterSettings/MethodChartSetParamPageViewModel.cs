@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
 using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
 
@@ -9,30 +8,17 @@ using Newtonsoft.Json;
 
 namespace MCCS.ViewModels.MethodManager.ParamterSettings
 {
-    public sealed class MethodChartSetParamPageViewModel : BaseViewModel
+    public sealed class MethodChartSetParamPageViewModel : BaseParameterSetViewModel<ChartSettingParamModel>
     {
-        private readonly IPseudoChannelManager _pseudoChannelManager;
-        private ChartSettingParamModel? _parameter;
-        private string _sourceId = string.Empty;
+        private readonly IPseudoChannelManager _pseudoChannelManager; 
 
         public MethodChartSetParamPageViewModel(
             IPseudoChannelManager pseudoChannelManager, 
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _pseudoChannelManager = pseudoChannelManager;
-            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
-            SaveCommand = new DelegateCommand(ExecuteSaveCommand);
+            _pseudoChannelManager = pseudoChannelManager;  
         }
-
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            var parameter = navigationContext.Parameters.GetValue<OpenParamterSetEventParam>("OpenParameterSetEventParam");
-            _sourceId = parameter.SourceId;
-            if (parameter is { Parameter: not null })
-            { 
-                _parameter = JsonConvert.DeserializeObject<ChartSettingParamModel>(parameter.Parameter); 
-            }
-        }
+         
 
         private int _chartType;
         public int ChartType
@@ -41,9 +27,7 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
             set => SetProperty(ref _chartType, value);
         }
 
-        #region Command
-        public DelegateCommand LoadCommand { get; }
-        public DelegateCommand SaveCommand { get; } 
+        #region Command 
         #endregion
 
         #region Property  
@@ -72,7 +56,7 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
         #endregion
 
         #region Private Method
-        private void ExecuteLoadCommand()
+        protected override void ExecuteLoad()
         {
             XBindCollection.Clear();
             YBindCollection.Clear();
@@ -96,28 +80,23 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
                 Unit = "s",
                 DisplayName = "时间"
             });
-            if (_parameter == null) return;
-            SelectedXElement = XBindCollection.FirstOrDefault(c => c.Id == _parameter.XAxisParamId);
-            SelectedYElement = YBindCollection.FirstOrDefault(c => c.Id == _parameter.YAxisParamId);
-            ChartType = (int)_parameter.Type;
-        }
+            if (Parameter == null) return;
+            SelectedXElement = XBindCollection.FirstOrDefault(c => c.Id == Parameter.XAxisParamId);
+            SelectedYElement = YBindCollection.FirstOrDefault(c => c.Id == Parameter.YAxisParamId);
+            ChartType = (int)Parameter.Type;
+        } 
+        #endregion
 
-        private void ExecuteSaveCommand()
+        protected override string GetParameterJson()
         {
             var parameter = new ChartSettingParamModel
             {
                 Type = (ChartTypeEnum)ChartType,
-                XAxisParamId = SelectedXElement?.Id ?? 1,
+                XAxisParamId = SelectedXElement?.Id ?? 0,
                 YAxisParamId = SelectedYElement?.Id ?? 0
             };
-            if (_sourceId == string.Empty) return;
             var json = JsonConvert.SerializeObject(parameter);
-            _eventAggregator.GetEvent<SaveParameterEvent>().Publish(new SaveParameterEventParam
-            {
-                SourceId = _sourceId,
-                Parameter = json
-            });
+            return json;
         }
-        #endregion
     }
 }

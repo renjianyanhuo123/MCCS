@@ -7,6 +7,8 @@
         /// </summary>
         public required string SourceId { get; init; }
 
+        public required string ViewName { get; init; }
+
         public string? Parameter { get; init; }
     }
 }

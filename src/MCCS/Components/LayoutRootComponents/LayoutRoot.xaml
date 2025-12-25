@@ -33,14 +33,7 @@
                               ResizeDirection="Rows"
                               ShowsPreview="True"
                               HorizontalAlignment="Stretch"
-                              ResizeBehavior="PreviousAndNext">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="DragCompleted">
-                            <b:InvokeCommandAction
-                                Command="{Binding SplitterDragCompletedCommand}"
-                                PassEventArgsToCommand="True" />
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
+                              ResizeBehavior="PreviousAndNext"> 
                 </GridSplitter>
 
                 <ContentControl Grid.Row="2"
@@ -68,13 +61,13 @@
                               VerticalAlignment="Stretch"
                               ShowsPreview="True"
                               ResizeBehavior="PreviousAndNext" >
-                    <b:Interaction.Triggers>
+                    <!--<b:Interaction.Triggers>
                         <b:EventTrigger EventName="DragCompleted">
                             <b:InvokeCommandAction
                                 Command="{Binding SplitterDragCompletedCommand}"
                                 PassEventArgsToCommand="True" />
                         </b:EventTrigger>
-                    </b:Interaction.Triggers>
+                    </b:Interaction.Triggers>-->
                 </GridSplitter>
 
                 <ContentControl Grid.Column="2"
