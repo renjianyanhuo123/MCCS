@@ -6,8 +6,8 @@ namespace MCCS.Models.CurveModels
     {
         private readonly IPseudoChannelManager _pseudoChannelManager;
 
-        private XYBindCollectionItem _selectedXBindItem;
-        public XYBindCollectionItem SelectedXBindItem
+        private XyBindCollectionItem _selectedXBindItem;
+        public XyBindCollectionItem SelectedXBindItem
         {
             get => _selectedXBindItem;
             set
@@ -19,8 +19,8 @@ namespace MCCS.Models.CurveModels
             }
         }
 
-        private XYBindCollectionItem _selectedYBindItem;
-        public XYBindCollectionItem SelectedYBindItem
+        private XyBindCollectionItem _selectedYBindItem;
+        public XyBindCollectionItem SelectedYBindItem
         {
             get => _selectedYBindItem;
             set
@@ -39,7 +39,7 @@ namespace MCCS.Models.CurveModels
             set => SetProperty(ref _curve, value);
         }
 
-        public CurveMainModel(XYBindCollectionItem xAxe, XYBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
+        public CurveMainModel(XyBindCollectionItem xAxe, XyBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
         {
             _pseudoChannelManager = pseudoChannelManager;
             _selectedXBindItem = xAxe ?? throw new ArgumentNullException(nameof(xAxe));

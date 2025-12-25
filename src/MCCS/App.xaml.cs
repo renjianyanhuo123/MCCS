@@ -19,6 +19,7 @@ using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.Dialogs.Project;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
+using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.StationSetup;
 using MCCS.ViewModels.Pages.StationSites;
@@ -37,6 +38,7 @@ using MCCS.Views.Dialogs.Method;
 using MCCS.Views.Dialogs.Project;
 using MCCS.Views.MethodManager;
 using MCCS.Views.MethodManager.Contents;
+using MCCS.Views.MethodManager.ParamterSettings;
 using MCCS.Views.Pages;
 using MCCS.Views.Pages.StationSetup;
 using MCCS.Views.Pages.StationSites;
@@ -172,6 +174,8 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodInterfaceSettingPage>(nameof(MethodInterfaceSettingPageViewModel));
             containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
+
+            containerRegistry.RegisterForNavigation<MethodChartSetParamPage>(nameof(MethodChartSetParamPageViewModel));
             // StationSetup  
             containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));
             containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel));

@@ -23,8 +23,9 @@
                         HorizontalAlignment="Center"
                         Kind="{Binding Icon}" />
                     <TextBlock Text="{Binding Title}"
-                               FontSize="15"
+                               FontSize="18"
                                FontWeight="Bold"
+                               HorizontalAlignment="Center"
                                Cursor="Hand" 
                                Foreground="Blue"> 
                         <TextBlock.InputBindings>
@@ -33,7 +34,16 @@
                         </TextBlock.InputBindings>
                     </TextBlock>
                     <TextBlock Visibility="{Binding IsCanSetParam, Converter={StaticResource BooleanToVisibilityConverter}}"
-                               Text="{Binding NodeSettingParamText}" Foreground="Blue" />
+                               HorizontalAlignment="Center"
+                               Cursor="Hand"
+                               FontSize="15"
+                               Margin="0,5,0,0"
+                               Text="{Binding NodeSettingParamText}" Foreground="Blue">
+                        <TextBlock.InputBindings>
+                            <MouseBinding MouseAction="LeftClick"
+                                          Command="{Binding SetNodeParamterCommand}" />
+                        </TextBlock.InputBindings>
+                    </TextBlock>
                 </StackPanel>
             </Border>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">

@@ -20,10 +20,10 @@ namespace MCCS.Models.CurveModels
         private double _tableInitTime = 0.000;
         private const int _maxVisiblePoints = 500;
 
-        private readonly XYBindCollectionItem _selectedXBindItem;
-        private readonly XYBindCollectionItem _selectedYBindItem;
+        private readonly XyBindCollectionItem _selectedXBindItem;
+        private readonly XyBindCollectionItem _selectedYBindItem;
 
-        public CurveShowModel(XYBindCollectionItem xAxe, XYBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
+        public CurveShowModel(XyBindCollectionItem xAxe, XyBindCollectionItem yAxe, IPseudoChannelManager pseudoChannelManager)
         {
             _channelManager = pseudoChannelManager;
             _selectedXBindItem = xAxe;

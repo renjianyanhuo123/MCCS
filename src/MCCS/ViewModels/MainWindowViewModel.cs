@@ -4,6 +4,7 @@ using MCCS.Events.Common;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Events.StartUp;
 using MCCS.ViewModels.MethodManager;
+using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting.EventParams;
@@ -116,9 +117,17 @@ namespace MCCS.ViewModels
         {
             IsOpenFlyout = true;
             RightFlyoutName = "Ui节点配置";
-            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodComponentsPageViewModel), UriKind.Relative));
+            var paramters = new NavigationParameters { { "SourceId", param.SourceId } };
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodComponentsPageViewModel), UriKind.Relative), paramters);
         }
 
+        private void ExecuteShowParamterSetCommand(OpenParamterSetEventParam param)
+        {
+            IsOpenFlyout = true;
+            RightFlyoutName = "节点参数配置";
+            var paramters = new NavigationParameters { { "OpenParameterSetEventParam", param } };
+            _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodChartSetParamPageViewModel), UriKind.Relative), paramters);
+        }
         #endregion
 
         public MainWindowViewModel( 
@@ -132,6 +141,14 @@ namespace MCCS.ViewModels
             _eventAggregator.GetEvent<OpenRightFlyoutEvent>().Subscribe(OnOpenRightFlyout);
             _eventAggregator.GetEvent<AddOpEvent>().Subscribe(ExecuteShowStepsCommand);
             _eventAggregator.GetEvent<OpenUiCompontsEvent>().Subscribe(ExecuteShowComponentsCommand);
+            _eventAggregator.GetEvent<OpenParamterSetEvent>().Subscribe(ExecuteShowParamterSetCommand);
+            _eventAggregator.GetEvent<SelectedComponentEvent>().Subscribe(param =>
+            {
+                if (!string.IsNullOrEmpty(param.SourceId))
+                {
+                    IsOpenFlyout = false;
+                }
+            });
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 

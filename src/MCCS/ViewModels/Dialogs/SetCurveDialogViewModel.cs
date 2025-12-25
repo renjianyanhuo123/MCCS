@@ -1,8 +1,7 @@
 ﻿using MaterialDesignThemes.Wpf;
-using MCCS.Models.Model3D;
+
 using System.Collections.ObjectModel;
 using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Models;
 using MCCS.Models.CurveModels;
 
 namespace MCCS.ViewModels.Dialogs
@@ -31,11 +30,11 @@ namespace MCCS.ViewModels.Dialogs
         /// <summary>
         /// X轴绑定的集合
         /// </summary>
-        public ObservableCollection<XYBindCollectionItem> XBindCollection { get; } = [];
+        public ObservableCollection<XyBindCollectionItem> XBindCollection { get; } = [];
         /// <summary>
         /// Y轴绑定的集合
         /// </summary>
-        public ObservableCollection<XYBindCollectionItem> YBindCollection { get; } = [];
+        public ObservableCollection<XyBindCollectionItem> YBindCollection { get; } = [];
 
         #endregion
 
@@ -72,7 +71,7 @@ namespace MCCS.ViewModels.Dialogs
             var channels = _pseudoChannelManager.GetPseudoChannels();
             foreach (var channel in channels)
             {
-                var tempModel = new XYBindCollectionItem
+                var tempModel = new XyBindCollectionItem
                 {
                     Id = channel.ChannelId,
                     Name = channel.Configuration.ChannelName,
@@ -82,7 +81,7 @@ namespace MCCS.ViewModels.Dialogs
                 XBindCollection.Add(tempModel);
                 YBindCollection.Add(tempModel);
             }
-            XBindCollection.Add(new XYBindCollectionItem
+            XBindCollection.Add(new XyBindCollectionItem
             {
                 Id = 0,
                 Name = "Time",

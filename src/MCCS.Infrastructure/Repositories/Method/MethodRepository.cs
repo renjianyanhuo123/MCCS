@@ -33,6 +33,11 @@ namespace MCCS.Infrastructure.Repositories.Method
                 .Where(expression)
                 .ToListAsync();
 
+        public Task<MethodUiComponentsModel> GetMethodUiComponentByIdAsync(long componentId) =>
+            freeSql.Select<MethodUiComponentsModel>()
+                .Where(c => c.Id == componentId)
+                .ToOneAsync();
+
         public async Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression)
         {
             var res = new PageModel<MethodModel>

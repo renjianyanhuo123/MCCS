@@ -1,10 +1,8 @@
 ﻿namespace MCCS.Events.Mehtod.DynamicGridOperationEvents
 {
-    public record OpenUiCompontsEventParam
+    public record SelectedComponentEventParam
     {
-        /// <summary>
-        /// 记录源节点
-        /// </summary>
         public required string SourceId { get; init; }
+        public required long NodeId { get; init; }
     }
 }

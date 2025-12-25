@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager.InterfaceSettings;
 
@@ -8,12 +9,19 @@ namespace MCCS.ViewModels.MethodManager
     public class MethodComponentsPageViewModel : BaseViewModel
     {
         private readonly IMethodRepository _methodRepository;
+        private string _sourceId = "";
 
         public MethodComponentsPageViewModel(IEventAggregator eventAggregator, IMethodRepository methodRepository) : base(eventAggregator)
         {
             _methodRepository = methodRepository;
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             SelectComponentCommand = new DelegateCommand<UiComponentListItemModel>(ExecuteSelectComponentCommand);
+        }
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        {
+            var sourceId = navigationContext.Parameters.GetValue<string>("SourceId");
+            _sourceId = sourceId;
         }
 
         #region Command
@@ -37,7 +45,12 @@ namespace MCCS.ViewModels.MethodManager
 
         private void ExecuteSelectComponentCommand(UiComponentListItemModel param)
         {
-            // _eventAggregator.GetEvent<>()
+            if (_sourceId == string.Empty) return;
+            _eventAggregator.GetEvent<SelectedComponentEvent>().Publish(new SelectedComponentEventParam
+            {
+                SourceId = _sourceId,
+                NodeId = param.NodeId
+            });
         }
         #endregion
 

@@ -496,39 +496,21 @@ namespace MCCS
                         ComponentType = UiComponentTypeEnum.Display,
                         Title = "图表组件",
                         Icon = "ChartBar",
-                        ViewTypeName = "",
-                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
-                        {
-                            { "Color", "Green" },
-                            { "Width", "100" },
-                            { "Height", "30" }
-                        })
+                        ViewTypeName = ""
                     },
                     new()
                     {
                         ComponentType = UiComponentTypeEnum.Display,
                         Title = "原始数据监控组件",
                         Icon = "Database",
-                        ViewTypeName = "",
-                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
-                        {
-                            { "Color", "Green" },
-                            { "Width", "100" },
-                            { "Height", "30" }
-                        })
+                        ViewTypeName = ""
                     },
                     new()
                     {
                         ComponentType = UiComponentTypeEnum.Interaction,
                         Title = "控制参数输入组件",
                         Icon = "PencilOutline",
-                        ViewTypeName = "",
-                        ParametersJson = JsonConvert.SerializeObject(new Dictionary<string, string>
-                        {
-                            { "Color", "Green" },
-                            { "Width", "100" },
-                            { "Height", "30" }
-                        })
+                        ViewTypeName = ""
                     }
                 };
                 freeSql.Insert(uiComponents).ExecuteAffrows();

@@ -13,9 +13,11 @@ namespace MCCS.Infrastructure.Models.MethodManager
 
         [Column(IsNullable = false, StringLength = 200)]
         public required string ViewTypeName { get; set; }
+        [Column(IsNullable = true, StringLength = 500)]
+        public string? Description { get; set; }
 
-        [Column(IsNullable = true, StringLength = -2)]
-        public string? ParametersJson { get; set; }
+        //[Column(IsNullable = true, StringLength = -2)]
+        //public string? ParametersJson { get; set; }
 
         /// <summary>
         /// 是否可以设置参数

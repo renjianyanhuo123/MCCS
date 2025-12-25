@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Models.CurveModels
 {
-    public class XYBindCollectionItem
+    public class XyBindCollectionItem
     {
         /// <summary>
         /// 用于存储对外获取数据的ID
