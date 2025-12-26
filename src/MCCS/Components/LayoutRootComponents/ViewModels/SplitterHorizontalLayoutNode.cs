@@ -4,13 +4,25 @@ namespace MCCS.Components.LayoutRootComponents.ViewModels
 {
     public class SplitterHorizontalLayoutNode : LayoutNode
     {
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        /// <param name="leftNode"></param>
+        /// <param name="rightNode"></param>
         public SplitterHorizontalLayoutNode(LayoutNode leftNode, LayoutNode rightNode)
         {
             LeftNode = leftNode;
             RightNode = rightNode;
             LeftNode.Parent = this;
             RightNode.Parent = this; 
-        } 
+        }
+
+        public SplitterHorizontalLayoutNode(double leftRatio, double rightRatio, double splitterSize, LayoutNode leftNode, LayoutNode rightNode) : this(leftNode, rightNode)
+        {
+            LeftRatio = new GridLength(leftRatio, GridUnitType.Star);
+            RightRatio = new GridLength(rightRatio, GridUnitType.Star);
+            SplitterSize = new GridLength(splitterSize, GridUnitType.Pixel);
+        }
 
         /// <summary>
         /// 左侧占比

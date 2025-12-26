@@ -2,7 +2,7 @@
 {
     public static class HighPerformanceRandomHash
     {
-        private static readonly Random Random = new();
+        private static readonly Random _random = new();
 
         public static string GenerateRandomHash6()
         {
@@ -11,7 +11,7 @@
 
             for (var i = 0; i < 6; i++)
             {
-                hash[i] = hexChars[Random.Next(16)];
+                hash[i] = hexChars[_random.Next(16)];
             }
 
             return new string(hash);

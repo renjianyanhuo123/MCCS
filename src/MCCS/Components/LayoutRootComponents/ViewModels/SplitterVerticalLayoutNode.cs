@@ -11,7 +11,14 @@ namespace MCCS.Components.LayoutRootComponents.ViewModels
             RightNode = rightNode;
             LeftNode.Parent = this;
             RightNode.Parent = this; 
-        } 
+        }
+
+        public SplitterVerticalLayoutNode(double leftRatio, double rightRatio, double splitterSize, LayoutNode leftNode, LayoutNode rightNode) : this(leftNode, rightNode)
+        {
+            LeftRatio = new GridLength(leftRatio, GridUnitType.Star);
+            RightRatio = new GridLength(rightRatio, GridUnitType.Star);
+            SplitterSize = new GridLength(splitterSize, GridUnitType.Pixel);
+        }
 
         /// <summary>
         /// 左侧占比

@@ -65,6 +65,13 @@ namespace MCCS.Models.ProjectManager
             set => SetProperty(ref _startTime, value);
         }
 
+        private string? _testOperationText;
+        public string? TestOperationText
+        {
+            get => _testOperationText;
+            set => SetProperty(ref _testOperationText, value);
+        }
+
         private string _remark = string.Empty;
         public string Remark
         {

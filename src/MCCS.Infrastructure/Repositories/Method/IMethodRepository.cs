@@ -17,5 +17,6 @@ namespace MCCS.Infrastructure.Repositories.Method
         Task<MethodUiComponentsModel> GetMethodUiComponentByIdAsync(long componentId);
         ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken = default);
         ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken = default);
+        long AddInterfaceSetting(MethodInterfaceSettingModel model);
     }
 }

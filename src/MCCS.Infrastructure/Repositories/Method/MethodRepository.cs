@@ -10,6 +10,12 @@ namespace MCCS.Infrastructure.Repositories.Method
         public async ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken) => 
             await freeSql.Insert(method).ExecuteIdentityAsync(cancellationToken);
 
+        public long AddInterfaceSetting(MethodInterfaceSettingModel model)
+        {
+            freeSql.Delete<MethodInterfaceSettingModel>().Where(c => c.MethodId == model.MethodId).ExecuteAffrows();
+            return freeSql.Insert(model).ExecuteIdentity();
+        }
+
         public async ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken)
         {
             var rows = await freeSql.Delete<MethodModel>()

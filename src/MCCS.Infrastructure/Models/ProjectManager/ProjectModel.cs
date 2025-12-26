@@ -43,10 +43,11 @@ namespace MCCS.Infrastructure.Models.ProjectManager
         /// 试验时长
         /// </summary>
         public long TestTime { get; set; }
+
         /// <summary>
         /// 试验开始时间
         /// </summary>
-        public long StartTime { get; set; } 
+        public long StartTime { get; set; } = 0;
         /// <summary>
         /// 备注
         /// </summary>

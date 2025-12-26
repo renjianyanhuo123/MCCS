@@ -4,15 +4,15 @@
     {
         public long NodeId { get; set; }
 
-        private string _title;
-        public string Title
+        private string? _title;
+        public string? Title
         {
             get => _title;
             set => SetProperty(ref _title, value);
         }
 
-        private string _iconStr;
-        public string IconStr
+        private string? _iconStr;
+        public string? IconStr
         {
             get => _iconStr;
             set => SetProperty(ref _iconStr, value);

@@ -1,5 +1,7 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
+using MCCS.Infrastructure.Models.MethodManager;
+using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Infrastructure.Repositories.Method;
 
 using Serilog;
@@ -26,6 +28,25 @@ namespace MCCS.Components.LayoutRootComponents
                 if (param.SourceId != Id) return;
                 ParamterJson = param.Parameter;
             });
+        }
+
+        /// <summary>
+        /// 渲染已有的单元格
+        /// </summary>
+        /// <param name="eventAggregator"></param>
+        /// <param name="methodRepository"></param>
+        /// <param name="node"></param>
+        /// <param name="componentModel"></param>
+        public CellEditableComponentViewModel(IEventAggregator eventAggregator, IMethodRepository methodRepository, CellNode node, MethodUiComponentsModel? componentModel) : this(eventAggregator, methodRepository)
+        {
+            if (componentModel == null) return;
+            Title = componentModel.Title;
+            Icon = componentModel.Icon ?? "";
+            IsCanSetParam = componentModel.IsCanSetParam;
+            NodeId = node.NodeId;
+            NodeSettingParamText = node.ParamterJson == null ? "未设置节点参数" : "已设置参数";
+            ParamterJson = node.ParamterJson;
+            SetParamViewName = componentModel.SetParamViewName;
         }
 
         #region Command 
@@ -190,7 +211,8 @@ namespace MCCS.Components.LayoutRootComponents
             try
             {
                 if (param.NodeId <= 0) return;
-                if (param.SourceId != Id) return; 
+                if (param.SourceId != Id) return;
+                // 这里直接从数据库获取最新的组件信息，避免数据不一致
                 var component = await _methodRepository.GetMethodUiComponentByIdAsync(param.NodeId);
                 if (component == null) return;
                 NodeId = param.NodeId;

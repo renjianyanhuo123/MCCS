@@ -90,11 +90,17 @@
                 <DataGridTemplateColumn Header="操作" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="删除"
-                                    Width="100"
-                                    Click="Delete_OnClick"
-                                    Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
-                                    Tag="{Binding Id}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="{Binding TestOperationText}" Width="100" Click="TestOperation_OnClick"
+                                        Tag="{Binding Id}">
+
+                                </Button>
+                                <Button Content="删除"
+                                        Width="100"
+                                        Click="Delete_OnClick"
+                                        Style="{StaticResource MaterialDesignPaperSecondaryLightButton}"
+                                        Tag="{Binding Id}" /> 
+                            </StackPanel> 
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

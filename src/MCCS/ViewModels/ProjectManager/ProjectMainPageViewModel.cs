@@ -14,18 +14,20 @@ using Serilog;
 namespace MCCS.ViewModels.ProjectManager
 {
     public sealed class ProjectMainPageViewModel : BaseViewModel
-    {
-        public const string Tag = "ProjectMainPage";
-
+    {  
         private readonly IContainerProvider _containerProvider;
         private readonly IProjectRepository _projectRepository;
+        private readonly IRegionManager _regionManager;
 
-        public ProjectMainPageViewModel(IEventAggregator eventAggregator,
+        public ProjectMainPageViewModel(
+            IRegionManager regionManager,
+            IEventAggregator eventAggregator,
             IContainerProvider containerProvider,
             IProjectRepository projectRepository) : base(eventAggregator)
         {
             _containerProvider = containerProvider;
             _projectRepository = projectRepository;
+            _regionManager = regionManager;
             _eventAggregator.GetEvent<NotificationAddProjectEvent>().Subscribe(async void (_) =>
             {
                 try
@@ -39,6 +41,7 @@ namespace MCCS.ViewModels.ProjectManager
             });
             AddProjectCommand = new AsyncDelegateCommand(ExecuteAddProjectCommand);
             LoadCommand = new AsyncDelegateCommand(SearchData);
+            TestOperationCommand = new AsyncDelegateCommand<long>(ExecuteTestOperationCommand);
             SearchCommand = new AsyncDelegateCommand(SearchData);
             PageChangedCommand = new AsyncDelegateCommand<object?>(OnPageChangedCommand);
             DeleteProjectCommand = new AsyncDelegateCommand<long>(ExecuteDeleteProjectCommand);
@@ -74,7 +77,7 @@ namespace MCCS.ViewModels.ProjectManager
         {
             get => _projectName;
             set => SetProperty(ref _projectName, value);
-        }
+        } 
 
         public ObservableCollection<ProjectItemViewModel> Projects { get; } = [];
         #endregion
@@ -85,6 +88,7 @@ namespace MCCS.ViewModels.ProjectManager
         public AsyncDelegateCommand SearchCommand { get; }
         public AsyncDelegateCommand<object?> PageChangedCommand { get; }
         public AsyncDelegateCommand<long> DeleteProjectCommand { get; }
+        public AsyncDelegateCommand<long> TestOperationCommand { get; }
         #endregion
 
         #region Private Method
@@ -129,6 +133,7 @@ namespace MCCS.ViewModels.ProjectManager
                     FilePath = project.FilePath,
                     TestTime = project.TestTime.ToString(),
                     StartTime = startTime,
+                    TestOperationText = project.StartTime == 0 ? "开始试验" : "继续试验",
                     Remark = project.Remark ?? string.Empty,
                     CreateTime = project.CreateTime.ToString("yyyy-MM-dd HH:mm:ss"),
                     UpdateTime = project.UpdateTime.ToString("yyyy-MM-dd HH:mm:ss")
@@ -145,6 +150,11 @@ namespace MCCS.ViewModels.ProjectManager
                 var success = await _projectRepository.DeleteProjectAsync(id);
                 if (success) await SearchData();
             }
+        }
+
+        private async Task ExecuteTestOperationCommand(long id)
+        {
+            // _regionManager.RequestNavigate();
         }
 
         private async Task OnPageChangedCommand(object? param)

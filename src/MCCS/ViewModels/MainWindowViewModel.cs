@@ -149,6 +149,13 @@ namespace MCCS.ViewModels
                     IsOpenFlyout = false;
                 }
             });
+            _eventAggregator.GetEvent<SaveParameterEvent>().Subscribe(param =>
+            {
+                if (!string.IsNullOrEmpty(param.SourceId))
+                {
+                    IsOpenFlyout = false;
+                }
+            });
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 

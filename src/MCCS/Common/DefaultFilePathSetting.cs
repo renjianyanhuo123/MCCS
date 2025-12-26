@@ -2,8 +2,8 @@
 {
     public static class DefaultFilePathSetting
     {
-        private static string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+        private static readonly string _basePath = AppDomain.CurrentDomain.BaseDirectory;
 
-        public static string DefaultMethodSavePath = $"{BasePath}//MethodInfoFiles//";
+        public static string DefaultMethodSavePath = $"{_basePath}//MethodInfoFiles//";
     }
 }

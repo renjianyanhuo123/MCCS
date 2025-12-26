@@ -29,5 +29,20 @@ namespace MCCS.Views.ProjectManager
                 Log.Error($"Delete Project Failed! {ex.Message}");
             }
         }
+
+        private async void TestOperation_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var button = sender as Button;
+                if (button?.Tag is not long projectId) return;
+                var viewModel = DataContext as ProjectMainPageViewModel;
+                await viewModel?.TestOperationCommand.Execute(projectId)!;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Operation Project Failed! {ex.Message}");
+            }
+        }
     }
 }

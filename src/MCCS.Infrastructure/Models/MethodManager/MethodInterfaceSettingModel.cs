@@ -11,7 +11,7 @@ namespace MCCS.Infrastructure.Models.MethodManager
         public long MethodId { get; set; }
 
         /// <summary>
-        /// 界面配置根节点
+        /// 界面配置根节点集合
         /// </summary>
         [Column(IsNullable = false, StringLength = -2)]
         public required string RootSetting { get; set; }

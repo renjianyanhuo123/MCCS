@@ -79,6 +79,7 @@
   <ItemGroup>
     <Folder Include="Converters\Common\" />
     <Folder Include="Models\ProjectManager\" />
+    <Folder Include="Services\MethodService\" />
   </ItemGroup>
 
   <ItemGroup>
