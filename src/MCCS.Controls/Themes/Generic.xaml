@@ -1,0 +1,14 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:MCCS.Controls"
+    xmlns:nav="clr-namespace:MCCS.Controls.Controls.Navigation">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/MCCS.Controls;component/Themes/Colors.xaml"/>
+        <ResourceDictionary Source="/MCCS.Controls;component/Themes/CurvedTab.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="{x:Type nav:CurvedTabControl}" />
+
+    <Style TargetType="{x:Type nav:CurvedTabItem}" />
+</ResourceDictionary>

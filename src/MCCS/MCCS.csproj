@@ -14,13 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Views\新文件夹\**" />
-    <EmbeddedResource Remove="Views\新文件夹\**" />
-    <None Remove="Views\新文件夹\**" />
-    <Page Remove="Views\新文件夹\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="App.xaml~RF43ad201d.TMP" />
     <None Remove="mccs.logo.ico" />
     <None Remove="Resources\Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" />
@@ -80,6 +73,8 @@
     <Folder Include="Converters\Common\" />
     <Folder Include="Models\ProjectManager\" />
     <Folder Include="Services\MethodService\" />
+    <Folder Include="ViewModels\Common\" />
+    <Folder Include="Views\Common\" />
   </ItemGroup>
 
   <ItemGroup>

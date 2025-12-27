@@ -31,7 +31,7 @@ namespace MCCS.ViewModels.Pages
         #region 私有方法 
         private void ExecuteJumpToProjectCommand()
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(nameof(ProjectMainPageViewModel), UriKind.Relative));
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(nameof(ProjectListPageViewModel), UriKind.Relative));
             _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Publish(new NotificationCancelSelectedEventParam());
         }
         private void ExecuteJumpToMethodCommand()

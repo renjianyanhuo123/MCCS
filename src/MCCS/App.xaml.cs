@@ -165,7 +165,8 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSitePseudoChannelPage>(StationSitePseudoChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteModel3DSettingPage>(StationSiteModel3DSettingPageViewModel.Tag);
             // Projects
-            containerRegistry.RegisterForNavigation<ProjectMainPage>(nameof(ProjectMainPageViewModel)); 
+            containerRegistry.RegisterForNavigation<ProjectListPage>(nameof(ProjectListPageViewModel));
+            containerRegistry.RegisterForNavigation<ProjectMainPage>(nameof(ProjectMainPageViewModel));
             // Methods
             containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodContentPage>(MethodContentPageViewModel.Tag);

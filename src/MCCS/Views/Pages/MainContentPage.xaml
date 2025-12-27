@@ -115,19 +115,14 @@
                     <materialDesign:PackIcon Width="Auto" Height="Auto" Kind="Logout" />
                 </Button>
             </Grid>
-            <Grid Grid.Row="1" Grid.Column="1"  Background="#F1F1F1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <ContentControl Grid.Row="1" regions:RegionManager.RegionName="{x:Static mccs:GlobalConstant.MainContentRegionName}" Focusable="True" IsTabStop="False">
-                    <b:Interaction.Triggers>
-                        <b:EventTrigger EventName="Loaded">
-                            <b:InvokeCommandAction Command="{Binding MainRegionLoadedCommand}" CommandParameter="{Binding ElementName=TestDesignCanvas}"/>
-                        </b:EventTrigger>
-                    </b:Interaction.Triggers>
-                </ContentControl>
-            </Grid>
+            <ContentControl Grid.Row="1" Grid.Column="1" regions:RegionManager.RegionName="{x:Static mccs:GlobalConstant.MainContentRegionName}" Focusable="True" IsTabStop="False"
+                            Background="#F1F1F1">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="Loaded">
+                        <b:InvokeCommandAction Command="{Binding MainRegionLoadedCommand}" />
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+            </ContentControl>
             <StatusBar Grid.Row="2" Grid.Column="1"  Background="#F1F1F1">
                 <StatusBarItem>Application</StatusBarItem>
                 <Separator Style="{StaticResource MahApps.Styles.Separator.StatusBar}" />

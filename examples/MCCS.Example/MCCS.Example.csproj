@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\MCCS.Controls\MCCS.Controls.csproj" />
     <ProjectReference Include="..\..\src\MCCS.UserControl\MCCS.UserControl.csproj" />
     <ProjectReference Include="..\..\src\MCCS.WorkflowSetting\MCCS.WorkflowSetting.csproj" />
   </ItemGroup>
