@@ -37,7 +37,6 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -309,7 +308,7 @@ namespace MCCS.ViewModels.Pages
         private void ExecuteShowCurveCommand()
         {
             var parameters = new DialogParameters() { { "title", "曲线图像" } };
-            _dialogService.Show(SetCurveDialogViewModel.Tag, parameters, res => { });
+            _dialogService.Show(SetCurveDialogViewModel.Tag, parameters, res => { }); 
         }
 
         private async Task LoadModelsAsync()

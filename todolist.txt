@@ -1,1 +1,4 @@
 1. 替换FreeSql 为 SqlSugar  ,FreeSql Bug太多
+2. Prism中许多好的特性没有利用起来
+    (1) EventAggregate 的filter，当订阅者有多个，可以在订阅者中添加filter
+    (2) Moudle的使用完全用错了,但是针对目前的场景似乎用不到

@@ -12,16 +12,13 @@ public class BaseDialog : BindableBase, IDialogAware
     public bool CanCloseDialog() => true;
     public DelegateCommand CloseCommand => new(ExecuteCloseCommand);
 
-    private void ExecuteCloseCommand()
-    {
-        RequestClose.Invoke(new DialogResult(ButtonResult.OK));
-    }
-    
+    private void ExecuteCloseCommand() => RequestClose.Invoke(new DialogResult(ButtonResult.OK));
+
     public virtual void OnDialogClosed()
     {
     }
 
-    public  virtual void OnDialogOpened(IDialogParameters parameters)
+    public virtual void OnDialogOpened(IDialogParameters parameters)
     {
     }
 

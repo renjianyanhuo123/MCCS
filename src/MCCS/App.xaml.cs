@@ -30,6 +30,7 @@ using MCCS.ViewModels.Pages.SystemManager;
 using MCCS.ViewModels.Pages.TestModelOperations;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.ViewModels.ProjectManager;
+using MCCS.ViewModels.ProjectManager.Components;
 using MCCS.Views;
 using MCCS.Views.Dialogs;
 using MCCS.Views.Dialogs.Common;
@@ -48,6 +49,7 @@ using MCCS.Views.Pages.SystemManager;
 using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.Pages.WorkflowSteps;
 using MCCS.Views.ProjectManager;
+using MCCS.Views.ProjectManager.Components;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
 
@@ -143,6 +145,9 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ProjectOperationPage>(nameof(ProjectOperationPageViewModel));
+
+            // Project-Components
+            containerRegistry.RegisterForNavigation<ProjectChartComponentPage>(nameof(ProjectChartComponentPageViewModel));
             // Dialogs
             // containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
@@ -158,6 +163,7 @@ namespace MCCS
             containerRegistry.RegisterDialog<AddMethodDialog>(AddMethodDialogViewModel.Tag);
             // Dialog Projects
             containerRegistry.RegisterDialog<AddProjectDialog>(AddProjectDialogViewModel.Tag); 
+            containerRegistry.RegisterDialog<ProjectContentDialog>(nameof(ProjectContentDialogViewModel));
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);

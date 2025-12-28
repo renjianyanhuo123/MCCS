@@ -9,9 +9,16 @@ namespace MCCS.Components.LayoutRootComponents
     {
         private readonly IEventAggregator _eventAggregator;
         private readonly IMethodRepository _methodRepository; 
+        private readonly IDialogService _dialogService;
+        private readonly IRegionManager _regionManager;
+
         public LayoutTreeTraversal(IEventAggregator eventAggregator,
+            IRegionManager regionManager,
+            IDialogService dialogService,
             IMethodRepository methodRepository)
         {
+            _regionManager = regionManager;
+            _dialogService = dialogService;
             _eventAggregator = eventAggregator;
             _methodRepository = methodRepository;
         }
@@ -101,7 +108,7 @@ namespace MCCS.Components.LayoutRootComponents
         {
             if (cellType == CellTypeEnum.DisplayOnly)
             {
-                return new CellContainerComponentViewModel();
+                return new CellContainerComponentViewModel(_regionManager, _dialogService);
             }
             else
             {
