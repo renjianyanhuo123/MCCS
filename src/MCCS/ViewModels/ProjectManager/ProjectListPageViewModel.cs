@@ -1,14 +1,18 @@
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+
 using MaterialDesignThemes.Wpf;
+
 using MCCS.Events.Common;
 using MCCS.Events.Project;
 using MCCS.Infrastructure.Models.ProjectManager;
 using MCCS.Infrastructure.Repositories.Project;
 using MCCS.Models.ProjectManager;
+using MCCS.Models.ProjectManager.Parameters;
 using MCCS.UserControl.Params;
 using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Dialogs.Project;
+
 using Serilog;
 
 namespace MCCS.ViewModels.ProjectManager
@@ -41,7 +45,7 @@ namespace MCCS.ViewModels.ProjectManager
             });
             AddProjectCommand = new AsyncDelegateCommand(ExecuteAddProjectCommand);
             LoadCommand = new AsyncDelegateCommand(SearchData);
-            TestOperationCommand = new DelegateCommand<object?>(ExecuteTestOperationCommand);
+            TestOperationCommand = new DelegateCommand<ProjectItemViewModel>(ExecuteTestOperationCommand);
             SearchCommand = new AsyncDelegateCommand(SearchData);
             PageChangedCommand = new AsyncDelegateCommand<object?>(OnPageChangedCommand);
             DeleteProjectCommand = new AsyncDelegateCommand<long>(ExecuteDeleteProjectCommand);
@@ -88,7 +92,9 @@ namespace MCCS.ViewModels.ProjectManager
         public AsyncDelegateCommand SearchCommand { get; }
         public AsyncDelegateCommand<object?> PageChangedCommand { get; }
         public AsyncDelegateCommand<long> DeleteProjectCommand { get; }
-        public DelegateCommand<object?> TestOperationCommand { get; }
+        public DelegateCommand<ProjectItemViewModel> TestOperationCommand { get; }
+        public AsyncDelegateCommand<long> EditProjectCommand { get; }
+
         #endregion
 
         #region Private Method
@@ -127,6 +133,7 @@ namespace MCCS.ViewModels.ProjectManager
                     Id = project.Id,
                     Name = project.Name,
                     Code = project.Code,
+                    MethodId = project.MethodId,
                     MethodName = project.MethodName ?? string.Empty,
                     Standard = project.Standard,
                     Person = project.Person ?? string.Empty,
@@ -152,9 +159,13 @@ namespace MCCS.ViewModels.ProjectManager
             }
         }
 
-        private void ExecuteTestOperationCommand(object? id)
+        private void ExecuteTestOperationCommand(ProjectItemViewModel projectItem)
         {
-            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(nameof(ProjectMainPageViewModel), UriKind.Relative));
+            var parameter = new NavigationParameters
+            {
+                {"ProjectInfo", new ProjectOperationParameter(projectItem.Id, projectItem.MethodId, projectItem.FilePath)}
+            };
+            _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName, new Uri(nameof(ProjectMainPageViewModel), UriKind.Relative), parameter);
         }
 
         private async Task OnPageChangedCommand(object? param)

@@ -1,11 +1,27 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
+using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
+using MCCS.Infrastructure.Repositories.Method;
 
 namespace MCCS.Components.LayoutRootComponents
 {
-    public static class LayoutTreeTraversal
+    public class LayoutTreeTraversal : ILayoutTreeTraversal
     {
-        public static List<BaseNode> PostOrderToBaseNodes(LayoutNode root)
+        private readonly IEventAggregator _eventAggregator;
+        private readonly IMethodRepository _methodRepository; 
+        public LayoutTreeTraversal(IEventAggregator eventAggregator,
+            IMethodRepository methodRepository)
+        {
+            _eventAggregator = eventAggregator;
+            _methodRepository = methodRepository;
+        }
+
+        /// <summary>
+        /// 后序遍历布局树，转换为BaseNode列表
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        public List<BaseNode> PostOrderToBaseNodes(LayoutNode root)
         {
             if (root == null)
                 return [];
@@ -37,8 +53,67 @@ namespace MCCS.Components.LayoutRootComponents
                     lastVisited = peek;
                 }
             }
-
             return result;
+        } 
+
+        public LayoutNode BuildRootNode(CellTypeEnum cellType, List<BaseNode> nodes, List<MethodUiComponentsModel> components)
+        {
+            if (nodes.Count == 0) return CreateLayoutNode(cellType);
+            LayoutNode? loopNode = null;
+            var nodeDic = new Dictionary<string, LayoutNode>();
+            //(1)构建二叉树;nodes采用后序遍历存储
+            foreach (var node in nodes)
+            {
+                switch (node)
+                {
+                    case CellNode cellNode:
+                        loopNode = CreateLayoutNode(cellType, cellNode, components.FirstOrDefault(c => c.Id == cellNode.NodeId));
+                        break;
+                    case SplitterNode splitterNode:
+                        if (splitterNode.LeftNodeId == null
+                            || !nodeDic.ContainsKey(splitterNode.LeftNodeId)
+                            || splitterNode.RightNodeId == null
+                            || !nodeDic.ContainsKey(splitterNode.RightNodeId))
+                            throw new InvalidOperationException("节点数据异常，无法构建布局树");
+                        var leftNode = nodeDic[splitterNode.LeftNodeId];
+                        var rightNode = nodeDic[splitterNode.RightNodeId];
+                        if (splitterNode.NodeType == NodeTypeEnum.SplitterHorizontal)
+                        {
+                            loopNode = new SplitterHorizontalLayoutNode(splitterNode.LeftRatio,
+                                splitterNode.RightRatio, splitterNode.SplitterSize, leftNode, rightNode);
+                        }
+                        else
+                        {
+                            loopNode = new SplitterVerticalLayoutNode(splitterNode.LeftRatio,
+                                splitterNode.RightRatio, splitterNode.SplitterSize, leftNode, rightNode);
+                        }
+                        break;
+                    default:
+                        throw new NotSupportedException("不支持该种类型的节点");
+                }
+                nodeDic.Add(node.Id, loopNode);
+            }
+            if (loopNode == null) throw new InvalidOperationException("节点数据异常，无法构建布局树");
+            return loopNode;
+        }
+
+        private LayoutNode CreateLayoutNode(CellTypeEnum cellType, CellNode? node = null, MethodUiComponentsModel? component = null)
+        {
+            if (cellType == CellTypeEnum.DisplayOnly)
+            {
+                return new CellContainerComponentViewModel();
+            }
+            else
+            {
+                if (node == null || component == null)
+                {
+                    return new CellEditableComponentViewModel(_eventAggregator, _methodRepository);
+                }
+                else
+                {
+                    return new CellEditableComponentViewModel(_eventAggregator, _methodRepository, node, component);
+                }
+            } 
         }
 
         private static BaseNode CreateBaseNode(LayoutNode node) =>

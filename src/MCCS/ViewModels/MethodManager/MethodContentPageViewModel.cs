@@ -8,9 +8,7 @@ using MCCS.ViewModels.MethodManager.Contents;
 namespace MCCS.ViewModels.MethodManager
 {
     public class MethodContentPageViewModel : BaseViewModel
-    {
-        public const string Tag = "MethodContentPage";
-
+    {  
         private long _methodId = -1;
 
         private readonly IRegionManager _regionManager;

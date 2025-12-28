@@ -1,7 +1,10 @@
-using MCCS.ViewModels.ProjectManager;
-using Serilog;
 using System.Windows;
 using System.Windows.Controls;
+
+using MCCS.Models.ProjectManager;
+using MCCS.ViewModels.ProjectManager;
+
+using Serilog;
 
 namespace MCCS.Views.ProjectManager
 {
@@ -35,14 +38,29 @@ namespace MCCS.Views.ProjectManager
             try
             {
                 var button = sender as Button;
-                if (button?.Tag is not long projectId) return;
+                if (button?.Tag is not ProjectItemViewModel project) return;
                 var viewModel = DataContext as ProjectListPageViewModel; 
-                viewModel?.TestOperationCommand.Execute(projectId);
+                viewModel?.TestOperationCommand.Execute(project);
             }
             catch (Exception ex)
             {
                 Log.Error($"Operation Project Failed! {ex.Message}");
             }
         }
+
+        //private void TestEdit_OnClick(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        var button = sender as Button;
+        //        if (button?.Tag is not ProjectItemViewModel project) return;
+        //        var viewModel = DataContext as ProjectListPageViewModel;
+        //        viewModel?.TestOperationCommand.Execute(project);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Log.Error($"Edit Project Failed! {ex.Message}");
+        //    }
+        //}
     }
 }

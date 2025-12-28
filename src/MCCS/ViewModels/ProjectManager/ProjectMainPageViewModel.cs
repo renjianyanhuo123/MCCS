@@ -1,10 +1,12 @@
-﻿using MCCS.ViewModels.MethodManager;
+﻿using MCCS.Models.ProjectManager.Parameters;
+using MCCS.ViewModels.MethodManager;
 
 namespace MCCS.ViewModels.ProjectManager
 {
     public class ProjectMainPageViewModel : BaseViewModel
     {
         private readonly IRegionManager _regionManager;
+        private ProjectOperationParameter? _parameter;
 
         public ProjectMainPageViewModel(
             IRegionManager regionManager,
@@ -12,7 +14,14 @@ namespace MCCS.ViewModels.ProjectManager
         {
             _regionManager = regionManager;
             NavigateTestCommand = new DelegateCommand(ExecuteNavigateTestCommand);
-            NavigateMethodCommand = new DelegateCommand(ExecuteNavigateMethodCommand);
+            NavigateMethodCommand = new DelegateCommand(ExecuteNavigateMethodCommand); 
+        }
+
+        public override void OnNavigatedTo(NavigationContext navigationContext)
+        { 
+            _parameter = navigationContext.Parameters.GetValue<ProjectOperationParameter>("ProjectInfo");
+            // 默认跳转测试界面
+            ExecuteNavigateTestCommand();
         }
 
         #region Property 
@@ -42,16 +51,22 @@ namespace MCCS.ViewModels.ProjectManager
         {
             IsTestChecked = true;
             IsMethodChecked = false;
-            _regionManager.RequestNavigate(GlobalConstant.ProjectNavigateRegionName, new Uri(nameof(ProjectOperationPageViewModel), UriKind.Relative));
+            if (_parameter == null) return;
+            var parameter = new NavigationParameters
+            {
+                { "MethodId", _parameter.MethodId }
+            };
+            _regionManager.RequestNavigate(GlobalConstant.ProjectNavigateRegionName, new Uri(nameof(ProjectOperationPageViewModel), UriKind.Relative), parameter);
         }
 
         private void ExecuteNavigateMethodCommand()
         {
             IsTestChecked = false;
             IsMethodChecked = true;
+            if (_parameter == null) return;
             var parameter = new NavigationParameters
             {
-                //{ "MethodId", _methodId }
+                { "MethodId", _parameter.MethodId }
             };
             _regionManager.RequestNavigate(GlobalConstant.ProjectNavigateRegionName, new Uri(nameof(MethodContentPageViewModel), UriKind.Relative), parameter);
         }

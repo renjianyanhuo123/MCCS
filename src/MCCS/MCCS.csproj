@@ -71,8 +71,6 @@
 
   <ItemGroup>
     <Folder Include="Converters\Common\" />
-    <Folder Include="Models\ProjectManager\" />
-    <Folder Include="Services\MethodService\" />
     <Folder Include="ViewModels\Common\" />
     <Folder Include="Views\Common\" />
   </ItemGroup>

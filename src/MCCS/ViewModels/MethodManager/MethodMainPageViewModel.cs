@@ -160,7 +160,7 @@ namespace MCCS.ViewModels.MethodManager
             {
                 var temp = new NavigationParameters { { "MethodId", methodId } };
                 _regionManager.RequestNavigate(GlobalConstant.MainContentRegionName,
-                    new Uri(MethodContentPageViewModel.Tag, UriKind.Relative), temp);
+                    new Uri(nameof(MethodContentPageViewModel), UriKind.Relative), temp);
             }
         }
 

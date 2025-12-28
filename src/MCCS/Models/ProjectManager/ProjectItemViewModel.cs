@@ -23,6 +23,8 @@ namespace MCCS.Models.ProjectManager
             set => SetProperty(ref _code, value);
         }
 
+        public long MethodId { get; set; }
+
         private string _methodName = string.Empty;
         public string MethodName
         {

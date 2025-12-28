@@ -15,6 +15,9 @@
                 <local:CellEditableComponent />
             </Border>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type local:CellContainerComponentViewModel}">
+            <local:CellContainerComponent />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SplitterHorizontalLayoutNode}">
             <Grid>
                 <Grid.RowDefinitions>

@@ -142,6 +142,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<AddChannelPage>(AddChannelPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<Model3DSettingPage>(Model3DSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<ProjectOperationPage>(nameof(ProjectOperationPageViewModel));
             // Dialogs
             // containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
@@ -156,7 +157,7 @@ namespace MCCS
             // Dialog  Methods
             containerRegistry.RegisterDialog<AddMethodDialog>(AddMethodDialogViewModel.Tag);
             // Dialog Projects
-            containerRegistry.RegisterDialog<AddProjectDialog>(AddProjectDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<AddProjectDialog>(AddProjectDialogViewModel.Tag); 
             // Station Sites
             containerRegistry.RegisterForNavigation<EditStationSiteMainPage>(EditStationSiteMainPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<StationSiteHardwarePage>(StationSiteHardwarePageViewModel.Tag);
@@ -169,7 +170,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<ProjectMainPage>(nameof(ProjectMainPageViewModel));
             // Methods
             containerRegistry.RegisterForNavigation<MethodMainPage>(MethodMainPageViewModel.Tag);
-            containerRegistry.RegisterForNavigation<MethodContentPage>(MethodContentPageViewModel.Tag);
+            containerRegistry.RegisterForNavigation<MethodContentPage>(nameof(MethodContentPageViewModel));
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);

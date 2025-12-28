@@ -29,6 +29,6 @@
         /// <summary>
         /// 所有的参数
         /// </summary>
-        public string? ParamterJson{ get; set;}
+        public string? ParamterJson{ get; set;} 
     }
 }
