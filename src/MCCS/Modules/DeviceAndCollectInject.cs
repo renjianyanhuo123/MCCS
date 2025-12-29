@@ -1,5 +1,6 @@
 ﻿using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Components.LayoutRootComponents;
+using MCCS.Extensions;
 
 using Microsoft.Extensions.Configuration; 
 
@@ -10,7 +11,8 @@ namespace MCCS.Modules
         internal static void Inject(this IContainerRegistry containerRegistry, IConfiguration configuration)
         {
             // 注入协调管理
-            // containerRegistry.RegisterSingleton<IDataCollector, DataCollector>();
+            // containerRegistry.RegisterSingleton<IDataCollector, DataCollector>(); 
+            containerRegistry.Register<IDialogService, MaterialDialogService>();
             containerRegistry.Register<ILayoutTreeTraversal, LayoutTreeTraversal>();
         }
     }

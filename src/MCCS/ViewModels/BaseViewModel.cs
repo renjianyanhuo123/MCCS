@@ -6,7 +6,7 @@ public class BaseViewModel(IEventAggregator eventAggregator, IDialogService? dia
     : BindableBase, INavigationAware
 {
     protected readonly IEventAggregator _eventAggregator = eventAggregator;
-    protected IDialogService? _dialogService = dialogService;
+    protected IDialogService _dialogService = dialogService;
     protected string _parentView = string.Empty;
 
     public BaseViewModel(IEventAggregator eventAggregator) : this(eventAggregator, null)

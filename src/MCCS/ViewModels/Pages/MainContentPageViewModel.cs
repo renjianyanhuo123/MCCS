@@ -7,6 +7,7 @@ using MaterialDesignThemes.Wpf;
 
 using MCCS.Common; 
 using MCCS.Events;
+using MCCS.Extensions;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.MainPages;
 using MCCS.Services.AppExitService;
@@ -105,7 +106,7 @@ namespace MCCS.ViewModels.Pages
                 { "ShowContent", "是否确定关闭整个应用程序?"},
                 {"RootDialogName", "RootDialog"}
             }; 
-            var result = await _dialogService.ShowDialogAsync(nameof(DeleteConfirmDialogViewModel), parameters);
+            var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", parameters);
             if (result.Result == ButtonResult.OK)
             {
                 await _appExitService.ExitAsync();

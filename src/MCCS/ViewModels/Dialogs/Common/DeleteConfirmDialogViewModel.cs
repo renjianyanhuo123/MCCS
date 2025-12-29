@@ -1,10 +1,7 @@
-﻿using MaterialDesignThemes.Wpf;
-
-namespace MCCS.ViewModels.Dialogs.Common
+﻿namespace MCCS.ViewModels.Dialogs.Common
 {
     public class DeleteConfirmDialogViewModel : BaseDialog
-    {
-        private string? _dialogRootName = "RootDialog";
+    { 
 
         #region Property 
         private string? _showContent = null; 
@@ -22,8 +19,7 @@ namespace MCCS.ViewModels.Dialogs.Common
         #endregion
         protected virtual void CloseDialog(string parameter)
         {
-            var result = ButtonResult.None;
-            DialogHost.Close(_dialogRootName);
+            var result = ButtonResult.None; 
             if (parameter?.ToLower() == "true")
                 result = ButtonResult.OK;
             else if (parameter?.ToLower() == "false")
@@ -33,8 +29,7 @@ namespace MCCS.ViewModels.Dialogs.Common
         public override void OnDialogOpened(IDialogParameters parameters)
         {
             ShowContent = parameters.GetValue<string>("ShowContent");
-            Title = parameters.GetValue<string>("Title");
-            _dialogRootName = parameters.GetValue<string>("RootDialogName");
+            Title = parameters.GetValue<string>("Title"); 
         } 
     }
 }

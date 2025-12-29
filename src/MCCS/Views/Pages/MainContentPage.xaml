@@ -25,7 +25,7 @@
             <Setter Property="Foreground" Value="#E8DEF8" />
         </Style>
     </UserControl.Resources>
-    <materialDesign:DialogHost Identifier="RootDialog">
+    <materialDesign:DialogHost Identifier="RootDialog"> 
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="80" />

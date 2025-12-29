@@ -48,7 +48,7 @@
                     <Button  
                         VerticalAlignment="Center"
                         ToolTip="关闭"
-                        Command="{Binding CloseCommand}"
+                        Command="{Binding CloseDialogCommand}"
                         Width="30" Height="30" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
                         <materialDesign:PackIcon Kind="Close" />
                     </Button>

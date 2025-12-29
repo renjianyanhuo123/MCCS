@@ -28,7 +28,7 @@
             <TextBlock Grid.Row="1" Margin="15" Text="{Binding ShowContent}" TextWrapping="Wrap" FontSize="14" />
             <UniformGrid Grid.Row="2" Columns="2" Margin="15">
                 <Button Content="取消" Width="180" Margin="0,0,15,0" IsCancel="True"
-                        CommandParameter="true"
+                        CommandParameter="false"
                         Command="{Binding CloseDialogCommand}"
                         Style="{StaticResource MaterialDesignPaperLightButton}"/>
                 <Button Content="确认" Width="180" IsDefault="True" CommandParameter="true" Command="{Binding CloseDialogCommand}"/>

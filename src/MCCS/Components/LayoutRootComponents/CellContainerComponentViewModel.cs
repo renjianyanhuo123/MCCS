@@ -75,7 +75,8 @@ namespace MCCS.Components.LayoutRootComponents
             var parameters = new DialogParameters
             {
                 { "ContentViewModel", InnerViewModel },
-                { "Title", "弹窗标题" }
+                { "Title", "弹窗标题" },
+                { "IsPlaceholderComponent", false }
             };
             ChangeUiComponent();
             _dialogService.Show(nameof(ProjectContentDialogViewModel), parameters, res => { });
@@ -87,7 +88,8 @@ namespace MCCS.Components.LayoutRootComponents
             var parameters = new DialogParameters
             {
                 { "ContentViewModel", InnerViewModel },
-                { "Title", "弹窗标题" }
+                { "Title", "弹窗标题" },
+                { "IsPlaceholderComponent", true }
             };
             // ChangeUiComponent();
             InnerViewModel = null;
