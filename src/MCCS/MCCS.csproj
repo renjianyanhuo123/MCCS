@@ -10,7 +10,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     <StartupObject>MCCS.App</StartupObject>
     <ApplicationIcon>mccs.logo.ico</ApplicationIcon>
-    <PlatformTarget>x86</PlatformTarget>
+    <!--<PlatformTarget>x86</PlatformTarget>-->
   </PropertyGroup>
 
   <ItemGroup>

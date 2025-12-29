@@ -2,6 +2,7 @@
 using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Infrastructure.Repositories.Method;
+using MCCS.Services.ProjectServices;
 
 namespace MCCS.Components.LayoutRootComponents
 {
@@ -10,11 +11,15 @@ namespace MCCS.Components.LayoutRootComponents
         private readonly IEventAggregator _eventAggregator;
         private readonly IMethodRepository _methodRepository; 
         private readonly IDialogService _dialogService; 
+        private readonly IProjectComponentFactoryService _projectComponentFactoryService;
 
-        public LayoutTreeTraversal(IEventAggregator eventAggregator, 
+        public LayoutTreeTraversal(
+            IEventAggregator eventAggregator,
+            IProjectComponentFactoryService projectComponentFactoryService,
             IDialogService dialogService,
             IMethodRepository methodRepository)
-        { 
+        {
+            _projectComponentFactoryService = projectComponentFactoryService;
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
             _methodRepository = methodRepository;
@@ -105,19 +110,15 @@ namespace MCCS.Components.LayoutRootComponents
         {
             if (cellType == CellTypeEnum.DisplayOnly)
             {
-                return new CellContainerComponentViewModel(_dialogService, _eventAggregator);
+                return new CellContainerComponentViewModel(_dialogService, _projectComponentFactoryService, _eventAggregator, node);
             }
-            else
+
+            if (node == null || component == null)
             {
-                if (node == null || component == null)
-                {
-                    return new CellEditableComponentViewModel(_eventAggregator, _methodRepository);
-                }
-                else
-                {
-                    return new CellEditableComponentViewModel(_eventAggregator, _methodRepository, node, component);
-                }
-            } 
+                return new CellEditableComponentViewModel(_eventAggregator, _methodRepository);
+            }
+
+            return new CellEditableComponentViewModel(_eventAggregator, _methodRepository, node, component);
         }
 
         private static BaseNode CreateBaseNode(LayoutNode node) =>

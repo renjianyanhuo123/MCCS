@@ -30,7 +30,6 @@ using MCCS.ViewModels.Pages.SystemManager;
 using MCCS.ViewModels.Pages.TestModelOperations;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.ViewModels.ProjectManager;
-using MCCS.ViewModels.ProjectManager.Components;
 using MCCS.Views;
 using MCCS.Views.Dialogs;
 using MCCS.Views.Dialogs.Common;
@@ -49,7 +48,6 @@ using MCCS.Views.Pages.SystemManager;
 using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.Pages.WorkflowSteps;
 using MCCS.Views.ProjectManager;
-using MCCS.Views.ProjectManager.Components;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
 

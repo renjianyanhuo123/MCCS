@@ -1,7 +1,13 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
+using MCCS.Infrastructure.Models.MethodManager;
+using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
+using MCCS.Models.MethodManager.ParamterSettings;
+using MCCS.Services.ProjectServices;
 using MCCS.ViewModels.Dialogs.Project;
 using MCCS.ViewModels.ProjectManager.Components;
+
+using Newtonsoft.Json;
 
 namespace MCCS.Components.LayoutRootComponents
 {
@@ -10,35 +16,33 @@ namespace MCCS.Components.LayoutRootComponents
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
 
-        public CellContainerComponentViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
+        public CellContainerComponentViewModel(IDialogService dialogService, 
+            IProjectComponentFactoryService projectComponentFactoryService,
+            IEventAggregator eventAggregator, 
+            CellNode? node = null)
         {
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
-            InnerViewModel = new ProjectChartComponentPageViewModel();
+            if(node != null) InnerViewModel = projectComponentFactoryService.BuildComponentViewModel(node);
             PlaceholderPopupCommand = new DelegateCommand(ExecutePlaceholderPopupCommand);
             NonPlaceholderPopupCommand = new DelegateCommand(ExevuteNonPlaceholderPopupCommand);
         }
 
         #region Property
-
         private object? _innerViewModel;
-
         public object? InnerViewModel
         {
             get => _innerViewModel;
             set => SetProperty(ref _innerViewModel, value);
         }
-
         #endregion
 
         #region Command
         public DelegateCommand PlaceholderPopupCommand { get; }
-
         public DelegateCommand NonPlaceholderPopupCommand { get; }
-
         #endregion
 
-        #region Private Method 
+        #region Private Method
         private void ChangeUiComponent()
         {
             if (Parent == null) return;

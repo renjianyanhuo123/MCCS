@@ -8,6 +8,8 @@ using MCCS.Infrastructure.Models.SystemSetting;
 using MCCS.Infrastructure.Models.TestInfo;
 using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
+using MCCS.ViewModels.ProjectManager.Components;
+
 using Newtonsoft.Json;
 
 namespace MCCS
@@ -500,7 +502,7 @@ namespace MCCS
                         Icon = "ChartBar",
                         IsCanSetParam = true,
                         SetParamViewName = nameof(MethodChartSetParamPageViewModel),
-                        ViewTypeName = ""
+                        ViewTypeName = nameof(ProjectChartComponentPageViewModel)
                     },
                     new()
                     {

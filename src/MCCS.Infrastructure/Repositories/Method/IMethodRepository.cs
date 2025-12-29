@@ -6,14 +6,12 @@ namespace MCCS.Infrastructure.Repositories.Method
 {
     public interface IMethodRepository
     {
-        Task<MethodModel> GetMethodAsync(long id);
-
-        Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression);
-
-        Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression);
-
+        Task<MethodModel> GetMethodAsync(long id); 
+        Task<List<MethodModel>> GetMethodsAsync(Expression<Func<MethodModel, bool>> expression); 
+        Task<PageModel<MethodModel>> GetPageMethodsAsync(int pageIndex, int pageSize, Expression<Func<MethodModel, bool>> expression); 
         Task<MethodInterfaceSettingModel> GetInterfaceSettingAsync(long methodId); 
-        Task<List<MethodUiComponentsModel>> GetUiComponentsAsync(); 
+        Task<List<MethodUiComponentsModel>> GetUiComponentsAsync();
+        List<MethodUiComponentsModel> GetUiComponents();
         Task<MethodUiComponentsModel> GetMethodUiComponentByIdAsync(long componentId);
         ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken = default);
         ValueTask<long> AddMethodAsync(MethodModel method, CancellationToken cancellationToken = default);

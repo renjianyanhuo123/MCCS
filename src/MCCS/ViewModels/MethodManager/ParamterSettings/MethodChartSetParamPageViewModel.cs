@@ -81,8 +81,8 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
                 DisplayName = "时间"
             });
             if (Parameter == null) return;
-            SelectedXElement = XBindCollection.FirstOrDefault(c => c.Id == Parameter.XAxisParamId);
-            SelectedYElement = YBindCollection.FirstOrDefault(c => c.Id == Parameter.YAxisParamId);
+            SelectedXElement = XBindCollection.FirstOrDefault(c => c.Id == Parameter.XAxisParam?.Id);
+            SelectedYElement = YBindCollection.FirstOrDefault(c => c.Id == Parameter.YAxisParam?.Id);
             ChartType = (int)Parameter.Type;
         } 
         #endregion
@@ -92,8 +92,8 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
             var parameter = new ChartSettingParamModel
             {
                 Type = (ChartTypeEnum)ChartType,
-                XAxisParamId = SelectedXElement?.Id ?? 0,
-                YAxisParamId = SelectedYElement?.Id ?? 0
+                XAxisParam = SelectedXElement,
+                YAxisParam = SelectedYElement
             };
             var json = JsonConvert.SerializeObject(parameter);
             return json;

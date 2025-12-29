@@ -1,6 +1,7 @@
 ﻿using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Components.LayoutRootComponents;
 using MCCS.Extensions;
+using MCCS.Services.ProjectServices;
 
 using Microsoft.Extensions.Configuration; 
 
@@ -14,6 +15,7 @@ namespace MCCS.Modules
             // containerRegistry.RegisterSingleton<IDataCollector, DataCollector>(); 
             containerRegistry.Register<IDialogService, MaterialDialogService>();
             containerRegistry.Register<ILayoutTreeTraversal, LayoutTreeTraversal>();
+            containerRegistry.Register<IProjectComponentFactoryService, ProjectComponentFactoryService>();
         }
     }
 }

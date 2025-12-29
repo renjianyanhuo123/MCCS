@@ -39,6 +39,10 @@ namespace MCCS.Infrastructure.Repositories.Method
                 .Where(expression)
                 .ToListAsync();
 
+        public List<MethodUiComponentsModel> GetUiComponents() =>
+            freeSql.Select<MethodUiComponentsModel>()
+                .ToList();
+
         public Task<MethodUiComponentsModel> GetMethodUiComponentByIdAsync(long componentId) =>
             freeSql.Select<MethodUiComponentsModel>()
                 .Where(c => c.Id == componentId)
