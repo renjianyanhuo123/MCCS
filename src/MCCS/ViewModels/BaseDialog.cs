@@ -1,6 +1,6 @@
 ﻿namespace MCCS.ViewModels;
 
-public class BaseDialog : BindableBase, IDialogAware
+public abstract class BaseDialog : BindableBase, IDialogAware
 {
     private string _title = string.Empty;
     public string Title
@@ -9,10 +9,12 @@ public class BaseDialog : BindableBase, IDialogAware
         set => SetProperty(ref _title, value);
     }
 
-    public bool CanCloseDialog() => true;
-    public DelegateCommand CloseCommand => new(ExecuteCloseCommand);
+    public bool CanCloseDialog() => true; 
 
-    private void ExecuteCloseCommand() => RequestClose.Invoke(new DialogResult(ButtonResult.OK));
+    public virtual void RaiseRequestClose(IDialogResult dialogResult)
+    {
+        RequestClose.Invoke(dialogResult);
+    }
 
     public virtual void OnDialogClosed()
     {

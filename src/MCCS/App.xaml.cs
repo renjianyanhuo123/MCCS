@@ -146,14 +146,13 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<StationSiteSettingPage>(StationSiteSettingPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<ProjectOperationPage>(nameof(ProjectOperationPageViewModel));
 
-            // Project-Components
-            containerRegistry.RegisterForNavigation<ProjectChartComponentPage>(nameof(ProjectChartComponentPageViewModel));
+            // Project-Components 
             // Dialogs
             // containerRegistry.RegisterDialogWindow<NonModalDialogWindow>("NonModalWindow");
             containerRegistry.RegisterDialog<SetCurveDialog>(SetCurveDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddModel3DDialog>(AddModel3DDialogViewModel.Tag);
             containerRegistry.RegisterDialog<AddStationSiteInfoDialog>(AddStationSiteInfoDialogViewModel.Tag);
-            containerRegistry.RegisterDialog<DeleteConfirmDialog>(DeleteConfirmDialogViewModel.Tag);
+            containerRegistry.RegisterDialog<DeleteConfirmDialog>(nameof(DeleteConfirmDialogViewModel));
             containerRegistry.RegisterDialog<AddHardwareDialog>(AddHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditHardwareDialog>(EditHardwareDialogViewModel.Tag);
             containerRegistry.RegisterDialog<EditControlChannelPage>(EditControlChannelPageViewModel.Tag);

@@ -1,7 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
-namespace MCCS.Views.Dialogs.Common
+﻿namespace MCCS.Views.Dialogs.Common
 {
     /// <summary>
     /// DeleteConfirmDialog.xaml 的交互逻辑
@@ -13,17 +10,17 @@ namespace MCCS.Views.Dialogs.Common
             InitializeComponent();
         }
 
-        public string ShowContent
-        {
-            get => (string)GetValue(ShowContentProperty);
-            set => SetValue(ShowContentProperty, value);
-        }
+        //public string ShowContent
+        //{
+        //    get => (string)GetValue(ShowContentProperty);
+        //    set => SetValue(ShowContentProperty, value);
+        //}
 
-        public static readonly DependencyProperty ShowContentProperty =
-            DependencyProperty.Register(
-                nameof(ShowContent),
-                typeof(string),
-                typeof(DeleteConfirmDialog),
-                new PropertyMetadata("您确定要执行此操作吗？此操作可能会对数据产生影响，请谨慎选择。"));
+        //public static readonly DependencyProperty ShowContentProperty =
+        //    DependencyProperty.Register(
+        //        nameof(ShowContent),
+        //        typeof(string),
+        //        typeof(DeleteConfirmDialog),
+        //        new PropertyMetadata("您确定要执行此操作吗？此操作可能会对数据产生影响，请谨慎选择。"));
     }
 }

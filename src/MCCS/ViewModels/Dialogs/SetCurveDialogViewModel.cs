@@ -54,8 +54,7 @@ namespace MCCS.ViewModels.Dialogs
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             CurveSelectionChangedCommand = new DelegateCommand(ExecuteCurveSelectionChangedCommand); 
             CountOptions = [1, 2, 3, 4, 5, 6, 8, 9, 12];
-        }
-
+        } 
         public override void OnDialogOpened(IDialogParameters parameters)
         {
             if (parameters.ContainsKey("title"))

@@ -17,45 +17,47 @@
             <Setter Property="ShowInTaskbar" Value="False"/> 
         </Style>
     </dialogs:Dialog.WindowStyle>
-    <Grid Width="Auto" Height="Auto" >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
+    <materialDesign:DialogHost Identifier="ProjectComponentDialog">
+        <Grid Width="Auto" Height="Auto" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Background="#F1F1F1" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="15"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="1"
-                       VerticalAlignment="Center"
-                       FontSize="24"
-                       FontWeight="Bold"
-                       Text="{Binding Title}"></TextBlock>
-            <StackPanel Grid.Column="3"  Orientation="Horizontal">
-                <Button 
-                    Margin="0,0,15,0"
-                    VerticalAlignment="Center"
-                    ToolTip="还原"
-                    Width="30" Height="30" Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
-                    <materialDesign:PackIcon Kind="CallReceived" />
-                </Button>
-                <Button  
-                    VerticalAlignment="Center"
-                    ToolTip="关闭"
-                    Command="{Binding CloseCommand}"
-                    Width="30" Height="30" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
-                    <materialDesign:PackIcon Kind="Close" />
-                </Button> 
-            </StackPanel>
-            
+            <Grid Grid.Row="0" Background="#F1F1F1" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="80"></ColumnDefinition>
+                    <ColumnDefinition Width="200"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="15"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Text="{Binding Title}"></TextBlock>
+                <StackPanel Grid.Column="3"  Orientation="Horizontal">
+                    <!--<Button 
+                Margin="0,0,15,0"
+                VerticalAlignment="Center"
+                ToolTip="还原"
+                Width="30" Height="30" Style="{StaticResource MaterialDesignFloatingActionMiniButton}">
+                <materialDesign:PackIcon Kind="CallReceived" />
+            </Button>-->
+                    <Button  
+                        VerticalAlignment="Center"
+                        ToolTip="关闭"
+                        Command="{Binding CloseCommand}"
+                        Width="30" Height="30" Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}">
+                        <materialDesign:PackIcon Kind="Close" />
+                    </Button>
+                </StackPanel>
+
+            </Grid>
+            <!-- 直接复用同样的布局 / 子控件 -->
+            <!--<ContentPresenter Grid.Row="1" Content="{Binding InnerViewModel}" />-->
+            <ContentControl Grid.Row="1" Content="{Binding InnerViewModel}"></ContentControl>
         </Grid>
-        <!-- 直接复用同样的布局 / 子控件 -->
-        <!--<ContentPresenter Grid.Row="1" Content="{Binding InnerViewModel}" />-->
-        <ContentControl Grid.Row="1" dialogs:RegionManager.RegionName="ProjectContentRegion"></ContentControl>
-    </Grid>
+    </materialDesign:DialogHost>
 </UserControl>

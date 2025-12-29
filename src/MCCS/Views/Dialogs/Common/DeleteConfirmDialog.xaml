@@ -9,6 +9,14 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"
              d:DesignHeight="450" d:DesignWidth="800">
+    <prism:Dialog.WindowStyle>
+        <Style TargetType="Window">
+            <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterScreen" />
+            <Setter Property="WindowState" Value="Normal" />
+            <Setter Property="WindowStyle" Value="None" />
+            <Setter Property="ShowInTaskbar" Value="False"/>
+        </Style>
+    </prism:Dialog.WindowStyle>
     <Border Height="190" Width="450" CornerRadius="5">
         <Grid>
             <Grid.RowDefinitions>
@@ -16,13 +24,14 @@
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="确认操作" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold" FontSize="18"></TextBlock>
-            <TextBlock Grid.Row="1" Margin="15" Text="{Binding ShowContent, RelativeSource={RelativeSource AncestorType=UserControl}}" TextWrapping="Wrap" FontSize="14" />
+            <TextBlock Grid.Row="0" Text="{Binding Title}" VerticalAlignment="Center" Margin="15,0,0,0" FontWeight="Bold" FontSize="18"></TextBlock>
+            <TextBlock Grid.Row="1" Margin="15" Text="{Binding ShowContent}" TextWrapping="Wrap" FontSize="14" />
             <UniformGrid Grid.Row="2" Columns="2" Margin="15">
-                <Button Content="取消" Width="180" Margin="0,0,15,0" IsCancel="True" 
-                        Command="{Binding CancelCommand}"
+                <Button Content="取消" Width="180" Margin="0,0,15,0" IsCancel="True"
+                        CommandParameter="true"
+                        Command="{Binding CloseDialogCommand}"
                         Style="{StaticResource MaterialDesignPaperLightButton}"/>
-                <Button Content="确认" Width="180" IsDefault="True" Command="{Binding ConfirmCommand}"/>
+                <Button Content="确认" Width="180" IsDefault="True" CommandParameter="true" Command="{Binding CloseDialogCommand}"/>
             </UniformGrid>
         </Grid>
     </Border>

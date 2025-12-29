@@ -7,12 +7,11 @@ using MaterialDesignThemes.Wpf;
 
 using MCCS.Common; 
 using MCCS.Events;
-using MCCS.Events.Common;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.MainPages;
 using MCCS.Services.AppExitService;
+using MCCS.ViewModels.Dialogs.Common;
 using MCCS.ViewModels.Others;
-using MCCS.Views.Dialogs.Common;
 
 namespace MCCS.ViewModels.Pages
 {
@@ -21,8 +20,7 @@ namespace MCCS.ViewModels.Pages
         public const string Tag = "MainContentPage";
 
         private readonly IRegionManager _regionManager;
-        private readonly ISystemMenuRepository _systemMenuRepository;
-        private readonly IContainerProvider _containerProvider;
+        private readonly ISystemMenuRepository _systemMenuRepository; 
         private readonly IAppExitService _appExitService;
 
         #region 页面属性
@@ -101,10 +99,14 @@ namespace MCCS.ViewModels.Pages
 
         private async Task ExecuteLogoutCommand()
         {
-            var dialog = _containerProvider.Resolve<DeleteConfirmDialog>();
-            dialog.ShowContent = "确定是否退出应用程序?";
-            var result = await DialogHost.Show(dialog, "RootDialog");
-            if (result is DialogConfirmEvent { IsConfirmed: true })
+            var parameters = new DialogParameters
+            {
+                {"Title", "关闭应用程序"},
+                { "ShowContent", "是否确定关闭整个应用程序?"},
+                {"RootDialogName", "RootDialog"}
+            }; 
+            var result = await _dialogService.ShowDialogAsync(nameof(DeleteConfirmDialogViewModel), parameters);
+            if (result.Result == ButtonResult.OK)
             {
                 await _appExitService.ExitAsync();
             }
@@ -123,15 +125,14 @@ namespace MCCS.ViewModels.Pages
 
         #endregion
          
-        public MainContentPageViewModel(
-            IContainerProvider containerProvider,
+        public MainContentPageViewModel( 
             ISystemMenuRepository systemMenuRepository,
             IRegionManager regionManager,
             IAppExitService appExitService,
-            IEventAggregator eventAggregator) : base(eventAggregator)
+            IEventAggregator eventAggregator,
+            IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu);
-            _containerProvider = containerProvider;
+            _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu); 
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
             _appExitService = appExitService;

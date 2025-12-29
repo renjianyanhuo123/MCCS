@@ -1,6 +1,4 @@
-﻿using MCCS.ViewModels.ProjectManager.Components;
-
-namespace MCCS.Components.LayoutRootComponents
+﻿namespace MCCS.Components.LayoutRootComponents
 {
     /// <summary>
     /// CellContainerComponent.xaml 的交互逻辑
@@ -10,13 +8,13 @@ namespace MCCS.Components.LayoutRootComponents
         public CellContainerComponent()
         {
             InitializeComponent();
-            DataContextChanged += (s, e) =>
-            {
-                var viewModel = DataContext as CellContainerComponentViewModel ?? throw new ArgumentException(nameof(CellContainerComponentViewModel));
-                RegionManager.SetRegionManager(ComponentElementRegion, viewModel.ScopedRegionManager);
-                RegionManager.SetRegionName(ComponentElementRegion, "ProjectContentRegion");
-                viewModel.ScopedRegionManager.RequestNavigate("ProjectContentRegion", new Uri(nameof(ProjectChartComponentPageViewModel), UriKind.Relative));
-            };
+            //DataContextChanged += (s, e) =>
+            //{
+            //    var viewModel = DataContext as CellContainerComponentViewModel ?? throw new ArgumentException(nameof(CellContainerComponentViewModel));
+            //    RegionManager.SetRegionManager(ComponentElementRegion, viewModel.ScopedRegionManager);
+            //    RegionManager.SetRegionName(ComponentElementRegion, "ProjectContentRegion");
+            //    viewModel.ScopedRegionManager.RequestNavigate("ProjectContentRegion", new Uri(nameof(ProjectChartComponentPageViewModel), UriKind.Relative));
+            //};
             
         }
     }

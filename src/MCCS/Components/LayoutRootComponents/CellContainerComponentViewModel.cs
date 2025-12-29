@@ -1,6 +1,5 @@
-﻿using System.Windows;
-
-using MCCS.Components.LayoutRootComponents.ViewModels;
+﻿using MCCS.Components.LayoutRootComponents.ViewModels;
+using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.ViewModels.Dialogs.Project;
 using MCCS.ViewModels.ProjectManager.Components;
 
@@ -9,30 +8,93 @@ namespace MCCS.Components.LayoutRootComponents
     public sealed class CellContainerComponentViewModel : LayoutNode
     {
         private readonly IDialogService _dialogService;
-        public readonly IRegionManager ScopedRegionManager;
+        private readonly IEventAggregator _eventAggregator;
 
-        public CellContainerComponentViewModel(IRegionManager regionManager, IDialogService dialogService)
+        public CellContainerComponentViewModel(IDialogService dialogService, IEventAggregator eventAggregator)
         {
             _dialogService = dialogService;
-            ScopedRegionManager = regionManager.CreateRegionManager();
-            PopupCommand = new DelegateCommand(ExecutePopupCommand);
+            _eventAggregator = eventAggregator;
+            InnerViewModel = new ProjectChartComponentPageViewModel();
+            PlaceholderPopupCommand = new DelegateCommand(ExecutePlaceholderPopupCommand);
+            NonPlaceholderPopupCommand = new DelegateCommand(ExevuteNonPlaceholderPopupCommand);
         }
 
-        #region Command
-        public DelegateCommand PopupCommand { get; }
+        #region Property
+
+        private object? _innerViewModel;
+
+        public object? InnerViewModel
+        {
+            get => _innerViewModel;
+            set => SetProperty(ref _innerViewModel, value);
+        }
+
         #endregion
 
-        #region Private Method
-        private void ExecutePopupCommand()
+        #region Command
+        public DelegateCommand PlaceholderPopupCommand { get; }
+
+        public DelegateCommand NonPlaceholderPopupCommand { get; }
+
+        #endregion
+
+        #region Private Method 
+        private void ChangeUiComponent()
         {
+            if (Parent == null) return;
+            var grandFather = Parent.Parent;
+            var brotherNode = Parent.LeftNode == this ? Parent.RightNode : Parent.LeftNode;
+            if (brotherNode == null) return;
+            if (grandFather == null)
+            {
+                brotherNode.Parent = null;
+                _eventAggregator.GetEvent<ChangedRootEvent>().Publish(new ChangedRootEventParam
+                {
+                    Root = brotherNode
+                });
+            }
+            else
+            {
+                brotherNode.Parent = grandFather;
+                if (Parent == grandFather.LeftNode)
+                {
+                    grandFather.LeftNode = null;
+                    grandFather.LeftNode = brotherNode;
+                }
+                else
+                {
+                    grandFather.RightNode = null;
+                    grandFather.RightNode = brotherNode;
+                }
+            }
+        }
+
+        private void ExevuteNonPlaceholderPopupCommand()
+        {
+            if (InnerViewModel == null) return;
             var parameters = new DialogParameters
             {
-                { "ContentViewModel", this },
-                { "RegionManager", ScopedRegionManager },
-                { "Title", "弹窗标题"}
+                { "ContentViewModel", InnerViewModel },
+                { "Title", "弹窗标题" }
             };
+            ChangeUiComponent();
+            _dialogService.Show(nameof(ProjectContentDialogViewModel), parameters, res => { });
+        }
 
-            _dialogService.Show(nameof(ProjectContentDialogViewModel), parameters, res => { }); 
+        private void ExecutePlaceholderPopupCommand()
+        {
+            if (InnerViewModel == null) return;
+            var parameters = new DialogParameters
+            {
+                { "ContentViewModel", InnerViewModel },
+                { "Title", "弹窗标题" }
+            };
+            // ChangeUiComponent();
+            InnerViewModel = null;
+            _dialogService.Show(nameof(ProjectContentDialogViewModel), parameters, res =>
+            {
+                InnerViewModel = res.Parameters.GetValue<object>("ContentViewModel"); 
+            }); 
         } 
         #endregion
     } 
