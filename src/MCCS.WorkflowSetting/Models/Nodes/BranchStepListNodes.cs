@@ -26,13 +26,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Width = 260,
                 Height = 85
             });
-            Nodes.Add(new AddOpNode
-            {
-                Name = "Add",
-                Parent = this,
-                Width = 20,
-                Height = 20
-            });
+            Nodes.Add(new AddOpNode(this));
             RenderChanged();
         }
         

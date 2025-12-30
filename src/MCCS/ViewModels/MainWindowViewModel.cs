@@ -4,7 +4,6 @@ using MCCS.Events.Common;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Events.StartUp;
 using MCCS.ViewModels.MethodManager;
-using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.WorkflowSteps;
 using MCCS.WorkflowSetting.EventParams;
@@ -13,7 +12,7 @@ namespace MCCS.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
-        private readonly IRegionManager _regionManager; 
+        private readonly IRegionManager _regionManager;
 
         #region 页面属性 
         private double _mainPageWidth; 
@@ -107,9 +106,9 @@ namespace MCCS.ViewModels
 
         private void ExecuteShowStepsCommand(AddOpEventParam opEventArgs)
         {
-             IsOpenFlyout = true;
-             RightFlyoutName = "工作流配置";
-             var paramters = new NavigationParameters { { "OpEventArgs", opEventArgs } }; 
+             IsOpenFlyout = true; 
+            RightFlyoutName = "工作流配置";
+            var paramters = new NavigationParameters { { "OpEventArgs", opEventArgs } }; 
              _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative), paramters);
         }
 
@@ -142,20 +141,9 @@ namespace MCCS.ViewModels
             _eventAggregator.GetEvent<AddOpEvent>().Subscribe(ExecuteShowStepsCommand);
             _eventAggregator.GetEvent<OpenUiCompontsEvent>().Subscribe(ExecuteShowComponentsCommand);
             _eventAggregator.GetEvent<OpenParamterSetEvent>().Subscribe(ExecuteShowParamterSetCommand);
-            _eventAggregator.GetEvent<SelectedComponentEvent>().Subscribe(param =>
-            {
-                if (!string.IsNullOrEmpty(param.SourceId))
-                {
-                    IsOpenFlyout = false;
-                }
-            });
-            _eventAggregator.GetEvent<SaveParameterEvent>().Subscribe(param =>
-            {
-                if (!string.IsNullOrEmpty(param.SourceId))
-                {
-                    IsOpenFlyout = false;
-                }
-            });
+            _eventAggregator.GetEvent<SelectedComponentEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
+            _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false);
+            _eventAggregator.GetEvent<SaveParameterEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 

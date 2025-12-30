@@ -2,10 +2,13 @@
 {
     public class AddOpNode : BaseNode
     {
-        public AddOpNode( )  
+        public AddOpNode(BaseNode parentNode)
         {
-            Type = NodeTypeEnum.Action;
-        }
-         
+            Name = "Add";
+            Width = 20;
+            Height = 20;
+            Parent = parentNode;
+            Type = NodeTypeEnum.Action; 
+        } 
     }
 }

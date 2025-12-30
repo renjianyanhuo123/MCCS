@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MCCS.WorkflowSetting.Components.WorkflowStepListNodes"
+<UserControl x:Class="MCCS.WorkflowSetting.Components.WorkflowStepListNodes"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -32,12 +32,15 @@
         <DataTemplate DataType="{x:Type localViewModel:EndNode}">
             <local:WorkflowEndNode  />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type localViewModel:TempPlaceholderAddNode}">
+            <local:WorkflowTempPlaceholderAddNode  />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type localViewModel:StepListNodes}">
             <local:WorkflowStepListNodes  />
         </DataTemplate>
         <DataTemplate DataType="{x:Type localViewModel:BranchStepListNodes}">
             <local:WorkflowBranchStepListNodes  />
-        </DataTemplate>
+        </DataTemplate> 
         <converters:PointsToPathConverter x:Key="PointsToPathConverter" />
     </UserControl.Resources>
     <Grid Width="{Binding Width}" Height="{Binding Height}" 

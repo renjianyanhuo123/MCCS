@@ -50,7 +50,7 @@
         </Style>
 
         <!-- 状态指示器样式 -->
-        <Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">
+        <!--<Style x:Key="StatusIndicatorStyle" TargetType="Ellipse">
             <Setter Property="Width" Value="12"/>
             <Setter Property="Height" Value="12"/>
             <Setter Property="Fill" Value="#FF3CB371"/>
@@ -66,7 +66,7 @@
                     </BeginStoryboard>
                 </EventTrigger>
             </Style.Triggers>
-        </Style>
+        </Style>-->
     </UserControl.Resources>
     <Grid>
         <ItemsControl
@@ -93,10 +93,8 @@
                             </Grid.RowDefinitions>
 
                             <!-- 标题栏 -->
-                            <StackPanel Grid.Row="0" Orientation="Horizontal" 
-                           HorizontalAlignment="Center" Margin="0,0,0,10">
-                                <Ellipse Style="{StaticResource StatusIndicatorStyle}" 
-                            Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                <!--<Ellipse Style="{StaticResource StatusIndicatorStyle}" Margin="0,0,10,0" VerticalAlignment="Center"/>-->
                                 <TextBlock Text="{Binding DisplayName}" Style="{StaticResource TitleTextStyle}"/>
                             </StackPanel>
 

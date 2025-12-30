@@ -63,7 +63,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 var temp = value / 2.0;
                 ItemMargin = new Thickness(temp, 0, temp, 0);
             }
-        } 
+        }
+
+        private bool _isShowOperationBtn = false; 
+        public bool IsShowOperationBtn
+        {
+            get => _isShowOperationBtn;
+            set => SetProperty(ref _isShowOperationBtn, value);
+        }
 
         #endregion
 
@@ -109,15 +116,9 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         #region Private Method
 
-        private void ExecuteMouseEnterCommand()
-        {
+        private void ExecuteMouseEnterCommand() => IsShowOperationBtn = true;
 
-        }
-
-        private void ExecuteMouseLeaveCommand()
-        {
-
-        }
+        private void ExecuteMouseLeaveCommand() => IsShowOperationBtn = false;
 
         #endregion
 

@@ -26,14 +26,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Type = NodeTypeEnum.Start,
                 Name = "Start"
             });
-            Nodes.Add(new AddOpNode
-            {
-                Name = "Add",
-                Parent = this,
-                Type = NodeTypeEnum.Action,
-                Width = 20,
-                Height = 20
-            });
+            Nodes.Add(new AddOpNode(this));
             Nodes.Add(new EndNode
             {
                 Name = "End",

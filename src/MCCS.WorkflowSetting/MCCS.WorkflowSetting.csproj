@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 

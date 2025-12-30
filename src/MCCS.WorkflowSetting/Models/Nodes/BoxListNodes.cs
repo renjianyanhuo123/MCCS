@@ -25,6 +25,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             NodeClickCommand = new DelegateCommand<object?>(ExecuteNodeClickCommand);
             _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(ExecuteAddNode);
             _eventAggregator.GetEvent<DeleteNodeEvent>().Subscribe(ExecuteDeleteNode);
+            _eventAggregator.GetEvent<DeleteTempPlaceholderNodeEvent>()
+                .Subscribe(OnDeleteTempPlaceholderNodeEvent, ThreadOption.UIThread, false, filter => filter.SourceId != Id);
         }
 
         #region Command 
@@ -33,20 +35,25 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public DelegateCommand<object?> NodeClickCommand { get; protected set; }
         #endregion
 
-        #region Private Method
+        #region Private Method 
+        private void OnDeleteTempPlaceholderNodeEvent(DeleteTempPlaceholderNodeEventParam param)
+        {
+            // 删除当前List节点中所有的占位节点
+            var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
+            if (deleteNodeInfo == null) return;
+            Nodes.Remove(deleteNodeInfo);
+            RaiseNodeChanged("UIChanged", "");
+        }
+
         protected void ExecuteAddNode(AddNodeEventParam param)
         {
             if (param == null) return;
             if (param.Source != Id) return;
+            var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
+            if (deleteNodeInfo == null) return;
+            Nodes.Remove(deleteNodeInfo);
             var node = param.Node;
-            var addOpNode = new AddOpNode
-            {
-                Name = "Add",
-                Parent = this,
-                Type = NodeTypeEnum.Action,
-                Width = 20,
-                Height = 20
-            };
+            var addOpNode = new AddOpNode(this);
             node.Parent = this;
             if (InsertBeforeNode == null)
             {
@@ -58,6 +65,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Nodes.Insert(InsertBeforeNode.Index, node);
                 Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
             }
+            
             // 触发更新; 因为会先更新自己的节点变更
             RaiseNodeChanged("UIChanged", "");
         }
@@ -67,18 +75,23 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// <param name="param"></param>
         protected void ExecuteNodeClickCommand(object? param)
         {
-            if (param is BaseNode node)
+            if (param is not BaseNode { Type: NodeTypeEnum.Action } node) return;
+            InsertBeforeNode = node;
+            // 先删除之前在界面中非母线(即自己所在的List)所有的剩余占位点
+            _eventAggregator.GetEvent<DeleteTempPlaceholderNodeEvent>().Publish(new DeleteTempPlaceholderNodeEventParam
             {
-                if (node.Type == NodeTypeEnum.Action)
-                {
-                    InsertBeforeNode = node;
-                    _eventAggregator.GetEvent<AddOpEvent>().Publish(new AddOpEventParam
-                    {
-                        Source = Id,
-                        NodeId = node.Id
-                    });
-                }
-            }
+                PublisherId = node.Id,
+                SourceId = Id
+            });
+            var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
+            if (deleteNodeInfo != null) Nodes.Remove(deleteNodeInfo);
+            Nodes.Insert(InsertBeforeNode.Index, new TempPlaceholderAddNode(this));
+            RaiseNodeChanged("UIChanged", "");
+            _eventAggregator.GetEvent<AddOpEvent>().Publish(new AddOpEventParam
+            {
+                Source = Id,
+                NodeId = node.Id
+            });
         }
         /// <summary>
         /// 删除节点
@@ -88,14 +101,12 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             if (param == null || param.Source != Id) return;
             var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Id == param.NodeId);
-            if (deleteNodeInfo != null)
-            {
-                var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
-                Nodes.Remove(deleteNodeInfo);
-                if (deleteAddNode != null) Nodes.Remove(deleteAddNode);
-                // 触发更新
-                RaiseNodeChanged("UIChanged", "");
-            }
+            if (deleteNodeInfo == null) return;
+            var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
+            Nodes.Remove(deleteNodeInfo);
+            if (deleteAddNode != null) Nodes.Remove(deleteAddNode);
+            // 触发更新
+            RaiseNodeChanged("UIChanged", "");
         }
         #endregion
 
@@ -116,8 +127,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// (1)更新节点位置
         /// </summary>
         protected virtual void UpdateNodePosition()
-        {
-            
-        }
+        { }
     }
 }
