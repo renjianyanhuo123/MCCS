@@ -56,7 +56,7 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
             {
                 SettingValues.Add(new DataMonitorSettingItemParamViewModel
                 {
-                    SelectedChannelItem = PseudoChannels.FirstOrDefault(c => c.Id == item.PseudoChannelId),
+                    SelectedChannelItem = PseudoChannels.FirstOrDefault(c => c.Id == item.PseudoChannel.Id),
                     RetainBit = item.RetainBit,
                     Unit = item.Unit
                 }); 
@@ -68,7 +68,7 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
         {
             var settingValues = SettingValues.Select(s => new DataMonitorSettingItemParamModel
             {
-                PseudoChannelId = s.SelectedChannelItem?.Id ?? 0,
+                PseudoChannel = s.SelectedChannelItem,
                 Unit = s.Unit,
                 RetainBit = s.RetainBit
             }).ToList();

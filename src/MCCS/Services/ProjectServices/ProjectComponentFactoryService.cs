@@ -27,16 +27,19 @@ namespace MCCS.Services.ProjectServices
             _componentModels ??= _methodRepository.GetUiComponents();
             var componentModel = _componentModels.FirstOrDefault(c => c.Id == cellNode.NodeId);
             if (componentModel == null) return null;
+            if (cellNode.ParamterJson == null) return null;
             switch (componentModel.ViewTypeName)
             {
-                case nameof(ProjectChartComponentPageViewModel):
-                    if (cellNode.ParamterJson == null) return null;
-                    var parameter = JsonConvert.DeserializeObject<ChartSettingParamModel>(cellNode.ParamterJson);
-                    if (parameter == null) return null;
-                    return new ProjectChartComponentPageViewModel(parameter);
+                case nameof(ProjectChartComponentPageViewModel): 
+                    var parameter1 = JsonConvert.DeserializeObject<ChartSettingParamModel>(cellNode.ParamterJson);
+                    if (parameter1 == null) return null;
+                    return new ProjectChartComponentPageViewModel(parameter1);
                 case nameof(ProjectDataMonitorComponentPageViewModel):
+                    var parameter2 = JsonConvert.DeserializeObject<List<DataMonitorSettingItemParamModel>>(cellNode.ParamterJson);
+                    if (parameter2 == null) return null;
+                    return new ProjectDataMonitorComponentPageViewModel(parameter2); 
                 default:
-                    return new ProjectDataMonitorComponentPageViewModel();
+                    return new ProjectDataMonitorComponentPageViewModel(null);
             } 
         }
     }

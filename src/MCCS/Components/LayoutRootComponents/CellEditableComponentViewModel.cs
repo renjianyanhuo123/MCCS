@@ -221,6 +221,8 @@ namespace MCCS.Components.LayoutRootComponents
                 SetParamViewName = component.SetParamViewName;
                 NodeSettingParamText = "未设置节点参数";
                 IsCanSetParam = component.IsCanSetParam;
+                // 每次设置节点后都必须重新设置Ui参数
+                ParamterJson = null;
             }
             catch (Exception e)
             {

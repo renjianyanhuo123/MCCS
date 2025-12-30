@@ -1,8 +1,10 @@
-﻿namespace MCCS.Models.MethodManager.ParamterSettings
+﻿using MCCS.Models.CurveModels;
+
+namespace MCCS.Models.MethodManager.ParamterSettings
 {
     public class DataMonitorSettingItemParamModel
     {
-        public long PseudoChannelId { get; set; }
+        public required XyBindCollectionItem PseudoChannel { get; set; }
         /// <summary>
         /// 专门用于显示的单位(int类型写死于界面中)
         /// </summary>
