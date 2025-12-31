@@ -112,21 +112,31 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         private void ExecuteChildrenChanged()
         {
             var maxHeight = Children.Max(c => c.Height);
-            Width = ItemSpacing * Children.Count + Children.Sum(c => c.Width);
-            Height = maxHeight;
+            var newWidth = ItemSpacing * Children.Count + Children.Sum(c => c.Width);
+            var newHeight = maxHeight;
+
             BorderHeight = maxHeight;
             if (Children.Count > 1)
             {
                 var rightSpace = ItemSpacing / 2.0 + Children[^1].Width / 2.0;
                 var leftSpace = ItemSpacing / 2.0 + Children[0].Width / 2.0;
                 BorderLeftSpacing = leftSpace;
-                BorderWidth = Width - leftSpace - rightSpace;
+                BorderWidth = newWidth - leftSpace - rightSpace;
             }
-            // 如果当前是展开状态，更新临时尺寸
+
+            // 只在展开状态下更新实际的Width和Height
             if (IsCollapse)
             {
-                _tempWidth = Width;
-                _tempHeight = Height;
+                Width = newWidth;
+                Height = newHeight;
+                _tempWidth = newWidth;
+                _tempHeight = newHeight;
+            }
+            else
+            {
+                // 收起状态下只更新临时尺寸，不改变实际显示尺寸
+                _tempWidth = newWidth;
+                _tempHeight = newHeight;
             }
         }
 
@@ -183,13 +193,21 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                     }
                 }
             }
-            Height = maxHeight;
+
             BorderHeight = maxHeight;
-            // 如果当前是展开状态，更新临时尺寸
+
+            // 只在展开状态下更新Height
             if (IsCollapse)
             {
-                _tempHeight = Height;
+                Height = maxHeight;
+                _tempHeight = maxHeight;
             }
+            else
+            {
+                // 收起状态下只更新临时高度
+                _tempHeight = maxHeight;
+            }
+
             foreach (var child in Children)
             {
                 if (child is BranchStepListNodes node)
