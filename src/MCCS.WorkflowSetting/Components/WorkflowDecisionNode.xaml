@@ -70,13 +70,18 @@
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0"
-                    Width="20" 
-                    Height="20" 
+                    Width="20"
+                    Height="20"
                     VerticalAlignment="Center"
                     x:Name="LeftBorder"
                     ToolTip="添加分支"
                     Visibility="{Binding IsShowOperationBtn, Converter={StaticResource BooleanToVisibilityConverter}}"
                     CornerRadius="50" >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding AddBranchCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="#CCCCCC"/>
@@ -84,9 +89,9 @@
                     </Style>
                 </Border.Style>
                 <!-- 加号图片 -->
-                <Image Source="/MCCS.WorkflowSetting;component/Resources/plus.png" 
-                       Width="16" Height="16" 
-                       VerticalAlignment="Center" 
+                <Image Source="/MCCS.WorkflowSetting;component/Resources/plus.png"
+                       Width="16" Height="16"
+                       VerticalAlignment="Center"
                        HorizontalAlignment="Center" />
             </Border>
             <Border 
