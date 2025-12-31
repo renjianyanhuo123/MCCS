@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
+
+using MCCS.Common.Resources.Extensions;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -8,7 +10,9 @@ namespace MCCS.WorkflowSetting.Models.Nodes
     public class DecisionNode : BaseNode
     {
         private readonly IEventAggregator _eventAggregator;
-
+        private readonly IDialogService _dialogService;
+        private double _tempHeight;
+        private double _tempWidth;
         #region Property
         /// <summary>
         /// 所有的子节点
@@ -20,10 +24,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             get => _isCollapse;
             set => SetProperty(ref _isCollapse, value);
-        }
-
-        private double _tempHeight;
-        private double _tempWidth;
+        } 
 
         private double _borderWidth; 
         public double BorderWidth
@@ -88,13 +89,13 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             get => _decisionNum;
             set => SetProperty(ref _decisionNum, value);
-        }
-
+        } 
         #endregion
 
-        public DecisionNode(IEventAggregator eventAggregator)
+        public DecisionNode(IEventAggregator eventAggregator, IDialogService dialogService)
         {
             _eventAggregator = eventAggregator;
+            _dialogService = dialogService;
             ItemSpacing = 10;
             var node1 = new BranchStepListNodes(eventAggregator)
             {
@@ -112,12 +113,13 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             _tempHeight = Height;
             Children.Add(node1);
             Children.Add(node2);
-            DecisionNum = Children.Count();
+            DecisionNum = Children.Count;
             ExecuteChildrenChanged();
             MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
             MouseEnterCommand = new DelegateCommand(ExecuteMouseEnterCommand);
             CollapseCommand = new DelegateCommand(ExecuteCollapseCommand);
             AddBranchCommand = new DelegateCommand(ExecuteAddBranchCommand);
+            DeleteAllDecisionCommand = new AsyncDelegateCommand(ExecuteDeleteAllDecisionCommand);
         }
 
         private void ExecuteChildrenChanged()
@@ -148,12 +150,19 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public DelegateCommand MouseEnterCommand { get; }
         public DelegateCommand CollapseCommand { get; }
         public DelegateCommand AddBranchCommand { get; }
+        public AsyncDelegateCommand DeleteAllDecisionCommand { get; }
+
         #endregion
 
         #region Private Method 
         private void ExecuteMouseEnterCommand() => IsShowOperationBtn = true;
 
         private void ExecuteMouseLeaveCommand() => IsShowOperationBtn = false;
+
+        private async Task ExecuteDeleteAllDecisionCommand()
+        {
+            // var result = await _dialogService.ShowDialogHostAsync(nameof())
+        }
 
         private void ExecuteCollapseCommand()
         {
@@ -184,7 +193,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             };
             Children.Add(newBranch);
             DecisionNum = Children.Count;
-            ExecuteChildrenChanged();
+            // ExecuteChildrenChanged();
             // 通知父节点重新布局
             RaiseNodeChanged("AddBranch");
         }
@@ -204,9 +213,10 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             foreach (var child in Children)
             {
                 if (child is not BranchStepListNodes node) continue;
-                if (maxHeight < node.GetCurrentHeight)
+                var temp = node.GetCurrentHeight();
+                if (maxHeight < temp)
                 {
-                    maxHeight = node.GetCurrentHeight;
+                    maxHeight = temp;
                 }
             }
             BorderHeight = maxHeight; 

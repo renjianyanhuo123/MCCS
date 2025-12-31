@@ -3,11 +3,9 @@ using System.Windows;
 
 using MahApps.Metro.Controls;
 
-using MaterialDesignThemes.Wpf;
-
-using MCCS.Common; 
+using MCCS.Common;
+using MCCS.Common.Resources.Extensions;
 using MCCS.Events;
-using MCCS.Extensions;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.MainPages;
 using MCCS.Services.AppExitService;

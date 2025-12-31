@@ -8,21 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="新文件夹\**" />
-    <EmbeddedResource Remove="新文件夹\**" />
-    <None Remove="新文件夹\**" />
-    <Page Remove="新文件夹\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Resources\chevronup_16.png" />
     <None Remove="Resources\ellipse.png" />
     <None Remove="Resources\plus.png" />
     <None Remove="Resources\WorkflowEnd.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Prism.DryIoc" Version="9.0.537" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +44,11 @@
     <Compile Update="Components\WorkflowStepNode.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
 
 </Project>

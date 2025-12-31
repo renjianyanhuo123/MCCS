@@ -1,6 +1,6 @@
 ﻿using MCCS.Collecter.PseudoChannelManagers;
+using MCCS.Common.Resources.Extensions;
 using MCCS.Components.LayoutRootComponents;
-using MCCS.Extensions;
 using MCCS.Services.ProjectServices;
 
 using Microsoft.Extensions.Configuration; 

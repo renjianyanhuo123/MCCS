@@ -4,7 +4,7 @@ using System.Windows.Threading;
 
 using MaterialDesignThemes.Wpf;
 
-namespace MCCS.Extensions
+namespace MCCS.Common.Resources.Extensions
 {
     public class MaterialDialogService : DialogService
     {

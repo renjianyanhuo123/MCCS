@@ -11,12 +11,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;
-            Height = 200; 
-            LoadedCommand = new DelegateCommand(ExecuteLoadedCommand); 
-        } 
-        #region Private Method
-        private void ExecuteLoadedCommand()
-        {
+            Height = 200;
             Nodes.Clear();
             Connections.Clear();
             Nodes.Add(new BranchNode
@@ -27,6 +22,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Height = 85
             });
             Nodes.Add(new AddOpNode(this));
+            LoadedCommand = new DelegateCommand(ExecuteLoadedCommand);
+        } 
+        #region Private Method
+        private void ExecuteLoadedCommand()
+        { 
             RenderChanged();
         }
         
@@ -52,7 +52,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             //}
         }
 
-        public double GetCurrentHeight => Nodes[^1].Position.Y + Nodes[^1].Height + AddActionDistance;
+        public double GetCurrentHeight() => Nodes[^1].Position.Y + Nodes[^1].Height + AddActionDistance;
 
         protected override void UpdateConnection()
         {

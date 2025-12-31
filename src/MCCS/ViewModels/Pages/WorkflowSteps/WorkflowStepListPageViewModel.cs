@@ -8,9 +8,9 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
 {
     public sealed class WorkflowStepListPageViewModel : BaseViewModel
     {
-        public const string Tag = "WorkflowStepListPage";
-         
-        public WorkflowStepListPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public const string Tag = "WorkflowStepListPage"; 
+
+        public WorkflowStepListPageViewModel(IEventAggregator eventAggregator, IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             Steps = 
             [
@@ -80,7 +80,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     };
                     break;
                 case StepTypeEnum.Decision:
-                    res = new DecisionNode(_eventAggregator);
+                    res = new DecisionNode(_eventAggregator, _dialogService);
                     break;
             }
             if (res != null) _eventAggregator.GetEvent<AddNodeEvent>().Publish(new AddNodeEventParam

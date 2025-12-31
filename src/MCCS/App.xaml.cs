@@ -48,6 +48,7 @@ using MCCS.Views.Pages.SystemManager;
 using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.Pages.WorkflowSteps;
 using MCCS.Views.ProjectManager;
+using MCCS.WorkflowSetting;
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
 
@@ -80,7 +81,10 @@ namespace MCCS
         {
             // 注册模块
             moduleCatalog.AddModule<NotificationModule>();
+            moduleCatalog.AddModule<WorkflowModule>();
         }
+
+
         /// <summary>
         /// (1)
         /// </summary>
@@ -184,10 +188,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<DataMonitorSetParamPage>(nameof(DataMonitorSetParamPageViewModel));
             // StationSetup  
             containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));
-            containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel));
-            // Workflow Setting
-            // 指定ViewModel创建
-            containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>();
+            containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel)); 
         }
 
         /// <summary>

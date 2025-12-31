@@ -1,4 +1,4 @@
-﻿namespace MCCS.Extensions
+﻿namespace MCCS.Common.Resources.Extensions
 {
     public static class DialogServiceExtensions
     {

@@ -1,4 +1,4 @@
-﻿using MCCS.Extensions;
+﻿using MCCS.Common.Resources.Extensions;
 using MCCS.ViewModels.Dialogs.Common;
 
 namespace MCCS.ViewModels.Dialogs.Project
