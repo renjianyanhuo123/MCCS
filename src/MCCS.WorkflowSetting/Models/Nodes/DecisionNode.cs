@@ -7,6 +7,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class DecisionNode : BaseNode
     {
+        private readonly IEventAggregator _eventAggregator;
 
         #region Property
         /// <summary>
@@ -93,6 +94,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         public DecisionNode(IEventAggregator eventAggregator)
         {
+            _eventAggregator = eventAggregator;
             ItemSpacing = 10;
             var node1 = new BranchStepListNodes(eventAggregator)
             {
@@ -115,6 +117,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
             MouseEnterCommand = new DelegateCommand(ExecuteMouseEnterCommand);
             CollapseCommand = new DelegateCommand(ExecuteCollapseCommand);
+            AddBranchCommand = new DelegateCommand(ExecuteAddBranchCommand);
         }
 
         private void ExecuteChildrenChanged()
@@ -143,7 +146,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         #region Command
         public DelegateCommand MouseLeaveCommand { get; }
         public DelegateCommand MouseEnterCommand { get; }
-        public DelegateCommand CollapseCommand { get; } 
+        public DelegateCommand CollapseCommand { get; }
+        public DelegateCommand AddBranchCommand { get; }
         #endregion
 
         #region Private Method 
@@ -169,6 +173,20 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
             // 通知父节点重新布局
             RaiseNodeChanged("Collapse");
+        }
+
+        private void ExecuteAddBranchCommand()
+        {
+            // 在最后添加一个新的分支节点
+            var newBranch = new BranchStepListNodes(_eventAggregator)
+            {
+                Parent = this
+            };
+            Children.Add(newBranch);
+            DecisionNum = Children.Count;
+            ExecuteChildrenChanged();
+            // 通知父节点重新布局
+            RaiseNodeChanged("AddBranch");
         }
 
         #endregion
