@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Services.NotificationService;
 using MCCS.UserControl.Transfer;
 

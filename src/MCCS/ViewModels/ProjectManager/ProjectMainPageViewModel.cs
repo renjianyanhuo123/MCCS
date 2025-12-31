@@ -1,4 +1,5 @@
-﻿using MCCS.Models.ProjectManager.Parameters;
+﻿using MCCS.Common.Resources.ViewModels;
+using MCCS.Models.ProjectManager.Parameters;
 using MCCS.ViewModels.MethodManager;
 
 namespace MCCS.ViewModels.ProjectManager

@@ -1,4 +1,6 @@
-﻿using MaterialDesignThemes.Wpf; 
+﻿using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.Hardwares;
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Repositories;

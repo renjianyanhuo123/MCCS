@@ -1,4 +1,6 @@
-﻿using MaterialDesignThemes.Wpf; 
+﻿using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.StationSites;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;

@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel; 
 using MCCS.Models.Stations.PseudoChannels;
 using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.StationSites.PseudoChannels;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;

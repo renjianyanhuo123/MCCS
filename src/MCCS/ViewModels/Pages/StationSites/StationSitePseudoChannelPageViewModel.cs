@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel; 
 using MCCS.Models.Stations.PseudoChannels;
 using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
+using MCCS.Common.Resources.Views;
 using MCCS.Events.StationSites;
 using MCCS.Events.StationSites.PseudoChannels;
 using MCCS.Views.Pages.StationSites.PseudoChannels;
-using MCCS.Views.Dialogs.Common;
 using MCCS.Events.Common;
 using MCCS.Infrastructure.Repositories;
 using Serilog;

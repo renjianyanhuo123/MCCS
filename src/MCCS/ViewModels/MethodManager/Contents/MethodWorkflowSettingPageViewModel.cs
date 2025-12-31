@@ -1,4 +1,6 @@
 ﻿using System.Windows.Controls;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.ViewModels.MethodManager.Contents

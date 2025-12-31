@@ -2,7 +2,9 @@
 using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
-using MaterialDesignThemes.Wpf; 
+using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.StationSites.ControlChannels;
 using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.Models.Devices;

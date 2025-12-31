@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using MCCS.Common.DataManagers.Methods;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager;

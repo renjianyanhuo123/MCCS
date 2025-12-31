@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Models.Stations;
 
 namespace MCCS.ViewModels.Pages.StationSetup

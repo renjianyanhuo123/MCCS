@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager.InterfaceSettings;

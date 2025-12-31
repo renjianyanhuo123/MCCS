@@ -4,7 +4,9 @@ using MCCS.Models.Stations;
 using MCCS.ViewModels.Pages.StationSites;
 using MCCS.Views.Dialogs;
 using Serilog;
-using System.Collections.ObjectModel; 
+using System.Collections.ObjectModel;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.SystemManager

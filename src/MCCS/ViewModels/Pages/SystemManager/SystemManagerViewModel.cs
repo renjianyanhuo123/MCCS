@@ -1,4 +1,6 @@
-﻿namespace MCCS.ViewModels.Pages.SystemManager
+﻿using MCCS.Common.Resources.ViewModels;
+
+namespace MCCS.ViewModels.Pages.SystemManager
 {
     public class SystemManagerViewModel : BaseViewModel
     {

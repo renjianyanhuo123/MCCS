@@ -1,4 +1,4 @@
-﻿namespace MCCS.Views.Dialogs.Common
+﻿namespace MCCS.Common.Resources.Views
 {
     /// <summary>
     /// DeleteConfirmDialog.xaml 的交互逻辑

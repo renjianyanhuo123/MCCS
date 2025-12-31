@@ -1,4 +1,6 @@
-﻿namespace MCCS.ViewModels.MethodManager
+﻿using MCCS.Common.Resources.ViewModels;
+
+namespace MCCS.ViewModels.MethodManager
 {
     public sealed class MethodCellSettingPageViewModel : BaseViewModel
     {

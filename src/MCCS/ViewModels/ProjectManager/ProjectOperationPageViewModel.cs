@@ -1,4 +1,5 @@
-﻿using MCCS.Components.LayoutRootComponents;
+﻿using MCCS.Common.Resources.ViewModels;
+using MCCS.Components.LayoutRootComponents;
 using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Infrastructure.Repositories.Method;

@@ -5,11 +5,11 @@ using MahApps.Metro.Controls;
 
 using MCCS.Common;
 using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.MainPages;
 using MCCS.Services.AppExitService;
-using MCCS.ViewModels.Dialogs.Common;
 using MCCS.ViewModels.Others;
 
 namespace MCCS.ViewModels.Pages

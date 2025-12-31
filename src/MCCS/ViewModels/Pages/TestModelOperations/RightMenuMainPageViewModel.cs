@@ -1,5 +1,6 @@
 ﻿using DryIoc;
 using MCCS.Collecter.ControlChannelManagers;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.Tests;
 using MCCS.Infrastructure.TestModels;
 

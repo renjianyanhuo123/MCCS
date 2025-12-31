@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel; 
+﻿using System.Collections.ObjectModel;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;

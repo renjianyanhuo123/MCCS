@@ -1,4 +1,4 @@
-﻿namespace MCCS.ViewModels.Dialogs.Common
+﻿namespace MCCS.Common.Resources.ViewModels
 {
     public class DeleteConfirmDialogViewModel : BaseDialog
     { 

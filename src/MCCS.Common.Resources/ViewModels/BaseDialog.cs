@@ -1,4 +1,4 @@
-﻿namespace MCCS.ViewModels;
+﻿namespace MCCS.Common.Resources.ViewModels;
 
 public abstract class BaseDialog : BindableBase, IDialogAware
 {

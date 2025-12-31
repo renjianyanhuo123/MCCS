@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.Common;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Events.StartUp;

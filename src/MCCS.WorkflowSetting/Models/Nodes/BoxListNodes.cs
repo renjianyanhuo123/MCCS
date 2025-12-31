@@ -71,7 +71,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 Nodes.Insert(InsertBeforeNode.Index, node);
                 Nodes.Insert(InsertBeforeNode.Index + 1, addOpNode);
             }
-            
             // 触发更新; 因为会先更新自己的节点变更
             RaiseNodeChanged("UIChanged", "");
         }

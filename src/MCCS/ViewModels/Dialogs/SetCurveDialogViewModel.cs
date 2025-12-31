@@ -2,6 +2,7 @@
 
 using System.Collections.ObjectModel;
 using MCCS.Collecter.PseudoChannelManagers;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Models.CurveModels;
 
 namespace MCCS.ViewModels.Dialogs

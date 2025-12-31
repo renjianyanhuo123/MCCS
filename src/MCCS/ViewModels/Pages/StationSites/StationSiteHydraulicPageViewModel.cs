@@ -1,4 +1,6 @@
-﻿namespace MCCS.ViewModels.Pages.StationSites
+﻿using MCCS.Common.Resources.ViewModels;
+
+namespace MCCS.ViewModels.Pages.StationSites
 {
     public sealed class StationSiteHydraulicPageViewModel : BaseViewModel
     {

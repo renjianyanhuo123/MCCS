@@ -1,4 +1,5 @@
-﻿using MCCS.Infrastructure.Models.MethodManager;
+﻿using MCCS.Common.Resources.ViewModels;
+using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Repositories.Method;
 
 namespace MCCS.ViewModels.MethodManager.Contents

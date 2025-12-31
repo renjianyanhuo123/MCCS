@@ -1,6 +1,8 @@
 ﻿using MCCS.Services.StartInitial;
 using System.Reflection;
 using System.Windows;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.StartUp;
 
 namespace MCCS.ViewModels.Pages

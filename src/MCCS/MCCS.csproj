@@ -71,7 +71,9 @@
   <ItemGroup>
     <Folder Include="Converters\Common\" />
     <Folder Include="ViewModels\Common\" />
+    <Folder Include="ViewModels\Dialogs\Common\" />
     <Folder Include="Views\Common\" />
+    <Folder Include="Views\Dialogs\Common\" />
   </ItemGroup>
 
   <ItemGroup>

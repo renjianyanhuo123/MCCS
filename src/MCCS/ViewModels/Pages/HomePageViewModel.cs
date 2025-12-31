@@ -1,4 +1,5 @@
-﻿using MCCS.Events;
+﻿using MCCS.Common.Resources.ViewModels;
+using MCCS.Events;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.ProjectManager;
 

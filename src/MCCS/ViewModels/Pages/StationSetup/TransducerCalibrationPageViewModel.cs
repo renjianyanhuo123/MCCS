@@ -1,4 +1,6 @@
-﻿namespace MCCS.ViewModels.Pages.StationSteup
+﻿using MCCS.Common.Resources.ViewModels;
+
+namespace MCCS.ViewModels.Pages.StationSteup
 {
     public sealed class TransducerCalibrationPageViewModel : BaseViewModel
     {

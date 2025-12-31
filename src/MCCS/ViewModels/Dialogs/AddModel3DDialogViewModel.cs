@@ -1,4 +1,6 @@
-﻿using MaterialDesignThemes.Wpf;  
+﻿using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Dialogs

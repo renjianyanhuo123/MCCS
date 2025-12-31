@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace MCCS.ViewModels;
+namespace MCCS.Common.Resources.ViewModels;
 
 public class BaseViewModel(IEventAggregator eventAggregator, IDialogService? dialogService)
     : BindableBase, INavigationAware

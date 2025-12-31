@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Models.MethodManager;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;

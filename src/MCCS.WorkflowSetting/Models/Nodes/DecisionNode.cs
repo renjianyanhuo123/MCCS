@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 
 using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
@@ -161,7 +162,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         private async Task ExecuteDeleteAllDecisionCommand()
         {
-            // var result = await _dialogService.ShowDialogHostAsync(nameof())
+            var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", new DialogParameters
+            {
+                {"Title", "是否确认删除该决策节点及其所有分支？"},
+                {"ShowContent", "注意: 删除该决策节点后，其所有分支节点及子节点都会被一并删除，且该操作不可撤销！"}
+            });
+            if (result.Result == ButtonResult.OK)
+            {
+            }
         }
 
         private void ExecuteCollapseCommand()

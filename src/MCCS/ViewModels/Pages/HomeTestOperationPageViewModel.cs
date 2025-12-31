@@ -4,6 +4,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
+using MCCS.Common.Resources.ViewModels;
+
 namespace MCCS.ViewModels.Pages
 {
     public class HomeTestOperationPageViewModel : BaseViewModel

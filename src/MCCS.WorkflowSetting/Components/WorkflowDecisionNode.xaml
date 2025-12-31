@@ -106,7 +106,12 @@
                     <i:EventTrigger EventName="MouseEnter">
                         <prism:InvokeCommandAction Command="{Binding MouseEnterCommand}" 
                                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Button}}"/>
-                    </i:EventTrigger> 
+                    </i:EventTrigger>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <prism:InvokeCommandAction Command="{Binding DeleteAllDecisionCommand}" 
+                                                   CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Button}}"/>
+                    </i:EventTrigger>
+                    <!--DeleteAllDecisionCommand-->
                 </i:Interaction.Triggers>
                 <Border.Effect>
                     <DropShadowEffect Color="Gray" 

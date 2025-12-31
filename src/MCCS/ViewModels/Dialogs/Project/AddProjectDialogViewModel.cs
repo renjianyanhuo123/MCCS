@@ -1,4 +1,6 @@
 using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.Project;
 using MCCS.Infrastructure.Models.ProjectManager;

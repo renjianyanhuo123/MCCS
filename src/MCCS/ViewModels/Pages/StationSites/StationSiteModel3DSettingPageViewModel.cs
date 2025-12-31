@@ -8,6 +8,7 @@ using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Common;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Components.GlobalNotification.Models; 
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Models.Model3D;

@@ -1,4 +1,5 @@
-﻿using MCCS.Components.GlobalNotification.Models;
+﻿using MCCS.Common.Resources.ViewModels;
+using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.SystemManager;
 using MCCS.Services.NotificationService;
 

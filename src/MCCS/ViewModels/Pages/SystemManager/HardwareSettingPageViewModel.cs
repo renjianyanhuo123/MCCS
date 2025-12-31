@@ -3,11 +3,13 @@ using MCCS.Events.Common;
 using MCCS.Events.Hardwares;
 using MCCS.Models.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
-using MCCS.Views.Dialogs.Common;
 using MCCS.Views.Dialogs.Hardwares;
 using Serilog;
 using System.Collections.ObjectModel;
 using System.Windows;
+
+using MCCS.Common.Resources.ViewModels;
+using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.Repositories;
 
 namespace MCCS.ViewModels.Pages.SystemManager

@@ -1,5 +1,5 @@
 ﻿using MCCS.Common.Resources.Extensions;
-using MCCS.ViewModels.Dialogs.Common;
+using MCCS.Common.Resources.ViewModels;
 
 namespace MCCS.ViewModels.Dialogs.Project
 {

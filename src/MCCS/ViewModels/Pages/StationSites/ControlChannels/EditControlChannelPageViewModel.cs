@@ -3,6 +3,8 @@ using MCCS.Events.StationSites.ControlChannels;
 using MCCS.Models.ControlCommand;
 using MCCS.Models.Stations.ControlChannels;
 using System.Collections.ObjectModel;
+
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;
