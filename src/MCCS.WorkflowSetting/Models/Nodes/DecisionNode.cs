@@ -6,7 +6,7 @@ using MCCS.WorkflowSetting.EventParams;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class DecisionNode : BaseNode
-    { 
+    {
 
         #region Property
         /// <summary>
@@ -20,6 +20,9 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _isCollapse;
             set => SetProperty(ref _isCollapse, value);
         }
+
+        private double _tempHeight;
+        private double _tempWidth;
 
         private double _borderWidth; 
         public double BorderWidth
@@ -83,7 +86,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         public DecisionNode(IEventAggregator eventAggregator)
         {
-            ItemSpacing = 10; 
+            ItemSpacing = 10;
             var node1 = new BranchStepListNodes(eventAggregator)
             {
                 Parent = this
@@ -94,7 +97,10 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             };
             IsCollapse = true;
             Width = ItemSpacing * 2 + node1.Width + node2.Width;
-            Height = Math.Max(node1.Height, node2.Height); 
+            Height = Math.Max(node1.Height, node2.Height);
+            // 保存初始的展开状态尺寸
+            _tempWidth = Width;
+            _tempHeight = Height;
             Children.Add(node1);
             Children.Add(node2);
             ExecuteChildrenChanged();
@@ -116,6 +122,12 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 BorderLeftSpacing = leftSpace;
                 BorderWidth = Width - leftSpace - rightSpace;
             }
+            // 如果当前是展开状态，更新临时尺寸
+            if (IsCollapse)
+            {
+                _tempWidth = Width;
+                _tempHeight = Height;
+            }
         }
 
         #region Command
@@ -132,34 +144,37 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         private void ExecuteCollapseCommand()
         {
             IsCollapse = !IsCollapse;
-            //if (IsCollapse)
-            //{
-            //    _tempHeight = Height;
-            //    _tempWidth = Width;
-            //    Height = 200;
-            //    Width = 200;
-            //}
-            //else
-            //{
-            //    Height = _tempHeight;
-            //    Width = _tempWidth;
-            //}
+            if (!IsCollapse)  // 收起状态：隐藏分支，只显示中心图标
+            {
+                _tempHeight = Height;
+                _tempWidth = Width;
+                Height = 50;  // 只显示中心决策图标的高度
+                Width = 100;  // 只显示中心决策图标的宽度
+            }
+            else  // 展开状态：恢复原来的尺寸
+            {
+                Height = _tempHeight;
+                Width = _tempWidth;
+            }
+
+            // 通知父节点重新布局
+            RaiseNodeChanged("Collapse");
         }
 
         #endregion
 
-        #region 更新 
+        #region 更新
         protected override void ProcessNodeChange(NodeChangedEventArgs e)
         {
             // 所有子流程节点更新以及整体更新
-#if DEBUG 
+#if DEBUG
             Debug.WriteLine($"===决策节点更新:{Id}===");
 #endif
             ExecuteChildrenChanged();
-            // 先找出最大高度 
+            // 先找出最大高度
             var maxHeight = 0.0;
             foreach (var child in Children)
-            { 
+            {
                 if (child is BranchStepListNodes node)
                 {
                     if (maxHeight < node.GetCurrentHeight)
@@ -167,18 +182,23 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                         maxHeight = node.GetCurrentHeight;
                     }
                 }
-            } 
+            }
             Height = maxHeight;
             BorderHeight = maxHeight;
+            // 如果当前是展开状态，更新临时尺寸
+            if (IsCollapse)
+            {
+                _tempHeight = Height;
+            }
             foreach (var child in Children)
             {
                 if (child is BranchStepListNodes node)
                 {
                     node.Height = maxHeight;
                     node.RenderChanged();
-                } 
+                }
             }
-        } 
+        }
         #endregion
     }
 }
