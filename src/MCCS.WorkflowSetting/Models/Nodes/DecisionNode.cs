@@ -82,6 +82,13 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             set => SetProperty(ref _isShowOperationBtn, value);
         }
 
+        private int _decisionNum = 0; 
+        public int DecisionNum
+        {
+            get => _decisionNum;
+            set => SetProperty(ref _decisionNum, value);
+        }
+
         #endregion
 
         public DecisionNode(IEventAggregator eventAggregator)
@@ -103,6 +110,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             _tempHeight = Height;
             Children.Add(node1);
             Children.Add(node2);
+            DecisionNum = Children.Count();
             ExecuteChildrenChanged();
             MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
             MouseEnterCommand = new DelegateCommand(ExecuteMouseEnterCommand);
@@ -112,22 +120,24 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         private void ExecuteChildrenChanged()
         {
             var maxHeight = Children.Max(c => c.Height);
-            Width = ItemSpacing * Children.Count + Children.Sum(c => c.Width);
-            Height = maxHeight;
+            var newWidth = ItemSpacing * Children.Count + Children.Sum(c => c.Width);
             BorderHeight = maxHeight;
             if (Children.Count > 1)
             {
                 var rightSpace = ItemSpacing / 2.0 + Children[^1].Width / 2.0;
                 var leftSpace = ItemSpacing / 2.0 + Children[0].Width / 2.0;
                 BorderLeftSpacing = leftSpace;
-                BorderWidth = Width - leftSpace - rightSpace;
+                BorderWidth = newWidth - leftSpace - rightSpace;
             }
-            // 如果当前是展开状态，更新临时尺寸
+            // 只在展开状态下更新实际的Width和Height
             if (IsCollapse)
             {
-                _tempWidth = Width;
-                _tempHeight = Height;
-            }
+                Width = newWidth;
+                Height = maxHeight;
+            } 
+            // 收起状态下只更新临时尺寸，不改变实际显示尺寸 
+            _tempWidth = newWidth;
+            _tempHeight = maxHeight;
         }
 
         #region Command
@@ -148,7 +158,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             {
                 _tempHeight = Height;
                 _tempWidth = Width;
-                Height = 50;  // 只显示中心决策图标的高度
+                Height = 24;  // 只显示中心决策图标的高度
                 Width = 100;  // 只显示中心决策图标的宽度
             }
             else  // 展开状态：恢复原来的尺寸
@@ -175,28 +185,22 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             var maxHeight = 0.0;
             foreach (var child in Children)
             {
-                if (child is BranchStepListNodes node)
+                if (child is not BranchStepListNodes node) continue;
+                if (maxHeight < node.GetCurrentHeight)
                 {
-                    if (maxHeight < node.GetCurrentHeight)
-                    {
-                        maxHeight = node.GetCurrentHeight;
-                    }
+                    maxHeight = node.GetCurrentHeight;
                 }
             }
-            Height = maxHeight;
-            BorderHeight = maxHeight;
-            // 如果当前是展开状态，更新临时尺寸
-            if (IsCollapse)
-            {
-                _tempHeight = Height;
-            }
+            BorderHeight = maxHeight; 
+            // 只在展开状态下更新Height 
+            if (IsCollapse) Height = maxHeight; 
+            // 收起状态下只更新临时高度 
+            _tempHeight = maxHeight;
             foreach (var child in Children)
             {
-                if (child is BranchStepListNodes node)
-                {
-                    node.Height = maxHeight;
-                    node.RenderChanged();
-                }
+                if (child is not BranchStepListNodes node) continue;
+                node.Height = maxHeight;
+                node.RenderChanged();
             }
         }
         #endregion
