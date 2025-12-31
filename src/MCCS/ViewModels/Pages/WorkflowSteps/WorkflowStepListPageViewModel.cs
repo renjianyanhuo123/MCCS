@@ -51,7 +51,7 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
         {
             var paramters = navigationContext.Parameters.GetValue<AddOpEventParam>("OpEventArgs");
             _sourceId = paramters.Source as string ?? throw new ArgumentNullException(nameof(paramters.Source));
-        }
+        } 
 
         #region Property 
         public ObservableCollection<WorkflowSettingItemModel> Steps { get; private set; }

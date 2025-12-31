@@ -11,7 +11,7 @@ namespace MCCS.WorkflowSetting.EventParams
         /// <summary>
         /// 添加的节点
         /// </summary>
-        public required BaseNode Node { get; init; }
+        public required BaseNode? Node { get; init; }
         ///// <summary>
         ///// 待变更的添加节点的位置
         ///// </summary>

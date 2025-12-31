@@ -13,6 +13,8 @@ namespace MCCS.ViewModels
     public class MainWindowViewModel : BaseViewModel
     {
         private readonly IRegionManager _regionManager;
+        private string _currentFlyoutName = "";
+        private object? _tempParam = null;
 
         #region 页面属性 
         private double _mainPageWidth; 
@@ -61,7 +63,20 @@ namespace MCCS.ViewModels
         public bool IsOpenFlyout
         {
             get => _isOpenFlyout;
-            set => SetProperty(ref _isOpenFlyout, value);
+            set
+            {
+                if (SetProperty(ref _isOpenFlyout, value) && _isOpenFlyout == false)
+                {
+                    if (_currentFlyoutName == WorkflowStepListPageViewModel.Tag && _tempParam is AddOpEventParam param)
+                    {
+                        _eventAggregator.GetEvent<AddNodeEvent>().Publish(new AddNodeEventParam
+                        {
+                            Source = param.Source.ToString() ?? "",
+                            Node = null
+                        });
+                    }
+                }
+            }
         }
 
         private string _rightFlyoutName = string.Empty;
@@ -108,6 +123,8 @@ namespace MCCS.ViewModels
         {
              IsOpenFlyout = true; 
             RightFlyoutName = "工作流配置";
+            _currentFlyoutName = WorkflowStepListPageViewModel.Tag;
+            _tempParam = opEventArgs;
             var paramters = new NavigationParameters { { "OpEventArgs", opEventArgs } }; 
              _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(WorkflowStepListPageViewModel.Tag, UriKind.Relative), paramters);
         }
@@ -116,6 +133,8 @@ namespace MCCS.ViewModels
         {
             IsOpenFlyout = true;
             RightFlyoutName = "Ui节点配置";
+            _currentFlyoutName = nameof(MethodComponentsPageViewModel);
+            _tempParam = param;
             var paramters = new NavigationParameters { { "SourceId", param.SourceId } };
             _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(nameof(MethodComponentsPageViewModel), UriKind.Relative), paramters);
         }
@@ -124,6 +143,8 @@ namespace MCCS.ViewModels
         {
             IsOpenFlyout = true;
             RightFlyoutName = "节点参数配置";
+            _currentFlyoutName = param.ViewName;
+            _tempParam = param;
             var paramters = new NavigationParameters { { "OpenParameterSetEventParam", param } };
             _regionManager.RequestNavigate(GlobalConstant.RightFlyoutRegionName, new Uri(param.ViewName, UriKind.Relative), paramters);
         }
@@ -141,9 +162,13 @@ namespace MCCS.ViewModels
             _eventAggregator.GetEvent<AddOpEvent>().Subscribe(ExecuteShowStepsCommand);
             _eventAggregator.GetEvent<OpenUiCompontsEvent>().Subscribe(ExecuteShowComponentsCommand);
             _eventAggregator.GetEvent<OpenParamterSetEvent>().Subscribe(ExecuteShowParamterSetCommand);
-            _eventAggregator.GetEvent<SelectedComponentEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
-            _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false);
-            _eventAggregator.GetEvent<SaveParameterEvent>().Subscribe(param => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
+            _eventAggregator.GetEvent<SelectedComponentEvent>().Subscribe(_ => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
+            _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(_ =>
+            {
+                _currentFlyoutName = "";
+                IsOpenFlyout = false;
+            }, ThreadOption.UIThread, false, filter => filter.Node != null);
+            _eventAggregator.GetEvent<SaveParameterEvent>().Subscribe(_ => IsOpenFlyout = false, ThreadOption.UIThread, false, filter => !string.IsNullOrEmpty(filter.SourceId));
             LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             // OpenTestFlyoutCommand = new DelegateCommand<Flyout>(f => f.SetCurrentValue(Flyout.IsOpenProperty, true), f => true);
         } 

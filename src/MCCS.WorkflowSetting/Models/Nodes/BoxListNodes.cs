@@ -51,8 +51,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             if (param.Source != Id) return;
             var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
             if (deleteNodeInfo == null) return;
-            Nodes.Remove(deleteNodeInfo);
+            Nodes.Remove(deleteNodeInfo); 
             var node = param.Node;
+            // 为空表示取消添加操作
+            if (node == null)
+            {
+                RaiseNodeChanged("UIChanged", "");
+                return;
+            }
             var addOpNode = new AddOpNode(this);
             node.Parent = this;
             if (InsertBeforeNode == null)
