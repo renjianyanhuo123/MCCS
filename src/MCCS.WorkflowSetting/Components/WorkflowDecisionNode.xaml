@@ -19,8 +19,10 @@
                 Margin="{Binding BorderLeftMargin}"
                 BorderThickness="0,1.5,0,1.5"
                 Width="{Binding BorderWidth}"
-                Height="{Binding BorderHeight}"/>
-        <ItemsControl ItemsSource="{Binding Children}">
+                Height="{Binding BorderHeight}"
+                Visibility="{Binding IsCollapse,Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <ItemsControl ItemsSource="{Binding Children}"
+                      Visibility="{Binding IsCollapse,Converter={StaticResource BooleanToVisibilityConverter}}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal"  />
@@ -55,7 +57,7 @@
               HorizontalAlignment="Center">
             <i:Interaction.Triggers> 
                 <i:EventTrigger EventName="MouseLeave">
-                    <i:InvokeCommandAction Command="{Binding MouseLeaveCommand}"/>
+                    <prism:InvokeCommandAction Command="{Binding MouseLeaveCommand}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <Grid.ColumnDefinitions>
@@ -68,6 +70,7 @@
                     Height="20" 
                     VerticalAlignment="Center"
                     x:Name="LeftBorder"
+                    ToolTip="添加分支"
                     Visibility="{Binding IsShowOperationBtn, Converter={StaticResource BooleanToVisibilityConverter}}"
                     CornerRadius="50" >
                 <Border.Style>
@@ -104,29 +107,33 @@
                 </Border.Effect>
                 <Border.RenderTransform>
                     <RotateTransform Angle="45"/>
-                </Border.RenderTransform>
-                
-                <!-- 内部图片 -->
+                </Border.RenderTransform> 
                 <Image Width="Auto" Height="Auto"  Margin="6" Source="/MCCS.WorkflowSetting;component/Resources/ellipse.png" />
             </Border>
             <Border Grid.Column="2"
                     x:Name="RightBorder"
                     Width="20" 
                     Height="20"
+                    ToolTip="收起" 
                     Visibility="{Binding IsShowOperationBtn, Converter={StaticResource BooleanToVisibilityConverter}}"
                     VerticalAlignment="Center"
                     CornerRadius="50" >
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding CollapseCommand}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="#CCCCCC"/>
                         <Setter Property="Cursor" Value="Hand" />
                     </Style>
                 </Border.Style>
-                <!-- 加号图片 -->
-                <Image Source="/MCCS.WorkflowSetting;component/Resources/plus.png" 
+                <!-- 收起图片 -->
+                <Image Source="/MCCS.WorkflowSetting;component/Resources/chevronup_16.png" 
                        Width="16" Height="16" 
                        VerticalAlignment="Center" 
-                       HorizontalAlignment="Center" />
+                       HorizontalAlignment="Center" /> 
             </Border>
         </Grid>
     </Grid>

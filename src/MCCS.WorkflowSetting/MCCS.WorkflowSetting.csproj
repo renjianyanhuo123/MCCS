@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\chevronup_16.png" />
     <None Remove="Resources\ellipse.png" />
     <None Remove="Resources\plus.png" />
     <None Remove="Resources\WorkflowEnd.png" />
@@ -36,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\chevronup_16.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Resources\ellipse.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

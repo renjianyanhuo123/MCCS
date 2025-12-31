@@ -6,15 +6,22 @@ using MCCS.WorkflowSetting.EventParams;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class DecisionNode : BaseNode
-    {
+    { 
+
         #region Property
         /// <summary>
         /// 所有的子节点
         /// </summary>
         public ObservableCollection<BaseNode> Children { get; } = [];
 
-        private double _borderWidth;
+        private bool _isCollapse = false;
+        public bool IsCollapse
+        {
+            get => _isCollapse;
+            set => SetProperty(ref _isCollapse, value);
+        }
 
+        private double _borderWidth; 
         public double BorderWidth
         {
             get => _borderWidth;
@@ -85,6 +92,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             {
                 Parent = this
             };
+            IsCollapse = true;
             Width = ItemSpacing * 2 + node1.Width + node2.Width;
             Height = Math.Max(node1.Height, node2.Height); 
             Children.Add(node1);
@@ -92,6 +100,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             ExecuteChildrenChanged();
             MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
             MouseEnterCommand = new DelegateCommand(ExecuteMouseEnterCommand);
+            CollapseCommand = new DelegateCommand(ExecuteCollapseCommand);
         }
 
         private void ExecuteChildrenChanged()
@@ -112,13 +121,30 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         #region Command
         public DelegateCommand MouseLeaveCommand { get; }
         public DelegateCommand MouseEnterCommand { get; }
+        public DelegateCommand CollapseCommand { get; } 
         #endregion
 
-        #region Private Method
-
+        #region Private Method 
         private void ExecuteMouseEnterCommand() => IsShowOperationBtn = true;
 
         private void ExecuteMouseLeaveCommand() => IsShowOperationBtn = false;
+
+        private void ExecuteCollapseCommand()
+        {
+            IsCollapse = !IsCollapse;
+            //if (IsCollapse)
+            //{
+            //    _tempHeight = Height;
+            //    _tempWidth = Width;
+            //    Height = 200;
+            //    Width = 200;
+            //}
+            //else
+            //{
+            //    Height = _tempHeight;
+            //    Width = _tempWidth;
+            //}
+        }
 
         #endregion
 
