@@ -5,6 +5,81 @@
         public BranchNode()
         {
             Type = NodeTypeEnum.Branch;
+            DeleteSingleDecisionCommand = new DelegateCommand(ExecuteDeleteSingleDecisionCommand);
+            OperationNodeClickedCommand = new DelegateCommand(ExecuteOperationNodeClickedCommand);
+            DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
+            ConfigueDeleteCommand = new DelegateCommand(ExecuteConfigueDeleteCommand);
+            CancelCommand = new DelegateCommand(ExecuteCancelCommand);
         }
+
+        #region Property
+        /// <summary>
+        /// 节点标题
+        /// </summary>
+        private string _title = string.Empty;
+        public string Title
+        {
+            get => _title;
+            set => SetProperty(ref _title, value);
+        }
+
+        private bool _isOpen = false;
+        public bool IsOpen
+        {
+            get => _isOpen;
+            set => SetProperty(ref _isOpen, value);
+        }
+
+        private bool _isShowShade = false;
+        public bool IsShowShade
+        {
+            get => _isShowShade;
+            set => SetProperty(ref _isShowShade, value);
+        }
+        #endregion
+
+        #region Command 
+        public DelegateCommand DeleteSingleDecisionCommand { get; }
+        public DelegateCommand OperationNodeClickedCommand { get; }
+        public DelegateCommand DeleteNodeCommand { get; }
+        public DelegateCommand CancelCommand { get; }
+        public DelegateCommand ConfigueDeleteCommand { get; }
+
+        #endregion
+
+        #region Private Method
+        private void ExecuteDeleteSingleDecisionCommand()
+        {
+            IsShowShade = true;
+            IsOpen = false;
+        }
+
+        private void ExecuteOperationNodeClickedCommand()
+        {
+            IsOpen = true;
+        }
+
+        private void ExecuteDeleteNodeCommand()
+        {
+            IsShowShade = true;
+            IsOpen = false;
+        }
+
+        private void ExecuteCancelCommand()
+        {
+            IsShowShade = false;
+        }
+
+        private void ExecuteConfigueDeleteCommand()
+        {
+            //_eventAggregator.GetEvent<DeleteNodeEvent>()
+            //    .Publish(new DeleteNodeEventParam
+            //    {
+            //        Source = _soureId,
+            //        NodeId = Id
+            //    });
+        }
+
+        #endregion
     }
 }

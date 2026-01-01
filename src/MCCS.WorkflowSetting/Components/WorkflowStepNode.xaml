@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MCCS.WorkflowSetting.Components.WorkflowStepNode"
+<UserControl x:Class="MCCS.WorkflowSetting.Components.WorkflowStepNode"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -88,14 +88,14 @@
                     </UniformGrid>
                 </StackPanel>
             </Border>
-            <Popup x:Name="ContextPopup"
-                               StaysOpen="False"
-                               AllowsTransparency="True" 
-                               Placement="Bottom"
-                               IsOpen="{Binding IsOpen}"
-                               PlacementTarget="{Binding ElementName=OperationNode}"
-                               HorizontalOffset="-180"
-                               VerticalOffset="5">
+            <Popup Grid.Row="0" x:Name="ContextPopup"
+                   StaysOpen="False"
+                   AllowsTransparency="True" 
+                   Placement="Bottom"
+                   IsOpen="{Binding IsOpen}"
+                   PlacementTarget="{Binding ElementName=OperationNode}"
+                   HorizontalOffset="-180"
+                   VerticalOffset="5">
                 <Border Padding="0" 
                         CornerRadius="8" 
                         Background="White"

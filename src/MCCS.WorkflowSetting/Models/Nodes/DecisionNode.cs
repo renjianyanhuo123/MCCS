@@ -151,8 +151,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public DelegateCommand MouseEnterCommand { get; }
         public DelegateCommand CollapseCommand { get; }
         public DelegateCommand AddBranchCommand { get; }
-        public AsyncDelegateCommand DeleteAllDecisionCommand { get; }
-
+        public AsyncDelegateCommand DeleteAllDecisionCommand { get; } 
         #endregion
 
         #region Private Method 
@@ -169,6 +168,19 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             });
             if (result.Result == ButtonResult.OK)
             {
+                // 清理所有子分支节点
+                Children.Clear();
+
+                // 发布删除事件，通知父节点删除此决策节点
+                if (Parent != null)
+                {
+                    _eventAggregator.GetEvent<DeleteNodeEvent>()
+                        .Publish(new DeleteNodeEventParam
+                        {
+                            Source = Parent.Id,
+                            NodeId = Id
+                        });
+                }
             }
         }
 
