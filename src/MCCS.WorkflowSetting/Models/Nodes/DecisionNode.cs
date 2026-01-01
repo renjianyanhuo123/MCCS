@@ -97,7 +97,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             _eventAggregator = eventAggregator;
             _dialogService = dialogService;
-            ItemSpacing = 10;
+            ItemSpacing = 20;
             var node1 = new BranchStepListNodes(eventAggregator)
             {
                 Parent = this

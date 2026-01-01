@@ -26,8 +26,10 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         } 
         #region Private Method
         private void ExecuteLoadedCommand()
-        { 
+        {
             RenderChanged();
+            // 通知父节点更新，确保边框正确显示
+            RaiseNodeChanged("Loaded");
         }
         
         protected override void UpdateNodePosition()
