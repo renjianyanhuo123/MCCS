@@ -1,21 +1,21 @@
-﻿using System.Windows.Controls;
-using MCCS.WorkflowSetting.Models.Nodes;
+﻿using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.WorkflowSetting
 {
+    /// <summary>
+    /// 工作流管理器接口
+    /// 负责工作流数据的序列化、反序列化和状态管理
+    /// 注意：此接口只负责数据层面的操作，不涉及UI层面的Canvas操作
+    /// UI绑定应该由ViewModel或View层处理
+    /// </summary>
     public interface ICanvasManager
     {
         /// <summary>
-        /// 初始化画布管理器
-        /// </summary>
-        /// <param name="canvas">画布控件</param>
-        void Inititial(Canvas canvas);
-
-        /// <summary>
-        /// 从JSON字符串渲染工作流
+        /// 从JSON字符串加载并还原工作流
         /// </summary>
         /// <param name="json">工作流JSON字符串</param>
-        void RenderWorkflowByJson(string json);
+        /// <returns>还原的工作流根节点</returns>
+        StepListNodes LoadWorkflowFromJson(string json);
 
         /// <summary>
         /// 保存当前工作流为JSON字符串
@@ -35,10 +35,11 @@ namespace MCCS.WorkflowSetting
         /// 从文件加载工作流
         /// </summary>
         /// <param name="filePath">文件路径</param>
-        Task LoadWorkflowFromFileAsync(string filePath);
+        /// <returns>加载的工作流根节点</returns>
+        Task<StepListNodes> LoadWorkflowFromFileAsync(string filePath);
 
         /// <summary>
-        /// 设置当前工作流根节点
+        /// 设置当前工作流根节点（用于保存操作）
         /// </summary>
         /// <param name="rootNode">根节点</param>
         void SetWorkflowRoot(StepListNodes rootNode);
@@ -47,10 +48,5 @@ namespace MCCS.WorkflowSetting
         /// 获取当前工作流根节点
         /// </summary>
         StepListNodes? GetWorkflowRoot();
-
-        /// <summary>
-        /// 添加节点（保留用于未来扩展）
-        /// </summary>
-        void Add();
     }
 }

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using MCCS.WorkflowSetting.Models.Nodes;
 using MCCS.WorkflowSetting.Serialization;
 
 namespace MCCS.WorkflowSetting
 {
     /// <summary>
-    /// 画布管理器实现
-    /// 负责工作流的渲染、保存和加载
+    /// 工作流管理器实现
+    /// 负责工作流的序列化、反序列化和状态管理
+    /// 注意：此类只负责数据层面的操作，不涉及UI层面的Canvas操作
+    /// UI绑定应该由ViewModel或View层处理
     /// </summary>
     public sealed class CanvasManager : ICanvasManager
     {
@@ -17,7 +18,6 @@ namespace MCCS.WorkflowSetting
         private readonly IEventAggregator _eventAggregator;
         private readonly IDialogService? _dialogService;
 
-        private Canvas? _canvas;
         private StepListNodes? _currentWorkflowRoot;
 
         /// <summary>
@@ -37,17 +37,11 @@ namespace MCCS.WorkflowSetting
         }
 
         /// <summary>
-        /// 初始化画布管理器
+        /// 从JSON字符串加载并还原工作流
         /// </summary>
-        public void Inititial(Canvas canvas)
-        {
-            _canvas = canvas ?? throw new ArgumentNullException(nameof(canvas));
-        }
-
-        /// <summary>
-        /// 从JSON字符串渲染工作流
-        /// </summary>
-        public void RenderWorkflowByJson(string json)
+        /// <param name="json">工作流JSON字符串</param>
+        /// <returns>还原的工作流根节点</returns>
+        public StepListNodes LoadWorkflowFromJson(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
                 throw new ArgumentException("JSON字符串不能为空", nameof(json));
@@ -57,21 +51,15 @@ namespace MCCS.WorkflowSetting
                 // 使用序列化器反序列化工作流
                 var workflowRoot = _workflowSerializer.DeserializeFromJson(json, _eventAggregator, _dialogService);
 
-                // 保存当前工作流根节点
+                // 保存当前工作流根节点（用于后续保存操作）
                 _currentWorkflowRoot = workflowRoot;
 
-                // 如果画布已初始化，可以在这里设置DataContext或进行其他UI绑定
-                // 注：实际的UI渲染通常由XAML的数据绑定自动完成
-                // 这里只是提供了一个扩展点
-                if (_canvas != null)
-                {
-                    // 可选：触发画布重绘或其他UI更新操作
-                    _canvas.DataContext = workflowRoot;
-                }
+                // 返回工作流根节点，由调用者（ViewModel/View）负责UI绑定
+                return workflowRoot;
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"渲染工作流失败: {ex.Message}", ex);
+                throw new InvalidOperationException($"加载工作流失败: {ex.Message}", ex);
             }
         }
 
@@ -127,7 +115,9 @@ namespace MCCS.WorkflowSetting
         /// <summary>
         /// 从文件加载工作流
         /// </summary>
-        public async Task LoadWorkflowFromFileAsync(string filePath)
+        /// <param name="filePath">文件路径</param>
+        /// <returns>加载的工作流根节点</returns>
+        public async Task<StepListNodes> LoadWorkflowFromFileAsync(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentException("文件路径不能为空", nameof(filePath));
@@ -140,8 +130,8 @@ namespace MCCS.WorkflowSetting
                 // 异步读取文件
                 var json = await File.ReadAllTextAsync(filePath);
 
-                // 渲染工作流
-                RenderWorkflowByJson(json);
+                // 加载并返回工作流
+                return LoadWorkflowFromJson(json);
             }
             catch (Exception ex)
             {
@@ -150,8 +140,9 @@ namespace MCCS.WorkflowSetting
         }
 
         /// <summary>
-        /// 设置当前工作流根节点
+        /// 设置当前工作流根节点（用于保存操作）
         /// </summary>
+        /// <param name="rootNode">根节点</param>
         public void SetWorkflowRoot(StepListNodes rootNode)
         {
             _currentWorkflowRoot = rootNode ?? throw new ArgumentNullException(nameof(rootNode));
@@ -160,18 +151,10 @@ namespace MCCS.WorkflowSetting
         /// <summary>
         /// 获取当前工作流根节点
         /// </summary>
+        /// <returns>当前工作流根节点，如果未设置则返回null</returns>
         public StepListNodes? GetWorkflowRoot()
         {
             return _currentWorkflowRoot;
-        }
-
-        /// <summary>
-        /// 添加节点（保留用于未来扩展）
-        /// </summary>
-        public void Add()
-        {
-            // 预留方法，用于未来可能的节点添加功能
-            throw new NotImplementedException("此功能尚未实现");
         }
     }
 }
