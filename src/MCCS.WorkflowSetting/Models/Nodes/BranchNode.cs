@@ -83,20 +83,15 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             // BranchNode的Parent是BranchStepListNodes
             if (Parent is not BranchStepListNodes branchStepList) return;
-
             // BranchStepListNodes的Parent是DecisionNode
             if (branchStepList.Parent is not DecisionNode decisionNode) return;
-
             // 从DecisionNode的Children集合中删除整个BranchStepListNodes
             // 这会删除当前子分支下的所有内容
             decisionNode.Children.Remove(branchStepList);
-
             // 更新决策分支数量
             decisionNode.DecisionNum = decisionNode.Children.Count;
-
             // 触发变更事件，通知UI更新
             decisionNode.RaiseNodeChanged("DeleteBranch");
-
             // 隐藏遮罩层
             IsShowShade = false;
         }

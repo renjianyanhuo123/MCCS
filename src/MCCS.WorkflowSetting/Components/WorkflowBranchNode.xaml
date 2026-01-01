@@ -57,7 +57,7 @@
                     Opacity="0.8"
                     Height="Auto" Grid.RowSpan="2">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" >
-                    <TextBlock Text="确定删除此节点?" 
+                    <TextBlock Text="确定删除此分支下所有的子节点?" 
                                HorizontalAlignment="Center"
                                Margin="0,0,0,10"
                                Foreground="White"
@@ -79,8 +79,8 @@
             <Grid Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="10"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
                 </Grid.RowDefinitions> 
                 <Popup Grid.Row="0" x:Name="ContextPopup"
            StaysOpen="False"
@@ -121,9 +121,9 @@
                             <Separator Height="1"  Background="#F0F0F0"  Margin="0"/>
                             <!-- 删除 -->
                             <Button 
-                    Style="{StaticResource MenuButtonStyle}"
-                    Command="{Binding DeleteNodeCommand}"
-                    Height="44" >
+                                Style="{StaticResource MenuButtonStyle}"
+                                Command="{Binding DeleteNodeCommand}"
+                                Height="44" >
                                 <StackPanel Orientation="Horizontal" Margin="16,0">
                                     <Path Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
                               Fill="#FF4444"
@@ -156,23 +156,24 @@
 
                     <!-- 菜单按钮 -->
                     <Button Grid.Column="1"
-                Style="{StaticResource MenuButtonStyle}"
-                Command="{Binding OperationNodeClickedCommand}"
-                x:Name="OperationNode"
-                VerticalAlignment="Center">
+                        Style="{StaticResource MenuButtonStyle}"
+                        Command="{Binding OperationNodeClickedCommand}"
+                        x:Name="OperationNode"
+                        VerticalAlignment="Center">
                         <materialDesign:PackIcon Width="20" Height="20" Kind="DotsHorizontal" Foreground="#666666" />
                     </Button>
                 </Grid>
 
-                <StackPanel Grid.Row="2" Background="#F5F5F5" Margin="0,0,0,10">
+                <Grid Grid.Row="2"
+                      Background="#F5F5F5"
+                       Cursor="Hand"> 
                     <!-- 描述文本 -->
-                    <TextBlock Text="所有数据可进入该分支"
-                   FontSize="14"
-                   Width="Auto"
-                   Height="Auto"
-                   VerticalAlignment="Center" 
-                   Foreground="#999999"/>
-                </StackPanel>
+                    <TextBlock Text="所有数据可进入该分支" 
+                               FontSize="14"
+                               Margin="10,0,0,0"
+                               VerticalAlignment="Center" 
+                               Foreground="#999999"/>
+                </Grid>
             </Grid>
         </Grid>
     </Border>

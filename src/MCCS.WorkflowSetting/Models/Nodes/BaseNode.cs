@@ -74,7 +74,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// <summary>
         /// 触发变更事件（从当前节点开始向上冒泡）
         /// </summary>
-        protected void RaiseNodeChanged(string changeType, object? changeData = null)
+        public void RaiseNodeChanged(string changeType, object? changeData = null)
         {
             var args = new NodeChangedEventArgs(this, changeType, changeData);
             OnNodeChanged(args);

@@ -69,7 +69,7 @@
                     Height="Auto" Grid.RowSpan="2">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                             Margin="0,15, 0,0">
-                    <TextBlock Text="确定删除此节点?" 
+                    <TextBlock Text="确定删除此分支?" 
                                HorizontalAlignment="Center"
                                Margin="0,0,0,10"
                                Foreground="White"
