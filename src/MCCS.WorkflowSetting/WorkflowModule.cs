@@ -1,6 +1,7 @@
 ﻿
 using MCCS.WorkflowSetting.Components;
 using MCCS.WorkflowSetting.Models.Nodes;
+using MCCS.WorkflowSetting.Serialization;
 
 namespace MCCS.WorkflowSetting
 {
@@ -15,13 +16,19 @@ namespace MCCS.WorkflowSetting
             // No initialization logic required at this time
         }
         /// <summary>
-        /// (1)
+        /// (1)注册类型
         /// </summary>
         /// <param name="containerRegistry"></param>
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // 指定ViewModel创建
             containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>();
+
+            // 注册序列化服务
+            containerRegistry.RegisterSingleton<IWorkflowSerializer, WorkflowSerializer>();
+
+            // 注册画布管理器
+            containerRegistry.RegisterSingleton<ICanvasManager, CanvasManager>();
         }
     }
 }
