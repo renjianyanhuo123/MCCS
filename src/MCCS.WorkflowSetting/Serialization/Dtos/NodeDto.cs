@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.WorkflowSetting.Serialization.Dtos
@@ -66,7 +65,7 @@ namespace MCCS.WorkflowSetting.Serialization.Dtos
         /// <summary>
         /// 子节点列表（用于BoxListNodes）
         /// </summary>
-        public List<NodeDto> Children { get; set; } = new();
+        public List<NodeDto> Children { get; set; } = [];
 
         /// <summary>
         /// 特定类型节点的扩展属性

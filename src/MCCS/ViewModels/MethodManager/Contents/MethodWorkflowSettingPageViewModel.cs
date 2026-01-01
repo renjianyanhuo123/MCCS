@@ -2,6 +2,7 @@
 
 using MCCS.Common.Resources.ViewModels;
 using MCCS.WorkflowSetting.EventParams;
+using MCCS.WorkflowSetting.Models.Nodes;
 
 namespace MCCS.ViewModels.MethodManager.Contents
 {
@@ -50,6 +51,13 @@ namespace MCCS.ViewModels.MethodManager.Contents
                     Scale = _perect / 100.0;
                 }
             }
+        }
+
+        private StepListNodes _workflowNodes; 
+        public StepListNodes WorkflowNodes
+        {
+            get => _workflowNodes;
+            set => SetProperty(ref _workflowNodes, value);
         }
 
         private double _scale = 1.0;

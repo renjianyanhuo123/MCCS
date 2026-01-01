@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace MCCS.WorkflowSetting.Serialization.Dtos
 {
     /// <summary>

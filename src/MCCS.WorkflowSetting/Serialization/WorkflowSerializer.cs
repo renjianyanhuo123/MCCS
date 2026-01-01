@@ -153,10 +153,8 @@ namespace MCCS.WorkflowSetting.Serialization
 
         private void CollectConnectionsRecursive(BaseNode node, List<ConnectionDto> connections, HashSet<string> visited)
         {
-            if (visited.Contains(node.Id))
+            if (!visited.Add(node.Id))
                 return;
-
-            visited.Add(node.Id);
 
             if (node is BoxListNodes boxListNodes)
             {
@@ -292,7 +290,7 @@ namespace MCCS.WorkflowSetting.Serialization
 
         private DecisionNode CreateDecisionNode(NodeDto nodeDto, IEventAggregator eventAggregator, IDialogService? dialogService)
         {
-            var decisionNode = new DecisionNode(eventAggregator, dialogService ?? new NullDialogService());
+            var decisionNode = new DecisionNode(eventAggregator, dialogService);
 
             // 清空默认创建的子分支
             decisionNode.Children.Clear();
@@ -392,47 +390,6 @@ namespace MCCS.WorkflowSetting.Serialization
                     if (nodeDto.Properties.TryGetValue("Title", out var branchTitle))
                         branchNode.Title = branchTitle?.ToString() ?? string.Empty;
                     break;
-            }
-        }
-
-        #endregion
-
-        #region 辅助类
-
-        /// <summary>
-        /// 空对话框服务实现（用于在没有IDialogService时的占位）
-        /// </summary>
-        private class NullDialogService : IDialogService
-        {
-            public void Show(string name, IDialogParameters parameters, Action<IDialogResult> callback)
-            {
-                // 空实现
-            }
-
-            public void Show(string name, IDialogParameters parameters, Action<IDialogResult> callback, string windowName)
-            {
-                // 空实现
-            }
-
-            public void ShowDialog(string name, IDialogParameters parameters, Action<IDialogResult> callback)
-            {
-                callback?.Invoke(new DialogResult());
-            }
-
-            public void ShowDialog(string name, IDialogParameters parameters, Action<IDialogResult> callback, string windowName)
-            {
-                callback?.Invoke(new DialogResult());
-            }
-
-            public Task<IDialogResult> ShowDialogHostAsync(string name, string dialogHostName, IDialogParameters parameters = null!)
-            {
-                return Task.FromResult<IDialogResult>(new DialogResult());
-            }
-
-            private class DialogResult : IDialogResult
-            {
-                public IDialogParameters Parameters { get; } = new DialogParameters();
-                public ButtonResult Result { get; } = ButtonResult.None;
             }
         }
 
