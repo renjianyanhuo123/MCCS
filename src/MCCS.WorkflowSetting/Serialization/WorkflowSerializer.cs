@@ -237,7 +237,7 @@ namespace MCCS.WorkflowSetting.Serialization
                     // 恢复子节点
                     foreach (var childDto in nodeDto.Children)
                     {
-                        var childNode = CreateNodeFromDto(childDto, eventAggregator, dialogService);
+                        var childNode = CreateNodeFromDto(childDto, boxListNodes, eventAggregator, dialogService);
                         if (childNode != null)
                         {
                             childNode.Parent = boxListNodes;
@@ -265,15 +265,18 @@ namespace MCCS.WorkflowSetting.Serialization
             }
         }
 
-        private BaseNode? CreateNodeFromDto(NodeDto nodeDto, IEventAggregator eventAggregator, IDialogService? dialogService)
+        private BaseNode? CreateNodeFromDto(NodeDto nodeDto, BaseNode? parentNode, IEventAggregator eventAggregator, IDialogService? dialogService)
         {
+            // 获取父节点的Id，用于StepNode和BranchNode的构造函数
+            var parentId = parentNode?.Id ?? string.Empty;
+
             BaseNode? node = nodeDto.Type switch
             {
                 NodeTypeEnum.Start => new StartNode(),
                 NodeTypeEnum.End => new EndNode(),
-                NodeTypeEnum.Process => new StepNode(nodeDto.Id, eventAggregator),
+                NodeTypeEnum.Process => new StepNode(parentId, eventAggregator),
                 NodeTypeEnum.Decision => CreateDecisionNode(nodeDto, eventAggregator, dialogService),
-                NodeTypeEnum.Branch => new BranchNode(eventAggregator, null!),
+                NodeTypeEnum.Branch => new BranchNode(eventAggregator, parentNode),
                 NodeTypeEnum.BranchStepList => new BranchStepListNodes(eventAggregator),
                 _ => null
             };
@@ -311,7 +314,7 @@ namespace MCCS.WorkflowSetting.Serialization
                     // 恢复分支的子节点
                     foreach (var branchChildDto in childDto.Children)
                     {
-                        var childNode = CreateNodeFromDto(branchChildDto, eventAggregator, dialogService);
+                        var childNode = CreateNodeFromDto(branchChildDto, branchNode, eventAggregator, dialogService);
                         if (childNode != null)
                         {
                             childNode.Parent = branchNode;
@@ -352,6 +355,7 @@ namespace MCCS.WorkflowSetting.Serialization
         {
             // 恢复基础属性（不恢复Id，保持新生成的Id或使用原Id）
             // node.Id = nodeDto.Id; // 可选：如果需要保持原Id
+            node.Type = nodeDto.Type;
             node.Name = nodeDto.Name;
             node.Code = nodeDto.Code;
             node.Index = nodeDto.Index;
