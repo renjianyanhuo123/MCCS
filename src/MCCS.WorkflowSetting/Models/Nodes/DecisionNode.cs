@@ -66,7 +66,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             }
         }
 
-        private double _itemSpacing = 10;
+        private double _itemSpacing = 30;
         public double ItemSpacing
         {
             get => _itemSpacing;
@@ -97,7 +97,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             _eventAggregator = eventAggregator;
             _dialogService = dialogService;
-            ItemSpacing = 10;
+            ItemSpacing = 30;
             var node1 = new BranchStepListNodes(eventAggregator)
             {
                 Parent = this

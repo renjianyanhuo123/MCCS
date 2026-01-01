@@ -14,13 +14,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Height = 200;
             Nodes.Clear();
             Connections.Clear();
-            Nodes.Add(new BranchNode
-            {
-                Name = "Branch",
-                Parent = this,
-                Width = 260,
-                Height = 85
-            });
+            Nodes.Add(new BranchNode(eventAggregator, this));
             Nodes.Add(new AddOpNode(this));
             LoadedCommand = new DelegateCommand(ExecuteLoadedCommand);
         } 
@@ -28,6 +22,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         private void ExecuteLoadedCommand()
         { 
             RenderChanged();
+            RaiseNodeChanged("Loaded");
         }
         
         protected override void UpdateNodePosition()

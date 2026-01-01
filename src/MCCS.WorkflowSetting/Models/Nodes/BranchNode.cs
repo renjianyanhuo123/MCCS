@@ -1,15 +1,24 @@
-﻿namespace MCCS.WorkflowSetting.Models.Nodes
+﻿using MCCS.WorkflowSetting.EventParams;
+
+namespace MCCS.WorkflowSetting.Models.Nodes
 {
-    public class BranchNode : BaseNode 
+    public class BranchNode : BaseNode
     {
-        public BranchNode()
+        private readonly IEventAggregator _eventAggregator;
+
+        public BranchNode(IEventAggregator eventAggregator, BaseNode? parent)
         {
+            _eventAggregator = eventAggregator;
+            Name = "Branch";
+            Parent = parent;
+            Width = 260;
+            Height = 85;
             Type = NodeTypeEnum.Branch;
             DeleteSingleDecisionCommand = new DelegateCommand(ExecuteDeleteSingleDecisionCommand);
             OperationNodeClickedCommand = new DelegateCommand(ExecuteOperationNodeClickedCommand);
             DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
             ConfigueDeleteCommand = new DelegateCommand(ExecuteConfigueDeleteCommand);
-            CancelCommand = new DelegateCommand(ExecuteCancelCommand);
+            CancelCommand = new DelegateCommand(ExecuteCancelCommand); 
         }
 
         #region Property
@@ -72,12 +81,7 @@
 
         private void ExecuteConfigueDeleteCommand()
         {
-            //_eventAggregator.GetEvent<DeleteNodeEvent>()
-            //    .Publish(new DeleteNodeEventParam
-            //    {
-            //        Source = _soureId,
-            //        NodeId = Id
-            //    });
+             
         }
 
         #endregion
