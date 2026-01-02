@@ -6,41 +6,14 @@
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
              mc:Ignorable="d" 
              xmlns:prism="http://prismlibrary.com/"
-             prism:ViewModelLocator.AutoWireViewModel="True"
+             prism:ViewModelLocator.AutoWireViewModel="False"
              xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
              xmlns:converters="clr-namespace:MCCS.WorkflowSetting.Converters"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors" 
              d:DesignHeight="450" d:DesignWidth="800" 
              d:DataContext="{d:DesignInstance localViewModel:StepListNodes}">
     <UserControl.Resources>
-        <!-- 为每个类型定义隐式 DataTemplate，注意 DataType 属性 -->
-        <DataTemplate DataType="{x:Type localViewModel:StepNode}">
-            <local:WorkflowStepNode />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:AddOpNode}">
-            <local:WorkflowAddOperationNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:DecisionNode}">
-            <local:WorkflowDecisionNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:BranchNode}">
-            <local:WorkflowBranchNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:StartNode}">
-            <local:WorkflowStartNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:EndNode}">
-            <local:WorkflowEndNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:TempPlaceholderAddNode}">
-            <local:WorkflowTempPlaceholderAddNode  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:StepListNodes}">
-            <local:WorkflowStepListNodes  />
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type localViewModel:BranchStepListNodes}">
-            <local:WorkflowBranchStepListNodes  />
-        </DataTemplate> 
+        
         <converters:PointsToPathConverter x:Key="PointsToPathConverter" />
     </UserControl.Resources>
     <Grid Width="{Binding Width}" Height="{Binding Height}" 

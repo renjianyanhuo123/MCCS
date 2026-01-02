@@ -6,35 +6,18 @@ using MCCS.WorkflowSetting.EventParams;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class StepListNodes : BoxListNodes
-    {
+    { 
+
         public StepListNodes(IEventAggregator eventAggregator) : base(eventAggregator)
         {
             Type = NodeTypeEnum.StepList; 
             LoadedCommand = new DelegateCommand(ExecuteLoadedCommand); 
-        }   
+        }
+
 
         #region Private Method  
         private void ExecuteLoadedCommand()
         { 
-            Nodes.Clear();
-            Connections.Clear();
-            Nodes.Add(new StartNode
-            {
-                Width = 60,
-                Height = 60,
-                Parent = this,
-                Type = NodeTypeEnum.Start,
-                Name = "Start"
-            });
-            Nodes.Add(new AddOpNode(this));
-            Nodes.Add(new EndNode
-            {
-                Name = "End",
-                Parent = this,
-                Type = NodeTypeEnum.End,
-                Width = 56,
-                Height = 80
-            });
             RenderChanged();
         }
 

@@ -16,6 +16,11 @@ namespace MCCS.Infrastructure.Repositories.Method
             return freeSql.Insert(model).ExecuteIdentity();
         }
 
+        public Task<MethodWorkflowSettingModel> GetMethodWorkflowSettingAsync(long methodId) =>
+            freeSql.Select<MethodWorkflowSettingModel>()
+                .Where(c => c.MethodId == methodId)
+                .ToOneAsync();
+
         public async ValueTask<bool> DeleteMethodAsync(long id, CancellationToken cancellationToken)
         {
             var rows = await freeSql.Delete<MethodModel>()

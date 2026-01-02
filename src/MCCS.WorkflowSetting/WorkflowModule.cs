@@ -22,11 +22,9 @@ namespace MCCS.WorkflowSetting
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // 指定ViewModel创建
-            containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>();
-
+            // containerRegistry.RegisterForNavigation<WorkflowStepListNodes, StepListNodes>(); 
             // 注册序列化服务
-            containerRegistry.RegisterSingleton<IWorkflowSerializer, WorkflowSerializer>();
-
+            containerRegistry.RegisterSingleton<IWorkflowSerializer, WorkflowSerializer>(); 
             // 注册画布管理器
             containerRegistry.RegisterSingleton<ICanvasManager, CanvasManager>();
         }

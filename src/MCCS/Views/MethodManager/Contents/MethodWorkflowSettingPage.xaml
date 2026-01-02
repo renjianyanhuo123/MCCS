@@ -12,7 +12,38 @@
              xmlns:localViewModel="clr-namespace:MCCS.ViewModels.MethodManager.Contents"
              xmlns:workflowSetting="clr-namespace:MCCS.WorkflowSetting;assembly=MCCS.WorkflowSetting"
              xmlns:components="clr-namespace:MCCS.WorkflowSetting.Components;assembly=MCCS.WorkflowSetting"
+             xmlns:nodes="clr-namespace:MCCS.WorkflowSetting.Models.Nodes;assembly=MCCS.WorkflowSetting"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance localViewModel:MethodWorkflowSettingPageViewModel}">
+    <UserControl.Resources>
+        <!-- 为每个类型定义隐式 DataTemplate，注意 DataType 属性 -->
+        <DataTemplate DataType="{x:Type nodes:StepNode}">
+            <components:WorkflowStepNode />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:AddOpNode}">
+            <components:WorkflowAddOperationNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:DecisionNode}">
+            <components:WorkflowDecisionNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:BranchNode}">
+            <components:WorkflowBranchNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:StartNode}">
+            <components:WorkflowStartNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:EndNode}">
+            <components:WorkflowEndNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:TempPlaceholderAddNode}">
+            <components:WorkflowTempPlaceholderAddNode  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:StepListNodes}">
+            <components:WorkflowStepListNodes  />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type nodes:BranchStepListNodes}">
+            <components:WorkflowBranchStepListNodes  />
+        </DataTemplate>
+</UserControl.Resources>
     <Grid x:Name="Container">
         <b:Interaction.Triggers>
             <b:EventTrigger EventName="Loaded">
@@ -35,9 +66,7 @@
                     <ScaleTransform ScaleX="{Binding Scale}" 
                                     ScaleY="{Binding Scale}" />
                 </Grid.RenderTransform>
-                <components:WorkflowStepListNodes DataContext="{Binding WorkflowNodes}">
-
-                </components:WorkflowStepListNodes>
+                <ContentControl Content="{Binding WorkflowNodes}" />
             </Grid>
         </ScrollViewer>
 

@@ -1,6 +1,9 @@
 ﻿using System.Windows.Controls;
 
 using MCCS.Common.Resources.ViewModels;
+using MCCS.Infrastructure.Helper;
+using MCCS.Infrastructure.Repositories.Method;
+using MCCS.WorkflowSetting;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;
 
@@ -9,14 +12,21 @@ namespace MCCS.ViewModels.MethodManager.Contents
     public sealed class MethodWorkflowSettingPageViewModel : BaseViewModel
     {
         public const string Tag = "MethodWorkflowSettingPage";
+        private readonly IMethodRepository _methodRepository;
 
         private long _methodId = -1;
         private double _oldWidth;
         private double _oldHeight;
 
-        public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
-        { 
-            LoadCommand = new DelegateCommand<object>(ExecuteLoadCommand);
+        private readonly ICanvasManager _canvasManager;
+
+        public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator,
+            IMethodRepository methodRepository,
+            ICanvasManager canvasManager) : base(eventAggregator)
+        {
+            _canvasManager = canvasManager;
+            _methodRepository = methodRepository;
+            LoadCommand = new AsyncDelegateCommand<object>(ExecuteLoadCommand);
             _eventAggregator.GetEvent<NotificationWorkflowChangedEvent>().Subscribe(OnNotificationWorkflowChangedEvent);
         }
 
@@ -70,7 +80,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         #endregion
 
         #region Command 
-        public DelegateCommand<object> LoadCommand { get; }  
+        public AsyncDelegateCommand<object> LoadCommand { get; }  
         #endregion
 
         #region Private Method
@@ -88,7 +98,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
             }
         }
 
-        private void ExecuteLoadCommand(object param)
+        private async Task ExecuteLoadCommand(object param)
         {
             if (_methodId == -1) throw new ArgumentNullException("No MethodId!");
             if (param is Grid element)
@@ -97,7 +107,35 @@ namespace MCCS.ViewModels.MethodManager.Contents
                 _oldHeight = element.ActualHeight;
                 Width = element.ActualWidth;
                 Height = element.ActualHeight; 
-            }
+            }  
+            var workflowSettingModel = await _methodRepository.GetMethodWorkflowSettingAsync(_methodId);
+            //if (workflowSettingModel == null)
+            //{
+            //}
+            //if (!FileHelper.FileExists(@"E:/workflow.json"))
+            //{
+            //    var temp = new StepListNodes(_eventAggregator);
+            //    temp.Nodes.Clear();
+            //    temp.Connections.Clear();
+            //    temp.Nodes.Add(new StartNode
+            //    {
+            //        Width = 60,
+            //        Height = 60,
+            //        Parent = WorkflowNodes,
+            //        Type = NodeTypeEnum.Start,
+            //        Name = "Start"
+            //    });
+            //    temp.Nodes.Add(new AddOpNode(WorkflowNodes));
+            //    temp.Nodes.Add(new EndNode
+            //    {
+            //        Name = "End",
+            //        Parent = WorkflowNodes,
+            //        Type = NodeTypeEnum.End,
+            //        Width = 56,
+            //        Height = 80
+            //    });
+            //    WorkflowNodes = temp;
+            //}
         }
         #endregion
     }
