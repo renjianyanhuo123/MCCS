@@ -3,7 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Models.Nodes" d:DataContext="{d:DesignInstance Type=viewmodels:StepNode}"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
+             xmlns:converters="clr-namespace:MCCS.Common.Resources.Converters;assembly=MCCS.Common.Resources"
+             xmlns:interactivity="http://prismlibrary.com/"
+             xmlns:extensionAttributes="clr-namespace:MCCS.Common.Resources.ExtensionAttributes;assembly=MCCS.Common.Resources"
+             d:DataContext="{d:DesignInstance Type=viewmodels:StepNode}"
              mc:Ignorable="d" 
              x:Name="WorkflowStepNodeRoot"
              d:DesignHeight="110" d:DesignWidth="260">
@@ -43,6 +47,7 @@
             </Setter>
         </Style>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
     </UserControl.Resources> 
     <Border Background="White" 
             CornerRadius="8" 
@@ -112,6 +117,7 @@
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Height="44"
                                 Background="Transparent"
+                                Command="{Binding ModifityTitleCommand}"
                                 BorderThickness="0">
                             <StackPanel Orientation="Horizontal" Margin="16,0">
                                 <Path Data="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
@@ -157,7 +163,8 @@
             <Border Grid.Row="0" 
                     Background="{Binding TitleBackground}" 
                     CornerRadius="8,8,0,0">
-                <Grid>
+                <Grid Focusable="True"
+                      Background="Transparent">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
                         <RowDefinition Height="Auto"></RowDefinition>
@@ -183,12 +190,29 @@
 
                     <!-- 标题文本 -->
                     <TextBlock Grid.Row="1" Text="{Binding Title}" 
-                               Foreground="White" 
+                               Foreground="White"
+                               Visibility="{Binding TitleIsEditable, Converter={StaticResource ReverseBooleanToVisibilityConverter}}"
                                FontSize="14" 
                                FontWeight="Bold"
                                HorizontalAlignment="Center" 
                                VerticalAlignment="Bottom"
                                Margin="0,0,0,10"/>
+                    <TextBox Grid.Row="1"
+                             Text="{Binding Title, UpdateSourceTrigger=LostFocus}"
+                             Width ="200"
+                             FontSize ="14"
+                             FontWeight="Bold"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Bottom"
+                             Margin="0,0,0,10"
+                             extensionAttributes:FocusHelper.AutoFocus="{Binding TitleIsEditable}"
+                             Visibility="{Binding TitleIsEditable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="LostFocus">
+                                <interactivity:InvokeCommandAction Command="{Binding TitleLostFocusCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                    </TextBox>
                 </Grid>
             </Border>
 

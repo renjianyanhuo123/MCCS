@@ -11,12 +11,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public StepNode(string sourceId, IEventAggregator eventAggregator)
         {
             _soureId = sourceId;
+            _eventAggregator = eventAggregator;
             OperationNodeClickedCommand = new DelegateCommand(ExecuteOperationNodeClickedCommand);
             DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
             CancelCommand = new DelegateCommand(ExecuteCancelCommand);
             ConfigueDeleteCommand = new DelegateCommand(ExecuteConfigueDeleteCommand);
-            TitleBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9955"));
-            _eventAggregator = eventAggregator;
+            ModifityTitleCommand = new DelegateCommand(ExecuteModifityTitleCommand);
+            TitleLostFocusCommand = new DelegateCommand(ExecuteTitleLostFocusCommand);
+            TitleBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9955")); 
         }
         #region Property
         /// <summary>
@@ -28,6 +30,14 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             get => _title;
             set => SetProperty(ref _title, value);
         }
+
+        private bool _titleIsEditable = false;
+        public bool TitleIsEditable
+        {
+            get => _titleIsEditable;
+            set => SetProperty(ref _titleIsEditable, value);
+        }
+
         /// <summary>
         /// 节点背景色
         /// </summary>
@@ -53,28 +63,35 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         }
         #endregion
 
-        public DelegateCommand OperationNodeClickedCommand { get; }
-
-        public DelegateCommand DeleteNodeCommand { get; }
-
-        public DelegateCommand CancelCommand { get; }
-
+        #region Command
+        public DelegateCommand OperationNodeClickedCommand { get; } 
+        public DelegateCommand DeleteNodeCommand { get; } 
+        public DelegateCommand CancelCommand { get; } 
         public DelegateCommand ConfigueDeleteCommand { get; }
+        public DelegateCommand ModifityTitleCommand { get; }
+        public DelegateCommand TitleLostFocusCommand { get; }
 
-        private void ExecuteConfigueDeleteCommand()
+        #endregion
+        private void ExecuteTitleLostFocusCommand()
         {
+            TitleIsEditable = false;
+        }
+
+        private void ExecuteModifityTitleCommand()
+        {
+            TitleIsEditable = true;
+            IsOpen = false;
+        }
+
+        private void ExecuteConfigueDeleteCommand() =>
             _eventAggregator.GetEvent<DeleteNodeEvent>()
                 .Publish(new DeleteNodeEventParam
                 {
                     Source = _soureId,
                     NodeId = Id
                 });
-        }
 
-        private void ExecuteOperationNodeClickedCommand()
-        {
-            IsOpen = true;
-        }
+        private void ExecuteOperationNodeClickedCommand() => IsOpen = true;
 
         private void ExecuteDeleteNodeCommand()
         {
@@ -82,9 +99,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             IsOpen = false;
         }
 
-        private void ExecuteCancelCommand()
-        {
-            IsShowShade = false;
-        }
+        private void ExecuteCancelCommand() => IsShowShade = false;
     }
 }
