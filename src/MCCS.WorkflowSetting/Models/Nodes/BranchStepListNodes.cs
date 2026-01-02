@@ -12,8 +12,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;
             Height = 200;
-            Nodes.Clear();
-            Connections.Clear();
             foreach (var child in children)
             {
                 child.Parent = this;

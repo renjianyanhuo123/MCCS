@@ -101,10 +101,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             IsCollapse = true;
             Width = ItemSpacing * 2 + children.Sum(s => s.Width);
             Height = children.Max(c => c.Height);
-            children.ForEach(c => c.Parent = this);
-            // 保存初始的展开状态尺寸
-            _tempWidth = Width;
-            _tempHeight = Height; 
+            children.ForEach(c => c.Parent = this); 
             Children.Clear();
             Children.AddRange(children);
             DecisionNum = Children.Count;

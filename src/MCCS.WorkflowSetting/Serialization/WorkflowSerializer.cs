@@ -11,18 +11,13 @@ namespace MCCS.WorkflowSetting.Serialization
     /// </summary>
     public class WorkflowSerializer : IWorkflowSerializer
     {
-        private readonly JsonSerializerSettings _serializerSettings;
-
-        public WorkflowSerializer()
+        private readonly JsonSerializerSettings _serializerSettings = new()
         {
-            _serializerSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented,
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Include,
-                Converters = { new BaseNodeDtoConverter() }
-            };
-        }
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Include,
+            Converters = { new BaseNodeDtoConverter() }
+        };
 
         /// <summary>
         /// 将StepListNodes转换为可序列化的DTO对象，并序列化为JSON字符串

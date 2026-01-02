@@ -111,7 +111,6 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 IsCollapse = node.IsCollapse,
                 Branches = []
             };
-
             // 转换所有子分支
             foreach (var child in node.Children)
             {
@@ -120,7 +119,6 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                     dto.Branches.Add(ConvertBranchStepList(branchStepList));
                 }
             }
-
             return dto;
         }
 
@@ -140,8 +138,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Order = branchStepList.Order,
                 Level = branchStepList.Level,
                 Nodes = []
-            };
-
+            }; 
             // 转换分支中的所有节点
             foreach (var node in branchStepList.Nodes)
             {
@@ -150,8 +147,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 {
                     dto.Nodes.Add(nodeDto);
                 }
-            }
-
+            } 
             return dto;
         }
 

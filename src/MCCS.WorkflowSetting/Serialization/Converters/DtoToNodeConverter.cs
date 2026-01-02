@@ -8,17 +8,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
     /// <summary>
     /// DTO到节点转换器
     /// </summary>
-    public class DtoToNodeConverter
+    public class DtoToNodeConverter(IEventAggregator eventAggregator, IDialogService dialogService)
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IDialogService _dialogService;
-
-        public DtoToNodeConverter(IEventAggregator eventAggregator, IDialogService dialogService)
-        {
-            _eventAggregator = eventAggregator;
-            _dialogService = dialogService;
-        }
-
         /// <summary>
         /// 将DTO转换为对应的节点
         /// </summary>
@@ -68,7 +59,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
 
         private StepNode ConvertToStepNode(StepNodeDto dto, BaseNode? parent)
         {
-            var node = new StepNode(parent?.Id ?? string.Empty, _eventAggregator)
+            var node = new StepNode(parent?.Id ?? string.Empty, eventAggregator)
             {
                 Parent = parent,
                 Width = dto.Width,
@@ -84,7 +75,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         }
 
         private BranchNode ConvertToBranchNode(BranchNodeDto dto, BaseNode? parent) =>
-            new(_eventAggregator, parent)
+            new(eventAggregator, parent)
             {
                 Name = dto.Name,
                 Code = dto.Code,
@@ -99,7 +90,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         {
             var children = dto.Branches.Select(branchDto => ConvertToBranchStepList(branchDto, null)).ToList();
             // 转换所有子分支
-            var node = new DecisionNode(_eventAggregator, _dialogService, children)
+            var node = new DecisionNode(eventAggregator, dialogService, children)
             {
                 Parent = parent,
                 Name = dto.Name,
@@ -120,7 +111,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         {
             var nodes = dto.Nodes.Select(nodeDto => Convert(nodeDto, null)).OfType<BaseNode>().ToList();
             // 转换分支中的所有节点
-            var branchStepList = new BranchStepListNodes(_eventAggregator, nodes)
+            var branchStepList = new BranchStepListNodes(eventAggregator, nodes)
             {
                 Parent = parent,
                 Name = dto.Name,

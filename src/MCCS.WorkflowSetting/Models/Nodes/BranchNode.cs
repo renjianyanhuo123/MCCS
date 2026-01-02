@@ -1,6 +1,4 @@
-﻿using MCCS.WorkflowSetting.EventParams;
-
-namespace MCCS.WorkflowSetting.Models.Nodes
+﻿namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class BranchNode : BaseNode
     {
