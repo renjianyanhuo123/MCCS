@@ -6,6 +6,8 @@ using MCCS.Models.MethodManager;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;
 
+using Prism.Events;
+
 namespace MCCS.ViewModels.Pages.WorkflowSteps
 {
     public sealed class WorkflowStepListPageViewModel : BaseViewModel
@@ -82,7 +84,18 @@ namespace MCCS.ViewModels.Pages.WorkflowSteps
                     };
                     break;
                 case StepTypeEnum.Decision:
-                    res = new DecisionNode(_eventAggregator, _dialogService);
+                    var children = new List<BranchStepListNodes>
+                    {
+                        new BranchStepListNodes(_eventAggregator, [
+                            new BranchNode(_eventAggregator, null),
+                            new AddOpNode(null)
+                        ]),
+                        new BranchStepListNodes(_eventAggregator, [
+                            new BranchNode(_eventAggregator, null),
+                            new AddOpNode(null)
+                        ])
+                    };
+                    res = new DecisionNode(_eventAggregator, _dialogService, children);
                     break;
             }
             if (res != null) _eventAggregator.GetEvent<AddNodeEvent>().Publish(new AddNodeEventParam

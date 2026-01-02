@@ -88,5 +88,11 @@ namespace MCCS.Infrastructure.Repositories.Method
         /// <param name="model">The interface setting to add. Cannot be <c>null</c>.</param>
         /// <returns>The unique identifier of the newly added interface setting.</returns>
         long AddInterfaceSetting(MethodInterfaceSettingModel model);
+        /// <summary>
+        /// Adds a new workflow setting to the system.
+        /// </summary>
+        /// <param name="model">The workflow setting to add. Must not be <c>null</c>.</param>
+        /// <returns>The unique identifier of the newly added workflow setting.</returns>
+        long AddWorkflowSetting(MethodWorkflowSettingModel model);
     }
 }

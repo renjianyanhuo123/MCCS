@@ -1,4 +1,6 @@
-﻿using MCCS.WorkflowSetting.Models.Edges;
+﻿using System.Collections.ObjectModel;
+
+using MCCS.WorkflowSetting.Models.Edges;
 using System.Diagnostics;
 using System.Windows;
 using MCCS.WorkflowSetting.EventParams;
@@ -8,9 +10,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
     public class StepListNodes : BoxListNodes
     { 
 
-        public StepListNodes(IEventAggregator eventAggregator) : base(eventAggregator)
+        public StepListNodes(IEventAggregator eventAggregator, List<BaseNode> children) : base(eventAggregator)
         {
-            Type = NodeTypeEnum.StepList; 
+            Type = NodeTypeEnum.StepList;
+            children.ForEach(node => node.Parent = this);
+            Nodes.AddRange(children);
             LoadedCommand = new DelegateCommand(ExecuteLoadedCommand); 
         }
 

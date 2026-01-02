@@ -93,27 +93,20 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         } 
         #endregion
 
-        public DecisionNode(IEventAggregator eventAggregator, IDialogService dialogService)
+        public DecisionNode(IEventAggregator eventAggregator, IDialogService dialogService, List<BranchStepListNodes> children)
         {
             _eventAggregator = eventAggregator;
             _dialogService = dialogService;
-            ItemSpacing = 30;
-            var node1 = new BranchStepListNodes(eventAggregator)
-            {
-                Parent = this
-            };
-            var node2 = new BranchStepListNodes(eventAggregator)
-            {
-                Parent = this
-            };
+            ItemSpacing = 30;   
             IsCollapse = true;
-            Width = ItemSpacing * 2 + node1.Width + node2.Width;
-            Height = Math.Max(node1.Height, node2.Height);
+            Width = ItemSpacing * 2 + children.Sum(s => s.Width);
+            Height = children.Max(c => c.Height);
+            children.ForEach(c => c.Parent = this);
             // 保存初始的展开状态尺寸
             _tempWidth = Width;
-            _tempHeight = Height;
-            Children.Add(node1);
-            Children.Add(node2);
+            _tempHeight = Height; 
+            Children.Clear();
+            Children.AddRange(children);
             DecisionNum = Children.Count;
             ExecuteChildrenChanged();
             MouseLeaveCommand = new DelegateCommand(ExecuteMouseLeaveCommand);
@@ -121,7 +114,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             CollapseCommand = new DelegateCommand(ExecuteCollapseCommand);
             AddBranchCommand = new DelegateCommand(ExecuteAddBranchCommand);
             DeleteAllDecisionCommand = new AsyncDelegateCommand(ExecuteDeleteAllDecisionCommand);
-        }
+        } 
 
         private void ExecuteChildrenChanged()
         {
@@ -206,14 +199,18 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         private void ExecuteAddBranchCommand()
         {
+            var children = new List<BaseNode>
+            {
+                new BranchNode(_eventAggregator, null),
+                new AddOpNode(null)
+            };
             // 在最后添加一个新的分支节点
-            var newBranch = new BranchStepListNodes(_eventAggregator)
+            var newBranch = new BranchStepListNodes(_eventAggregator, children)
             {
                 Parent = this
             };
             Children.Add(newBranch);
-            DecisionNum = Children.Count;
-            // ExecuteChildrenChanged();
+            DecisionNum = Children.Count; 
             // 通知父节点重新布局
             RaiseNodeChanged("AddBranch");
         }

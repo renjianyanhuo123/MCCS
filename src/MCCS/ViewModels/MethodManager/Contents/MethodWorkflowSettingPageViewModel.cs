@@ -1,11 +1,11 @@
 ﻿using System.Windows.Controls;
 
 using MCCS.Common.Resources.ViewModels;
-using MCCS.Infrastructure.Helper;
+using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Repositories.Method;
-using MCCS.WorkflowSetting;
 using MCCS.WorkflowSetting.EventParams;
 using MCCS.WorkflowSetting.Models.Nodes;
+using MCCS.WorkflowSetting.Serialization;
 
 namespace MCCS.ViewModels.MethodManager.Contents
 {
@@ -13,19 +13,19 @@ namespace MCCS.ViewModels.MethodManager.Contents
     {
         public const string Tag = "MethodWorkflowSettingPage";
         private readonly IMethodRepository _methodRepository;
+        private readonly IWorkflowSerializer _workflowSerializer;
 
         private long _methodId = -1;
         private double _oldWidth;
         private double _oldHeight;
 
-        private readonly ICanvasManager _canvasManager;
-
         public MethodWorkflowSettingPageViewModel(IEventAggregator eventAggregator,
             IMethodRepository methodRepository,
-            ICanvasManager canvasManager) : base(eventAggregator)
+            IWorkflowSerializer workflowSerializer,
+            IDialogService dialogService) : base(eventAggregator, dialogService)
         {
-            _canvasManager = canvasManager;
             _methodRepository = methodRepository;
+            _workflowSerializer = workflowSerializer;
             LoadCommand = new AsyncDelegateCommand<object>(ExecuteLoadCommand);
             _eventAggregator.GetEvent<NotificationWorkflowChangedEvent>().Subscribe(OnNotificationWorkflowChangedEvent);
         }
@@ -33,6 +33,16 @@ namespace MCCS.ViewModels.MethodManager.Contents
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
+        }
+
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            var json = _workflowSerializer.Serialize(WorkflowNodes);
+            _methodRepository.AddWorkflowSetting(new MethodWorkflowSettingModel
+            {
+                MethodId = _methodId,
+                WorkflowSetting = json
+            });
         }
 
         #region Property
@@ -109,33 +119,19 @@ namespace MCCS.ViewModels.MethodManager.Contents
                 Height = element.ActualHeight; 
             }  
             var workflowSettingModel = await _methodRepository.GetMethodWorkflowSettingAsync(_methodId);
-            //if (workflowSettingModel == null)
-            //{
-            //}
-            //if (!FileHelper.FileExists(@"E:/workflow.json"))
-            //{
-            //    var temp = new StepListNodes(_eventAggregator);
-            //    temp.Nodes.Clear();
-            //    temp.Connections.Clear();
-            //    temp.Nodes.Add(new StartNode
-            //    {
-            //        Width = 60,
-            //        Height = 60,
-            //        Parent = WorkflowNodes,
-            //        Type = NodeTypeEnum.Start,
-            //        Name = "Start"
-            //    });
-            //    temp.Nodes.Add(new AddOpNode(WorkflowNodes));
-            //    temp.Nodes.Add(new EndNode
-            //    {
-            //        Name = "End",
-            //        Parent = WorkflowNodes,
-            //        Type = NodeTypeEnum.End,
-            //        Width = 56,
-            //        Height = 80
-            //    });
-            //    WorkflowNodes = temp;
-            //}
+            if (workflowSettingModel?.WorkflowSetting == null)
+            {
+                var temp = new StepListNodes(_eventAggregator, [
+                    new StartNode(null),
+                    new AddOpNode(null),
+                    new EndNode(null)
+                ]); 
+                WorkflowNodes = temp;
+            }
+            else
+            { 
+                WorkflowNodes = _workflowSerializer.Deserialize(workflowSettingModel.WorkflowSetting, _eventAggregator, _dialogService);
+            }
         }
         #endregion
     }

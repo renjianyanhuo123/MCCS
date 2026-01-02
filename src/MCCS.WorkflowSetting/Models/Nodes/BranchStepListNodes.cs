@@ -6,18 +6,22 @@ using System.Windows;
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class BranchStepListNodes : BoxListNodes
-    {
-        public BranchStepListNodes(IEventAggregator eventAggregator) : base(eventAggregator)
+    { 
+        public BranchStepListNodes(IEventAggregator eventAggregator, List<BaseNode> children) : base(eventAggregator)
         {
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;
             Height = 200;
             Nodes.Clear();
             Connections.Clear();
-            Nodes.Add(new BranchNode(eventAggregator, this));
-            Nodes.Add(new AddOpNode(this));
+            foreach (var child in children)
+            {
+                child.Parent = this;
+                Nodes.Add(child);
+            }
             LoadedCommand = new DelegateCommand(ExecuteLoadedCommand);
         } 
+
         #region Private Method
         private void ExecuteLoadedCommand()
         { 
