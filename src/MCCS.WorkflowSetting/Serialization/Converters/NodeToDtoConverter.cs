@@ -1,4 +1,5 @@
 ﻿using System.Windows.Media;
+using System.Xml.Linq;
 
 using MCCS.WorkflowSetting.Models.Nodes;
 using MCCS.WorkflowSetting.Serialization.Dtos;
@@ -33,6 +34,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = node.Id,
                 Name = node.Name,
                 Code = node.Code,
+                Width = node.Width,
+                Height = node.Height,
                 Type = node.Type,
                 Order = node.Order,
                 Level = node.Level
@@ -44,6 +47,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = node.Id,
                 Name = node.Name,
                 Code = node.Code,
+                Width = node.Width,
+                Height = node.Height,
                 Type = NodeTypeEnum.Start,
                 Order = node.Order,
                 Level = node.Level
@@ -55,6 +60,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = node.Id,
                 Name = node.Name,
                 Code = node.Code,
+                Width = node.Width,
+                Height = node.Height,
                 Type = NodeTypeEnum.End,
                 Order = node.Order,
                 Level = node.Level
@@ -67,6 +74,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Name = node.Name,
                 Code = node.Code,
                 Type = NodeTypeEnum.Process,
+                Width = node.Width,
+                Height = node.Height,
                 Order = node.Order,
                 Level = node.Level,
                 Title = node.Title,
@@ -79,6 +88,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = node.Id,
                 Name = node.Name,
                 Code = node.Code,
+                Width = node.Width,
+                Height = node.Height,
                 Type = NodeTypeEnum.Branch,
                 Order = node.Order,
                 Level = node.Level,
@@ -92,6 +103,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = node.Id,
                 Name = node.Name,
                 Code = node.Code,
+                Width = node.Width,
+                Height = node.Height,
                 Type = NodeTypeEnum.Decision,
                 Order = node.Order,
                 Level = node.Level,
@@ -121,6 +134,8 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Id = branchStepList.Id,
                 Name = branchStepList.Name,
                 Code = branchStepList.Code,
+                Width = branchStepList.Width,
+                Height = branchStepList.Height,
                 Type = NodeTypeEnum.BranchStepList,
                 Order = branchStepList.Order,
                 Level = branchStepList.Level,

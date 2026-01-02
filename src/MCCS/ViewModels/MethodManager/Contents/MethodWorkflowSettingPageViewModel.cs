@@ -122,9 +122,9 @@ namespace MCCS.ViewModels.MethodManager.Contents
             if (workflowSettingModel?.WorkflowSetting == null)
             {
                 var temp = new StepListNodes(_eventAggregator, [
-                    new StartNode(null),
+                    new StartNode(),
                     new AddOpNode(null),
-                    new EndNode(null)
+                    new EndNode()
                 ]); 
                 WorkflowNodes = temp;
             }

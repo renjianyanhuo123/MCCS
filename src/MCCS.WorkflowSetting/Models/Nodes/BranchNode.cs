@@ -11,6 +11,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             _eventAggregator = eventAggregator;
             Name = "Branch";
             Parent = parent;
+            Title = "分支";
             Width = 260;
             Height = 85;
             Type = NodeTypeEnum.Branch;

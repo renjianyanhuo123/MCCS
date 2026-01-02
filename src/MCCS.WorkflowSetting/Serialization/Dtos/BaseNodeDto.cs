@@ -11,7 +11,14 @@ namespace MCCS.WorkflowSetting.Serialization.Dtos
         /// 节点唯一标识
         /// </summary>
         public string Id { get; set; } = string.Empty;
-
+        /// <summary>
+        /// 宽度
+        /// </summary>
+        public double Width { get; set; }
+        /// <summary>
+        /// 高度
+        /// </summary>
+        public double Height { get; set; }
         /// <summary>
         /// 节点名称
         /// </summary>

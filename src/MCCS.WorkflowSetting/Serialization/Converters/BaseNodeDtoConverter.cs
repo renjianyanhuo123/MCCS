@@ -14,42 +14,30 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         public override BaseNodeDto? ReadJson(JsonReader reader, Type objectType, BaseNodeDto? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
-                return null;
+                return null!;
 
-            var jObject = JObject.Load(reader);
+            JObject jo = JObject.Load(reader);
 
-            // 根据Type字段确定具体类型
-            var typeValue = jObject["Type"]?.Value<int>() ?? 0;
-            var nodeType = (NodeTypeEnum)typeValue;
+            if (!jo.TryGetValue("Type", out var typeToken))
+                throw new JsonSerializationException("Node missing Type field");
 
-            BaseNodeDto? dto = nodeType switch
+            var type = (NodeTypeEnum)typeToken.Value<int>();
+
+            BaseNodeDto target = type switch
             {
                 NodeTypeEnum.Start => new BaseNodeDto(),
                 NodeTypeEnum.End => new BaseNodeDto(),
+
                 NodeTypeEnum.Process => new StepNodeDto(),
                 NodeTypeEnum.Branch => new BranchNodeDto(),
-                NodeTypeEnum.Decision => new DecisionNodeDto(),
                 NodeTypeEnum.BranchStepList => new BranchStepListDto(),
-                _ => new BaseNodeDto()
+                NodeTypeEnum.Decision => new DecisionNodeDto(),
+
+                _ => throw new NotSupportedException($"Unsupported node type: {type}")
             };
 
-            if (dto != null)
-            {
-                // 使用新的序列化器避免递归调用
-                var newSerializer = new JsonSerializer();
-                foreach (var converter in serializer.Converters)
-                {
-                    if (converter != this)
-                    {
-                        newSerializer.Converters.Add(converter);
-                    }
-                }
-
-                using var subReader = jObject.CreateReader();
-                newSerializer.Populate(subReader, dto);
-            }
-
-            return dto;
+            serializer.Populate(jo.CreateReader(), target);
+            return target;
         }
 
         public override void WriteJson(JsonWriter writer, BaseNodeDto? value, JsonSerializer serializer)
