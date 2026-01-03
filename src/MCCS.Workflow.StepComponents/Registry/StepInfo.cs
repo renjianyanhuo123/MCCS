@@ -1,39 +1,40 @@
 using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Parameters;
 
 namespace MCCS.Workflow.StepComponents.Registry
 {
     /// <summary>
-    /// 组件信息（用于展示和选择）
+    /// 步骤信息 - 用于UI展示和步骤选择
     /// </summary>
-    public class ComponentInfo
+    public class StepInfo
     {
         /// <summary>
-        /// 组件唯一标识
+        /// 步骤唯一标识
         /// </summary>
         public string Id { get; set; } = string.Empty;
 
         /// <summary>
-        /// 组件名称
+        /// 步骤名称
         /// </summary>
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// 组件描述
+        /// 步骤描述
         /// </summary>
         public string Description { get; set; } = string.Empty;
 
         /// <summary>
-        /// 组件分类
+        /// 步骤分类
         /// </summary>
         public ComponentCategory Category { get; set; }
 
         /// <summary>
-        /// 组件图标
+        /// 步骤图标（Material Design Icon名称）
         /// </summary>
         public string Icon { get; set; } = "Cog";
 
         /// <summary>
-        /// 组件版本
+        /// 步骤版本
         /// </summary>
         public string Version { get; set; } = "1.0.0";
 
@@ -58,8 +59,13 @@ namespace MCCS.Workflow.StepComponents.Registry
         public int Order { get; set; }
 
         /// <summary>
-        /// 组件类型
+        /// 步骤类型
         /// </summary>
-        public Type ComponentType { get; set; } = null!;
+        public Type StepType { get; set; } = null!;
+
+        /// <summary>
+        /// 参数定义列表
+        /// </summary>
+        public IReadOnlyList<IComponentParameter>? ParameterDefinitions { get; set; }
     }
 }
