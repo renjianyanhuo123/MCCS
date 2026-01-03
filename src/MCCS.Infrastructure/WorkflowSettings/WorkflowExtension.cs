@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MCCS.Core.WorkflowSettings
+namespace MCCS.Infrastructure.WorkflowSettings
 {
     public static class WorkflowExtension
     {

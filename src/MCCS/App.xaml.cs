@@ -10,7 +10,7 @@ using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Collecter.SignalManagers;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
-using MCCS.Core.WorkflowSettings;
+using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
