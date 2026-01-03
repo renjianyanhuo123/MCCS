@@ -56,6 +56,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Collecter\MCCS.Collecter.csproj" />
     <ProjectReference Include="..\MCCS.UserControl\MCCS.UserControl.csproj" />
+    <ProjectReference Include="..\MCCS.Workflow.StepComponents\MCCS.Workflow.StepComponents.csproj" />
     <ProjectReference Include="..\MCCS.WorkflowSetting\MCCS.WorkflowSetting.csproj" />
   </ItemGroup>
 

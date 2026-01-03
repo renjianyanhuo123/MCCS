@@ -48,6 +48,7 @@ using MCCS.Views.Pages.SystemManager;
 using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.Pages.WorkflowSteps;
 using MCCS.Views.ProjectManager;
+using MCCS.Workflow.StepComponents;
 using MCCS.WorkflowSetting;
 
 using Microsoft.Extensions.Configuration;
@@ -80,6 +81,7 @@ namespace MCCS
             // 注册模块
             moduleCatalog.AddModule<NotificationModule>();
             moduleCatalog.AddModule<WorkflowModule>();
+            moduleCatalog.AddModule<StepComponentModule>();
         }
 
 
