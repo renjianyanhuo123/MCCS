@@ -3,18 +3,30 @@ using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Parameters;
 
-namespace MCCS.Workflow.StepComponents.Components
+namespace MCCS.Workflow.StepComponents.Steps
 {
     /// <summary>
-    /// 消息框组件 - 显示消息对话框
+    /// 消息框步骤 - 显示消息对话框
     /// </summary>
     [StepComponent("message-box", "消息提示",
         Description = "显示消息对话框，可用于提示用户或等待用户确认",
         Category = ComponentCategory.UserInteraction,
         Icon = "MessageAlert",
         Tags = new[] { "消息", "提示", "对话框", "弹窗" })]
-    public class MessageBoxComponent : BaseStepComponent
+    public class MessageBoxStep : BaseWorkflowStep
     {
+        [StepInput("Title")]
+        public string Title { get; set; } = "提示";
+
+        [StepInput("Message")]
+        public string Message { get; set; } = string.Empty;
+
+        [StepInput("MessageType")]
+        public string MessageType { get; set; } = "Information";
+
+        [StepInput("Buttons")]
+        public string Buttons { get; set; } = "OK";
+
         protected override IEnumerable<IComponentParameter> DefineParameters()
         {
             yield return new StringParameter
@@ -73,20 +85,18 @@ namespace MCCS.Workflow.StepComponents.Components
             };
         }
 
-        protected override Task<ComponentExecutionResult> ExecuteCoreAsync(
-            ComponentExecutionContext context,
-            CancellationToken cancellationToken)
+        protected override Task<StepResult> ExecuteAsync(StepExecutionContext context)
         {
-            var title = GetParameterValue<string>("Title") ?? "提示";
-            var message = GetParameterValue<string>("Message") ?? string.Empty;
-            var messageType = GetParameterValue<string>("MessageType") ?? "Information";
-            var buttons = GetParameterValue<string>("Buttons") ?? "OK";
+            var title = GetParameter<string>("Title") ?? "提示";
+            var message = GetParameter<string>("Message") ?? string.Empty;
+            var messageType = GetParameter<string>("MessageType") ?? "Information";
+            var buttons = GetParameter<string>("Buttons") ?? "OK";
 
             // 替换变量
-            title = ReplaceVariables(title, context);
-            message = ReplaceVariables(message, context);
+            title = context.ReplaceVariables(title);
+            message = context.ReplaceVariables(message);
 
-            context.Log?.Invoke($"显示消息框: {title}", LogLevel.Info);
+            context.Log($"显示消息框: {title}");
 
             // 在UI线程上显示消息框
             MessageBoxResult result = MessageBoxResult.None;
@@ -114,38 +124,14 @@ namespace MCCS.Workflow.StepComponents.Components
             });
 
             var resultStr = result.ToString();
-            context.Log?.Invoke($"用户选择: {resultStr}", LogLevel.Info);
+            context.Log($"用户选择: {resultStr}");
 
-            return Task.FromResult(ComponentExecutionResult.Success(new Dictionary<string, object?>
+            return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {
                 ["Result"] = resultStr,
                 ["IsConfirmed"] = result is MessageBoxResult.OK or MessageBoxResult.Yes,
                 ["IsCancelled"] = result is MessageBoxResult.Cancel or MessageBoxResult.No
             }));
-        }
-
-        private static string ReplaceVariables(string template, ComponentExecutionContext context)
-        {
-            var result = template;
-
-            foreach (var kvp in context.GlobalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            foreach (var kvp in context.LocalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            return result;
-        }
-
-        public override IStepComponent Clone()
-        {
-            var clone = new MessageBoxComponent();
-            clone.SetParameterValues(GetParameterValues());
-            return clone;
         }
     }
 }

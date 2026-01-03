@@ -4,22 +4,40 @@ using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Parameters;
 
-namespace MCCS.Workflow.StepComponents.Components
+namespace MCCS.Workflow.StepComponents.Steps
 {
     /// <summary>
-    /// HTTP请求组件 - 发送HTTP请求
+    /// HTTP请求步骤 - 发送HTTP请求
     /// </summary>
     [StepComponent("http-request", "HTTP请求",
         Description = "发送HTTP请求并获取响应",
         Category = ComponentCategory.Network,
         Icon = "Web",
         Tags = new[] { "HTTP", "请求", "API", "网络", "REST" })]
-    public class HttpRequestComponent : BaseStepComponent
+    public class HttpRequestStep : BaseWorkflowStep
     {
         private static readonly HttpClient _httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(30)
         };
+
+        [StepInput("Url")]
+        public string Url { get; set; } = string.Empty;
+
+        [StepInput("Method")]
+        public string Method { get; set; } = "GET";
+
+        [StepInput("Headers")]
+        public List<KeyValueItem>? Headers { get; set; }
+
+        [StepInput("Body")]
+        public string? Body { get; set; }
+
+        [StepInput("ContentType")]
+        public string ContentType { get; set; } = "application/json";
+
+        [StepInput("Timeout")]
+        public int Timeout { get; set; } = 30;
 
         protected override IEnumerable<IComponentParameter> DefineParameters()
         {
@@ -27,11 +45,9 @@ namespace MCCS.Workflow.StepComponents.Components
             {
                 Name = "Url",
                 DisplayName = "请求URL",
-                Description = "HTTP请求的目标URL",
+                Description = "HTTP请求的目标URL，支持变量替换",
                 IsRequired = true,
                 Placeholder = "https://api.example.com/data",
-                ValidationPattern = @"^https?://",
-                ValidationMessage = "请输入有效的HTTP/HTTPS URL",
                 Order = 1,
                 Group = "基本设置"
             };
@@ -105,34 +121,22 @@ namespace MCCS.Workflow.StepComponents.Components
                 Order = 6,
                 Group = "高级设置"
             };
-
-            yield return new BooleanParameter
-            {
-                Name = "IgnoreSslErrors",
-                DisplayName = "忽略SSL错误",
-                Description = "是否忽略SSL证书错误",
-                DefaultValue = false,
-                Order = 7,
-                Group = "高级设置"
-            };
         }
 
-        protected override async Task<ComponentExecutionResult> ExecuteCoreAsync(
-            ComponentExecutionContext context,
-            CancellationToken cancellationToken)
+        protected override async Task<StepResult> ExecuteAsync(StepExecutionContext context)
         {
-            var url = GetParameterValue<string>("Url") ?? string.Empty;
-            var method = GetParameterValue<string>("Method") ?? "GET";
-            var headers = GetParameterValue<List<KeyValueItem>>("Headers");
-            var body = GetParameterValue<string>("Body");
-            var contentType = GetParameterValue<string>("ContentType") ?? "application/json";
-            var timeout = GetParameterValue<int>("Timeout");
+            var url = GetParameter<string>("Url") ?? string.Empty;
+            var method = GetParameter<string>("Method") ?? "GET";
+            var headers = GetParameter<List<KeyValueItem>>("Headers");
+            var body = GetParameter<string>("Body");
+            var contentType = GetParameter<string>("ContentType") ?? "application/json";
+            var timeout = GetParameter<int>("Timeout");
 
             // 替换URL中的变量
-            url = ReplaceVariables(url, context);
-            body = body != null ? ReplaceVariables(body, context) : null;
+            url = context.ReplaceVariables(url);
+            body = body != null ? context.ReplaceVariables(body) : null;
 
-            context.Log?.Invoke($"发送 {method} 请求到 {url}", LogLevel.Info);
+            context.Log($"发送 {method} 请求到 {url}");
 
             try
             {
@@ -143,7 +147,7 @@ namespace MCCS.Workflow.StepComponents.Components
                 {
                     foreach (var header in headers.Where(h => h.IsEnabled))
                     {
-                        var headerValue = ReplaceVariables(header.Value, context);
+                        var headerValue = context.ReplaceVariables(header.Value);
                         request.Headers.TryAddWithoutValidation(header.Key, headerValue);
                     }
                 }
@@ -154,13 +158,13 @@ namespace MCCS.Workflow.StepComponents.Components
                     request.Content = new StringContent(body, Encoding.UTF8, contentType);
                 }
 
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
                 cts.CancelAfter(TimeSpan.FromSeconds(timeout > 0 ? timeout : 30));
 
                 var response = await _httpClient.SendAsync(request, cts.Token);
                 var responseBody = await response.Content.ReadAsStringAsync(cts.Token);
 
-                context.Log?.Invoke($"收到响应: {(int)response.StatusCode} {response.ReasonPhrase}", LogLevel.Info);
+                context.Log($"收到响应: {(int)response.StatusCode} {response.ReasonPhrase}");
 
                 var output = new Dictionary<string, object?>
                 {
@@ -173,13 +177,13 @@ namespace MCCS.Workflow.StepComponents.Components
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return ComponentExecutionResult.Success(output);
+                    return StepResult.Succeed(output);
                 }
                 else
                 {
-                    return new ComponentExecutionResult
+                    return new StepResult
                     {
-                        Status = ComponentExecutionStatus.Failed,
+                        Success = false,
                         ErrorMessage = $"HTTP请求失败: {response.StatusCode} {response.ReasonPhrase}",
                         OutputData = output
                     };
@@ -187,36 +191,12 @@ namespace MCCS.Workflow.StepComponents.Components
             }
             catch (TaskCanceledException)
             {
-                return ComponentExecutionResult.Failure("请求超时");
+                return StepResult.Fail("请求超时");
             }
             catch (HttpRequestException ex)
             {
-                return ComponentExecutionResult.Failure($"HTTP请求异常: {ex.Message}", ex);
+                return StepResult.Fail($"HTTP请求异常: {ex.Message}");
             }
-        }
-
-        private static string ReplaceVariables(string template, ComponentExecutionContext context)
-        {
-            var result = template;
-
-            foreach (var kvp in context.GlobalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            foreach (var kvp in context.LocalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            return result;
-        }
-
-        public override IStepComponent Clone()
-        {
-            var clone = new HttpRequestComponent();
-            clone.SetParameterValues(GetParameterValues());
-            return clone;
         }
     }
 }

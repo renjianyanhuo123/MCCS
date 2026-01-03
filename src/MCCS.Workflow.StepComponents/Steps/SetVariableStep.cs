@@ -2,18 +2,27 @@ using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Parameters;
 
-namespace MCCS.Workflow.StepComponents.Components
+namespace MCCS.Workflow.StepComponents.Steps
 {
     /// <summary>
-    /// 变量赋值组件 - 设置工作流变量
+    /// 变量赋值步骤 - 设置工作流变量
     /// </summary>
     [StepComponent("set-variable", "设置变量",
         Description = "设置工作流变量值，可用于在步骤间传递数据",
         Category = ComponentCategory.DataProcessing,
         Icon = "Variable",
         Tags = new[] { "变量", "赋值", "数据", "设置" })]
-    public class SetVariableComponent : BaseStepComponent
+    public class SetVariableStep : BaseWorkflowStep
     {
+        [StepInput("VariableName")]
+        public string VariableName { get; set; } = string.Empty;
+
+        [StepInput("VariableValue")]
+        public string VariableValue { get; set; } = string.Empty;
+
+        [StepInput("ValueType")]
+        public string ValueType { get; set; } = "string";
+
         protected override IEnumerable<IComponentParameter> DefineParameters()
         {
             yield return new StringParameter
@@ -40,21 +49,6 @@ namespace MCCS.Workflow.StepComponents.Components
 
             yield return new SelectParameter
             {
-                Name = "VariableScope",
-                DisplayName = "变量作用域",
-                Description = "变量的作用范围",
-                IsRequired = true,
-                DefaultValue = "global",
-                Options = new List<SelectOption>
-                {
-                    new("global", "全局变量（跨步骤共享）"),
-                    new("local", "本地变量（仅当前步骤）")
-                },
-                Order = 3
-            };
-
-            yield return new SelectParameter
-            {
                 Name = "ValueType",
                 DisplayName = "值类型",
                 Description = "变量值的数据类型",
@@ -67,60 +61,33 @@ namespace MCCS.Workflow.StepComponents.Components
                     new("boolean", "布尔值"),
                     new("json", "JSON对象")
                 },
-                Order = 4
+                Order = 3
             };
         }
 
-        protected override Task<ComponentExecutionResult> ExecuteCoreAsync(
-            ComponentExecutionContext context,
-            CancellationToken cancellationToken)
+        protected override Task<StepResult> ExecuteAsync(StepExecutionContext context)
         {
-            var variableName = GetParameterValue<string>("VariableName") ?? string.Empty;
-            var variableValue = GetParameterValue<string>("VariableValue") ?? string.Empty;
-            var scope = GetParameterValue<string>("VariableScope") ?? "global";
-            var valueType = GetParameterValue<string>("ValueType") ?? "string";
+            var variableName = GetParameter<string>("VariableName") ?? string.Empty;
+            var variableValue = GetParameter<string>("VariableValue") ?? string.Empty;
+            var valueType = GetParameter<string>("ValueType") ?? "string";
 
             // 替换变量引用
-            variableValue = ReplaceVariables(variableValue, context);
+            variableValue = context.ReplaceVariables(variableValue);
 
             // 类型转换
             object? typedValue = ConvertValue(variableValue, valueType);
 
             // 设置变量
-            if (scope == "global")
-            {
-                context.SetGlobalVariable(variableName, typedValue);
-            }
-            else
-            {
-                context.SetLocalVariable(variableName, typedValue);
-            }
+            context.SetVariable(variableName, typedValue);
 
-            context.Log?.Invoke($"设置{(scope == "global" ? "全局" : "本地")}变量 {variableName} = {typedValue}", LogLevel.Info);
+            context.Log($"设置变量 {variableName} = {typedValue}");
 
-            return Task.FromResult(ComponentExecutionResult.Success(new Dictionary<string, object?>
+            return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {
                 ["VariableName"] = variableName,
                 ["VariableValue"] = typedValue,
-                ["Scope"] = scope
+                ["ValueType"] = valueType
             }));
-        }
-
-        private static string ReplaceVariables(string template, ComponentExecutionContext context)
-        {
-            var result = template;
-
-            foreach (var kvp in context.GlobalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            foreach (var kvp in context.LocalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            return result;
         }
 
         private static object? ConvertValue(string value, string valueType)
@@ -130,16 +97,9 @@ namespace MCCS.Workflow.StepComponents.Components
                 "integer" => int.TryParse(value, out var intVal) ? intVal : 0,
                 "double" => double.TryParse(value, out var doubleVal) ? doubleVal : 0.0,
                 "boolean" => bool.TryParse(value, out var boolVal) && boolVal,
-                "json" => value, // JSON保持为字符串，实际使用时再解析
+                "json" => value,
                 _ => value
             };
-        }
-
-        public override IStepComponent Clone()
-        {
-            var clone = new SetVariableComponent();
-            clone.SetParameterValues(GetParameterValues());
-            return clone;
         }
     }
 }

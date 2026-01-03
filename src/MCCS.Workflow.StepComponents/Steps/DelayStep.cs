@@ -2,27 +2,29 @@ using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Parameters;
 
-namespace MCCS.Workflow.StepComponents.Components
+namespace MCCS.Workflow.StepComponents.Steps
 {
     /// <summary>
-    /// 延时组件 - 等待指定时间后继续执行
+    /// 延时步骤 - 等待指定时间后继续执行
     /// </summary>
     [StepComponent("delay", "延时等待",
         Description = "等待指定的时间后继续执行下一步",
         Category = ComponentCategory.FlowControl,
         Icon = "TimerSand",
         Tags = new[] { "等待", "延时", "暂停", "计时" })]
-    public class DelayComponent : BaseStepComponent
+    public class DelayStep : BaseWorkflowStep
     {
         /// <summary>
-        /// 延时时间（毫秒）
+        /// 延时数值
         /// </summary>
-        public int DelayMilliseconds { get; set; } = 1000;
+        [StepInput("DelayValue")]
+        public int DelayValue { get; set; } = 1;
 
         /// <summary>
-        /// 延时类型
+        /// 延时类型（milliseconds, seconds, minutes, hours）
         /// </summary>
-        public string DelayType { get; set; } = "milliseconds";
+        [StepInput("DelayType")]
+        public string DelayType { get; set; } = "seconds";
 
         protected override IEnumerable<IComponentParameter> DefineParameters()
         {
@@ -34,7 +36,7 @@ namespace MCCS.Workflow.StepComponents.Components
                 IsRequired = true,
                 DefaultValue = 1,
                 MinValue = 0,
-                MaxValue = 86400000, // 最长24小时
+                MaxValue = 86400000,
                 Order = 1
             };
 
@@ -56,12 +58,10 @@ namespace MCCS.Workflow.StepComponents.Components
             };
         }
 
-        protected override async Task<ComponentExecutionResult> ExecuteCoreAsync(
-            ComponentExecutionContext context,
-            CancellationToken cancellationToken)
+        protected override async Task<StepResult> ExecuteAsync(StepExecutionContext context)
         {
-            var delayValue = GetParameterValue<int>("DelayValue");
-            var delayType = GetParameterValue<string>("DelayType") ?? "seconds";
+            var delayValue = GetParameter<int>("DelayValue");
+            var delayType = GetParameter<string>("DelayType") ?? "seconds";
 
             var delayMs = delayType switch
             {
@@ -72,16 +72,17 @@ namespace MCCS.Workflow.StepComponents.Components
                 _ => delayValue * 1000
             };
 
-            context.Log?.Invoke($"开始等待 {delayValue} {GetUnitDisplayName(delayType)}", LogLevel.Info);
+            context.Log($"开始等待 {delayValue} {GetUnitDisplayName(delayType)}");
 
-            // 使用 Task.Delay 实现可取消的等待
-            await Task.Delay(delayMs, cancellationToken);
+            await Task.Delay(delayMs, context.CancellationToken);
 
-            context.Log?.Invoke("延时等待完成", LogLevel.Info);
+            context.Log("延时等待完成");
 
-            return ComponentExecutionResult.Success(new Dictionary<string, object?>
+            return StepResult.Succeed(new Dictionary<string, object?>
             {
-                ["DelayedMs"] = delayMs
+                ["DelayedMs"] = delayMs,
+                ["DelayValue"] = delayValue,
+                ["DelayUnit"] = delayType
             });
         }
 
@@ -93,12 +94,5 @@ namespace MCCS.Workflow.StepComponents.Components
             "hours" => "小时",
             _ => "秒"
         };
-
-        public override IStepComponent Clone()
-        {
-            var clone = new DelayComponent();
-            clone.SetParameterValues(GetParameterValues());
-            return clone;
-        }
     }
 }

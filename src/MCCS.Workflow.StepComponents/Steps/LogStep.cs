@@ -2,18 +2,27 @@ using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Parameters;
 
-namespace MCCS.Workflow.StepComponents.Components
+namespace MCCS.Workflow.StepComponents.Steps
 {
     /// <summary>
-    /// 日志组件 - 输出日志信息
+    /// 日志步骤 - 输出日志信息
     /// </summary>
     [StepComponent("log", "日志输出",
         Description = "输出日志信息，支持变量替换",
         Category = ComponentCategory.General,
         Icon = "TextBoxOutline",
         Tags = new[] { "日志", "输出", "调试", "打印" })]
-    public class LogComponent : BaseStepComponent
+    public class LogStep : BaseWorkflowStep
     {
+        [StepInput("Message")]
+        public string Message { get; set; } = string.Empty;
+
+        [StepInput("LogLevel")]
+        public string LogLevelValue { get; set; } = "Info";
+
+        [StepInput("IncludeTimestamp")]
+        public bool IncludeTimestamp { get; set; } = true;
+
         protected override IEnumerable<IComponentParameter> DefineParameters()
         {
             yield return new MultilineTextParameter
@@ -54,16 +63,14 @@ namespace MCCS.Workflow.StepComponents.Components
             };
         }
 
-        protected override Task<ComponentExecutionResult> ExecuteCoreAsync(
-            ComponentExecutionContext context,
-            CancellationToken cancellationToken)
+        protected override Task<StepResult> ExecuteAsync(StepExecutionContext context)
         {
-            var message = GetParameterValue<string>("Message") ?? string.Empty;
-            var logLevelStr = GetParameterValue<string>("LogLevel") ?? "Info";
-            var includeTimestamp = GetParameterValue<bool>("IncludeTimestamp");
+            var message = GetParameter<string>("Message") ?? string.Empty;
+            var logLevelStr = GetParameter<string>("LogLevel") ?? "Info";
+            var includeTimestamp = GetParameter<bool>("IncludeTimestamp");
 
             // 替换变量
-            message = ReplaceVariables(message, context);
+            message = context.ReplaceVariables(message);
 
             // 添加时间戳
             if (includeTimestamp)
@@ -81,43 +88,13 @@ namespace MCCS.Workflow.StepComponents.Components
             };
 
             // 输出日志
-            context.Log?.Invoke(message, logLevel);
+            context.Log(message, logLevel);
 
-            return Task.FromResult(ComponentExecutionResult.Success(new Dictionary<string, object?>
+            return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {
                 ["LoggedMessage"] = message,
                 ["LogLevel"] = logLevelStr
             }));
-        }
-
-        private static string ReplaceVariables(string template, ComponentExecutionContext context)
-        {
-            // 简单的变量替换实现 ${variableName}
-            var result = template;
-
-            foreach (var kvp in context.GlobalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            foreach (var kvp in context.LocalVariables)
-            {
-                result = result.Replace($"${{{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            foreach (var kvp in context.PreviousStepOutput)
-            {
-                result = result.Replace($"${{prev.{kvp.Key}}}", kvp.Value?.ToString() ?? string.Empty);
-            }
-
-            return result;
-        }
-
-        public override IStepComponent Clone()
-        {
-            var clone = new LogComponent();
-            clone.SetParameterValues(GetParameterValues());
-            return clone;
         }
     }
 }
