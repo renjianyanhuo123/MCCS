@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.HardwareDevices
+﻿namespace MCCS.Station.HardwareDevices
 {
     public record HardwareDeviceConfiguration
     {

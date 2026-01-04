@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.Parameters
+﻿namespace MCCS.Station.Parameters
 {
     public interface IParameterManager
     {

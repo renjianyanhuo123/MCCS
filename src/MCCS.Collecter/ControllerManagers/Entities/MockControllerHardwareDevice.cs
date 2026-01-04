@@ -1,13 +1,14 @@
-﻿using MCCS.Collecter.DllNative;
-using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Infrastructure.TestModels.ControlParams;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 
-namespace MCCS.Collecter.ControllerManagers.Entities
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Station.DllNative;
+using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
+
+namespace MCCS.Station.ControllerManagers.Entities
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {

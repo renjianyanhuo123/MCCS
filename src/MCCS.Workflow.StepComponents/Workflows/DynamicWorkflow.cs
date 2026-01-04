@@ -44,24 +44,24 @@ namespace MCCS.Workflow.StepComponents.Workflows
                 if (i == 0)
                 {
                     // 第一个步骤
-                    currentStep = builder
-                        .StartWith(stepType, x =>
-                        {
-                            ConfigureStep(x, stepConfig);
-                        })
-                        .Name(stepConfig.Name)
-                        .Id(stepConfig.Id);
+                    //currentStep = builder
+                    //    .StartWith(stepType, x =>
+                    //    {
+                    //        ConfigureStep(x, stepConfig);
+                    //    })
+                    //    .Name(stepConfig.Name)
+                    //    .Id(stepConfig.Id);
                 }
                 else if (currentStep != null)
                 {
                     // 后续步骤
-                    currentStep = currentStep
-                        .Then(stepType, x =>
-                        {
-                            ConfigureStep(x, stepConfig);
-                        })
-                        .Name(stepConfig.Name)
-                        .Id(stepConfig.Id);
+                    //currentStep = currentStep
+                    //    .Then(stepType, x =>
+                    //    {
+                    //        ConfigureStep(x, stepConfig);
+                    //    })
+                    //    .Name(stepConfig.Name)
+                    //    .Id(stepConfig.Id);
                 }
             }
         }

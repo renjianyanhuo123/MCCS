@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.Devices;
+﻿namespace MCCS.Station.Devices;
 
 public enum ConnectionTypeEnum
 {

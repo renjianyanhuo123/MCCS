@@ -1,8 +1,9 @@
-﻿using MCCS.Collecter.HardwareDevices;
-using System.Reactive.Linq;
-using MCCS.Collecter.SignalManagers;
+﻿using System.Reactive.Linq;
 
-namespace MCCS.Collecter.PseudoChannelManagers
+using MCCS.Station.HardwareDevices;
+using MCCS.Station.SignalManagers;
+
+namespace MCCS.Station.PseudoChannelManagers
 {
     public sealed class PseudoChannel
     {  

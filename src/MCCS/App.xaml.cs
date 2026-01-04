@@ -4,16 +4,16 @@ using System.Windows.Threading;
 
 using DryIoc.Microsoft.DependencyInjection;
 
-using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Collecter.SignalManagers;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
+using MCCS.Station.ControlChannelManagers;
+using MCCS.Station.ControllerManagers;
+using MCCS.Station.PseudoChannelManagers;
+using MCCS.Station.SignalManagers;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Method;

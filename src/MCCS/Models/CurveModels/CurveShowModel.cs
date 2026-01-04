@@ -7,7 +7,7 @@ using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 
-using MCCS.Collecter.PseudoChannelManagers;
+using MCCS.Station.PseudoChannelManagers;
 
 using SkiaSharp;
 

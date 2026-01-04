@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
-namespace MCCS.Collecter.DllNative
+namespace MCCS.Station.DllNative
 {
     public class BufferPool
     {

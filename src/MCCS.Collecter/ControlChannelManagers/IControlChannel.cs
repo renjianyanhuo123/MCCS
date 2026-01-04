@@ -2,7 +2,7 @@
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 
-namespace MCCS.Collecter.ControlChannelManagers
+namespace MCCS.Station.ControlChannelManagers
 {
     public interface IControlChannel
     {

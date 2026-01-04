@@ -146,10 +146,10 @@ namespace MCCS.Workflow.StepComponents.Core
                 await OnAfterExecuteAsync(stepContext, result);
 
                 // 处理下一步决策
-                if (result.NextStepName != null)
-                {
-                    return ExecutionResult.Branch(new List<string> { result.NextStepName }, result.OutputData);
-                }
+                //if (result.NextStepName != null)
+                //{
+                //    return ExecutionResult.Branch(new List<string> { result.NextStepName }, result.OutputData);
+                //}
 
                 if (result.ProceedToNext)
                 {

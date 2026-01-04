@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.ControlChannelManagers 
+﻿namespace MCCS.Station.ControlChannelManagers 
 {
     public sealed record ControlCompletionConfiguration
     {

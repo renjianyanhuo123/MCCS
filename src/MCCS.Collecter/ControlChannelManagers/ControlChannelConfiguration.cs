@@ -1,7 +1,7 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.HardwareDevices;
+﻿using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
 
-namespace MCCS.Collecter.ControlChannelManagers
+namespace MCCS.Station.ControlChannelManagers
 {
     public enum ControlChannelSignalTypeEnum : int
     {

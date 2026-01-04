@@ -1,10 +1,11 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Collecter.HardwareDevices;
 
-namespace MCCS.Collecter.ControllerManagers.Entities
+using MCCS.Infrastructure.TestModels;
+using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
+
+namespace MCCS.Station.ControllerManagers.Entities
 {
     public abstract class ControllerHardwareDeviceBase
     { 

@@ -1,7 +1,4 @@
-﻿using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.DllNative.Models;
-using MCCS.Common.DataManagers;
+﻿using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.Controllers;
@@ -10,6 +7,8 @@ using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
 using MCCS.Services.NotificationService;
+using MCCS.Station.ControlChannelManagers;
+using MCCS.Station.DllNative.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 

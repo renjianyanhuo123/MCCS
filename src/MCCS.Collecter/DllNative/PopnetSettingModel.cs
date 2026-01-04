@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace MCCS.Collecter.DllNative
+namespace MCCS.Station.DllNative
 {
     public class PopnetSettingModel
     {

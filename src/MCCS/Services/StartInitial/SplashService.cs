@@ -1,16 +1,17 @@
-﻿using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.DllNative.Models;
-using MCCS.Common.DataManagers;
+﻿using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.StationSites;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Collecter.SignalManagers;
-using MCCS.Collecter.SignalManagers.Signals;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Repositories;
+using MCCS.Station.ControlChannelManagers;
+using MCCS.Station.ControllerManagers;
+using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
+using MCCS.Station.PseudoChannelManagers;
+using MCCS.Station.SignalManagers;
+using MCCS.Station.SignalManagers.Signals;
+
 using Microsoft.Extensions.Configuration;
 using StationSiteInfo = MCCS.Common.DataManagers.StationSites.StationSiteInfo;
 

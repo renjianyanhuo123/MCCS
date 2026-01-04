@@ -1,9 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
 
 using System.Collections.ObjectModel;
-using MCCS.Collecter.PseudoChannelManagers;
+
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Models.CurveModels;
+using MCCS.Station.PseudoChannelManagers;
 
 namespace MCCS.ViewModels.Dialogs
 {

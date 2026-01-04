@@ -66,13 +66,10 @@ namespace MCCS.Workflow.StepComponents
             services.AddTransient<HttpRequestStep>();
             services.AddTransient<MessageBoxStep>();
 
-            // 构建服务提供者
-            var serviceProvider = services.BuildServiceProvider();
-
             // 注册 WorkflowCore 的主要服务到 Prism 容器
-            containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowHost>());
-            containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowRegistry>());
-            containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowController>());
+            //containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowHost>());
+            //containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowRegistry>());
+            //containerRegistry.RegisterInstance(serviceProvider.GetRequiredService<IWorkflowController>());
         }
 
         /// <summary>
@@ -83,16 +80,12 @@ namespace MCCS.Workflow.StepComponents
             // 流程控制步骤
             registry.RegisterStep<DelayStep>();
             registry.RegisterStep<ConditionStep>();
-
             // 通用步骤
             registry.RegisterStep<LogStep>();
-
             // 数据处理步骤
             registry.RegisterStep<SetVariableStep>();
-
             // 网络步骤
             registry.RegisterStep<HttpRequestStep>();
-
             // 用户交互步骤
             registry.RegisterStep<MessageBoxStep>();
         }

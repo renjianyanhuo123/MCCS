@@ -1,7 +1,7 @@
-﻿using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.SignalManagers;
+﻿using MCCS.Station.ControllerManagers;
+using MCCS.Station.SignalManagers;
 
-namespace MCCS.Collecter.PseudoChannelManagers
+namespace MCCS.Station.PseudoChannelManagers
 {
     public class PseudoChannelManager : IPseudoChannelManager
     {

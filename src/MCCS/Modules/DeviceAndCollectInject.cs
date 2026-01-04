@@ -1,5 +1,4 @@
-﻿using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Common.Resources.Extensions;
+﻿using MCCS.Common.Resources.Extensions;
 using MCCS.Components.LayoutRootComponents;
 using MCCS.Services.ProjectServices;
 

@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.DllNative
+﻿namespace MCCS.Station.DllNative
 {
     public static class AddressContanst
     {

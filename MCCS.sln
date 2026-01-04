@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.UserControl", "src\MCC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Example", "examples\MCCS.Example\MCCS.Example.csproj", "{36C51B27-1393-4F64-AB78-A8F3843B67CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Collecter", "src\MCCS.Collecter\MCCS.Collecter.csproj", "{02FB1F64-C031-4EB5-BE9E-FC881763D3AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.Station", "src\MCCS.Collecter\MCCS.Station.csproj", "{02FB1F64-C031-4EB5-BE9E-FC881763D3AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCCS.UnitTest", "tests\MCCS.UnitTest\MCCS.UnitTest.csproj", "{69E5E519-5AD8-4309-95B6-F8CBAD86AE9D}"
 EndProject

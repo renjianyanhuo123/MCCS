@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.DllNative.Models
+﻿namespace MCCS.Station.DllNative.Models
 {
     /// <summary>
     /// SSI通道参数类型

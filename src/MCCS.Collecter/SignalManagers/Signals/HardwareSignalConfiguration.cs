@@ -1,7 +1,7 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.HardwareDevices;
+﻿using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
 
-namespace MCCS.Collecter.SignalManagers.Signals
+namespace MCCS.Station.SignalManagers.Signals
 {
     /// <summary>
     /// Bw控制器所有的信号接口信息

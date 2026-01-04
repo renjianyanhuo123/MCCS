@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MCCS.Collecter.DllNative.Models
+namespace MCCS.Station.DllNative.Models
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct TNet_ADHInfo()

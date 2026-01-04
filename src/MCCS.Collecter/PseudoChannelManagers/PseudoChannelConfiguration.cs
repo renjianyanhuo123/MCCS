@@ -1,6 +1,6 @@
-﻿using MCCS.Collecter.SignalManagers.Signals;
+﻿using MCCS.Station.SignalManagers.Signals;
 
-namespace MCCS.Collecter.PseudoChannelManagers
+namespace MCCS.Station.PseudoChannelManagers
 {
     public class PseudoChannelConfiguration
     {

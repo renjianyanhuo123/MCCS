@@ -1,9 +1,9 @@
-﻿using MCCS.Collecter.ControllerManagers.Entities;
-using MCCS.Collecter.DllNative;
-using MCCS.Collecter.HardwareDevices; 
-using MCCS.Infrastructure.Helper;
+﻿using MCCS.Infrastructure.Helper;
+using MCCS.Station.ControllerManagers.Entities;
+using MCCS.Station.DllNative;
+using MCCS.Station.HardwareDevices;
 
-namespace MCCS.Collecter.ControllerManagers
+namespace MCCS.Station.ControllerManagers
 {
     /// <summary>
     /// 控制器管理(务必保持单例)

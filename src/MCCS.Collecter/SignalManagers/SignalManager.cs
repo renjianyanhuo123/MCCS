@@ -1,11 +1,12 @@
 ﻿using System.Reactive.Linq;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Collecter.SignalManagers.Signals;
+
 using MCCS.Infrastructure.Models.ProjectManager;
 using MCCS.Infrastructure.TestModels.Commands;
+using MCCS.Station.ControllerManagers;
+using MCCS.Station.HardwareDevices;
+using MCCS.Station.SignalManagers.Signals;
 
-namespace MCCS.Collecter.SignalManagers
+namespace MCCS.Station.SignalManagers
 {
     public sealed class SignalManager : ISignalManager
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 
-using MCCS.Collecter.PseudoChannelManagers;
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
+using MCCS.Station.PseudoChannelManagers;
 
 using Newtonsoft.Json;
 

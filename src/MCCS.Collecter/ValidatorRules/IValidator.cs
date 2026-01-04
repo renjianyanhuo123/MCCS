@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.ValidatorRules
+﻿namespace MCCS.Station.ValidatorRules
 {
     public interface IValidator<TContext>
     {

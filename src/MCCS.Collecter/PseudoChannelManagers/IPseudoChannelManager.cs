@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.PseudoChannelManagers
+﻿namespace MCCS.Station.PseudoChannelManagers
 {
     public interface IPseudoChannelManager
     { 

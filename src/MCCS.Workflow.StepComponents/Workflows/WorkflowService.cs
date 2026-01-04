@@ -3,6 +3,8 @@ using MCCS.Workflow.StepComponents.Registry;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
+using WorkflowStatus = MCCS.Workflow.StepComponents.Core.WorkflowStatus;
+
 namespace MCCS.Workflow.StepComponents.Workflows
 {
     /// <summary>

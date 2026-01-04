@@ -1,9 +1,9 @@
-﻿using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Infrastructure.TestModels;
+﻿using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
 
-namespace MCCS.Collecter.ControllerManagers.Entities
+namespace MCCS.Station.ControllerManagers.Entities
 {
     public interface IController: IHardwareDevice
     {

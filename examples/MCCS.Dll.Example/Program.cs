@@ -1,9 +1,10 @@
-﻿using MCCS.Collecter.DllNative;
-using MCCS.Collecter.DllNative.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+
+using MCCS.Station.DllNative;
+using MCCS.Station.DllNative.Models;
 
 namespace POPNetCtrlConsoleTest
 {

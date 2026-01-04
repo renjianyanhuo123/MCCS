@@ -1,7 +1,7 @@
-﻿using MCCS.Collecter.ControllerManagers.Entities;
-using MCCS.Collecter.HardwareDevices;
+﻿using MCCS.Station.ControllerManagers.Entities;
+using MCCS.Station.HardwareDevices;
 
-namespace MCCS.Collecter.ControllerManagers
+namespace MCCS.Station.ControllerManagers
 {
     public interface IControllerManager : IDisposable
     { 

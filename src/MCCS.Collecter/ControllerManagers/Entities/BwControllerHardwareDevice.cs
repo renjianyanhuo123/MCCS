@@ -1,19 +1,16 @@
-﻿using MCCS.Collecter.DllNative;
-using MCCS.Collecter.DllNative.Models;
-using MCCS.Collecter.HardwareDevices;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Infrastructure.TestModels.ControlParams;
-
-using Newtonsoft.Json;
-
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace MCCS.Collecter.ControllerManagers.Entities
+using MCCS.Infrastructure.TestModels;
+using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Station.DllNative;
+using MCCS.Station.DllNative.Models;
+using MCCS.Station.HardwareDevices;
+
+namespace MCCS.Station.ControllerManagers.Entities
 {
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {

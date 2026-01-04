@@ -1,10 +1,7 @@
 ﻿using HelixToolkit.SharpDX.Core;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
-using MCCS.Collecter.ControlChannelManagers;
-using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.PseudoChannelManagers;
-using MCCS.Collecter.SignalManagers;
+
 using MCCS.Common;
 using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.CurrentTest;
@@ -42,6 +39,10 @@ using System.Windows.Media;
 using System.Windows.Media.Media3D;
 
 using MCCS.Common.Resources.ViewModels;
+using MCCS.Station.ControlChannelManagers;
+using MCCS.Station.ControllerManagers;
+using MCCS.Station.PseudoChannelManagers;
+using MCCS.Station.SignalManagers;
 
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;

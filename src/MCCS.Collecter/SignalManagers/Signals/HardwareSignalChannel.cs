@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.SignalManagers.Signals
+﻿namespace MCCS.Station.SignalManagers.Signals
 {
     public sealed class HardwareSignalChannel : IDisposable
     { 

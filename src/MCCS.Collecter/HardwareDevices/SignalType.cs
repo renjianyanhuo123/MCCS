@@ -1,4 +1,4 @@
-﻿namespace MCCS.Collecter.HardwareDevices
+﻿namespace MCCS.Station.HardwareDevices
 {
     /// <summary>
     /// 舍弃原先的物理含义;转而变成业务含义的区分

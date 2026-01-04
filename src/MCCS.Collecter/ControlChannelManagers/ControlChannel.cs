@@ -1,12 +1,12 @@
-﻿using MCCS.Collecter.ControllerManagers;
-using MCCS.Collecter.ControllerManagers.Entities;
-using MCCS.Collecter.DllNative;
-using MCCS.Collecter.SignalManagers;
-using MCCS.Infrastructure.TestModels;
+﻿using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Station.ControllerManagers;
+using MCCS.Station.ControllerManagers.Entities;
+using MCCS.Station.DllNative;
+using MCCS.Station.SignalManagers;
 
-namespace MCCS.Collecter.ControlChannelManagers
+namespace MCCS.Station.ControlChannelManagers
 {
     public class ControlChannel : IControlChannel
     { 
