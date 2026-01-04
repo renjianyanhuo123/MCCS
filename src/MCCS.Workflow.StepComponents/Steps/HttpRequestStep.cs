@@ -13,7 +13,7 @@ namespace MCCS.Workflow.StepComponents.Steps
         Description = "发送HTTP请求并获取响应",
         Category = ComponentCategory.Network,
         Icon = "Web",
-        Tags = new[] { "HTTP", "请求", "API", "网络", "REST" })]
+        Tags = ["HTTP", "请求", "API", "网络", "REST"])]
     public class HttpRequestStep : BaseWorkflowStep
     {
         private static readonly HttpClient _httpClient = new()

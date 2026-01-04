@@ -11,7 +11,7 @@ namespace MCCS.Workflow.StepComponents.Steps
         Description = "等待指定的时间后继续执行下一步",
         Category = ComponentCategory.FlowControl,
         Icon = "TimerSand",
-        Tags = new[] { "等待", "延时", "暂停", "计时" })]
+        Tags = ["等待", "延时", "暂停", "计时"])]
     public class DelayStep : BaseWorkflowStep
     {
         /// <summary>

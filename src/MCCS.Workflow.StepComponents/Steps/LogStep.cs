@@ -11,7 +11,7 @@ namespace MCCS.Workflow.StepComponents.Steps
         Description = "输出日志信息，支持变量替换",
         Category = ComponentCategory.General,
         Icon = "TextBoxOutline",
-        Tags = new[] { "日志", "输出", "调试", "打印" })]
+        Tags = ["日志", "输出", "调试", "打印"])]
     public class LogStep : BaseWorkflowStep
     {
         [StepInput("Message")]
@@ -43,13 +43,13 @@ namespace MCCS.Workflow.StepComponents.Steps
                 Description = "日志的严重程度",
                 IsRequired = true,
                 DefaultValue = "Info",
-                Options = new List<SelectOption>
-                {
-                    new("Debug", "调试"),
-                    new("Info", "信息"),
-                    new("Warning", "警告"),
-                    new("Error", "错误")
-                },
+                Options =
+                [
+                    new SelectOption("Debug", "调试"),
+                    new SelectOption("Info", "信息"),
+                    new SelectOption("Warning", "警告"),
+                    new SelectOption("Error", "错误")
+                ],
                 Order = 2
             };
 

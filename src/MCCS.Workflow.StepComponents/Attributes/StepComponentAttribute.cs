@@ -56,7 +56,7 @@ namespace MCCS.Workflow.StepComponents.Attributes
         /// <summary>
         /// 标签（用于搜索和筛选）
         /// </summary>
-        public string[] Tags { get; set; } = Array.Empty<string>();
+        public string[] Tags { get; set; } = [];
 
         public StepComponentAttribute(string id, string name)
         {

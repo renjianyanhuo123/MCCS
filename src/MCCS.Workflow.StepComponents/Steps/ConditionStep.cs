@@ -51,21 +51,21 @@ namespace MCCS.Workflow.StepComponents.Steps
                 Description = "条件比较的运算符",
                 IsRequired = true,
                 DefaultValue = "equals",
-                Options = new List<SelectOption>
-                {
-                    new("equals", "等于 (==)"),
-                    new("not_equals", "不等于 (!=)"),
-                    new("greater_than", "大于 (>)"),
-                    new("greater_or_equal", "大于等于 (>=)"),
-                    new("less_than", "小于 (<)"),
-                    new("less_or_equal", "小于等于 (<=)"),
-                    new("contains", "包含"),
-                    new("not_contains", "不包含"),
-                    new("starts_with", "以...开头"),
-                    new("ends_with", "以...结尾"),
-                    new("is_empty", "为空"),
-                    new("is_not_empty", "不为空")
-                },
+                Options =
+                [
+                    new SelectOption("equals", "等于 (==)"),
+                    new SelectOption("not_equals", "不等于 (!=)"),
+                    new SelectOption("greater_than", "大于 (>)"),
+                    new SelectOption("greater_or_equal", "大于等于 (>=)"),
+                    new SelectOption("less_than", "小于 (<)"),
+                    new SelectOption("less_or_equal", "小于等于 (<=)"),
+                    new SelectOption("contains", "包含"),
+                    new SelectOption("not_contains", "不包含"),
+                    new SelectOption("starts_with", "以...开头"),
+                    new SelectOption("ends_with", "以...结尾"),
+                    new SelectOption("is_empty", "为空"),
+                    new SelectOption("is_not_empty", "不为空")
+                ],
                 Order = 2
             };
 
