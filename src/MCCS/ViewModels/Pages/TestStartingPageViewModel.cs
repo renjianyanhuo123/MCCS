@@ -38,11 +38,11 @@ using System.Windows.Media.Media3D;
 
 using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.Models;
-using MCCS.Common.Resources.ViewModels;
-using MCCS.Station.ControlChannelManagers;
-using MCCS.Station.ControllerManagers;
-using MCCS.Station.PseudoChannelManagers;
-using MCCS.Station.SignalManagers;
+using MCCS.Common.Resources.ViewModels; 
+using MCCS.Station.Core.ControlChannelManagers;
+using MCCS.Station.Core.ControllerManagers;
+using MCCS.Station.Core.PseudoChannelManagers;
+using MCCS.Station.Core.SignalManagers; 
 
 using Camera = HelixToolkit.Wpf.SharpDX.Camera;
 using Color = System.Windows.Media.Color;

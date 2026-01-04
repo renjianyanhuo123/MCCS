@@ -2,8 +2,8 @@
 
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.Tests;
-using MCCS.Infrastructure.TestModels;
-using MCCS.Station.ControlChannelManagers;
+using MCCS.Infrastructure.TestModels; 
+using MCCS.Station.Core.ControlChannelManagers;
 
 namespace MCCS.ViewModels.Pages.TestModelOperations
 {

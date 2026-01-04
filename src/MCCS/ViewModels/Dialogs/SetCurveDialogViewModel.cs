@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Models.CurveModels;
-using MCCS.Station.PseudoChannelManagers;
+using MCCS.Station.Core.PseudoChannelManagers; 
 
 namespace MCCS.ViewModels.Dialogs
 {

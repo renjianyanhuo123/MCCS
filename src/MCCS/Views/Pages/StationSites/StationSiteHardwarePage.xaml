@@ -9,7 +9,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              xmlns:stationViewModel="clr-namespace:MCCS.ViewModels.Pages.StationSites"
-             xmlns:devices="clr-namespace:MCCS.Station.Devices;assembly=MCCS.Station"
+             xmlns:devices="clr-namespace:MCCS.Station.Core.Devices;assembly=MCCS.Station.Core"
              d:DesignHeight="450" d:DesignWidth="800" >
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">

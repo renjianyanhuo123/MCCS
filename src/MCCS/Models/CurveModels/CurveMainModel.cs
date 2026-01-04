@@ -1,4 +1,4 @@
-﻿using MCCS.Station.PseudoChannelManagers;
+﻿using MCCS.Station.Core.PseudoChannelManagers; 
 
 namespace MCCS.Models.CurveModels
 {

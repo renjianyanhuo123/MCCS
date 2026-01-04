@@ -6,9 +6,9 @@ using MCCS.Events.Controllers;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
-using MCCS.Models;
-using MCCS.Station.ControlChannelManagers;
-using MCCS.Station.DllNative.Models;
+using MCCS.Models; 
+using MCCS.Station.Core.ControlChannelManagers;
+using MCCS.Station.Core.DllNative.Models; 
 using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 

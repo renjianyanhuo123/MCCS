@@ -2,7 +2,7 @@
 
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
-using MCCS.Station.PseudoChannelManagers;
+using MCCS.Station.Core.PseudoChannelManagers; 
 
 using Newtonsoft.Json;
 

@@ -7,7 +7,7 @@
              xmlns:systemmanager="clr-namespace:MCCS.ViewModels.Pages.SystemManager"
              xmlns:prism="http://prismlibrary.com/"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:devices="clr-namespace:MCCS.Station.Devices;assembly=MCCS.Station"
+             xmlns:devices="clr-namespace:MCCS.Station.Core.Devices;assembly=MCCS.Station.Core"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800">

@@ -1,6 +1,4 @@
-﻿using HelixToolkit.SharpDX.Core;
-
-using MCCS.Station.HardwareDevices;
+﻿using MCCS.Station.Core.HardwareDevices; 
 
 namespace MCCS.Models.Model3D
 {
