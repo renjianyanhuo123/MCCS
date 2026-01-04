@@ -40,11 +40,7 @@ namespace MCCS.Workflow.StepComponents
 
                 // 自动发现并注册当前程序集中的所有步骤
                 stepRegistry.DiscoverAndRegisterFromCurrentAssembly();
-            }
-
-            // 启动工作流主机
-            var workflowHost = containerProvider.Resolve<IWorkflowHost>();
-            workflowHost.Start();
+            } 
         }
 
         /// <summary>

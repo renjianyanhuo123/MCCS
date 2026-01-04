@@ -10,7 +10,7 @@
         /// <summary>
         /// 展示的中文名称
         /// </summary>
-        private string _displayName;
+        private string _displayName = "";
         public string DisplayName { get => _displayName; set => SetProperty(ref _displayName, value); }
          
         /// <summary>
@@ -26,7 +26,7 @@
         /// <summary>
         /// 专门用于显示的单位 
         /// </summary>
-        private string _unit;
+        private string _unit = "";
         public string Unit { get => _unit; set => SetProperty(ref _unit, value); }
 
         /// <summary>

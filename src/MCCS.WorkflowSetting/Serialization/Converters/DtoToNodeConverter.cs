@@ -30,9 +30,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                     } 
                     return null;
                 case NodeTypeEnum.Decision:
-                    return ConvertToDecisionNode((DecisionNodeDto)dto, parent);
-                defult:
-                    return null;
+                    return ConvertToDecisionNode((DecisionNodeDto)dto, parent); 
             };
             return null;
         }

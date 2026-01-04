@@ -24,10 +24,7 @@ namespace MCCS.Workflow.StepComponents.Registry
             RegisterStep(typeof(TStep), _ => new TStep());
         }
 
-        public void RegisterStep<TStep>(Func<IServiceProvider, TStep> factory) where TStep : BaseWorkflowStep
-        {
-            RegisterStep(typeof(TStep), sp => factory(sp));
-        }
+        public void RegisterStep<TStep>(Func<IServiceProvider, TStep> factory) where TStep : BaseWorkflowStep => RegisterStep(typeof(TStep), factory);
 
         public void RegisterStep(Type stepType)
         {
