@@ -72,6 +72,13 @@ namespace MCCS.ViewModels.Pages
             get => _rightFlyoutName;
             set => SetProperty(ref _rightFlyoutName, value);
         }
+
+        private INotificationService _notificationService;
+        public INotificationService NotificationService
+        {
+            get => _notificationService;
+            set => SetProperty(ref _notificationService, value);
+        }
         #endregion
 
         #region 命令声明
@@ -101,8 +108,7 @@ namespace MCCS.ViewModels.Pages
             var parameters = new DialogParameters
             {
                 {"Title", "关闭应用程序"},
-                { "ShowContent", "是否确定关闭整个应用程序?"},
-                {"RootDialogName", "RootDialog"}
+                { "ShowContent", "是否确定关闭整个应用程序?"}
             }; 
             var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", parameters);
             if (result.Result == ButtonResult.OK)
@@ -129,12 +135,14 @@ namespace MCCS.ViewModels.Pages
             IRegionManager regionManager,
             IAppExitService appExitService,
             IEventAggregator eventAggregator,
+            IContainerProvider containerProvider,
             IDialogService dialogService) : base(eventAggregator, dialogService)
         {
             _eventAggregator.GetEvent<NotificationCancelSelectedEvent>().Subscribe(OnCancelSelectedMenu); 
             _systemMenuRepository = systemMenuRepository;
             _regionManager = regionManager;
             _appExitService = appExitService;
+            NotificationService = containerProvider.Resolve<INotificationService>();
             LogoutCommand = new AsyncDelegateCommand(ExecuteLogoutCommand);
             var menus = systemMenuRepository.GetChildMenusById(0);
             _menus = [.. menus.Select(s => new MainMenuItemModel

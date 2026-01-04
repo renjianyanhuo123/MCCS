@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MCCS.Views.Pages"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:globalNotification="clr-namespace:MCCS.Components.GlobalNotification"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:regions="http://prismlibrary.com/"
              xmlns:menuItemModel="clr-namespace:MCCS.Models.MainPages"
@@ -14,13 +13,18 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:pages="clr-namespace:MCCS.ViewModels.Pages"
              xmlns:components="clr-namespace:MCCS.Components"
+             xmlns:views="clr-namespace:MCCS.Common.Resources.Views;assembly=MCCS.Common.Resources"
+             xmlns:viewModels="clr-namespace:MCCS.Common.Resources.ViewModels;assembly=MCCS.Common.Resources"
              d:DataContext="{d:DesignInstance Type=pages:MainContentPageViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <DataTemplate DataType="{x:Type viewModels:NotificationViewModel}">
+            <views:NotificationContainer />
+        </DataTemplate>
         <Style x:Key="CustomColorMaterialDesign3NavigationListBoxItem"
-              TargetType="ListBoxItem"
-              BasedOn="{StaticResource MaterialDesign3.NavigationRailListBoxItem}">
+               TargetType="ListBoxItem"
+               BasedOn="{StaticResource MaterialDesign3.NavigationRailListBoxItem}">
             <Setter Property="Background" Value="#4A4458" />
             <Setter Property="Foreground" Value="#E8DEF8" />
         </Style>
@@ -132,13 +136,14 @@
                     <ImageBrush ImageSource="/Resources/Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" Stretch="UniformToFill"/>
                 </StatusBar.Background>-->
             </StatusBar> 
-            <globalNotification:NotificationContainer Height="Auto" Width="Auto" 
+            <ContentControl Height="Auto" Width="Auto" 
                                           Grid.Row="0" 
                                           Grid.Column="0"
                                           Grid.ColumnSpan="2"
                                           HorizontalAlignment="Right"
                                           VerticalAlignment="Top"
-                                          Margin="0,10,10,0"></globalNotification:NotificationContainer>
+                                          Margin="0,10,10,0"
+                                          Content="{Binding NotificationService}"></ContentControl>
         </Grid>
     </materialDesign:DialogHost>
 </UserControl>

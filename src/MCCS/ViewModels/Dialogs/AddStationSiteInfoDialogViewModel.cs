@@ -1,10 +1,10 @@
 ﻿using MaterialDesignThemes.Wpf;
 
+using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Events.StationSites;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;
-using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Dialogs
 {

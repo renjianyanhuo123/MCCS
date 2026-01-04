@@ -3,10 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
-             xmlns:converters="clr-namespace:MCCS.Common.Resources.Converters;assembly=MCCS.Common.Resources"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors" xmlns:viewmodels="clr-namespace:MCCS.WorkflowSetting.Models.Nodes" 
              xmlns:interactivity="http://prismlibrary.com/"
              xmlns:extensionAttributes="clr-namespace:MCCS.Common.Resources.ExtensionAttributes;assembly=MCCS.Common.Resources"
+             xmlns:converters1="clr-namespace:MCCS.Common.Resources.Resources.Converters;assembly=MCCS.Common.Resources"
              d:DataContext="{d:DesignInstance Type=viewmodels:StepNode}"
              mc:Ignorable="d" 
              x:Name="WorkflowStepNodeRoot"
@@ -47,7 +47,7 @@
             </Setter>
         </Style>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <converters1:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
     </UserControl.Resources> 
     <Border Background="White"
             CornerRadius="8" 

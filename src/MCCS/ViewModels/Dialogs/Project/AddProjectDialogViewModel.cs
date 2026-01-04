@@ -1,11 +1,11 @@
 using MaterialDesignThemes.Wpf;
 
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.Models;
 using MCCS.Common.Resources.ViewModels;
-using MCCS.Components.GlobalNotification.Models;
 using MCCS.Events.Project;
 using MCCS.Infrastructure.Models.ProjectManager;
 using MCCS.Infrastructure.Repositories.Project;
-using MCCS.Services.NotificationService;
 
 namespace MCCS.ViewModels.Dialogs.Project
 {

@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using MaterialDesignThemes.Wpf;
 
+using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Events.Common;
@@ -10,6 +11,7 @@ using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager;
 using MCCS.UserControl.Params;
+using MCCS.ViewModels.Dialogs.Method;
 using MCCS.Views.Dialogs.Method;
 using Serilog;
 
@@ -26,7 +28,8 @@ namespace MCCS.ViewModels.MethodManager
         public MethodMainPageViewModel(IEventAggregator eventAggregator,
             IContainerProvider containerProvider,
             IMethodRepository methodRepository,
-            IRegionManager regionManager) : base(eventAggregator)
+            IDialogService dialogService,
+            IRegionManager regionManager) : base(eventAggregator, dialogService)
         {
             _containerProvider = containerProvider;
             _methodRepository = methodRepository;
@@ -106,20 +109,17 @@ namespace MCCS.ViewModels.MethodManager
             };
         }
 
-        private static string TestTypeToString(TestTypeEnum testType)
-        {
-            return testType switch
+        private static string TestTypeToString(TestTypeEnum testType) =>
+            testType switch
             {
                 TestTypeEnum.Dynamic => "动态试验",
                 TestTypeEnum.Static => "静态试验",
                 _ => "未知类型"
             };
-        }
 
         private async Task ExecuteAddMethodCommand()
-        {
-            var addMethodDialog = _containerProvider.Resolve<AddMethodDialog>();
-            var result = await DialogHost.Show(addMethodDialog, "RootDialog");
+        { 
+            var result = await _dialogService.ShowDialogHostAsync(nameof(AddMethodDialogViewModel), "RootDialog", new DialogParameters());
         } 
 
         private async Task SearchData()
@@ -169,8 +169,12 @@ namespace MCCS.ViewModels.MethodManager
         private async Task ExecuteDeleteMethodCommand(long id)
         {
             var dialog = _containerProvider.Resolve<DeleteConfirmDialog>();
-            var result = await DialogHost.Show(dialog, "RootDialog");
-            if (result is DialogConfirmEvent { IsConfirmed: true })
+            var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", new DialogParameters
+            {
+                {"Title", "删除"},
+                {"ShowContent", "是否确认删除该方法!"}
+            });
+            if (result.Result == ButtonResult.OK)
             {
                 var success = await _methodRepository.DeleteMethodAsync(id);
                 if(success) await SearchData();

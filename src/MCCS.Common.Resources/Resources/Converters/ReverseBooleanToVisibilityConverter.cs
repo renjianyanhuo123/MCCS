@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Data;
 
-namespace MCCS.Common.Resources.Converters
+namespace MCCS.Common.Resources.Resources.Converters
 {
     public sealed class ReverseBooleanToVisibilityConverter : IValueConverter
     {
@@ -29,6 +29,6 @@ namespace MCCS.Common.Resources.Converters
         /// <param name="culture">This parameter is not used.</param>
         /// <returns>
         /// <see langword="true" /> if <paramref name="value" /> is <see cref="F:System.Windows.Visibility.Visible" />; otherwise, <see langword="false" />.</returns>
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is Visibility visibility ? visibility == Visibility.Visible : (object)false;
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is Visibility visibility ? visibility == Visibility.Visible : false;
     }
 }

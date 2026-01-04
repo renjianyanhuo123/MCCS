@@ -1,20 +1,24 @@
-﻿using MCCS.Components.GlobalNotification.Models;
-using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Threading;
 
-namespace MCCS.Services.NotificationService
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.Models;
+
+namespace MCCS.Common.Resources.ViewModels
 {
-    public class NotificationService : BindableBase, INotificationService
+    public class NotificationViewModel : BindableBase, INotificationService
     {
-        public ObservableCollection<NotificationItem> Notifications { get; } = new();
+        public ObservableCollection<NotificationItem> Notifications { get; } = [];
         private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
 
-        public NotificationService()
+        public NotificationViewModel()
         {
             _timer.Tick += (s, e) => CheckAutoHide();
             _timer.Start();
+            CloseCommand = new DelegateCommand<NotificationItem>(Remove);
         }
+
+        public DelegateCommand<NotificationItem> CloseCommand { get; }
 
         public void Show(string title, string message, NotificationType type = NotificationType.Info, int autoHideSeconds = 5)
         {

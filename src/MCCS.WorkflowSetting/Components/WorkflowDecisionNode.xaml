@@ -6,14 +6,14 @@
              xmlns:local="clr-namespace:MCCS.WorkflowSetting.Components"
              xmlns:localViewModel="clr-namespace:MCCS.WorkflowSetting.Models.Nodes"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:prism="http://prismlibrary.com/"
-             xmlns:converters="clr-namespace:MCCS.Common.Resources.Converters;assembly=MCCS.Common.Resources"
+             xmlns:prism="http://prismlibrary.com/" 
              xmlns:converters1="clr-namespace:MCCS.WorkflowSetting.Resources.Converters"
+             xmlns:converters2="clr-namespace:MCCS.Common.Resources.Resources.Converters;assembly=MCCS.Common.Resources"
              mc:Ignorable="d" 
              d:DesignHeight="80" d:DesignWidth="200" d:DataContext="{d:DesignInstance localViewModel:DecisionNode}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
-        <converters:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <converters2:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
         <converters1:BooleanToColorConverter x:Key="BooleanToColorConverter" />
     </UserControl.Resources>
     <Grid Width="{Binding Width}" Height="{Binding Height}">  

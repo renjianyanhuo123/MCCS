@@ -1,7 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using MCCS.Components.GlobalNotification.Models;
 
-namespace MCCS.Services.NotificationService
+using MCCS.Common.Resources.Models;
+
+namespace MCCS.Common.Resources.Extensions
 {
     public interface INotificationService
     {

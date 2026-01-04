@@ -1,6 +1,6 @@
 ﻿
-using MCCS.Components.GlobalNotification;
-using MCCS.Services.NotificationService;
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.ViewModels;
 
 namespace MCCS.Modules
 {
@@ -11,8 +11,7 @@ namespace MCCS.Modules
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.RegisterSingleton<INotificationService, NotificationService>();
-            containerRegistry.Register<NotificationContainer>();
+            containerRegistry.RegisterSingleton<INotificationService, NotificationViewModel>(); 
         }
     }
 }

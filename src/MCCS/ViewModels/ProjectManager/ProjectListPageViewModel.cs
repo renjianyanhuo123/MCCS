@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 
 using MaterialDesignThemes.Wpf;
 
+using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Events.Common;
@@ -13,6 +14,8 @@ using MCCS.Models.ProjectManager;
 using MCCS.Models.ProjectManager.Parameters;
 using MCCS.UserControl.Params;
 using MCCS.Views.Dialogs.Project;
+
+using Prism.Dialogs;
 
 using Serilog;
 
@@ -28,7 +31,8 @@ namespace MCCS.ViewModels.ProjectManager
             IRegionManager regionManager,
             IEventAggregator eventAggregator,
             IContainerProvider containerProvider,
-            IProjectRepository projectRepository) : base(eventAggregator)
+            IDialogService dialogService,
+            IProjectRepository projectRepository) : base(eventAggregator, dialogService)
         {
             _containerProvider = containerProvider;
             _projectRepository = projectRepository;
@@ -150,10 +154,13 @@ namespace MCCS.ViewModels.ProjectManager
         }
 
         private async Task ExecuteDeleteProjectCommand(long id)
-        {
-            var dialog = _containerProvider.Resolve<DeleteConfirmDialog>();
-            var result = await DialogHost.Show(dialog, "RootDialog");
-            if (result is DialogConfirmEvent { IsConfirmed: true })
+        { 
+            var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", new DialogParameters
+            {
+                {"Title","删除" },
+                {"ShowContent", "是否删除该项目,删除不可恢复!"}
+            });
+            if (result.Result == ButtonResult.OK)
             {
                 var success = await _projectRepository.DeleteProjectAsync(id);
                 if (success) await SearchData();

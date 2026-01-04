@@ -1,16 +1,21 @@
-﻿using MaterialDesignThemes.Wpf; 
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+
+using MaterialDesignThemes.Wpf;
+
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.ViewModels;
+using MCCS.Common.Resources.Views;
 using MCCS.Events.Common;
 using MCCS.Events.Hardwares;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.Hardwares;
 using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.Views.Dialogs.Hardwares;
-using Serilog;
-using System.Collections.ObjectModel;
-using System.Windows;
 
-using MCCS.Common.Resources.ViewModels;
-using MCCS.Common.Resources.Views;
-using MCCS.Infrastructure.Repositories;
+using Prism.Dialogs;
+
+using Serilog;
 
 namespace MCCS.ViewModels.Pages.SystemManager
 {
@@ -67,10 +72,13 @@ namespace MCCS.ViewModels.Pages.SystemManager
             var result = await DialogHost.Show(addDialog, "RootDialog");
         }
         private async Task ExecuteDeleteHardwareCommand(long id)
-        {
-            var confirmDialog = _containerProvider.Resolve<DeleteConfirmDialog>();
-            var result = await DialogHost.Show(confirmDialog, "RootDialog");
-            if (result is DialogConfirmEvent { IsConfirmed: true })
+        { 
+            var result = await _dialogService.ShowDialogHostAsync(nameof(DeleteConfirmDialogViewModel), "RootDialog", new DialogParameters
+            {
+                {"Title", "删除"},
+                {"ShowContent", "是否确认删除该硬件设备!"}
+            });
+            if (result.Result == ButtonResult.OK)
             {
                 // Execute delete logic here
                 var success = await _deviceInfoRepository.DeleteDeviceInfoAsync(id);
@@ -112,7 +120,7 @@ namespace MCCS.ViewModels.Pages.SystemManager
         {
             HardwareList.Clear();
             var hardwareList = await _deviceInfoRepository.GetAllDevicesAsync();
-            var hardwareListView = hardwareList.Select(s => new HardwareListItemViewModel()
+            var hardwareListView = hardwareList.Select(s => new HardwareListItemViewModel
             {
                 Id = s.Id,
                 Name = s.DeviceName,

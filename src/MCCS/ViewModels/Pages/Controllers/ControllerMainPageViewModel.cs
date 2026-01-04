@@ -1,12 +1,12 @@
 ﻿using MCCS.Common.DataManagers;
 using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Components.GlobalNotification.Models;
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.Models;
 using MCCS.Events.Controllers;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Models;
-using MCCS.Services.NotificationService;
 using MCCS.Station.ControlChannelManagers;
 using MCCS.Station.DllNative.Models;
 using MCCS.ViewModels.Pages.ControlCommandPages;

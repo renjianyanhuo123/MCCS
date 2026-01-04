@@ -8,15 +8,16 @@ using HelixToolkit.SharpDX.Core.Assimp;
 using HelixToolkit.SharpDX.Core.Model.Scene;
 using HelixToolkit.Wpf.SharpDX;
 using MCCS.Common;
+using MCCS.Common.Resources.Extensions;
+using MCCS.Common.Resources.Models;
 using MCCS.Common.Resources.ViewModels;
-using MCCS.Components.GlobalNotification.Models; 
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Models.Model3D;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Models.Model3D;
 using MCCS.Models.Stations.Model3DSettings;
-using MCCS.Services.NotificationService;
+
 using Microsoft.Win32;
 using Serilog;
 using SharpDX;
