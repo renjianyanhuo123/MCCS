@@ -10,7 +10,7 @@
              mc:Ignorable="d" 
              xmlns:stationViewModel="clr-namespace:MCCS.ViewModels.Pages.StationSites"
              xmlns:devices="clr-namespace:MCCS.Station.Core.Devices;assembly=MCCS.Station.Core"
-             d:DesignHeight="450" d:DesignWidth="800" >
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance stationViewModel:StationSiteHardwarePageViewModel}">
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Loaded">
             <b:InvokeCommandAction 
