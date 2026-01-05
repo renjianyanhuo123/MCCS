@@ -1,7 +1,7 @@
 ﻿using MCCS.Infrastructure.Models.Devices;
-using MCCS.Station.Core.Devices; 
+using MCCS.Station.Abstractions.Enums;
 
-namespace MCCS.Common.DataManagers.Devices;
+namespace MCCS.Station.Abstractions.Models; 
 
 /// <summary>
 /// 设备基类 - 封装通用逻辑

@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
     <Folder Include="Events\" />
-    <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

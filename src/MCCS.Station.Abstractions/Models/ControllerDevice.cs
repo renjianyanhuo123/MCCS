@@ -1,7 +1,6 @@
-﻿using MCCS.Common.DataManagers.StationSites; 
-using MCCS.Infrastructure.Models.Devices;
+﻿using MCCS.Infrastructure.Models.Devices;
 
-namespace MCCS.Common.DataManagers.Devices
+namespace MCCS.Station.Abstractions.Models
 {
     public class ControllerDevice(long id, string name, long? parentDevicelong) : BaseDevice(id, name, DeviceTypeEnum.Controller, parentDevicelong)
     {

@@ -1,7 +1,8 @@
 ﻿using MCCS.Infrastructure.Models.StationSites;
+
 using Newtonsoft.Json;
 
-namespace MCCS.Common.DataManagers.StationSites
+namespace MCCS.Station.Abstractions.Models
 {
     [method: JsonConstructor]
     public sealed class StationSiteControlChannelInfo(long id, string name, ChannelTypeEnum channelType)

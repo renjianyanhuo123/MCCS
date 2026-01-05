@@ -1,7 +1,7 @@
 ﻿using MCCS.Common.DataManagers.CurrentTest;
-using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Common.DataManagers.StationSites;
+using MCCS.Station.Abstractions.Models;
+using MCCS.Station.Core.Devices;
 
 namespace MCCS.Common.DataManagers
 {

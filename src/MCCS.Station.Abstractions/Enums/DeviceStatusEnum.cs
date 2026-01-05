@@ -1,6 +1,6 @@
-﻿namespace MCCS.Station.Core.Devices
+﻿namespace MCCS.Station.Abstractions.Enums
 {
-    public enum DeviceStatusEnum : int
+    public enum DeviceStatusEnum : int 
     {
         /// <summary>
         /// 未知

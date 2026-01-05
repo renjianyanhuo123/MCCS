@@ -1,4 +1,4 @@
-﻿namespace MCCS.Common.DataManagers.StationSites
+﻿namespace MCCS.Station.Abstractions.Models
 {
     public sealed class StationSiteInfo(long id, string name)
     {

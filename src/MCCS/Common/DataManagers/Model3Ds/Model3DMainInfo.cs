@@ -1,4 +1,4 @@
-﻿using MCCS.Common.DataManagers.StationSites;
+﻿using MCCS.Station.Abstractions.Models;
 
 namespace MCCS.Common.DataManagers.Model3Ds
 {

@@ -1,6 +1,4 @@
 ﻿using MCCS.Common.DataManagers;
-using MCCS.Common.DataManagers.StationSites;
-using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
 using MCCS.Infrastructure.Models.Devices;
 using MCCS.Infrastructure.Repositories; 
@@ -13,7 +11,7 @@ using MCCS.Station.Core.SignalManagers;
 using MCCS.Station.Core.SignalManagers.Signals; 
 
 using Microsoft.Extensions.Configuration;
-using StationSiteInfo = MCCS.Common.DataManagers.StationSites.StationSiteInfo;
+using StationSiteInfo = MCCS.Station.Abstractions.Models.StationSiteInfo;
 
 namespace MCCS.Services.StartInitial
 {

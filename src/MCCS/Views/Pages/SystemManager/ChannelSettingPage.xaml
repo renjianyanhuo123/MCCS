@@ -8,6 +8,7 @@
              xmlns:prism="http://prismlibrary.com/"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:devices="clr-namespace:MCCS.Station.Core.Devices;assembly=MCCS.Station.Core"
+             xmlns:enums="clr-namespace:MCCS.Station.Abstractions.Enums;assembly=MCCS.Station.Abstractions"
              prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800">
@@ -109,16 +110,16 @@
                         <Ellipse.Style>
                             <Style TargetType="Ellipse" BasedOn="{StaticResource StatusIndicatorStyle}">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Connected}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static enums:DeviceStatusEnum.Connected}">
                                         <Setter Property="Fill" Value="#90EE90"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Busy}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static enums:DeviceStatusEnum.Busy}">
                                         <Setter Property="Fill" Value="#FFA500"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Error}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static enums:DeviceStatusEnum.Error}">
                                         <Setter Property="Fill" Value="#FF6B6B"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static devices:DeviceStatusEnum.Disconnected}">
+                                    <DataTrigger Binding="{Binding DeviceStatus}" Value="{x:Static enums:DeviceStatusEnum.Disconnected}">
                                         <Setter Property="Fill" Value="#808080"/>
                                     </DataTrigger>
                                 </Style.Triggers>
