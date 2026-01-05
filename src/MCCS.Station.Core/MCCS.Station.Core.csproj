@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
+    <ProjectReference Include="..\MCCS.Station.Abstractions\MCCS.Station.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
