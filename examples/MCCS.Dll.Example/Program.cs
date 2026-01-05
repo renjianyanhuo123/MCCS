@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-using MCCS.Station.DllNative;
-using MCCS.Station.DllNative.Models;
+using MCCS.Station.Core.DllNative;
+using MCCS.Station.Core.DllNative.Models;
+
 
 namespace POPNetCtrlConsoleTest
 {

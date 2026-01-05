@@ -1,8 +1,7 @@
 ﻿using MCCS.Common.DataManagers.CurrentTest;
 using MCCS.Common.DataManagers.Devices;
 using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Common.DataManagers.StationSites; 
-using MCCS.Infrastructure.Models.Devices;
+using MCCS.Common.DataManagers.StationSites;
 
 namespace MCCS.Common.DataManagers
 {
@@ -16,15 +15,7 @@ namespace MCCS.Common.DataManagers
         /// <summary>
         /// 当前启用的站点所有聚合信息
         /// </summary>
-        public StationSiteInfo? StationSiteInfo { get; private set; }
-        /// <summary>
-        /// 所有设备
-        /// </summary>
-        public List<BaseDevice>? Devices { get; private set; }
-        /// <summary>
-        /// 控制器 核心
-        /// </summary>
-        public List<ControllerDevice>? ControllerInfos { get; private set; }  
+        public StationSiteInfo? StationSiteInfo { get; private set; }  
         /// <summary>
         /// 当前正在进行的试验
         /// </summary>
@@ -45,13 +36,9 @@ namespace MCCS.Common.DataManagers
                 case CurrentTestInfo currentTestInfo:
                     CurrentTestInfo = currentTestInfo;
                     break;
-                case List<BaseDevice> devices:
-                    Devices = devices;
-                    ControllerInfos = devices.Where(c => c.Type == DeviceTypeEnum.Controller)
-                        .Select(s => (ControllerDevice)s).ToList();
+                case List<BaseDevice> devices: 
                     break;
-                case List<Model3DMainInfo> model3Ds:
-                    Model3Ds = model3Ds;
+                case List<Model3DMainInfo> model3Ds: 
                     break;
             }
         }

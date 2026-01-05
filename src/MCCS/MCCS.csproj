@@ -65,8 +65,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MCCS.Collecter\MCCS.Station.csproj" />
-    <ProjectReference Include="..\MCCS.Station.Core\MCCS.Station.Core.csproj" />
+    <ProjectReference Include="..\MCCS.Station.Client\MCCS.Station.Client.csproj" />
+    <ProjectReference Include="..\MCCS.Station.Host\MCCS.Station.Host.csproj" />
     <ProjectReference Include="..\MCCS.UserControl\MCCS.UserControl.csproj" />
     <ProjectReference Include="..\MCCS.Workflow.StepComponents\MCCS.Workflow.StepComponents.csproj" />
     <ProjectReference Include="..\MCCS.WorkflowSetting\MCCS.WorkflowSetting.csproj" />

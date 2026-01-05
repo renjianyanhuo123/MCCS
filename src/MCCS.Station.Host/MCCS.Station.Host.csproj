@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MCCS.Station.Core\MCCS.Station.Core.csproj" />
+  </ItemGroup>
+
 </Project>

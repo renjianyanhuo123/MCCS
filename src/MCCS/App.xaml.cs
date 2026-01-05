@@ -10,6 +10,7 @@ using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
+using MCCS.Station.Client;
 using MCCS.Station.Core.ControlChannelManagers;
 using MCCS.Station.Core.ControllerManagers;
 using MCCS.Station.Core.PseudoChannelManagers;
@@ -82,6 +83,7 @@ namespace MCCS
             moduleCatalog.AddModule<NotificationModule>();
             moduleCatalog.AddModule<WorkflowModule>();
             moduleCatalog.AddModule<StepComponentModule>();
+            moduleCatalog.AddModule<StationModule>();
         }
 
 
@@ -122,10 +124,7 @@ namespace MCCS
             containerRegistry.AddRepository(configuration);
             containerRegistry.AddModel3DServices(configuration);
             containerRegistry.Inject(configuration);
-            containerRegistry.RegisterSingleton<IControllerManager, ControllerManager>();
-            containerRegistry.RegisterSingleton<ISignalManager, SignalManager>();
-            containerRegistry.RegisterSingleton<IControlChannelManager, ControlChannelManager>();
-            containerRegistry.RegisterSingleton<IPseudoChannelManager, PseudoChannelManager>();
+            
             containerRegistry.RegisterSingleton<ISplashService, SplashService>();
             containerRegistry.RegisterSingleton<IAppExitService, AppExitService>();
             // containerRegistry.AddNotificationModule(configuration);

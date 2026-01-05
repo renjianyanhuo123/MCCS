@@ -40,7 +40,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             StopCommand = new DelegateCommand(ExecuteStopCommand);
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             // 查找当前模型对应的设备ID  的  控制器ID
-            _modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId) ?? throw new ArgumentNullException("modeInfo is null");
+            // _modelInfo = GlobalDataManager.Instance.Model3Ds?.FirstOrDefault(c => c.Id == modelId) ?? throw new ArgumentNullException("modeInfo is null");
             // var tempDevice = _modelInfo?.MappingDevice;
             // var controlChannels = GlobalDataManager.Instance.Model3Ds
             //if (tempDevice?.ParentDeviceId == null) throw new ArgumentNullException("未配置连接到控制器");

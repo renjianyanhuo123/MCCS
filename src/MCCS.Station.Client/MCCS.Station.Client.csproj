@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
+    <ProjectReference Include="..\MCCS.Station.Core\MCCS.Station.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MCCS.Collecter\MCCS.Station.csproj" />
+    <ProjectReference Include="..\..\src\MCCS.Station.Core\MCCS.Station.Core.csproj" />
   </ItemGroup>
 
 </Project>
