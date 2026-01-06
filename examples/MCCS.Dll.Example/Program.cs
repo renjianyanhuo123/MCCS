@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
+using MCCS.Infrastructure.Helper;
 using MCCS.Station.Core.DllNative;
 using MCCS.Station.Core.DllNative.Models;
 
@@ -1177,35 +1178,23 @@ namespace POPNetCtrlConsoleTest
                     uint totalSize = (uint)(structSize * dataCount1);
 
                     // 分配非托管内存
-                    IntPtr buffer = BufferPool.Rent();
+                    var buffer = NativeBufferPool.Rent(128);
                     try
-                    {
-                        // 初始化内存
-                        for (int i = 0; i < dataCount1; i++)
-                        {
-                            TNet_ADHInfo initData = new TNet_ADHInfo();
-                            IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
-                            Marshal.StructureToPtr(initData, structPtr, false);
-                        }
+                    { 
                         for (int j = 0; j < dataCount; j++)
                         {
                             // 调用DLL函数
                             int result1 = POPNetCtrl.NetCtrl01_GetAD_HInfo(
                                 _deviceHandle,
-                                buffer,
+                                buffer.Ptr,
                                 totalSize
                             );
                             if (result1 == 0)
                             {
                                 Console.WriteLine("操作成功");
 
-                                // 从内存中读取数据
-                                TNet_ADHInfo[] resultArray = new TNet_ADHInfo[dataCount1];
-                                for (int i = 0; i < dataCount1; i++)
-                                {
-                                    IntPtr structPtr = IntPtr.Add(buffer, i * structSize);
-                                    resultArray[i] = Marshal.PtrToStructure<TNet_ADHInfo>(structPtr);
-                                }
+                                // 从内存中读取数据 
+                                var resultArray = Marshal.PtrToStructure<TNet_ADHInfo>(buffer.Ptr);
                                 Console.WriteLine($"当前接受数据：{dataCount1}");
                                 //PrintADInfoArray(resultArray);
                             }
@@ -1218,7 +1207,7 @@ namespace POPNetCtrlConsoleTest
                     finally
                     {
                         // 归还内存
-                        BufferPool.Return(buffer);
+                        NativeBufferPool.Return(buffer);
                     }
                     stopwatch.Stop();
                     Console.WriteLine($"执行时间: {stopwatch.ElapsedMilliseconds}ms");

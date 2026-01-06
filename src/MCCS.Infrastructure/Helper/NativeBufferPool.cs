@@ -49,8 +49,11 @@ namespace MCCS.Infrastructure.Helper
             }
         }
 
-        // === 公共 API ===
-
+        /// <summary>
+        /// 租用Buffer
+        /// </summary>
+        /// <param name="minSize"></param>
+        /// <returns></returns>
         public static NativeBuffer Rent(int minSize)
         {
             var bucket = SelectBucket(minSize);
@@ -70,7 +73,10 @@ namespace MCCS.Infrastructure.Helper
             var newPtr = Marshal.AllocHGlobal(bucket.Size);
             return new NativeBuffer(newPtr, bucket.Size);
         }
-
+        /// <summary>
+        /// 归还内存
+        /// </summary>
+        /// <param name="buffer"></param>
         public static void Return(NativeBuffer buffer)
         {
             if (buffer == null || buffer.Ptr == IntPtr.Zero)
@@ -94,7 +100,9 @@ namespace MCCS.Infrastructure.Helper
                 Marshal.FreeHGlobal(buffer.Ptr);
             }
         }
-
+        /// <summary>
+        /// 清理所有的桶资源
+        /// </summary>
         public static void Clear()
         {
             foreach (var bucket in _buckets)
@@ -107,8 +115,11 @@ namespace MCCS.Infrastructure.Helper
             }
         }
 
-        // === 内部逻辑 ===
-
+        /// <summary>
+        /// 根据大小选择桶
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
         private static Bucket? SelectBucket(int size)
         {
             for (var i = 0; i < _buckets.Length; i++)

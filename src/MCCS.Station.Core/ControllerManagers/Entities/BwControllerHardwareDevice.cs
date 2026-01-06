@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.TestModels;
 using MCCS.Infrastructure.TestModels.ControlParams;
 using MCCS.Station.Core.DllNative;
@@ -17,7 +18,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private readonly IDisposable _acquisitionSubscription;
         private readonly EventLoopScheduler _highPriorityScheduler; 
         private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
-        private nint _singleBuffer = nint.Zero;
+        private NativeBuffer? _singleBuffer = null;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
         private ValveStatusEnum _valveStatus;
 
@@ -99,14 +100,14 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
                 return CreateBadDataPoint();
-            if (_singleBuffer == nint.Zero)
-                _singleBuffer = BufferPool.Rent();
+            if (_singleBuffer == null)
+                _singleBuffer = NativeBufferPool.Rent(128);
             var results = new List<TNet_ADHInfo>((int)count);
             for (uint i = 0; i < count; i++)
             {
-                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
-                    return CreateBadDataPoint();
-                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer);
+                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
+                    return CreateBadDataPoint(); 
+                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
                 results.Add(tempValue);
             }
 
@@ -250,10 +251,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
         public void CleanupResources()
         {
-            if (_singleBuffer != nint.Zero)
+            if (_singleBuffer != null)
             {
-                BufferPool.Return(_singleBuffer);
-                _singleBuffer = nint.Zero;
+                NativeBufferPool.Return(_singleBuffer);
+                _singleBuffer = null;
             }
         }
         public override void Dispose()

@@ -99,7 +99,7 @@ namespace MCCS.Station.Core.ControllerManagers
             {
                 _isDllInitialized = false;
             }
-            BufferPool.Clear();
+            NativeBufferPool.Clear();
         }
     }
 }
