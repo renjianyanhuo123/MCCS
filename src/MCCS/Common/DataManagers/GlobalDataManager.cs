@@ -1,7 +1,7 @@
 ﻿using MCCS.Common.DataManagers.CurrentTest;
 using MCCS.Common.DataManagers.Model3Ds;
+using MCCS.Infrastructure.Helper;
 using MCCS.Station.Abstractions.Models;
-using MCCS.Station.Core.Devices;
 
 namespace MCCS.Common.DataManagers
 {
@@ -16,6 +16,8 @@ namespace MCCS.Common.DataManagers
         /// 当前启用的站点所有聚合信息
         /// </summary>
         public StationSiteInfo? StationSiteInfo { get; private set; }  
+
+        public ProcessManager? ProcessManager { get; private set; }
         /// <summary>
         /// 当前正在进行的试验
         /// </summary>
@@ -39,6 +41,9 @@ namespace MCCS.Common.DataManagers
                 case List<BaseDevice> devices: 
                     break;
                 case List<Model3DMainInfo> model3Ds: 
+                    break;
+                case Infrastructure.Helper.ProcessManager processManager:
+                    ProcessManager = processManager;
                     break;
             }
         }

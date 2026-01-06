@@ -18,11 +18,6 @@ namespace MCCS.Station.Abstractions.Models
         /// </summary>
         public SignalTypeEnum ControlChannelSignalType { get; set; }
 
-        public BaseDevice? LinkedDevice { get; private set; }
-
-        public void Link(BaseDevice device)
-        {
-            LinkedDevice = device;
-        }
+        public BaseDevice? LinkedDevice { get; set; } 
     }
 }

@@ -66,7 +66,7 @@ namespace MCCS.Station.Core.DllNative
         /// <param name="inBytesSize1">数据结构的字节数</param>
         /// <returns>=0  操作成功   =1 设备未连接  =2 设备断开错误</returns>
         [DllImport(AddressContanst.DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int NetCtrl01_GetAD_HInfo(IntPtr hDevice, IntPtr InBytes1, uint inBytesSize1);
+        public static extern int NetCtrl01_GetAD_HInfo(IntPtr hDevice, IntPtr inBytes1, uint inBytesSize1);
 
         /// <summary>
         /// 向某个地址写浮点类型数据

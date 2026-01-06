@@ -2,7 +2,7 @@
 
 namespace MCCS.Station.Core.DllNative.Models
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public struct TNet_ADHInfo()
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]

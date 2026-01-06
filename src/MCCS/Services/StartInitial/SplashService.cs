@@ -1,31 +1,26 @@
 ﻿using MCCS.Common.DataManagers;
-using MCCS.Common.DataManagers.Model3Ds;
-using MCCS.Infrastructure.Models.Devices;
-using MCCS.Infrastructure.Repositories; 
-using MCCS.Station.Core.ControlChannelManagers;
-using MCCS.Station.Core.ControllerManagers;
-using MCCS.Station.Core.DllNative.Models;
-using MCCS.Station.Core.HardwareDevices;
-using MCCS.Station.Core.PseudoChannelManagers;
-using MCCS.Station.Core.SignalManagers;
-using MCCS.Station.Core.SignalManagers.Signals; 
+using MCCS.Infrastructure.Repositories;
+using MCCS.Station.Abstractions.Interfaces;
+using MCCS.Station.Core;
 
 using Microsoft.Extensions.Configuration;
-using StationSiteInfo = MCCS.Station.Abstractions.Models.StationSiteInfo;
 
 namespace MCCS.Services.StartInitial
 {
     public class SplashService : ISplashService
     {
         private readonly IStationSiteAggregateRepository _stationSiteAggregateRepository;
-        private readonly IDeviceInfoRepository _deviceInfoRepository; 
+        private readonly IDeviceInfoRepository _deviceInfoRepository;
+        private readonly IStationRuntime _stationRuntime;
         private readonly IConfiguration _configuration;   
         private readonly bool _isMock;
 
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository, 
-            IDeviceInfoRepository deviceInfoRepository,  
+            IDeviceInfoRepository deviceInfoRepository,
+            IStationRuntime stationRuntime,
             IConfiguration configuration)
         {
+            _stationRuntime = stationRuntime;
             _isMock = Convert.ToBoolean(configuration["AppSettings:IsMock"]); 
             _configuration = configuration;
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
@@ -34,12 +29,17 @@ namespace MCCS.Services.StartInitial
 
         public async Task InitialHardwareDevicesAsync()
         {
-            var currentUseStation = await _stationSiteAggregateRepository.GetCurrentStationSiteAggregateAsync();
-            if (currentUseStation?.StationSiteInfo == null) throw new ArgumentNullException("Current Use Station Site is Null");
-            var deviceInfos = await _deviceInfoRepository.GetAllDevicesAsync();
-            if (deviceInfos == null) throw new ArgumentNullException("Current Controllers is Null");
-            if (currentUseStation.Model3DAggregate == null || currentUseStation.Model3DAggregate.BaseInfo == null)
-                throw new ArgumentNullException("Station Site's Model3D or Model3D BaseInfo is Null");
+            if (!_stationRuntime.IsExistCurrentStationProfile())
+            {
+                var currentUseStation = await _stationSiteAggregateRepository.GetCurrentStationSiteAggregateAsync();
+                if (currentUseStation?.StationSiteInfo == null) throw new ArgumentNullException("Current Use Station Site is Null");
+                var stationInfo = _stationRuntime.MappingStationSiteInfo(currentUseStation);
+                await _stationRuntime.BuildCurrentStationProfileAsync(stationInfo);
+            }
+            if(GlobalDataManager.Instance.ProcessManager != null) 
+                GlobalDataManager.Instance.ProcessManager.Start();
+            //var deviceInfos = await _deviceInfoRepository.GetAllDevicesAsync();
+            //if (deviceInfos == null) throw new ArgumentNullException("Current Controllers is Null"); 
             //var model3DAndControlChannels = await _stationSiteAggregateRepository.GetControlChannelAndModelInfoByModelIdAsync(currentUseStation.Model3DAggregate.BaseInfo.Id);
             //var stationSiteInfo = new StationSiteInfo(currentUseStation.StationSiteInfo.Id, currentUseStation.StationSiteInfo.StationName);
             //var allSignals = await _deviceInfoRepository.GetSignalInterfacesByExpressionAsync(c => c.IsDeleted == false);

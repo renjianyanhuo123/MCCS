@@ -1,6 +1,9 @@
-﻿namespace MCCS.Station.Abstractions.Models
+﻿using Newtonsoft.Json;
+
+namespace MCCS.Station.Abstractions.Models
 {
-    public sealed class StationSiteInfo(long id, string name)
+    [method: JsonConstructor]
+    public sealed class StationSiteInfo(long id, string name, List<StationSiteControlChannelInfo> controlChannelInfos)
     {
         /// <summary>
         /// 站点ID
@@ -15,6 +18,6 @@
         /// <summary>
         /// 控制通道
         /// </summary>
-        public List<StationSiteControlChannelInfo> ControlChannels { get; } = [];
+        public List<StationSiteControlChannelInfo> ControlChannels { get; private set; } = controlChannelInfos;
     }
 }

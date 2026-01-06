@@ -4,8 +4,10 @@ using System.Windows.Threading;
 
 using DryIoc.Microsoft.DependencyInjection;
 
+using MCCS.Common.DataManagers;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
+using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
@@ -63,7 +65,8 @@ namespace MCCS
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App
-    { 
+    {
+
         /// <summary>
         /// (3)
         /// </summary>
@@ -197,23 +200,6 @@ namespace MCCS
         {
             try
             {
-                //var deviceRepository = Container.Resolve<IDeviceInfoRepository>();
-                //var devices = await deviceRepository.GetAllDevicesAsync();
-                //var connectionDevices = devices.Where(c => c.DeviceType == DeviceTypeEnum.Controller);
-                //var connectionManager = Container.Resolve<IConnectionManager>();
-                //var deviceManager = Container.Resolve<IDeviceManager>();
-                //// (1)默认注册模拟设备连接
-                //connectionManager.RegisterBatchConnections(connectionDevices.Select(c => new ConnectionSetting
-                //{
-                //    ConnectionId = c.DeviceId,
-                //    ConnectionType = ConnectionTypeEnum.Mock,
-                //    ConnectionStr = "XXXXXX"
-                //}).ToList());
-                //// (2) 打开所有连接
-                //await connectionManager.OpenAllConnections();
-                //// (3) 注册所有设备
-                //deviceManager.RegisterDevices(devices.Where(c => c.DeviceType == DeviceTypeEnum.Controller).ToList());
-                //deviceManager.StartAllDevices();
                 base.OnInitialized();
             }
             catch (Exception e)
@@ -228,6 +214,7 @@ namespace MCCS
         /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e)
         {
+            GlobalDataManager.Instance.SetValue(new ProcessManager("MCCS.Station.Host.exe", "", AppContext.BaseDirectory, false)); 
             // 设置全局异常处理
             SetupExceptionHandling();
             base.OnStartup(e);
@@ -235,12 +222,11 @@ namespace MCCS
 
         protected override void OnExit(ExitEventArgs e)
         {
+            GlobalDataManager.Instance.ProcessManager?.Stop();
+            GlobalDataManager.Instance.ProcessManager?.Dispose();
+            // 关闭主窗口后则释放所有设备连接
             Log.CloseAndFlush();
-            base.OnExit(e);
-            var controllerService = Container.Resolve<IControllerManager>();
-            controllerService.StopAllControllers();
-            controllerService.Dispose();
-            // 关闭主窗口后则释放所有设备连接 
+            base.OnExit(e); 
         }
 
         #region private method
