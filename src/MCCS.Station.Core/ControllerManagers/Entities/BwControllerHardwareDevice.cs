@@ -17,16 +17,20 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
     {
         private readonly IDisposable _acquisitionSubscription;
         private readonly EventLoopScheduler _highPriorityScheduler; 
-        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
+        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration; 
         private NativeBuffer? _singleBuffer = null;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
         private ValveStatusEnum _valveStatus;
+        private long _sampleSequence = 0;
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
             _hardwareDeviceConfiguration = configuration; 
             _highPriorityScheduler = CreateHighPriorityScheduler();
-            _acquisitionSubscription = CreateAcquisitionLoop();
+            var acquisitionStream = CreateAcquisitionObservable().Publish();
+            DataStream = acquisitionStream;
+            // ⚠️ 注意：采集在这里才真正启动
+            _acquisitionSubscription = acquisitionStream.Connect();
             _statusSubscription = Observable.Interval(TimeSpan.FromSeconds(configuration.StatusInterval))
                 .Subscribe(onNext: c =>
                 {
@@ -48,87 +52,58 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         }
 
         #region Private Method
-        private EventLoopScheduler CreateHighPriorityScheduler()
-        {
-            return new EventLoopScheduler(ts => new Thread(ts)
+        private EventLoopScheduler CreateHighPriorityScheduler() =>
+            new(ts => new Thread(ts)
             {
                 Name = $"Controller_{_hardwareDeviceConfiguration.DeviceId}",
                 IsBackground = true,
                 Priority = ThreadPriority.Highest
             });
-        }
-        /// <summary>
-        /// 因为现在批量采集就放在了Controller中;
-        /// </summary>
-        /// <returns></returns>
-        private IDisposable CreateAcquisitionLoop()
-        {
-            // 创建精确定时的数据采集循环
-            return Observable
-                .Generate(
-                    0L, // 初始状态
-                    _ => true, // 继续条件
-                    tick => tick + 1, // 状态更新
-                    _ => AcquireReading(), // 结果选择器
-                    _ => CalculateNextInterval()) // 时间选择器
-                .ObserveOn(_highPriorityScheduler)
-                .Subscribe(
-                    _dataSubject.OnNext,
-                    _ =>
+
+        private IObservable<SampleBatch<TNet_ADHInfo>> CreateAcquisitionObservable() =>
+            Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
+            {
+                return _highPriorityScheduler.Schedule(self =>
+                { 
+                    try
+                    { 
+                        var frame = AcquireReading(); 
+                        if (frame != null)
+                            observer.OnNext(frame);
+                    }
+                    catch (Exception ex)
                     {
-                        // 发送错误数据点而不是停止流
-                        var errorReading = new DataPoint<List<TNet_ADHInfo>>
-                        {
-                            Value = [],
-                            Unit = "",
-                            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                            DataQuality = DataQuality.Bad
-                        };
-                        _dataSubject.OnNext(errorReading);
-                    });
-        }
-        private TimeSpan CalculateNextInterval()
-        {
-            // 精确计算下次采样间隔
-            var temp = TimeSpan.FromTicks(Stopwatch.Frequency / _sampleRate);
-            return temp;
-        }
+                        observer.OnError(ex);
+                        return;
+                    } 
+                    self();
+                });
+            });
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint<List<TNet_ADHInfo>> AcquireReading()
+        private SampleBatch<TNet_ADHInfo>? AcquireReading()
         {
             uint count = 0;
-            if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL || count == 0)
-                return CreateBadDataPoint();
-            if (_singleBuffer == null)
-                _singleBuffer = NativeBufferPool.Rent(128);
-            var results = new List<TNet_ADHInfo>((int)count);
-            for (uint i = 0; i < count; i++)
-            {
-                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) != AddressContanst.OP_SUCCESSFUL)
-                    return CreateBadDataPoint(); 
-                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
-                results.Add(tempValue);
-            }
-
-            return new DataPoint<List<TNet_ADHInfo>>
+            if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL ||
+                count == 0) return null;
+            _singleBuffer ??= NativeBufferPool.Rent(128);
+            var res = new SampleBatch<TNet_ADHInfo>
             {
                 DeviceId = DeviceId,
-                Value = results,
-                Unit = "",
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                DataQuality = DataQuality.Good
+                SampleCount = count,
+                SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count
             };
-        }
-
-        private static DataPoint<List<TNet_ADHInfo>> CreateBadDataPoint() => new()
-        {
-            Value = [],
-            Unit = "",
-            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-            DataQuality = DataQuality.Bad
-        };
-
+            var tempValues = new TNet_ADHInfo[count];
+            for (uint i = 0; i < count; i++)
+            {
+                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) !=
+                    AddressContanst.OP_SUCCESSFUL) return null;
+                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
+                tempValues[i] = tempValue;
+                res.Values = tempValues;
+            } 
+            return res;
+        } 
         #endregion
 
         public bool ConnectToHardware()
@@ -180,10 +155,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             return success == AddressContanst.OP_SUCCESSFUL;
         }
 
-        public ValveStatusEnum GetValveStatus()
-        { 
-            return _valveStatus;
-        } 
+        public ValveStatusEnum GetValveStatus() => _valveStatus;
 
         public int SetValveStatus(bool isOpen)
         {
@@ -201,19 +173,12 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             return result == AddressContanst.OP_SUCCESSFUL;
         }
 
-        public int SetStaticControlMode(StaticControlParams param)
-        {   
-            return POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)param.StaticLoadControl, param.Speed, param.TargetValue);
-        }
+        public int SetStaticControlMode(StaticControlParams param) => POPNetCtrl.NetCtrl01_S_SetCtrlMod(_deviceHandle, (uint)param.StaticLoadControl, param.Speed, param.TargetValue);
 
-        public int SetValleyPeakFilterNum(int freq)
-        {  
-            return POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_ValleyPeak_FilterNum, (byte)freq);
-        }
+        public int SetValleyPeakFilterNum(int freq) => POPNetCtrl.NetCtrl01_bWriteAddr(_deviceHandle, AddressContanst.Addr_ValleyPeak_FilterNum, (byte)freq);
 
-        public int SetDynamicControlMode(DynamicControlParams param)
-        { 
-            return POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(_hardwareDeviceConfiguration.DeviceAddressId, param.MeanValue,
+        public int SetDynamicControlMode(DynamicControlParams param) =>
+            POPNetCtrl.NetCtrl01_Osci_SetWaveInfo(_hardwareDeviceConfiguration.DeviceAddressId, param.MeanValue,
                 param.Amplitude,
                 param.Frequency,
                 (byte)param.WaveType,
@@ -222,12 +187,8 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 param.CompensationPhase,
                 param.CycleCount,
                 (int)param.CtrlOpt);
-        }
 
-        public int SetDynamicStopControl(int tmpActMode, int tmpHaltState)
-        {
-            return POPNetCtrl.NetCtrl01_Osci_SetHaltState(_hardwareDeviceConfiguration.DeviceAddressId, (byte)tmpActMode, (byte)tmpHaltState);
-        }
+        public int SetDynamicStopControl(int tmpActMode, int tmpHaltState) => POPNetCtrl.NetCtrl01_Osci_SetHaltState(_hardwareDeviceConfiguration.DeviceAddressId, (byte)tmpActMode, (byte)tmpHaltState);
 
         public int SetSignalTare(int controlType)
         {
@@ -259,11 +220,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         }
         public override void Dispose()
         {
-            base.Dispose();
-            _highPriorityScheduler?.Dispose();
             _acquisitionSubscription?.Dispose();
-            _dataSubject?.Dispose();
+            _highPriorityScheduler?.Dispose(); 
             CleanupResources();
+            base.Dispose();  
         } 
     }
 }

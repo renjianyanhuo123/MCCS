@@ -179,8 +179,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             return Observable.Interval(TimeSpan.FromSeconds(t))
                 .Where(_ => _isRunning && Status == HardwareConnectionStatus.Connected)
                 .Subscribe(_ =>
-                {
-                    _dataSubject.OnNext(MockAcquireReading());
+                { 
 #if DEBUG
                     // Debug.WriteLine($"运行位移:{_position}mm");
 #endif
@@ -418,9 +417,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             base.Dispose();
             MockStaticControlStop();
             SetDynamicStopControl(0,0);
-            _acquisitionSubscription.Dispose();
-            _dataSubject?.OnCompleted();
-            _dataSubject?.Dispose();
+            _acquisitionSubscription.Dispose(); 
         }
     }
 }

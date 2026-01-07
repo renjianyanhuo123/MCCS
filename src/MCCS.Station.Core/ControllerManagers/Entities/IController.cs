@@ -14,11 +14,11 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// <summary>
         /// 批量数据流
         /// </summary>
-        IObservable<DataPoint<List<TNet_ADHInfo>>> DataStream { get; }
+        IObservable<SampleBatch<TNet_ADHInfo>> DataStream { get; }
         /// <summary>
         /// 单个数据流
         /// </summary>
-        IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; } 
+        // IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; } 
         /// <summary>
         /// 状态流
         /// </summary>

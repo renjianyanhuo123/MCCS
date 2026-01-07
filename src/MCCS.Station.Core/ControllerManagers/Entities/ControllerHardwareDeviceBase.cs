@@ -9,17 +9,21 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 {
     public abstract class ControllerHardwareDeviceBase
     { 
+        // ReSharper disable once InconsistentNaming
         protected readonly BehaviorSubject<HardwareConnectionStatus> _statusSubject;
-        protected readonly ReplaySubject<DataPoint<List<TNet_ADHInfo>>> _dataSubject;
+        // ReSharper disable once InconsistentNaming
         protected readonly int _sampleRate;
+        // ReSharper disable once InconsistentNaming
         protected IDisposable? _statusSubscription; 
          
         // 是否正在采集数据
+        // ReSharper disable once InconsistentNaming
         protected volatile bool _isRunning = false;
 
         /// <summary>
         /// 当前设备句柄
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         protected nint _deviceHandle = nint.Zero;
          
         public long DeviceId { get; } 
@@ -35,7 +39,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// <summary>
         /// 批量数据流
         /// </summary>
-        public IObservable<DataPoint<List<TNet_ADHInfo>>> DataStream { get; protected set; }
+        public IObservable<SampleBatch<TNet_ADHInfo>> DataStream { get; protected set; }
 
         /// <summary>
         /// 状态流
@@ -46,7 +50,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// 不预先展开，而是提供展开后的Observable;
         /// 单个的数据流
         /// </summary>
-        public IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; protected set; }
+        // public IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; protected set; }
 
         protected ControllerHardwareDeviceBase(HardwareDeviceConfiguration configuration)
         {
@@ -54,21 +58,8 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             DeviceName = configuration.DeviceName;
             DeviceType = configuration.DeviceType; 
             _sampleRate = configuration.SampleRate;
-            _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected);
-            _dataSubject = new ReplaySubject<DataPoint<List<TNet_ADHInfo>>>(bufferSize: 1000);
-            StatusStream = _statusSubject.AsObservable();
-            DataStream = _dataSubject.AsObservable();
-            IndividualDataStream = _dataSubject.Where(dp => dp is { DataQuality: DataQuality.Good, Value: not null })
-                .SelectMany(dataPoint =>
-                    dataPoint.Value.Select(item =>
-                        new DataPoint<TNet_ADHInfo>
-                        {
-                            Value = item,
-                            Unit = "",
-                            Timestamp = dataPoint.Timestamp,
-                            DeviceId = dataPoint.DeviceId
-                        }
-                    ));
+            _statusSubject = new BehaviorSubject<HardwareConnectionStatus>(HardwareConnectionStatus.Disconnected); 
+            StatusStream = _statusSubject.AsObservable(); 
         }
          
         #region 抽象方法 

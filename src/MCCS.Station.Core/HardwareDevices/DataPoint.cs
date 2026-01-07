@@ -15,4 +15,22 @@
         public required string Unit { get; init; }
         public DataQuality DataQuality { get; init; } 
     }
+
+    public record RawSample<T>
+    {
+        public long DeviceId { get; init; }
+        public long SequenceIndex { get; init; }
+        public T Value { get; init; }
+    }
+    /// <summary>
+    /// 采集层批量采集使用
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed record SampleBatch<T>
+    {
+        public long DeviceId { get; init; }
+        public long SequenceStart { get; init; }
+        public long SampleCount { get; init; }
+        public T[] Values { get; set; } 
+    }
 }
