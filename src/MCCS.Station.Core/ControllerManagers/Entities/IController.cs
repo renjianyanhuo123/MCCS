@@ -16,9 +16,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// </summary>
         IObservable<SampleBatch<TNet_ADHInfo>> DataStream { get; }
         /// <summary>
-        /// 单个数据流
+        /// 单个数据流 - 从批量数据展开为单条数据
         /// </summary>
-        // IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; } 
+        IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; } 
         /// <summary>
         /// 状态流
         /// </summary>
