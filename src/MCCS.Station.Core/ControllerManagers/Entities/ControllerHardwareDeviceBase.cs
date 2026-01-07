@@ -47,10 +47,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         public IObservable<HardwareConnectionStatus> StatusStream { get; protected set; }
 
         /// <summary>
-        /// 不预先展开，而是提供展开后的Observable;
-        /// 单个的数据流
+        /// 单个的数据流 - 从批量数据展开为单条数据
+        /// 使用 Publish().RefCount() 支持多订阅者场景
         /// </summary>
-        // public IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; protected set; }
+        public IObservable<DataPoint<TNet_ADHInfo>> IndividualDataStream { get; protected set; }
 
         protected ControllerHardwareDeviceBase(HardwareDeviceConfiguration configuration)
         {

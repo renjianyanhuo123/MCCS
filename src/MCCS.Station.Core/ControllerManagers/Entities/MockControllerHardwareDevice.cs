@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 
@@ -12,8 +13,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
-        private readonly IDisposable _acquisitionSubscription; 
+        private readonly IDisposable _acquisitionSubscription;
+        private readonly EventLoopScheduler _mockScheduler;
         private static readonly Random _rand = new();
+        private long _sampleSequence = 0;
 
         // 目前一个控制器就控制一个作动器
         private float _force = 10.0f;
@@ -45,9 +48,33 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// 阀门状态
         /// </summary>
         private ValveStatusEnum _valveStatus;
+
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
-        { 
-            _acquisitionSubscription = CreateAcquisitionLoop();
+        {
+            _mockScheduler = new EventLoopScheduler(ts => new Thread(ts)
+            {
+                Name = $"MockController_{configuration.DeviceId}",
+                IsBackground = true
+            });
+
+            // 创建批量采集流（热Observable）
+            var acquisitionStream = CreateAcquisitionObservable().Publish();
+            DataStream = acquisitionStream;
+
+            // 从批量流展开为单条数据流
+            IndividualDataStream = DataStream
+                .SelectMany(batch => batch.Values.Select((value, index) => new DataPoint<TNet_ADHInfo>
+                {
+                    DeviceId = batch.DeviceId,
+                    Timestamp = batch.ArrivalTicks + index,
+                    Value = value,
+                    Unit = string.Empty,
+                    DataQuality = DataQuality.Good
+                }))
+                .Publish()
+                .RefCount();
+
+            _acquisitionSubscription = acquisitionStream.Connect();
         }
 
         #region 私有方法
@@ -173,52 +200,59 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             }, token);
         }
 
-        private IDisposable CreateAcquisitionLoop()
-        {
-            var t = 1.0 / _sampleRate * 1.0;
-            return Observable.Interval(TimeSpan.FromSeconds(t))
-                .Where(_ => _isRunning && Status == HardwareConnectionStatus.Connected)
-                .Subscribe(_ =>
-                { 
-#if DEBUG
-                    // Debug.WriteLine($"运行位移:{_position}mm");
-#endif
+        /// <summary>
+        /// 创建模拟数据采集流
+        /// 模拟真实设备的采集行为：每2ms采集一批数据
+        /// </summary>
+        private IObservable<SampleBatch<TNet_ADHInfo>> CreateAcquisitionObservable() =>
+            Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
+            {
+                return _mockScheduler.SchedulePeriodic(TimeSpan.FromMilliseconds(2), () =>
+                {
+                    if (!_isRunning || Status != HardwareConnectionStatus.Connected)
+                        return;
+
+                    var batch = MockAcquireReading();
+                    if (batch != null)
+                        observer.OnNext(batch);
                 });
-        }
+            });
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private DataPoint<List<TNet_ADHInfo>> MockAcquireReading()
+        private SampleBatch<TNet_ADHInfo>? MockAcquireReading()
         {
-            // 模拟数据采集
-            var rand = new Random();
-            var res = new List<TNet_ADHInfo>();
-            // 根据当前时间模拟 100ms 更新一次数据的话，那么每次相当于要模拟出来100条数据
-            // 根据速度计算   
-            var mockValue = new TNet_ADHInfo()
+            // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
+            const uint sampleCount = 1; // 每批次1个样本，与2ms间隔配合模拟500Hz采样率
+
+            var values = new TNet_ADHInfo[sampleCount];
+            for (var i = 0; i < sampleCount; i++)
             {
-                Net_AD_N =
+                values[i] = new TNet_ADHInfo
                 {
-                    [0] = (float)AddNormalNoise(_force, 0.001),
-                    [1] = (float)AddNormalNoise(_force, 0.001),
-                    [2] = (float)(rand.NextDouble() * 100),
-                    [3] = (float)(rand.NextDouble() * 100),
-                    [4] = (float)(rand.NextDouble() * 100),
-                    [5] = (float)(rand.NextDouble() * 100)
-                },
-                Net_AD_S =
-                {
-                    [0] = (float)AddNormalNoise(_position, 0.001),
-                    [1] = (float)AddNormalNoise(_position, 0.001)
-                }
-            };
-            res.Add(mockValue);
-            return new DataPoint<List<TNet_ADHInfo>>
+                    Net_AD_N =
+                    {
+                        [0] = (float)AddNormalNoise(_force, 0.001),
+                        [1] = (float)AddNormalNoise(_force, 0.001),
+                        [2] = (float)(_rand.NextDouble() * 100),
+                        [3] = (float)(_rand.NextDouble() * 100),
+                        [4] = (float)(_rand.NextDouble() * 100),
+                        [5] = (float)(_rand.NextDouble() * 100)
+                    },
+                    Net_AD_S =
+                    {
+                        [0] = (float)AddNormalNoise(_position, 0.001),
+                        [1] = (float)AddNormalNoise(_position, 0.001)
+                    }
+                };
+            }
+
+            return new SampleBatch<TNet_ADHInfo>
             {
                 DeviceId = DeviceId,
-                Value = res,
-                Unit = "",
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                DataQuality = DataQuality.Good
+                SampleCount = sampleCount,
+                ArrivalTicks = Stopwatch.GetTimestamp(),
+                SequenceStart = Interlocked.Add(ref _sampleSequence, sampleCount) - sampleCount,
+                Values = values
             };
         }
         #endregion
@@ -414,10 +448,11 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
         public override void Dispose()
         {
-            base.Dispose();
+            _acquisitionSubscription?.Dispose();
+            _mockScheduler?.Dispose();
             MockStaticControlStop();
-            SetDynamicStopControl(0,0);
-            _acquisitionSubscription.Dispose(); 
+            SetDynamicStopControl(0, 0);
+            base.Dispose();
         }
     }
 }

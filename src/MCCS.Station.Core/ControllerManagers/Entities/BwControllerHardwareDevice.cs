@@ -26,12 +26,30 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
-            _hardwareDeviceConfiguration = configuration; 
+            _hardwareDeviceConfiguration = configuration;
             _highPriorityScheduler = CreateHighPriorityScheduler();
+
+            // 创建批量采集流（热Observable - 始终运行）
             var acquisitionStream = CreateAcquisitionObservable().Publish();
             DataStream = acquisitionStream;
+
+            // 从批量流展开为单条数据流
+            // 使用 SelectMany 展开 + Publish().RefCount() 支持多订阅者
+            IndividualDataStream = DataStream
+                .SelectMany(batch => batch.Values.Select((value, index) => new DataPoint<TNet_ADHInfo>
+                {
+                    DeviceId = batch.DeviceId,
+                    Timestamp = batch.ArrivalTicks + index, // 基于批次时间戳 + 索引区分
+                    Value = value,
+                    Unit = string.Empty,
+                    DataQuality = DataQuality.Good
+                }))
+                .Publish()
+                .RefCount();
+
             // ⚠️ 注意：采集在这里才真正启动
             _acquisitionSubscription = acquisitionStream.Connect();
+
             _statusSubscription = Observable.Interval(TimeSpan.FromSeconds(configuration.StatusInterval))
                 .Subscribe(onNext: c =>
                 {
