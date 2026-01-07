@@ -31,6 +31,10 @@
         public long DeviceId { get; init; }
         public long SequenceStart { get; init; }
         public long SampleCount { get; init; }
+        /// <summary>
+        /// 锚点
+        /// </summary>
+        public long ArrivalTicks { get; init; }
         public T[] Values { get; set; } 
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -63,20 +64,18 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private IObservable<SampleBatch<TNet_ADHInfo>> CreateAcquisitionObservable() =>
             Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
             {
-                return _highPriorityScheduler.Schedule(self =>
-                { 
-                    try
-                    { 
-                        var frame = AcquireReading(); 
-                        if (frame != null)
-                            observer.OnNext(frame);
-                    }
-                    catch (Exception ex)
-                    {
-                        observer.OnError(ex);
+                return _highPriorityScheduler.SchedulePeriodic(TimeSpan.FromMilliseconds(2), () =>
+                {
+                    if (_deviceHandle == nint.Zero || Status != HardwareConnectionStatus.Connected)
                         return;
-                    } 
-                    self();
+
+                    // 这一拍尽量读空（读到 null 就停）
+                    while (true)
+                    {
+                        var frame = AcquireReading();
+                        if (frame == null) break;
+                        observer.OnNext(frame);
+                    }
                 });
             });
 
@@ -91,6 +90,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             {
                 DeviceId = DeviceId,
                 SampleCount = count,
+                ArrivalTicks = Stopwatch.GetTimestamp(),
                 SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count
             };
             var tempValues = new TNet_ADHInfo[count];
@@ -99,9 +99,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) !=
                     AddressContanst.OP_SUCCESSFUL) return null;
                 var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
-                tempValues[i] = tempValue;
-                res.Values = tempValues;
-            } 
+                tempValues[i] = tempValue; 
+            }
+            res.Values = tempValues;
             return res;
         } 
         #endregion
