@@ -1,6 +1,9 @@
-﻿using MCCS.Infrastructure.Helper;
+using System.Reactive.Linq;
+
+using MCCS.Infrastructure.Helper;
 using MCCS.Station.Core.ControllerManagers.Entities;
 using MCCS.Station.Core.DllNative;
+using MCCS.Station.Core.DllNative.Models;
 using MCCS.Station.Core.HardwareDevices;
 
 namespace MCCS.Station.Core.ControllerManagers
@@ -10,9 +13,9 @@ namespace MCCS.Station.Core.ControllerManagers
     /// </summary>
     public sealed class ControllerManager : IControllerManager
     {
-        private static volatile bool _isDllInitialized = false;
+        private static volatile bool _isDllInitialized;
         private readonly Dictionary<long, IController> _controllers = [];
-        private bool _isMock = false; 
+        private bool _isMock; 
 
         public bool InitializeDll(bool isMock = false)
         {
@@ -86,6 +89,32 @@ namespace MCCS.Station.Core.ControllerManagers
             {
                 controller.StopDataAcquisition();
             }
+        }
+
+        public IObservable<SampleBatch<TNet_ADHInfo>[]> GetCombinedDataStream()
+        {
+            var controllerList = _controllers.Values.ToList();
+            if (controllerList.Count == 0)
+                return Observable.Empty<SampleBatch<TNet_ADHInfo>[]>();
+
+            if (controllerList.Count == 1)
+                return controllerList[0].DataStream.Select(x => new[] { x });
+
+            // 使用 CombineLatest 同步多个数据源的最新数据
+            return controllerList
+                .Select(c => c.DataStream)
+                .CombineLatest();
+        }
+
+        public IObservable<HardwareConnectionStatus[]> GetCombinedStatusStream()
+        {
+            var controllerList = _controllers.Values.ToList();
+            if (controllerList.Count == 0)
+                return Observable.Empty<HardwareConnectionStatus[]>();
+
+            return controllerList
+                .Select(c => c.StatusStream)
+                .CombineLatest();
         }
 
         public void Dispose()

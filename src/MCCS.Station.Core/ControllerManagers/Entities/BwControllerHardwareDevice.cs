@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Buffers;
+using System.Diagnostics;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -16,12 +17,18 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
         private readonly IDisposable _acquisitionSubscription;
-        private readonly EventLoopScheduler _highPriorityScheduler; 
-        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration; 
-        private NativeBuffer? _singleBuffer = null;
+        private readonly EventLoopScheduler _highPriorityScheduler;
+        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
+        private NativeBuffer? _singleBuffer;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
         private ValveStatusEnum _valveStatus;
-        private long _sampleSequence = 0;
+        private long _sampleSequence;
+
+        // 使用 ArrayPool 减少 GC 压力
+        private static readonly ArrayPool<TNet_ADHInfo> _arrayPool = ArrayPool<TNet_ADHInfo>.Shared;
+
+        // 空转等待时间（微秒），避免 CPU 空转
+        private const int IdleSpinWaitMicroseconds = 100;
 
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
@@ -64,18 +71,34 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
             {
                 return _highPriorityScheduler.Schedule(self =>
-                { 
+                {
+                    // 仅在运行状态时采集数据
+                    if (!_isRunning)
+                    {
+                        Thread.Sleep(1); // 非运行状态时，减少 CPU 占用
+                        self();
+                        return;
+                    }
+
                     try
-                    { 
-                        var frame = AcquireReading(); 
+                    {
+                        var frame = AcquireReading();
                         if (frame != null)
+                        {
                             observer.OnNext(frame);
+                        }
+                        else
+                        {
+                            // 无数据时短暂等待，避免 CPU 空转
+                            Thread.SpinWait(IdleSpinWaitMicroseconds);
+                        }
                     }
                     catch (Exception ex)
                     {
                         observer.OnError(ex);
                         return;
-                    } 
+                    }
+
                     self();
                 });
             });
@@ -86,23 +109,41 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL ||
                 count == 0) return null;
-            _singleBuffer ??= NativeBufferPool.Rent(128);
-            var res = new SampleBatch<TNet_ADHInfo>
+
+            _singleBuffer ??= NativeBufferPool.Rent(_structSize);
+
+            // 使用 ArrayPool 减少 GC 压力
+            var tempValues = _arrayPool.Rent((int)count);
+            try
             {
-                DeviceId = DeviceId,
-                SampleCount = count,
-                SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count
-            };
-            var tempValues = new TNet_ADHInfo[count];
-            for (uint i = 0; i < count; i++)
+                for (uint i = 0; i < count; i++)
+                {
+                    if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) !=
+                        AddressContanst.OP_SUCCESSFUL)
+                    {
+                        _arrayPool.Return(tempValues);
+                        return null;
+                    }
+
+                    tempValues[i] = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
+                }
+
+                // 创建结果并拷贝到确切大小的数组（因为 ArrayPool 可能返回更大的数组）
+                var resultValues = new TNet_ADHInfo[count];
+                Array.Copy(tempValues, resultValues, count);
+
+                return new SampleBatch<TNet_ADHInfo>
+                {
+                    DeviceId = DeviceId,
+                    SampleCount = count,
+                    SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count,
+                    Values = resultValues
+                };
+            }
+            finally
             {
-                if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) !=
-                    AddressContanst.OP_SUCCESSFUL) return null;
-                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
-                tempValues[i] = tempValue;
-                res.Values = tempValues;
-            } 
-            return res;
+                _arrayPool.Return(tempValues);
+            }
         } 
         #endregion
 

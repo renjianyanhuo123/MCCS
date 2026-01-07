@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 
 using MCCS.Infrastructure.TestModels;
@@ -12,8 +14,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 {
     public sealed class MockControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
-        private readonly IDisposable _acquisitionSubscription; 
+        private readonly IDisposable _acquisitionSubscription;
+        private readonly Subject<SampleBatch<TNet_ADHInfo>> _dataSubject = new();
         private static readonly Random _rand = new();
+        private long _sampleSequence;
 
         // 目前一个控制器就控制一个作动器
         private float _force = 10.0f;
@@ -46,7 +50,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// </summary>
         private ValveStatusEnum _valveStatus;
         public MockControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
-        { 
+        {
+            // 设置 DataStream 为 Subject 的 Observable
+            DataStream = _dataSubject.AsObservable();
             _acquisitionSubscription = CreateAcquisitionLoop();
         }
 
@@ -175,15 +181,73 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
         private IDisposable CreateAcquisitionLoop()
         {
-            var t = 1.0 / _sampleRate * 1.0;
-            return Observable.Interval(TimeSpan.FromSeconds(t))
+            // 模拟采集周期：每 10ms 采集一批数据（与实际硬件采样率匹配）
+            const int batchIntervalMs = 10;
+            var samplesPerBatch = _sampleRate * batchIntervalMs / 1000;
+            if (samplesPerBatch < 1) samplesPerBatch = 1;
+
+            return Observable.Interval(TimeSpan.FromMilliseconds(batchIntervalMs))
                 .Where(_ => _isRunning && Status == HardwareConnectionStatus.Connected)
-                .Subscribe(_ =>
-                { 
+                .Select(_ => GenerateMockBatch(samplesPerBatch))
+                .Subscribe(batch =>
+                {
+                    _dataSubject.OnNext(batch);
 #if DEBUG
-                    // Debug.WriteLine($"运行位移:{_position}mm");
+                    // Debug.WriteLine($"Mock发送数据批次: {batch.SampleCount} 条, 位移:{_position:F2}mm, 力:{_force:F2}N");
 #endif
                 });
+        }
+
+        /// <summary>
+        /// 生成模拟数据批次
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SampleBatch<TNet_ADHInfo> GenerateMockBatch(int sampleCount)
+        {
+            var values = new TNet_ADHInfo[sampleCount];
+            float currentForce, currentPosition;
+
+            lock (_lock)
+            {
+                currentForce = _force;
+                currentPosition = _position;
+            }
+
+            for (var i = 0; i < sampleCount; i++)
+            {
+                values[i] = new TNet_ADHInfo
+                {
+                    Net_AD_N = new float[6]
+                    {
+                        (float)AddNormalNoise(currentForce, 0.001),
+                        (float)AddNormalNoise(currentForce, 0.001),
+                        (float)(_rand.NextDouble() * 100),
+                        (float)(_rand.NextDouble() * 100),
+                        (float)(_rand.NextDouble() * 100),
+                        (float)(_rand.NextDouble() * 100)
+                    },
+                    Net_AD_S = new float[2]
+                    {
+                        (float)AddNormalNoise(currentPosition, 0.001),
+                        (float)AddNormalNoise(currentPosition, 0.001)
+                    },
+                    Net_FeedLoadN = (float)AddNormalNoise(currentForce, 0.001),
+                    Net_PosVref = currentPosition,
+                    Net_CtrlDA = 0,
+                    Net_CycleCount = 0,
+                    Net_SysState = (int)ControlState,
+                    Net_DIVal = 0,
+                    Net_DOVal = 0
+                };
+            }
+
+            return new SampleBatch<TNet_ADHInfo>
+            {
+                DeviceId = DeviceId,
+                SequenceStart = Interlocked.Add(ref _sampleSequence, sampleCount) - sampleCount,
+                SampleCount = sampleCount,
+                Values = values
+            };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -414,10 +478,12 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
         public override void Dispose()
         {
-            base.Dispose();
+            _acquisitionSubscription?.Dispose();
+            _dataSubject.OnCompleted();
+            _dataSubject.Dispose();
             MockStaticControlStop();
-            SetDynamicStopControl(0,0);
-            _acquisitionSubscription.Dispose(); 
+            SetDynamicStopControl(0, 0);
+            base.Dispose();
         }
     }
 }
