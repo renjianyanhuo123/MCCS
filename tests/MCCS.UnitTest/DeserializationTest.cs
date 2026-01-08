@@ -13,16 +13,7 @@ namespace MCCS.UnitTest
                                     {
                                         "id": 1,
                                         "name": "测试",
-                                        "signalInfos": [
-                                            {
-                                                "id" : 1,
-                                                "name": "信号1"
-                                            },
-                                            {
-                                                "id": 2,
-                                                "name": "信号2"
-                                            }
-                                        ]
+                                        "signalInfos": [ 1,2]
                                     }
                                     """;
 
@@ -33,7 +24,7 @@ namespace MCCS.UnitTest
             var obj = JsonConvert.DeserializeObject<ControllerDevice>(json);
             IsNotNull(obj);
             AreEqual(obj.Name, "测试");
-            AreEqual(obj.SignalInfos.Count, 2);
+            AreEqual(obj.SignalIds.Count, 2);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using MCCS.Infrastructure.Models.Devices;
-using MCCS.Infrastructure.Models.StationSites;
+﻿using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Infrastructure.Domain.StationSites
 {
@@ -7,6 +6,6 @@ namespace MCCS.Infrastructure.Domain.StationSites
     {
         public required PseudoChannelInfo PseudoChannelInfo { get; set; }
 
-        public List<SignalInterfaceInfo> Signals { get; set; } = [];
+        public List<long> SignalIds { get; set; } = [];
     } 
 }

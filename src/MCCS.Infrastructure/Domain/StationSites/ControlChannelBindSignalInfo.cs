@@ -1,5 +1,4 @@
-﻿using MCCS.Infrastructure.Models.Devices;
-using MCCS.Infrastructure.Models.StationSites;
+﻿using MCCS.Infrastructure.Models.StationSites;
 
 namespace MCCS.Infrastructure.Domain.StationSites
 {
@@ -12,8 +11,7 @@ namespace MCCS.Infrastructure.Domain.StationSites
 
     public class ControlChannelSignal
     {
-        public required SignalInterfaceInfo SignalInfo { get; set; }
+        public required long SignalId { get; set; }
         public SignalTypeEnum SignalType { get; set; }
-        public DeviceInfo? LinkDeviceInfo { get; set; } = null;
     }
 }

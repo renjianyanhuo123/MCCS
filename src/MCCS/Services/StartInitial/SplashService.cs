@@ -1,7 +1,6 @@
 ﻿using MCCS.Common.DataManagers;
 using MCCS.Infrastructure.Repositories;
 using MCCS.Station.Abstractions.Interfaces;
-using MCCS.Station.Core;
 
 using Microsoft.Extensions.Configuration;
 
@@ -14,13 +13,16 @@ namespace MCCS.Services.StartInitial
         private readonly IStationRuntime _stationRuntime;
         private readonly IConfiguration _configuration;   
         private readonly bool _isMock;
+        private readonly MCCS.Services.StationServices.IStationService _stationService;
 
         public SplashService(IStationSiteAggregateRepository stationSiteAggregateRepository, 
             IDeviceInfoRepository deviceInfoRepository,
             IStationRuntime stationRuntime,
+            MCCS.Services.StationServices.IStationService stationService,
             IConfiguration configuration)
         {
             _stationRuntime = stationRuntime;
+            _stationService = stationService;
             _isMock = Convert.ToBoolean(configuration["AppSettings:IsMock"]); 
             _configuration = configuration;
             _stationSiteAggregateRepository = stationSiteAggregateRepository;
@@ -30,10 +32,9 @@ namespace MCCS.Services.StartInitial
         public async Task InitialHardwareDevicesAsync()
         {
             if (!_stationRuntime.IsExistCurrentStationProfile())
-            {
-                var currentUseStation = await _stationSiteAggregateRepository.GetCurrentStationSiteAggregateAsync();
-                if (currentUseStation?.StationSiteInfo == null) throw new ArgumentNullException("Current Use Station Site is Null");
-                var stationInfo = _stationRuntime.MappingStationSiteInfo(currentUseStation);
+            {  
+                var stationInfo = await _stationService.GetCurrentStationSiteInfoAsync();
+                if (stationInfo == null) throw new ArgumentNullException("Current Use Station Site is Null");
                 await _stationRuntime.BuildCurrentStationProfileAsync(stationInfo);
             }
             if(GlobalDataManager.Instance.ProcessManager != null) 

@@ -11,7 +11,8 @@ namespace MCCS.Infrastructure.Domain.StationSites
         /// <summary>
         /// 所有的绑定的信号接口
         /// </summary>
-        public List<SignalInterfaceInfo> Signals { get; set; } = [];
+        public List<SignalInterfaceInfo> Signals { get; set; } = []; 
+
         public Model3DAggregate? Model3DAggregate { get; set; } 
     }
 }

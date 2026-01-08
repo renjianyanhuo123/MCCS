@@ -1,6 +1,4 @@
-﻿using MCCS.Station.Core.SignalManagers.Signals;
-
-namespace MCCS.Station.Core.PseudoChannelManagers
+﻿namespace MCCS.Station.Core.PseudoChannelManagers
 {
     public class PseudoChannelConfiguration
     {
@@ -31,6 +29,6 @@ namespace MCCS.Station.Core.PseudoChannelManagers
         /// <summary>
         /// 所有的信号集合配置
         /// </summary>
-        public required List<HardwareSignalConfiguration> SignalConfigurations { get; set; }
+        public required List<long> SignalIds { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using MCCS.Infrastructure.Domain.StationSites;
-using MCCS.Station.Abstractions.Models;
+﻿using MCCS.Station.Abstractions.Models;
 
 namespace MCCS.Station.Abstractions.Interfaces
 {
@@ -25,11 +24,18 @@ namespace MCCS.Station.Abstractions.Interfaces
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task BuildCurrentStationProfileAsync(StationSiteInfo stationSiteInfo, CancellationToken cancellationToken = default);
+        ///// <summary>
+        ///// 根据Profile文件获取当前的需要运行的站点
+        ///// </summary>
+        ///// <param name="cancellationToken"></param>
+        ///// <returns></returns>
+        // Task<StationSiteInfo?> GetStationInfoBtProfileAsync(CancellationToken cancellationToken = default);
         /// <summary>
-        /// 映射StationInfo模型
+        /// 初始化站点(Host中使用)
         /// </summary>
-        /// <param name="aggregateInfo"></param>
+        /// <param name="isMock"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        StationSiteInfo MappingStationSiteInfo(StationSiteAggregate aggregateInfo);
+        Task<StationSiteInfo> InitialStationSiteAsync(bool isMock, CancellationToken cancellationToken = default);
     }
 }

@@ -15,7 +15,7 @@ namespace MCCS.Station.Client
             containerRegistry.RegisterSingleton<ISignalManager, SignalManager>();
             containerRegistry.RegisterSingleton<IControlChannelManager, ControlChannelManager>();
             containerRegistry.RegisterSingleton<IPseudoChannelManager, PseudoChannelManager>();
-            containerRegistry.RegisterSingleton<IStationRuntime, StationRuntime>();
+            containerRegistry.Register<IStationRuntime, StationRuntime>();
         }
 
         public void OnInitialized(IContainerProvider containerProvider)

@@ -1,9 +1,12 @@
 ﻿using MCCS.Infrastructure.Models.Devices;
 
+using Newtonsoft.Json;
+
 namespace MCCS.Station.Abstractions.Models
 {
-    public class ControllerDevice(long id, string name, long? parentDevicelong) : BaseDevice(id, name, DeviceTypeEnum.Controller, parentDevicelong)
+    [method: JsonConstructor]
+    public class ControllerDevice(long id, string name) : BaseDevice(id, name, DeviceTypeEnum.Controller)
     {
-        public List<StationSiteControllerSignalInfo> SignalInfos { get; } = [];
+        public List<long> SignalIds { get; } = [];
     }
 }

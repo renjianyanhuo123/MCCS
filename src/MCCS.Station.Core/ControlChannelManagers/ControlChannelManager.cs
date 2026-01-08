@@ -9,8 +9,7 @@ namespace MCCS.Station.Core.ControlChannelManagers
     {
         private readonly Dictionary<long, ControlChannel> _channelDics = [];
         private readonly IControllerManager _controllerManager;
-        private readonly ISignalManager _signalManager;
-        private bool _isMock = false;
+        private readonly ISignalManager _signalManager; 
 
         public ControlChannelManager(IControllerManager controllerManager,
             ISignalManager signalManager)
@@ -19,9 +18,8 @@ namespace MCCS.Station.Core.ControlChannelManagers
             _signalManager = signalManager;
         }
 
-        public void Initialization(IEnumerable<ControlChannelConfiguration> configurations, bool isMock = false)
-        {
-            _isMock = isMock;
+        public void Initialization(IEnumerable<ControlChannelConfiguration> configurations)
+        { 
             foreach (var configuration in configurations)
             {
                 var channel = new ControlChannel(configuration, _controllerManager, _signalManager);

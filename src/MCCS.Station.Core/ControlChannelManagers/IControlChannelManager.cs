@@ -8,9 +8,8 @@ namespace MCCS.Station.Core.ControlChannelManagers
         /// <summary>
         /// 初始化控制通道
         /// </summary>
-        /// <param name="configurations"></param>
-        /// <param name="isMock">是否开启模拟</param>
-        void Initialization(IEnumerable<ControlChannelConfiguration> configurations, bool isMock = false);
+        /// <param name="configurations"></param> 
+        void Initialization(IEnumerable<ControlChannelConfiguration> configurations);
 
         /// <summary>
         /// 获取控制通道

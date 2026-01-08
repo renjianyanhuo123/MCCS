@@ -86,7 +86,6 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 {
                     if (_deviceHandle == nint.Zero || Status != HardwareConnectionStatus.Connected)
                         return;
-
                     // 这一拍尽量读空（读到 null 就停）
                     while (true)
                     {

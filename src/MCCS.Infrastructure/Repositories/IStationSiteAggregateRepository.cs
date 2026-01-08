@@ -11,6 +11,7 @@ namespace MCCS.Infrastructure.Repositories
 
         Task<List<StationSiteInfo>> GetStationSitesAsync(Expression<Func<StationSiteInfo, bool>> expression, CancellationToken cancellationToken = default);
          
+
         Task<StationSiteAggregate> GetStationSiteAggregateAsync(
             long stationId,
             CancellationToken cancellationToken = default);

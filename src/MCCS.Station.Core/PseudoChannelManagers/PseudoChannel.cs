@@ -36,8 +36,8 @@ namespace MCCS.Station.Core.PseudoChannelManagers
 
         private IObservable<DataPoint<float>> CreatePseudoChannelStream()
         {
-            var signalStreamList = Configuration.SignalConfigurations
-                .Select(s => _signalManager.GetSignalDataStream(s.SignalId))
+            var signalStreamList = Configuration.SignalIds
+                .Select(s => _signalManager.GetSignalDataStream(s))
                 .ToList();
 
             if (signalStreamList.Count == 0)

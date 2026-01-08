@@ -82,13 +82,11 @@ namespace MCCS.Infrastructure.Helper
 
         public void Stop(int timeoutMs = 3000)
         {
-            if (!IsRunning) return;
-
+            if (!IsRunning) return; 
             try
             {
                 // 优雅关闭
-                _process!.StandardInput.WriteLine("stop");
-
+                _process!.StandardInput.WriteLine("stop"); 
                 if (!_process.WaitForExit(timeoutMs))
                 {
                     // 超时强杀

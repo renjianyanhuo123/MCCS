@@ -147,19 +147,16 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             {
                 while (await _forceTimer.WaitForNextTickAsync(token))
                 {
-                    if (token.IsCancellationRequested) break; 
-                    bool reach;
+                    if (token.IsCancellationRequested) break;
                     lock (_lock)
                     {
-                        reach = speed < 0 && Math.Abs(_force - target) < Math.Abs(speed * 10)
-                                || speed > 0 && Math.Abs(_force - target) < speed * 10;
-
+                        var reach = speed < 0 && Math.Abs(_force - target) < Math.Abs(speed * 10)
+                                    || speed > 0 && Math.Abs(_force - target) < speed * 10; 
                         if (reach)
                         {
                             _force = target;
                             break;
-                        }
-
+                        } 
                         _force += speed * 10;
                     }
                 }
@@ -182,11 +179,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 {
                     if (token.IsCancellationRequested) break;
 
-                    bool reach;
                     lock (_lock)
                     {
-                        reach = speed < 0 && Math.Abs(_position - target) < Math.Abs(speed * 10)
-                                || speed > 0 && Math.Abs(_position - target) < speed * 10;
+                        var reach = speed < 0 && Math.Abs(_position - target) < Math.Abs(speed * 10)
+                                    || speed > 0 && Math.Abs(_position - target) < speed * 10;
 
                         if (reach)
                         {
@@ -215,6 +211,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                     var batch = MockAcquireReading();
                     if (batch != null)
                         observer.OnNext(batch);
+                    Console.WriteLine($"{Stopwatch.GetTimestamp()}");
                 });
             });
 
@@ -222,8 +219,10 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private SampleBatch<TNet_ADHInfo>? MockAcquireReading()
         {
             // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
-            const uint sampleCount = 1; // 每批次1个样本，与2ms间隔配合模拟500Hz采样率
-
+            const uint sampleCount = 2; // 每批次1个样本，与2ms间隔配合模拟1000Hz采样率
+#if DEBUG
+            Console.WriteLine($"{DateTime.UtcNow.Microsecond}");
+#endif
             var values = new TNet_ADHInfo[sampleCount];
             for (var i = 0; i < sampleCount; i++)
             {

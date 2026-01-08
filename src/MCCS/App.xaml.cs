@@ -7,16 +7,11 @@ using DryIoc.Microsoft.DependencyInjection;
 using MCCS.Common.DataManagers;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
-using MCCS.Infrastructure.Helper;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
 using MCCS.Station.Client;
-using MCCS.Station.Core.ControlChannelManagers;
-using MCCS.Station.Core.ControllerManagers;
-using MCCS.Station.Core.PseudoChannelManagers;
-using MCCS.Station.Core.SignalManagers;
 using MCCS.ViewModels.Dialogs;
 using MCCS.ViewModels.Dialogs.Hardwares;
 using MCCS.ViewModels.Dialogs.Method;
@@ -213,8 +208,7 @@ namespace MCCS
         /// </summary>
         /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e)
-        {
-            GlobalDataManager.Instance.SetValue(new ProcessManager("MCCS.Station.Host.exe", "", AppContext.BaseDirectory, false)); 
+        { 
             // 设置全局异常处理
             SetupExceptionHandling();
             base.OnStartup(e);
