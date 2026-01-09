@@ -128,9 +128,12 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             var result = POPNetCtrl.NetCtrl01_ConnectToDev(_hardwareDeviceConfiguration.DeviceAddressId, ref _deviceHandle);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
+                // 连接成功后立即设置状态，不等待状态轮询
+                Status = HardwareConnectionStatus.Connected;
+                _statusSubject.OnNext(HardwareConnectionStatus.Connected);
 #if DEBUG
                 Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{_hardwareDeviceConfiguration.DeviceAddressId:X}");
-#endif 
+#endif
                 return true;
             }
             else
