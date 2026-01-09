@@ -153,7 +153,7 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
             try
             {
                 // 批量读取数据
-                var dataItems = _channel?.ReadBatch(100) ?? new List<TData>();
+                var dataItems = _channel?.ReadBatch(100) ?? [];
 
                 if (dataItems.Count > 0)
                 {
@@ -226,25 +226,18 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     /// <summary>
     /// 获取所有数据的响应式流
     /// </summary>
-    public IObservable<TData> GetDataStream()
-    {
-        return _dataSubject.AsObservable();
-    }
+    public IObservable<TData> GetDataStream() => _dataSubject.AsObservable();
 
     /// <summary>
     /// 获取过滤后的数据流（根据提供的过滤函数）
     /// </summary>
-    public IObservable<TData> GetFilteredDataStream(Func<TData, bool> filter)
-    {
-        return _dataSubject.Where(filter);
-    }
+    public IObservable<TData> GetFilteredDataStream(Func<TData, bool> filter) => _dataSubject.Where(filter);
 
     /// <summary>
     /// 获取统计信息
     /// </summary>
-    public ReceiverStatistics GetStatistics()
-    {
-        return new ReceiverStatistics
+    public ReceiverStatistics GetStatistics() =>
+        new()
         {
             TotalPacketsReceived = _totalPacketsReceived,
             LostPacketsCount = _lostPacketsCount,
@@ -252,15 +245,11 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
             AverageLatencyMs = 0, // TODO: 计算实际延迟
             PacketsPerSecond = _packetsInLastSecond
         };
-    }
 
     /// <summary>
     /// 获取缓冲区状态
     /// </summary>
-    public (int count, int capacity) GetBufferStatus()
-    {
-        return _channel?.GetBufferStatus() ?? (0, 0);
-    }
+    public (int count, int capacity) GetBufferStatus() => _channel?.GetBufferStatus() ?? (0, 0);
 
     private void OnConnectionStateChanged(bool isConnected, string? reason)
     {

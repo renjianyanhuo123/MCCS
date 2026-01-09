@@ -12,13 +12,28 @@ using StationSiteInfo = MCCS.Station.Abstractions.Models.StationSiteInfo;
 
 namespace MCCS.Station.Core
 {
-    public class StationRuntime(
-        IControllerManager controllerManager,
-        ISignalManager signalManager,
-        IControlChannelManager controlChannelManager,
-        IPseudoChannelManager pseudoChannelManager)
-        : IStationRuntime
+    public class StationRuntime : IStationRuntime
     {
+        public StationRuntime() 
+        {
+        }
+
+        public StationRuntime(IControllerManager controllerManager,
+            ISignalManager signalManager,
+            IControlChannelManager controlChannelManager,
+            IPseudoChannelManager pseudoChannelManager)
+        {
+            _controllerManager = controllerManager;
+            _signalManager = signalManager;
+            _controlChannelManager = controlChannelManager;
+            _pseudoChannelManager = pseudoChannelManager;
+        }
+
+        private readonly IControllerManager _controllerManager;
+        private readonly ISignalManager _signalManager;
+        private readonly IControlChannelManager _controlChannelManager;
+        private readonly IPseudoChannelManager _pseudoChannelManager;
+
         private const string _profileName = "stationProfile";
         private const string _stationMain = "station.main.json";
 
@@ -43,7 +58,7 @@ namespace MCCS.Station.Core
         {
             var stationSiteInfo = await GetStationInfoBtProfileAsync(cancellationToken);
             if (stationSiteInfo == null) throw new ArgumentNullException(nameof(stationSiteInfo)); 
-            if (!controllerManager.InitializeDll(isMock))throw new InvalidOperationException("Controller Initialize Dll Error");
+            if (!_controllerManager.InitializeDll(isMock))throw new InvalidOperationException("Controller Initialize Dll Error");
             var index = 0;
             // (1)初始化注册所有的控制器
             foreach (var item in stationSiteInfo.Controllers)
@@ -58,10 +73,10 @@ namespace MCCS.Station.Core
                     SampleRate = 100,
                     ConnectionString = ""
                 };
-                controllerManager.CreateController(configuration);
+                _controllerManager.CreateController(configuration);
             }
             // (2) 初始化注册所有的信号接口
-            signalManager.Initialization(stationSiteInfo.AllSignals.Select(s => new HardwareSignalConfiguration
+            _signalManager.Initialization(stationSiteInfo.AllSignals.Select(s => new HardwareSignalConfiguration
             {
                 SignalId = s.Id,
                 SignalName = s.Name,
@@ -90,7 +105,7 @@ namespace MCCS.Station.Core
                 }; 
                 controlChannelConfigurations.Add(tempChannel);
             }
-            controlChannelManager.Initialization(controlChannelConfigurations);
+            _controlChannelManager.Initialization(controlChannelConfigurations);
             // (4) 创建所有的虚拟通道
             var pseudoChannelConfigurations = new List<PseudoChannelConfiguration>(); 
             foreach (var pseudoChannelInfo in stationSiteInfo.PseudoChannels)
@@ -108,8 +123,7 @@ namespace MCCS.Station.Core
                 };
                 pseudoChannelConfigurations.Add(tempPseudoChannel);
             }
-            pseudoChannelManager.Initialization(pseudoChannelConfigurations); 
-           
+            _pseudoChannelManager.Initialization(pseudoChannelConfigurations);
             return stationSiteInfo;
         }
     }

@@ -8,12 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="6.1.0" />
+    <ProjectReference Include="..\MCCS.Station.Core\MCCS.Station.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
-    <ProjectReference Include="..\MCCS.Station.Core\MCCS.Station.Core.csproj" />
+    <Folder Include="Communication\" />
   </ItemGroup>
 
 </Project>

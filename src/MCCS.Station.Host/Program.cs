@@ -1,11 +1,9 @@
-using MCCS.Station.Abstractions.Communication;
 using MCCS.Station.Abstractions.Interfaces;
 using MCCS.Station.Core;
 using MCCS.Station.Core.ControlChannelManagers;
 using MCCS.Station.Core.ControllerManagers;
 using MCCS.Station.Core.PseudoChannelManagers;
-using MCCS.Station.Core.SignalManagers;
-using MCCS.Station.Host.Communication;
+using MCCS.Station.Core.SignalManagers; 
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,8 +25,8 @@ namespace MCCS.Station.Host
             services.AddTransient<IStationRuntime, StationRuntime>();
 
             // 通信服务
-            services.AddSingleton<SharedMemoryDataPublisher>();
-            services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>());
+            //services.AddSingleton<SharedMemoryDataPublisher>();
+            //services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>());
 
             // 应用程序
             services.AddSingleton<App>();
@@ -43,7 +41,7 @@ namespace MCCS.Station.Host
 #if DEBUG
                 Console.WriteLine("Stop command received.");
 #endif
-                CleanupAsync().GetAwaiter().GetResult();
+                Cleanup();
                 break;
             }
         }
@@ -96,18 +94,13 @@ namespace MCCS.Station.Host
         /// <summary>
         /// 异步清理资源
         /// </summary>
-        private static async Task CleanupAsync()
+        private static void Cleanup()
         {
             // 停止应用程序
-            if (_app != null)
-            {
-                await _app.DisposeAsync();
-            }
-
+            _app?.Dispose();
             // 取消令牌
             _cts.Cancel();
-            _cts.Dispose();
-
+            _cts.Dispose(); 
             // 释放服务提供者
             _serviceProvider?.Dispose();
 

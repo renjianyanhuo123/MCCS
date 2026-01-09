@@ -13,22 +13,25 @@ public sealed class SharedMemoryChannelManager : IDisposable
     /// <summary>
     /// 数据通道名称前缀
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public const string DataChannelPrefix = "MCCS_Data_";
 
     /// <summary>
     /// 状态通道名称
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public const string StatusChannelName = "MCCS_Status";
 
     /// <summary>
     /// 命令通道名称
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public const string CommandChannelName = "MCCS_Command";
 
     /// <summary>
     /// 获取或创建泛型通道
     /// </summary>
-    public SharedMemoryChannel<T> GetOrCreateChannel<T>(string channelName, int maxItems = 1000) where T : struct
+    public SharedMemoryChannel<T> GetOrCreateChannel<T>(string channelName, int maxItems = 50) where T : struct
     {
         EnsureNotDisposed();
 
@@ -39,7 +42,7 @@ public sealed class SharedMemoryChannelManager : IDisposable
     /// <summary>
     /// 获取或创建数据通道
     /// </summary>
-    public SharedMemoryChannel<T> GetOrCreateDataChannel<T>(string channelName, int maxItems = 1000) where T : struct
+    public SharedMemoryChannel<T> GetOrCreateDataChannel<T>(string channelName, int maxItems = 50) where T : struct
     {
         EnsureNotDisposed();
 
@@ -50,10 +53,7 @@ public sealed class SharedMemoryChannelManager : IDisposable
     /// <summary>
     /// 检查通道是否存在
     /// </summary>
-    public bool ChannelExists(string channelName)
-    {
-        return _channels.ContainsKey(channelName);
-    }
+    public bool ChannelExists(string channelName) => _channels.ContainsKey(channelName);
 
     /// <summary>
     /// 尝试获取已存在的通道
@@ -85,10 +85,7 @@ public sealed class SharedMemoryChannelManager : IDisposable
     /// <summary>
     /// 获取所有通道名称
     /// </summary>
-    public IEnumerable<string> GetChannelNames()
-    {
-        return _channels.Keys.ToList();
-    }
+    public IEnumerable<string> GetChannelNames() => _channels.Keys.ToList();
 
     /// <summary>
     /// 获取通道数量
