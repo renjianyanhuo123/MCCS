@@ -1,4 +1,5 @@
 using System.IO.MemoryMappedFiles;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MCCS.Infrastructure.Communication;
@@ -33,7 +34,7 @@ public interface ISharedMemoryWriter<T> : ISharedMemoryChannel where T : struct
     /// <summary>
     /// 写入单个数据项
     /// </summary>
-    void Write(T data);
+    void Write(ref T data);
 
     /// <summary>
     /// 批量写入数据
@@ -92,16 +93,14 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
     private bool _disposed;
     private bool _isCreator;
 
-    private static readonly int _headerSize = Marshal.SizeOf<RingBufferHeader>();
+    private static readonly int HeaderSize = Unsafe.SizeOf<RingBufferHeader>();
 
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    [StructLayout(LayoutKind.Sequential)]
     private struct RingBufferHeader
     {
         public int WriteIndex;
         public int ReadIndex;
         public int Count;
-        public long LastWriteTimestamp;
-        public long SequenceNumber;
     }
 
     public string ChannelName => _channelName;
@@ -120,7 +119,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
         _mutexName = $"{channelName}_Mutex";
         _maxItems = maxItems;
         _itemSize = itemSize > 0 ? itemSize : Marshal.SizeOf<T>();
-        _memorySize = _headerSize + _itemSize * _maxItems;
+        _memorySize = HeaderSize + _itemSize * _maxItems;
 
         Initialize();
     }
@@ -157,9 +156,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             {
                 WriteIndex = 0,
                 ReadIndex = 0,
-                Count = 0,
-                LastWriteTimestamp = 0,
-                SequenceNumber = 0
+                Count = 0
             };
             _accessor!.Write(0, ref header);
         }
@@ -182,7 +179,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
 
     #region ISharedMemoryWriter<T> Implementation
 
-    public void Write(T data)
+    public void Write(ref T data)
     {
         EnsureNotDisposed();
 
@@ -198,14 +195,11 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                 header.Count--;
             }
 
-            long offset = _headerSize + header.WriteIndex * _itemSize;
+            long offset = HeaderSize + header.WriteIndex * _itemSize;
             _accessor!.Write(offset, ref data);
 
             header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
-            header.Count++;
-            header.LastWriteTimestamp = DateTime.UtcNow.Ticks;
-            header.SequenceNumber++;
-
+            header.Count++;  
             WriteHeader(ref header);
         }
         finally
@@ -232,16 +226,13 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                     header.Count--;
                 }
 
-                long offset = _headerSize + header.WriteIndex * _itemSize;
+                long offset = HeaderSize + header.WriteIndex * _itemSize;
                 var item = data;
                 _accessor!.Write(offset, ref item);
 
                 header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
-                header.Count++;
-                header.SequenceNumber++;
-            }
-
-            header.LastWriteTimestamp = DateTime.UtcNow.Ticks;
+                header.Count++; 
+            } 
             WriteHeader(ref header);
         }
         finally
@@ -267,13 +258,11 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                 header.Count--;
             }
 
-            long offset = _headerSize + header.WriteIndex * _itemSize;
+            long offset = HeaderSize + header.WriteIndex * _itemSize;
             _accessor!.Write(offset, ref data);
 
             header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
-            header.Count++;
-            header.LastWriteTimestamp = DateTime.UtcNow.Ticks;
-            header.SequenceNumber++;
+            header.Count++; 
 
             WriteHeader(ref header);
             return true;
@@ -299,7 +288,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return default;
 
-            long offset = _headerSize + header.ReadIndex * _itemSize;
+            long offset = HeaderSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out T data);
 
             header.ReadIndex = (header.ReadIndex + 1) % _maxItems;
@@ -332,7 +321,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             int index = header.ReadIndex;
             for (int i = 0; i < readCount; i++)
             {
-                long offset = _headerSize + index * _itemSize;
+                long offset = HeaderSize + index * _itemSize;
                 _accessor!.Read(offset, out T item);
                 result.Add(item);
 
@@ -367,7 +356,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return false;
 
-            long offset = _headerSize + header.ReadIndex * _itemSize;
+            long offset = HeaderSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out data);
 
             header.ReadIndex = (header.ReadIndex + 1) % _maxItems;
@@ -393,7 +382,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return default;
 
-            long offset = _headerSize + header.ReadIndex * _itemSize;
+            long offset = HeaderSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out T data);
 
             return data;
@@ -420,45 +409,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
         {
             _mutex.ReleaseMutex();
         }
-    }
-
-    /// <summary>
-    /// 获取最后写入时间
-    /// </summary>
-    public DateTime GetLastWriteTime()
-    {
-        if (_disposed) return DateTime.MinValue;
-
-        _mutex!.WaitOne();
-        try
-        {
-            var header = ReadHeader();
-            return new DateTime(header.LastWriteTimestamp, DateTimeKind.Utc);
-        }
-        finally
-        {
-            _mutex.ReleaseMutex();
-        }
-    }
-
-    /// <summary>
-    /// 获取当前序列号
-    /// </summary>
-    public long GetSequenceNumber()
-    {
-        if (_disposed) return 0;
-
-        _mutex!.WaitOne();
-        try
-        {
-            var header = ReadHeader();
-            return header.SequenceNumber;
-        }
-        finally
-        {
-            _mutex.ReleaseMutex();
-        }
-    }
+    } 
 
     /// <summary>
     /// 清空缓冲区

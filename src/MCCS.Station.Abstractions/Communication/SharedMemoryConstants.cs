@@ -23,17 +23,17 @@ public static class SharedMemoryConstants
     /// <summary>
     /// 默认数据通道最大项数
     /// </summary>
-    public const int DefaultDataChannelMaxItems = 1000;
+    public const int DefaultDataChannelMaxItems = 500;
 
     /// <summary>
     /// 默认状态通道最大项数
     /// </summary>
-    public const int DefaultStatusChannelMaxItems = 100;
+    public const int DefaultStatusChannelMaxItems = 500;
 
     /// <summary>
     /// 默认命令通道最大项数
     /// </summary>
-    public const int DefaultCommandChannelMaxItems = 50;
+    public const int DefaultCommandChannelMaxItems = 500;
 
     /// <summary>
     /// 数据包最大尺寸（字节）

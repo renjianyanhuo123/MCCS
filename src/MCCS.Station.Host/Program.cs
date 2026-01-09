@@ -3,7 +3,8 @@ using MCCS.Station.Core;
 using MCCS.Station.Core.ControlChannelManagers;
 using MCCS.Station.Core.ControllerManagers;
 using MCCS.Station.Core.PseudoChannelManagers;
-using MCCS.Station.Core.SignalManagers; 
+using MCCS.Station.Core.SignalManagers;
+using MCCS.Station.Host.Communication;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,8 +26,8 @@ namespace MCCS.Station.Host
             services.AddTransient<IStationRuntime, StationRuntime>();
 
             // 通信服务
-            //services.AddSingleton<SharedMemoryDataPublisher>();
-            //services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>());
+            services.AddSingleton<SharedMemoryDataPublisher>();
+            services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>());
 
             // 应用程序
             services.AddSingleton<App>();
@@ -70,7 +71,7 @@ namespace MCCS.Station.Host
 
             try
             {
-                await _app.RunAsync();
+                await _app.RunAsync(_cts.Token);
                 _ = Task.Run(ReadCommands);
 
                 // 保持主线程运行，直到收到取消请求

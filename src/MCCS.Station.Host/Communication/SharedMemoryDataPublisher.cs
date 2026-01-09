@@ -1,15 +1,12 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 using MCCS.Infrastructure.Communication;
 using MCCS.Station.Abstractions.Communication;
 using MCCS.Station.Abstractions.Interfaces;
-using MCCS.Station.Core.HardwareDevices;
 using MCCS.Station.Core.PseudoChannelManagers;
 using MCCS.Station.Core.SignalManagers;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MCCS.Station.Host.Communication;
 
@@ -19,6 +16,11 @@ namespace MCCS.Station.Host.Communication;
 /// </summary>
 public sealed class SharedMemoryDataPublisher : IDataPublisher
 {
+    /// <summary>
+    /// cpu亲和的事件循环调度器
+    /// </summary>
+    private readonly EventLoopScheduler _scheduler;
+
     private readonly ISignalManager _signalManager;
     private readonly IPseudoChannelManager _pseudoChannelManager;
     private readonly SharedMemoryChannelManager _channelManager;
@@ -45,7 +47,12 @@ public sealed class SharedMemoryDataPublisher : IDataPublisher
         _signalManager = signalManager;
         _pseudoChannelManager = pseudoChannelManager;
         _channelManager = new SharedMemoryChannelManager();
-        _subscriptions = new CompositeDisposable(); 
+        _subscriptions = new CompositeDisposable();
+        _scheduler = new EventLoopScheduler(ts => new Thread(ts)
+        {
+            Name = $"SharedMemory_PushData_1",
+            IsBackground = true
+        });
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)
@@ -84,19 +91,13 @@ public sealed class SharedMemoryDataPublisher : IDataPublisher
 #endif
     }
 
-    public void PublishChannelData(long channelId, double value)
+    public void PublishChannelData(ref ChannelDataItem data)
     {
         if (_dataChannel == null || !_isRunning)
-            return;
-
+            return; 
         try
-        {
-            var packet = new ChannelDataItem()
-            {
-                ChannelId = channelId,
-                Value = value
-            };
-            _dataChannel.Write(packet);
+        { 
+            _dataChannel.Write(ref data);
         }
         catch (Exception)
         {
@@ -120,32 +121,67 @@ public sealed class SharedMemoryDataPublisher : IDataPublisher
         _dataChannel.WriteBatch(packets);
     }
 
+    /*
+     *var merged =
+           Observable.Merge(...)
+               .Publish()
+               .RefCount();
+       
+       var shared =
+           merged
+               .Publish()
+               .RefCount();
+       
+       var gauge$ =
+           shared
+               .Buffer(TimeSpan.FromMilliseconds(200))
+               .Select(buf => buf[^1]);
+       
+       var chart$ =
+           shared
+               .Buffer(TimeSpan.FromMilliseconds(200));
+       
+       gauge$.Subscribe();
+       chart$.Subscribe(); 
+     */
     private void SubscribeToPseudoChannels()
     {
-        var pseudoChannels = _pseudoChannelManager.GetPseudoChannels(); 
-        foreach (var channel in pseudoChannels)
-        {
-            var channelId = channel.ChannelId;
-
-            // 订阅虚拟通道数据流
-            var subscription = channel.GetPseudoChannelStream()
-                .Subscribe(
-                    dataPoint => PublishChannelData(channelId, dataPoint.Value),
-                    ex => HandleError(channelId, ex),
-                    () => { /* completed */ });
-
-            _subscriptions.Add(subscription);
-        }
+        var pseudoChannels = _pseudoChannelManager.GetPseudoChannels();
+        var merged =
+            _pseudoChannelManager.GetPseudoChannels()
+                .Select(channel =>
+                    channel
+                        .GetPseudoChannelStream()
+                        .Select(data => new ChannelDataItem
+                        {
+                            ChannelId = channel.ChannelId,
+                            SequenceIndex = data.SequenceIndex,
+                            Value = data.Value
+                        })
+                        .ObserveOn(_scheduler)
+                )
+                .Merge()
+                .Publish()
+                .RefCount();
+        // 创建共享的热Observable(这里相当于共享上面的合并的流数据)
+        //var shared =
+        //    merged
+        //        .Publish()
+        //        .RefCount();
+        var subscription = merged.Subscribe(dataPoint => PublishChannelData(ref dataPoint),
+            HandleError,
+            () => { /* completed */ }); // 启动合并流 
+        _subscriptions.Add(subscription);
 
 #if DEBUG
         Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Subscribed to {pseudoChannels.Count()} pseudo channels");
 #endif
     } 
 
-    private void HandleError(long channelId, Exception ex)
+    private void HandleError(Exception ex)
     {
 #if DEBUG
-        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Error in channel {channelId}: {ex.Message}");
+        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Error in channel: {ex.Message}");
 #endif
     }
       

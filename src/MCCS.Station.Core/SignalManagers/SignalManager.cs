@@ -40,14 +40,11 @@ namespace MCCS.Station.Core.SignalManagers
             {
                 var signChannel = _signals.FirstOrDefault(s => s.SignalId == id);
                 if (signChannel == null)
-                    throw new ArgumentException($"Cannot find signal with ID: {id}", nameof(signalId));
-
+                    throw new ArgumentException($"Cannot find signal with ID: {id}", nameof(signalId)); 
                 var controller = _controllerManager.GetControllerInfo(signChannel.BelongControllerId);
-
                 return controller.IndividualDataStream
                     .Select(info => new DataPoint<float>
-                    {
-                        DataQuality = info.DataQuality,
+                    { 
                         DeviceId = info.DeviceId,
                         Unit = signChannel.Configuration.Unit ?? "",
                         Timestamp = info.Timestamp,

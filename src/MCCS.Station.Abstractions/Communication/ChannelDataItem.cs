@@ -10,6 +10,10 @@ namespace MCCS.Station.Abstractions.Communication
         /// </summary>
         public long ChannelId;
         /// <summary>
+        /// 当前批次索引(用于时间对齐)
+        /// </summary>
+        public long SequenceIndex;
+        /// <summary>
         /// 采集值
         /// </summary>
         public double Value;

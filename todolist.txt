@@ -2,3 +2,16 @@
 2. Prism中许多好的特性没有利用起来
     (1) EventAggregate 的filter，当订阅者有多个，可以在订阅者中添加filter
     (2) Moudle的使用完全用错了,但是针对目前的场景似乎用不到
+
+二、合并Rx.NET流 核心原则（先记住这 4 条） 
+1.合并之前统一 ObserveOn 到同一个 EventLoop
+2.合并本身不负责线程切换
+3.EventLoop = “汇总总线”，不是计算农场
+4.越靠近源，越少 ObserveOn
+
+三、Rx 的第一性原理
+Observable = 描述
+Subscribe = 执行
+
+Schedule、Subject
+

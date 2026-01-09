@@ -44,17 +44,11 @@ namespace MCCS.Station.Core.PseudoChannelManagers
                 return Observable.Empty<DataPoint<float>>();
 
             // 单信号直接返回，避免不必要的CombineLatest开销
+            // dp => dp with { Unit = Configuration.Unit ?? dp.Unit } 这种写法用于覆盖其他同名的属性
             if (signalStreamList.Count == 1)
             {
                 return signalStreamList[0]
-                    .Select(dp => new DataPoint<float>
-                    {
-                        DeviceId = dp.DeviceId,
-                        DataQuality = dp.DataQuality,
-                        Timestamp = dp.Timestamp,
-                        Unit = Configuration.Unit ?? dp.Unit,
-                        Value = dp.Value
-                    })
+                    .Select(dp => dp with { Unit = Configuration.Unit ?? dp.Unit })
                     .Publish()
                     .RefCount();
             }
@@ -64,8 +58,7 @@ namespace MCCS.Station.Core.PseudoChannelManagers
                 .CombineLatest()
                 .Select(values => new DataPoint<float>
                 {
-                    DeviceId = values[0].DeviceId,
-                    DataQuality = values.All(s => s.DataQuality == DataQuality.Good) ? DataQuality.Good : DataQuality.Bad,
+                    DeviceId = values[0].DeviceId, 
                     Timestamp = values.Max(s => s.Timestamp), // 使用最新时间戳而非平均值
                     Unit = Configuration.Unit ?? "",
                     Value = values.Average(s => s.Value)

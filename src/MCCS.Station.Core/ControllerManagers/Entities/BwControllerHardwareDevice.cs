@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Concurrency;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -35,14 +34,15 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
             // 从批量流展开为单条数据流
             // 使用 SelectMany 展开 + Publish().RefCount() 支持多订阅者
+            // 注意：这里的没有ObserveOn,没有指定线程上下文，订阅者自行决定
             IndividualDataStream = DataStream
                 .SelectMany(batch => batch.Values.Select((value, index) => new DataPoint<TNet_ADHInfo>
                 {
                     DeviceId = batch.DeviceId,
                     Timestamp = batch.ArrivalTicks + index, // 基于批次时间戳 + 索引区分
+                    SequenceIndex = batch.SequenceStart + index,
                     Value = value,
-                    Unit = string.Empty,
-                    DataQuality = DataQuality.Good
+                    Unit = string.Empty 
                 }))
                 .Publish()
                 .RefCount();

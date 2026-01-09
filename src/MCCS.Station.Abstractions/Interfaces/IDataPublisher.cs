@@ -1,3 +1,5 @@
+using MCCS.Station.Abstractions.Communication;
+
 namespace MCCS.Station.Abstractions.Interfaces;
 
 /// <summary>
@@ -23,7 +25,7 @@ public interface IDataPublisher : IDisposable
     /// <summary>
     /// 发布单个通道数据
     /// </summary>
-    void PublishChannelData(long channelId, double value);
+    void PublishChannelData(ref ChannelDataItem data);
 
     /// <summary>
     /// 发布批量通道数据

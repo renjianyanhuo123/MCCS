@@ -67,9 +67,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 {
                     DeviceId = batch.DeviceId,
                     Timestamp = batch.ArrivalTicks + index,
+                    SequenceIndex = batch.SequenceStart + index,
                     Value = value,
-                    Unit = string.Empty,
-                    DataQuality = DataQuality.Good
+                    Unit = string.Empty 
                 }))
                 .Publish()
                 .RefCount();
@@ -210,8 +210,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
 
                     var batch = MockAcquireReading();
                     if (batch != null)
-                        observer.OnNext(batch);
-                    Console.WriteLine($"{Stopwatch.GetTimestamp()}");
+                        observer.OnNext(batch); 
                 });
             });
 
