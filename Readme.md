@@ -23,3 +23,8 @@ Station设计功能:
 8,告警、诊断与维护（Alarms & Diagnostics）
 10,审计与运行日志（Audit & Trace）
 11,仿真与回放（Simulation & Replay）
+
+站点状态机
+Offline -> Connecting -> Online -> Ready -> Running -> Ready
+                                    ↓         ↓
+                                 Faulted/EStop -> Recovering

@@ -84,7 +84,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             {
                 return _highPriorityScheduler.SchedulePeriodic(TimeSpan.FromMilliseconds(2), () =>
                 {
-                    if (_deviceHandle == nint.Zero || Status != HardwareConnectionStatus.Connected)
+                    if (!_isRunning || _deviceHandle == nint.Zero || Status != HardwareConnectionStatus.Connected)
                         return;
                     // 这一拍尽量读空（读到 null 就停）
                     while (true)
@@ -128,18 +128,19 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             var result = POPNetCtrl.NetCtrl01_ConnectToDev(_hardwareDeviceConfiguration.DeviceAddressId, ref _deviceHandle);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
+                // 连接成功后立即设置状态，不等待状态轮询
+
+                Status = HardwareConnectionStatus.Connected; 
+                _statusSubject.OnNext(HardwareConnectionStatus.Connected);
 #if DEBUG
                 Debug.WriteLine($"✓ 设备连接成功，句柄: 0x{_hardwareDeviceConfiguration.DeviceAddressId:X}");
 #endif 
                 return true;
             }
-            else
-            {
 #if DEBUG
-                Debug.WriteLine($"✗ 设备连接失败，错误码: {result}");
+            Debug.WriteLine($"✗ 设备连接失败，错误码: {result}");
 #endif
-                return false;
-            }
+            return false;
         }
 
         public bool DisconnectFromHardware()
@@ -150,6 +151,8 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             var result = POPNetCtrl.NetCtrl01_DisConnectToDev(_deviceHandle);
             if (result == AddressContanst.OP_SUCCESSFUL)
             {
+                Status = HardwareConnectionStatus.Disconnected;
+                _statusSubject.OnNext(HardwareConnectionStatus.Disconnected);
 #if DEBUG
                 Debug.WriteLine("✓ 设备断开成功");
 #endif

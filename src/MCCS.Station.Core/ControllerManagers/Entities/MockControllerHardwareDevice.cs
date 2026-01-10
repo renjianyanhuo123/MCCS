@@ -220,7 +220,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
             const uint sampleCount = 2; // 每批次1个样本，与2ms间隔配合模拟1000Hz采样率
 #if DEBUG
-            Console.WriteLine($"{DateTime.Now:HH:mm:ss}");
+            Console.WriteLine($"执行采集: {DateTime.Now:HH:mm:ss.fff}");
 #endif
             var values = new TNet_ADHInfo[sampleCount];
             for (var i = 0; i < sampleCount; i++)

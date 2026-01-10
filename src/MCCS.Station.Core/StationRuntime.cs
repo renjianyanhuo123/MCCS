@@ -124,6 +124,9 @@ namespace MCCS.Station.Core
                 pseudoChannelConfigurations.Add(tempPseudoChannel);
             }
             _pseudoChannelManager.Initialization(pseudoChannelConfigurations);
+            // (5) 启动所有控制器的数据采集 
+            // 注意：必须在所有初始化完成后启动，否则数据流不会产生数据 
+            _controllerManager.StartAllControllers();
             return stationSiteInfo;
         }
     }
