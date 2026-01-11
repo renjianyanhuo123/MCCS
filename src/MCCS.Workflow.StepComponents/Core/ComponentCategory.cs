@@ -16,16 +16,6 @@ namespace MCCS.Workflow.StepComponents.Core
         DataProcessing,
 
         /// <summary>
-        /// 网络通信
-        /// </summary>
-        Network,
-
-        /// <summary>
-        /// 文件操作
-        /// </summary>
-        FileOperation,
-
-        /// <summary>
         /// 流程控制
         /// </summary>
         FlowControl,
@@ -40,9 +30,31 @@ namespace MCCS.Workflow.StepComponents.Core
         /// </summary>
         System,
 
+        // ========== 结构试验专用分类 ==========
+
         /// <summary>
-        /// 自定义
+        /// 基础与安全 - 配方加载、设备连接、安全联锁、使能控制
         /// </summary>
-        Custom
+        SafetyAndSetup,
+
+        /// <summary>
+        /// 校准与核查 - 力链校准、引伸计核查
+        /// </summary>
+        CalibrationAndVerification,
+
+        /// <summary>
+        /// 人工操作 - 试件安装、人工确认、清零
+        /// </summary>
+        ManualOperation,
+
+        /// <summary>
+        /// 控制执行 - 段执行、循环执行、预载、卸载
+        /// </summary>
+        ControlExecution,
+
+        /// <summary>
+        /// 数据与报告 - 采集、停止准则、报告生成
+        /// </summary>
+        DataAndReport
     }
 }
