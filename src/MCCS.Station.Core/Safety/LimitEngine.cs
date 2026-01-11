@@ -10,7 +10,7 @@ namespace MCCS.Station.Core.Safety;
 /// <summary>
 /// 软限位引擎
 /// 负责过程保护，保护试样/过程，系统仍可控
-/// 典型策略：超限触发时把相关轴切到"位移保持/力保持/速度限制"
+/// 典型策略：超限触发时把相关通道切到"位移保持/力保持/速度限制"
 /// </summary>
 public sealed class LimitEngine : ILimitEngine, IDisposable
 {

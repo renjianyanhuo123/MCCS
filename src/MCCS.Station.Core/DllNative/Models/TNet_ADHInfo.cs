@@ -16,7 +16,7 @@ namespace MCCS.Station.Core.DllNative.Models
         public float Net_CtrlDA;              // 控制输出DA值
         public int Net_CycleCount;            // 循环计数
         public int Net_SysState;              // 系统状态
-        public int Net_DIVal;                 // 数字输入值
+        public int Net_DIVal;                 // 数字输入值(检查急停也在此处)
         public int Net_DOVal;                 // 数字输出值
         public float Net_D_PosVref;           // 动态调整后的信号值
         public float Net_FeedLoadN;           // 试验力反馈值(关键!)

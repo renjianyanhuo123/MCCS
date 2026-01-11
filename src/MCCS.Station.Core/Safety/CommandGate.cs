@@ -30,6 +30,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
     private readonly ConcurrentDictionary<CommandRejectionReason, long> _rejectionsByReason = new();
 
     // 命令类型到所需能力的映射
+    // ReSharper disable once InconsistentNaming
     private static readonly Dictionary<CommandType, CapabilityFlags> CommandCapabilityMap = new()
     {
         [CommandType.Connect] = CapabilityFlags.CanConnect,
@@ -64,8 +65,9 @@ public sealed class CommandGate : ICommandGate, IDisposable
     };
 
     // 紧急命令类型（可以在受限状态下执行）
-    private static readonly HashSet<CommandType> EmergencyCommandTypes = new()
-    {
+    // ReSharper disable once InconsistentNaming
+    private static readonly HashSet<CommandType> EmergencyCommandTypes =
+    [
         CommandType.ClearInterlock,
         CommandType.ResetEStop,
         CommandType.SoftwareEStop,
@@ -75,7 +77,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
         CommandType.ManualStop,
         CommandType.CloseValve,
         CommandType.Deactivate
-    };
+    ];
 
     public CommandGate(IStatusAggregator statusAggregator, ISafetySupervisor safetySupervisor)
     {
@@ -101,7 +103,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
         // 2. 检查安全状态
         if (currentStatus.Safety >= SafetyStatus.Interlocked && !request.AllowInLimitedState)
         {
-            var (allowed, reason, blockingRules) = _safetySupervisor.CheckOperation(requiredCaps);
+            (var allowed, var reason, IReadOnlyList<string> blockingRules) = _safetySupervisor.CheckOperation(requiredCaps);
             if (!allowed)
             {
                 return CommandCheckResult.Reject(

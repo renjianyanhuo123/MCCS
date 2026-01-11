@@ -15,4 +15,3 @@ public enum StationStateEnum : byte
     EStop,          // 急停状态
     Recovering      // 恢复中
 }
-}

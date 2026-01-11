@@ -226,7 +226,7 @@ public sealed class StationSafetyContext : IDisposable
             Name = "安全门",
             Type = InterlockTypeEnum.DoorOpen,
             Description = "安全门未关闭",
-            SourceSignals = new[] { "door_closed" },
+            SourceSignals = ["door_closed"],
             ConditionExpression = "door_closed == 0",
             IsLatched = false,
             ResetPolicy = InterlockResetPolicy.Auto,

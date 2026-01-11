@@ -26,7 +26,7 @@ public record SafetyStatusChangedEvent : StationEvent
     /// <summary>
     /// 触发的规则ID列表
     /// </summary>
-    public IReadOnlyList<string> TriggeredRules { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> TriggeredRules { get; init; } = [];
 
     /// <summary>
     /// 详细描述
@@ -36,7 +36,7 @@ public record SafetyStatusChangedEvent : StationEvent
     /// <summary>
     /// 受影响的通道
     /// </summary>
-    public IReadOnlyList<string> AffectedChannels { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> AffectedChannels { get; init; } = [];
 
     /// <summary>
     /// 执行的动作

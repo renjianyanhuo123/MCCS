@@ -121,9 +121,7 @@ namespace MCCS.Workflow.StepComponents.Steps
             leftOperand = context.ReplaceVariables(leftOperand);
             rightOperand = context.ReplaceVariables(rightOperand);
 
-            var result = EvaluateCondition(leftOperand, op, rightOperand, caseSensitive);
-
-            context.Log($"条件判断: '{leftOperand}' {op} '{rightOperand}' = {result}");
+            var result = EvaluateCondition(leftOperand, op, rightOperand, caseSensitive); 
 
             var output = new Dictionary<string, object?>
             {

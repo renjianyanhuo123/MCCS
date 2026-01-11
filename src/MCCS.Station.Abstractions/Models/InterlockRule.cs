@@ -31,7 +31,7 @@ public sealed class InterlockRule
     /// <summary>
     /// 关联的信号/条件源
     /// </summary>
-    public IReadOnlyList<string> SourceSignals { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> SourceSignals { get; init; } = [];
 
     /// <summary>
     /// 联锁条件表达式（用于评估是否触发）

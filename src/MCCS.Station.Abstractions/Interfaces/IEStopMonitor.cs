@@ -27,12 +27,7 @@ public interface IEStopMonitor
     /// <summary>
     /// 任何急停是否激活
     /// </summary>
-    bool IsAnyEStopActive => IsHardwareEStopActive || IsSoftwareEStopActive;
-
-    /// <summary>
-    /// 获取当前激活的急停源
-    /// </summary>
-    IReadOnlyList<EStopSource> GetActiveEStopSources();
+    bool IsAnyEStopActive => IsHardwareEStopActive || IsSoftwareEStopActive; 
 
     /// <summary>
     /// 触发软件急停
@@ -62,51 +57,5 @@ public interface IEStopMonitor
     /// <summary>
     /// 获取最后一次急停的原因
     /// </summary>
-    string? LastEStopReason { get; }
-
-    /// <summary>
-    /// 获取复位指令
-    /// </summary>
-    string GetResetInstructions();
-
-    /// <summary>
-    /// 是否需要硬件复位
-    /// </summary>
-    bool RequiresHardwareReset { get; }
-}
-
-/// <summary>
-/// 急停源信息
-/// </summary>
-public sealed class EStopSource
-{
-    /// <summary>
-    /// 源ID
-    /// </summary>
-    public string SourceId { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 急停类型
-    /// </summary>
-    public EStopType Type { get; init; }
-
-    /// <summary>
-    /// 触发时间
-    /// </summary>
-    public DateTime TriggeredAt { get; init; }
-
-    /// <summary>
-    /// 触发原因
-    /// </summary>
-    public string Reason { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 触发者
-    /// </summary>
-    public string TriggeredBy { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 是否可以软件释放
-    /// </summary>
-    public bool CanSoftwareRelease { get; init; }
-}
+    string? LastEStopReason { get; }  
+} 

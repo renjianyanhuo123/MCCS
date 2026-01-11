@@ -6,7 +6,7 @@ namespace MCCS.Station.Abstractions.Models;
 /// 软限位配置
 /// 软限位目的：保护试样/过程，系统仍可控
 /// </summary>
-public sealed class SoftLimitConfig
+public sealed record SoftLimitConfig
 {
     /// <summary>
     /// 限位ID
@@ -140,7 +140,7 @@ public enum SoftLimitType : byte
 /// <summary>
 /// 软限位状态（运行时）
 /// </summary>
-public sealed class SoftLimitState
+public sealed record SoftLimitState
 {
     /// <summary>
     /// 关联的配置

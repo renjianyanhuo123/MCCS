@@ -42,7 +42,7 @@ public sealed class StationCompositeStatus
     /// <summary>
     /// 活跃的警告/问题列表
     /// </summary>
-    public IReadOnlyList<StatusIssue> ActiveIssues { get; init; } = Array.Empty<StatusIssue>();
+    public IReadOnlyList<StatusIssue> ActiveIssues { get; init; } = [];
 
     /// <summary>
     /// 状态更新时间
@@ -78,78 +78,8 @@ public sealed class StationCompositeStatus
     /// <summary>
     /// 是否需要人工干预
     /// </summary>
-    public bool RequiresIntervention => Safety >= SafetyStatus.Interlocked;
-
-    /// <summary>
-    /// 创建状态副本并更新指定维度
-    /// </summary>
-    public StationCompositeStatus With(
-        ConnectivityStatus? connectivity = null,
-        ActivationStatus? activation = null,
-        ProcessStatus? process = null,
-        SafetyStatus? safety = null,
-        CapabilityFlags? capabilities = null,
-        IReadOnlyList<StatusIssue>? activeIssues = null)
-    {
-        return new StationCompositeStatus
-        {
-            Connectivity = connectivity ?? Connectivity,
-            Activation = activation ?? Activation,
-            Process = process ?? Process,
-            Safety = safety ?? Safety,
-            Capabilities = capabilities ?? Capabilities,
-            ActiveIssues = activeIssues ?? ActiveIssues,
-            UpdatedAt = DateTime.UtcNow,
-            Summary = GenerateSummary(
-                connectivity ?? Connectivity,
-                activation ?? Activation,
-                process ?? Process,
-                safety ?? Safety)
-        };
-    }
-
-    private static string GenerateSummary(
-        ConnectivityStatus connectivity,
-        ActivationStatus activation,
-        ProcessStatus process,
-        SafetyStatus safety)
-    {
-        if (safety == SafetyStatus.EStop)
-            return "急停已触发";
-        if (safety == SafetyStatus.Failsafe)
-            return "失控保护已激活";
-        if (safety == SafetyStatus.Interlocked)
-            return "联锁已触发";
-        if (connectivity == ConnectivityStatus.Disconnected)
-            return "未连接";
-        if (connectivity == ConnectivityStatus.Connecting)
-            return "正在连接...";
-        if (connectivity == ConnectivityStatus.Degraded)
-            return "资源降级";
-        if (activation == ActivationStatus.Off)
-            return "能量关闭";
-        if (activation < ActivationStatus.High)
-            return $"能量状态: {activation}";
-
-        return process switch
-        {
-            ProcessStatus.Idle => "就绪待机",
-            ProcessStatus.Armed => "已准备",
-            ProcessStatus.Preparing => "准备中...",
-            ProcessStatus.Running => safety == SafetyStatus.Warning ? "运行中(警告)" : "运行中",
-            ProcessStatus.Paused => "已暂停",
-            ProcessStatus.Stopping => "停止中...",
-            ProcessStatus.Completed => "试验完成",
-            ProcessStatus.Unloading => "回零中...",
-            ProcessStatus.Manual => "手动模式",
-            _ => "未知状态"
-        };
-    }
-
-    public override string ToString()
-    {
-        return $"[{Connectivity}|{Activation}|{Process}|{Safety}] {Summary}";
-    }
+    public bool RequiresIntervention => Safety >= SafetyStatus.Interlocked; 
+    public override string ToString() => $"[{Connectivity}|{Activation}|{Process}|{Safety}] {Summary}";
 }
 
 /// <summary>

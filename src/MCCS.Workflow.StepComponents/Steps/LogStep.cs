@@ -77,19 +77,7 @@ namespace MCCS.Workflow.StepComponents.Steps
             {
                 message = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}";
             }
-
-            // 解析日志级别
-            var logLevel = logLevelStr switch
-            {
-                "Debug" => LogLevel.Debug,
-                "Warning" => LogLevel.Warning,
-                "Error" => LogLevel.Error,
-                _ => LogLevel.Info
-            };
-
-            // 输出日志
-            context.Log(message, logLevel);
-
+             
             return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {
                 ["LoggedMessage"] = message,

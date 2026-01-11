@@ -22,17 +22,18 @@ public sealed class ProcessStateMachine : IProcessStateMachine, IDisposable
     /// <summary>
     /// 状态转换规则定义
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     private static readonly Dictionary<ProcessStatus, HashSet<ProcessStatus>> ValidTransitions = new()
     {
-        [ProcessStatus.Idle] = new() { ProcessStatus.Armed, ProcessStatus.Preparing, ProcessStatus.Manual },
-        [ProcessStatus.Armed] = new() { ProcessStatus.Idle, ProcessStatus.Preparing, ProcessStatus.Running },
-        [ProcessStatus.Preparing] = new() { ProcessStatus.Armed, ProcessStatus.Running, ProcessStatus.Idle },
-        [ProcessStatus.Running] = new() { ProcessStatus.Paused, ProcessStatus.Stopping, ProcessStatus.Completed },
-        [ProcessStatus.Paused] = new() { ProcessStatus.Running, ProcessStatus.Stopping, ProcessStatus.Idle },
-        [ProcessStatus.Stopping] = new() { ProcessStatus.Idle, ProcessStatus.Completed, ProcessStatus.Unloading },
-        [ProcessStatus.Completed] = new() { ProcessStatus.Idle, ProcessStatus.Unloading, ProcessStatus.Armed },
-        [ProcessStatus.Unloading] = new() { ProcessStatus.Idle, ProcessStatus.Completed },
-        [ProcessStatus.Manual] = new() { ProcessStatus.Idle }
+        [ProcessStatus.Idle] = [ProcessStatus.Armed, ProcessStatus.Preparing, ProcessStatus.Manual],
+        [ProcessStatus.Armed] = [ProcessStatus.Idle, ProcessStatus.Preparing, ProcessStatus.Running],
+        [ProcessStatus.Preparing] = [ProcessStatus.Armed, ProcessStatus.Running, ProcessStatus.Idle],
+        [ProcessStatus.Running] = [ProcessStatus.Paused, ProcessStatus.Stopping, ProcessStatus.Completed],
+        [ProcessStatus.Paused] = [ProcessStatus.Running, ProcessStatus.Stopping, ProcessStatus.Idle],
+        [ProcessStatus.Stopping] = [ProcessStatus.Idle, ProcessStatus.Completed, ProcessStatus.Unloading],
+        [ProcessStatus.Completed] = [ProcessStatus.Idle, ProcessStatus.Unloading, ProcessStatus.Armed],
+        [ProcessStatus.Unloading] = [ProcessStatus.Idle, ProcessStatus.Completed],
+        [ProcessStatus.Manual] = [ProcessStatus.Idle]
     };
 
     public ProcessStateMachine(IStatusAggregator? statusAggregator = null)
@@ -79,7 +80,9 @@ public sealed class ProcessStateMachine : IProcessStateMachine, IDisposable
             // 检查是否被安全系统锁定
             if (_isLockedBySafety && !IsAllowedWhenLocked(newState))
             {
+#if DEBUG
                 Console.WriteLine($"[ProcessStateMachine] 状态机被安全锁定，禁止转换: {_currentState} -> {newState}");
+#endif
                 return false;
             }
 

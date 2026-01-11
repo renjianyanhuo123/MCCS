@@ -27,4 +27,32 @@ Station设计功能:
 站点状态机
 Offline -> Connecting -> Online -> Ready -> Running -> Ready
                                     ↓         ↓
-                                 Faulted/EStop -> Recovering
+                                 Faulted/EStop -> Recovering 
+维度	        文件	                     状态值
+连接与资源	ConnectivityStatus.cs	Disconnected/Connecting/Degraded/Ready
+激活与能量	ActivationStatus.cs	    Off/Low/High + 过渡态
+运行流程	    ProcessStatus.cs	    Idle/Armed/Running/Paused/Completed等
+安全与保护	SafetyStatus.cs	        Normal/Warning/Limited/Interlocked/Failsafe/EStop
+
+StatusAggregator	  四维合成 + 能力计算 + 问题追踪
+ProcessStateMachine	  只管流程（Idle→Armed→Running...）
+SafetySupervisor	  整合三层保护，独立于状态机
+StationHealthService  资源树自底向上计算健康状态
+CommandGate	          所有命令统一过闸（放行/改写/拒绝）
+StationSafetyContext  整合所有组件的便捷入口
+
+┌─────────────────────────────────────────────────────────────┐
+│                   SafetySupervisor (安全主管)                 │
+│  - 整合三层保护机制，对状态机有"硬打断/降级/锁定"权限           │
+├─────────────────────────────────────────────────────────────┤
+│  LimitEngine      │  InterlockEngine  │  EStopMonitor       │
+│  (软限位/过程保护)  │  (联锁/条件禁止)   │  (急停/失控保护)     │
+│  - 保护试样/过程   │  - 防止危险动作    │  - 保护设备与人身    │
+│  - 系统仍可控     │  - 需要复位动作    │  - 必须人工干预      │
+└─────────────────────────────────────────────────────────────┘
+1. EStop / Failsafe     (最高优先级，任何时候都盖过)
+2. Interlocked          (需要清除联锁才能继续)
+3. Limited              (软限位/过程保护，部分操作受限)
+4. Degraded             (资源缺失/异常)
+5. Running/Paused/Idle  (状态机流程)
+

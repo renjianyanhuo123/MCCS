@@ -70,13 +70,9 @@ namespace MCCS.Workflow.StepComponents.Steps
                 "minutes" => delayValue * 60 * 1000,
                 "hours" => delayValue * 60 * 60 * 1000,
                 _ => delayValue * 1000
-            };
+            }; 
 
-            context.Log($"开始等待 {delayValue} {GetUnitDisplayName(delayType)}");
-
-            await Task.Delay(delayMs, context.CancellationToken);
-
-            context.Log("延时等待完成");
+            await Task.Delay(delayMs, context.CancellationToken); 
 
             return StepResult.Succeed(new Dictionary<string, object?>
             {

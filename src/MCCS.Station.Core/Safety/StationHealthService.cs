@@ -177,30 +177,22 @@ public sealed class StationHealthService : IStationHealthService, IDisposable
         };
     }
 
-    public IReadOnlyList<ResourceHealthInfo> GetAllResources()
-    {
-        return _resources.Values.ToList().AsReadOnly();
-    }
+    public IReadOnlyList<ResourceHealthInfo> GetAllResources() => _resources.Values.ToList().AsReadOnly();
 
-    public IReadOnlyList<ResourceHealthInfo> GetResourcesByType(ResourceType type)
-    {
-        return _resources.Values
+    public IReadOnlyList<ResourceHealthInfo> GetResourcesByType(ResourceType type) =>
+        _resources.Values
             .Where(r => r.Type == type)
             .ToList()
             .AsReadOnly();
-    }
 
-    public ResourceHealthInfo? GetResource(string resourceId)
-    {
-        return _resources.TryGetValue(resourceId, out var resource) ? resource : null;
-    }
+    public ResourceHealthInfo? GetResource(string resourceId) => _resources.GetValueOrDefault(resourceId);
 
     public IReadOnlyList<ResourceHealthInfo> GetResourceTree()
     {
         // 获取根资源（没有父节点的资源）
         var roots = _resources.Values
             .Where(r => string.IsNullOrEmpty(r.ParentId))
-            .Select(r => BuildResourceNode(r))
+            .Select(BuildResourceNode)
             .ToList();
 
         return roots.AsReadOnly();
@@ -210,7 +202,7 @@ public sealed class StationHealthService : IStationHealthService, IDisposable
     {
         var children = _resources.Values
             .Where(r => r.ParentId == resource.ResourceId)
-            .Select(r => BuildResourceNode(r))
+            .Select(BuildResourceNode)
             .ToList();
 
         if (children.Count == 0)
@@ -236,21 +228,17 @@ public sealed class StationHealthService : IStationHealthService, IDisposable
         };
     }
 
-    public IReadOnlyList<ResourceHealthInfo> GetFaultedResources()
-    {
-        return _resources.Values
+    public IReadOnlyList<ResourceHealthInfo> GetFaultedResources() =>
+        _resources.Values
             .Where(r => r.Health == ResourceHealth.Fault)
             .ToList()
             .AsReadOnly();
-    }
 
-    public IReadOnlyList<ResourceHealthInfo> GetWarningResources()
-    {
-        return _resources.Values
+    public IReadOnlyList<ResourceHealthInfo> GetWarningResources() =>
+        _resources.Values
             .Where(r => r.Health == ResourceHealth.Warning)
             .ToList()
             .AsReadOnly();
-    }
 
     public ConnectivityStatus CalculateConnectivityStatus()
     {

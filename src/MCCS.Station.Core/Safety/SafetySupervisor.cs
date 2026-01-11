@@ -61,17 +61,16 @@ public sealed class SafetySupervisor : ISafetySupervisor, IDisposable
 
     private IDisposable SetupSubscriptions()
     {
-        var subscriptions = new List<IDisposable>();
-
-        // 订阅限位事件
-        subscriptions.Add(LimitEngine.LimitTriggered.Subscribe(OnLimitTriggered));
-        subscriptions.Add(LimitEngine.LimitWarning.Subscribe(OnLimitWarning));
-
-        // 订阅联锁事件
-        subscriptions.Add(InterlockEngine.InterlockTriggered.Subscribe(OnInterlockTriggered));
-
-        // 订阅急停事件
-        subscriptions.Add(EStopMonitor.EStopTriggered.Subscribe(OnEStopTriggered));
+        var subscriptions = new List<IDisposable>
+        {
+            // 订阅限位事件
+            LimitEngine.LimitTriggered.Subscribe(OnLimitTriggered),
+            LimitEngine.LimitWarning.Subscribe(OnLimitWarning),
+            // 订阅联锁事件
+            InterlockEngine.InterlockTriggered.Subscribe(OnInterlockTriggered),
+            // 订阅急停事件
+            EStopMonitor.EStopTriggered.Subscribe(OnEStopTriggered)
+        };
 
         return new CompositeDisposable(subscriptions);
     }
@@ -81,7 +80,7 @@ public sealed class SafetySupervisor : ISafetySupervisor, IDisposable
         RecalculateSafetyStatus(
             evt.IsTripped ? SafetyTriggerReason.SoftLimitTripped : SafetyTriggerReason.ConditionRestored,
             evt.IsTripped ? $"软限位触发: {evt.LimitId}" : $"软限位解除: {evt.LimitId}",
-            new[] { evt.ChannelId });
+            [evt.ChannelId]);
     }
 
     private void OnLimitWarning(LimitTrippedEvent evt)
@@ -182,10 +181,10 @@ public sealed class SafetySupervisor : ISafetySupervisor, IDisposable
                 }
                 if (EStopMonitor.IsAnyEStopActive)
                 {
-                    foreach (var source in EStopMonitor.GetActiveEStopSources())
-                    {
-                        triggeredRules.Add($"EStop:{source.SourceId}");
-                    }
+                    //foreach (var source in EStopMonitor.GetActiveEStopSources())
+                    //{
+                    //    triggeredRules.Add($"EStop:{source.SourceId}");
+                    //}
                 }
 
                 // 发布事件
@@ -351,31 +350,31 @@ public sealed class SafetySupervisor : ISafetySupervisor, IDisposable
         var blockingRules = new List<string>();
 
         // 检查急停
-        if (EStopMonitor.IsAnyEStopActive)
-        {
-            var sources = EStopMonitor.GetActiveEStopSources();
-            blockingRules.AddRange(sources.Select(s => $"EStop:{s.SourceId}"));
-            return (false, "急停已激活，禁止所有操作", blockingRules.AsReadOnly());
-        }
+        //if (EStopMonitor.IsAnyEStopActive)
+        //{
+        //    var sources = EStopMonitor.GetActiveEStopSources();
+        //    blockingRules.AddRange(sources.Select(s => $"EStop:{s.SourceId}"));
+        //    return (false, "急停已激活，禁止所有操作", blockingRules.AsReadOnly());
+        //}
 
-        // 检查联锁
-        var (interlockBlocked, interlockRules) = InterlockEngine.IsOperationBlocked(requiredCapabilities);
-        if (interlockBlocked)
-        {
-            blockingRules.AddRange(interlockRules.Select(r => $"Interlock:{r}"));
-            return (false, "操作被联锁阻止", blockingRules.AsReadOnly());
-        }
+        //// 检查联锁
+        //var (interlockBlocked, interlockRules) = InterlockEngine.IsOperationBlocked(requiredCapabilities);
+        //if (interlockBlocked)
+        //{
+        //    blockingRules.AddRange(interlockRules.Select(r => $"Interlock:{r}"));
+        //    return (false, "操作被联锁阻止", blockingRules.AsReadOnly());
+        //}
 
-        // 检查软限位禁用的能力
-        var limitDisabled = LimitEngine.GetDisabledCapabilities();
-        if ((limitDisabled & requiredCapabilities) != CapabilityFlags.None)
-        {
-            foreach (var limit in LimitEngine.GetTrippedLimits())
-            {
-                blockingRules.Add($"Limit:{limit.Config.LimitId}");
-            }
-            return (false, "操作被软限位限制", blockingRules.AsReadOnly());
-        }
+        //// 检查软限位禁用的能力
+        //var limitDisabled = LimitEngine.GetDisabledCapabilities();
+        //if ((limitDisabled & requiredCapabilities) != CapabilityFlags.None)
+        //{
+        //    foreach (var limit in LimitEngine.GetTrippedLimits())
+        //    {
+        //        blockingRules.Add($"Limit:{limit.Config.LimitId}");
+        //    }
+        //    return (false, "操作被软限位限制", blockingRules.AsReadOnly());
+        //}
 
         return (true, string.Empty, blockingRules.AsReadOnly());
     }

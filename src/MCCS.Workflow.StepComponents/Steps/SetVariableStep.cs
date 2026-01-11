@@ -78,9 +78,7 @@ namespace MCCS.Workflow.StepComponents.Steps
             object? typedValue = ConvertValue(variableValue, valueType);
 
             // 设置变量
-            context.SetVariable(variableName, typedValue);
-
-            context.Log($"设置变量 {variableName} = {typedValue}");
+            context.SetVariable(variableName, typedValue); 
 
             return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {

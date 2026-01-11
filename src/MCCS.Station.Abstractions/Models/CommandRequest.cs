@@ -144,7 +144,7 @@ public enum CommandPriority : byte
 /// <summary>
 /// 命令执行结果
 /// </summary>
-public sealed class CommandResult
+public sealed record CommandResult
 {
     /// <summary>
     /// 关联的命令ID

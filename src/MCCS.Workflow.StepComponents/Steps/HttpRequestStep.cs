@@ -134,9 +134,7 @@ namespace MCCS.Workflow.StepComponents.Steps
 
             // 替换URL中的变量
             url = context.ReplaceVariables(url);
-            body = body != null ? context.ReplaceVariables(body) : null;
-
-            context.Log($"发送 {method} 请求到 {url}");
+            body = body != null ? context.ReplaceVariables(body) : null; 
 
             try
             {
@@ -162,9 +160,7 @@ namespace MCCS.Workflow.StepComponents.Steps
                 cts.CancelAfter(TimeSpan.FromSeconds(timeout > 0 ? timeout : 30));
 
                 var response = await _httpClient.SendAsync(request, cts.Token);
-                var responseBody = await response.Content.ReadAsStringAsync(cts.Token);
-
-                context.Log($"收到响应: {(int)response.StatusCode} {response.ReasonPhrase}");
+                var responseBody = await response.Content.ReadAsStringAsync(cts.Token); 
 
                 var output = new Dictionary<string, object?>
                 {

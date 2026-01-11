@@ -138,9 +138,7 @@ namespace MCCS.Workflow.StepComponents.Core
                 };
 
                 // 保存到工作流数据
-                workflowData?.SetStepOutput(stepContext.StepId, StepOutput);
-                workflowData?.AddLog($"步骤 [{StepName}] 执行完成，耗时 {stopwatch.ElapsedMilliseconds}ms",
-                    result.Success ? LogLevel.Info : LogLevel.Error, stepContext.StepId);
+                workflowData?.SetStepOutput(stepContext.StepId, StepOutput); 
 
                 // 执行后回调
                 await OnAfterExecuteAsync(stepContext, result);
@@ -185,9 +183,7 @@ namespace MCCS.Workflow.StepComponents.Core
                     ExecutionTimeMs = stopwatch.ElapsedMilliseconds
                 };
 
-                workflowData?.SetStepOutput(CurrentStepId ?? context.Step.Id.ToString(), StepOutput);
-                workflowData?.AddLog($"步骤 [{StepName}] 执行失败: {ex.Message}", LogLevel.Error,
-                    CurrentStepId ?? context.Step.Id.ToString());
+                workflowData?.SetStepOutput(CurrentStepId ?? context.Step.Id.ToString(), StepOutput); 
 
                 throw;
             }
@@ -449,14 +445,7 @@ namespace MCCS.Workflow.StepComponents.Core
         /// 替换变量引用
         /// </summary>
         public string ReplaceVariables(string template) => WorkflowData.ReplaceVariables(template);
-
-        /// <summary>
-        /// 记录日志
-        /// </summary>
-        public void Log(string message, LogLevel level = LogLevel.Info)
-        {
-            WorkflowData.AddLog(message, level, StepId);
-        }
+         
     }
 
     /// <summary>
@@ -492,14 +481,12 @@ namespace MCCS.Workflow.StepComponents.Core
         /// <summary>
         /// 创建成功结果
         /// </summary>
-        public static StepResult Succeed(Dictionary<string, object?>? output = null)
-        {
-            return new StepResult
+        public static StepResult Succeed(Dictionary<string, object?>? output = null) =>
+            new()
             {
                 Success = true,
                 OutputData = output ?? new Dictionary<string, object?>()
             };
-        }
 
         /// <summary>
         /// 创建失败结果

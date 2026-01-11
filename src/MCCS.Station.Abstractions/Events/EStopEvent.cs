@@ -26,7 +26,7 @@ public record EStopEvent : StationEvent
     /// <summary>
     /// 执行的动作
     /// </summary>
-    public IReadOnlyList<string> ActionsTaken { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> ActionsTaken { get; init; } = [];
 
     /// <summary>
     /// 是否需要硬件复位

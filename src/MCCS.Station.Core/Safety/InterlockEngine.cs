@@ -382,9 +382,9 @@ public sealed class InterlockEngine : IInterlockEngine, IDisposable
         return rule.ResetPolicy switch
         {
             InterlockResetPolicy.Auto => "条件恢复后将自动清除",
-            InterlockResetPolicy.Manual => "请确认条件已恢复，然后点击"清除联锁"",
-            InterlockResetPolicy.ManualWithConfirm => "请确认条件已恢复并输入原因，然后点击"清除联锁"",
-            InterlockResetPolicy.Hardware => "请复位硬件（如按下急停复位按钮），然后点击"清除联锁"",
+            InterlockResetPolicy.Manual => "请确认条件已恢复，然后点击清除联锁",
+            InterlockResetPolicy.ManualWithConfirm => "请确认条件已恢复并输入原因，然后点击清除联锁",
+            InterlockResetPolicy.Hardware => "请复位硬件（如按下急停复位按钮），然后点击清除联锁",
             InterlockResetPolicy.Maintenance => "请联系维护人员进行检查和复位",
             _ => "请确认条件已恢复后清除联锁"
         };

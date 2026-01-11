@@ -94,10 +94,7 @@ namespace MCCS.Workflow.StepComponents.Steps
 
             // 替换变量
             title = context.ReplaceVariables(title);
-            message = context.ReplaceVariables(message);
-
-            context.Log($"显示消息框: {title}");
-
+            message = context.ReplaceVariables(message); 
             // 在UI线程上显示消息框
             MessageBoxResult result = MessageBoxResult.None;
 
@@ -123,8 +120,7 @@ namespace MCCS.Workflow.StepComponents.Steps
                 result = MessageBox.Show(message, title, btns, icon);
             });
 
-            var resultStr = result.ToString();
-            context.Log($"用户选择: {resultStr}");
+            var resultStr = result.ToString(); 
 
             return Task.FromResult(StepResult.Succeed(new Dictionary<string, object?>
             {

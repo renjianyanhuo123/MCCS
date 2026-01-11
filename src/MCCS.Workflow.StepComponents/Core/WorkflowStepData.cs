@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace MCCS.Workflow.StepComponents.Core
 {
@@ -54,12 +53,6 @@ namespace MCCS.Workflow.StepComponents.Core
         /// </summary>
         public string? ErrorMessage { get; set; }
 
-        /// <summary>
-        /// 日志记录
-        /// </summary>
-        [JsonIgnore]
-        public List<WorkflowLogEntry> Logs { get; set; } = new();
-
         #region 便捷方法
 
         /// <summary>
@@ -85,10 +78,7 @@ namespace MCCS.Workflow.StepComponents.Core
         /// <summary>
         /// 获取步骤输出
         /// </summary>
-        public StepOutputData? GetStepOutput(string stepId)
-        {
-            return StepOutputs.TryGetValue(stepId, out var output) ? output : null;
-        }
+        public StepOutputData? GetStepOutput(string stepId) => StepOutputs.GetValueOrDefault(stepId);
 
         /// <summary>
         /// 设置步骤输出
@@ -113,21 +103,7 @@ namespace MCCS.Workflow.StepComponents.Core
         public void SetStepConfig(string stepId, Dictionary<string, object?> config)
         {
             StepConfigs[stepId] = config;
-        }
-
-        /// <summary>
-        /// 添加日志
-        /// </summary>
-        public void AddLog(string message, LogLevel level = LogLevel.Info, string? stepId = null)
-        {
-            Logs.Add(new WorkflowLogEntry
-            {
-                Timestamp = DateTime.Now,
-                Level = level,
-                Message = message,
-                StepId = stepId
-            });
-        }
+        } 
 
         /// <summary>
         /// 替换字符串中的变量引用
@@ -220,17 +196,6 @@ namespace MCCS.Workflow.StepComponents.Core
     }
 
     /// <summary>
-    /// 工作流日志条目
-    /// </summary>
-    public class WorkflowLogEntry
-    {
-        public DateTime Timestamp { get; set; }
-        public LogLevel Level { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string? StepId { get; set; }
-    }
-
-    /// <summary>
     /// 工作流状态
     /// </summary>
     public enum WorkflowStatus
@@ -254,16 +219,5 @@ namespace MCCS.Workflow.StepComponents.Core
         Failed,
         Skipped,
         Cancelled
-    }
-
-    /// <summary>
-    /// 日志级别
-    /// </summary>
-    public enum LogLevel
-    {
-        Debug,
-        Info,
-        Warning,
-        Error
     }
 }
