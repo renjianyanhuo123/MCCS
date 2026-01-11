@@ -1,5 +1,6 @@
 using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Enums;
 using MCCS.Workflow.StepComponents.Parameters;
 
 namespace MCCS.Workflow.StepComponents.Steps
@@ -11,7 +12,7 @@ namespace MCCS.Workflow.StepComponents.Steps
         Description = "根据条件表达式决定执行流程",
         Category = ComponentCategory.FlowControl,
         Icon = "CallSplit",
-        Tags = new[] { "条件", "判断", "分支", "if" })]
+        Tags = ["条件", "判断", "分支", "if"])]
     public class ConditionStep : BaseWorkflowStep
     {
         [StepInput("LeftOperand")]

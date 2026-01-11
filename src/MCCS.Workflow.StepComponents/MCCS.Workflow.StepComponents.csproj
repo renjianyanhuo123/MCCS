@@ -8,12 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WorkflowCore" Version="3.10.0" />
     <PackageReference Include="WorkflowCore.DSL" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
+    <Compile Update="Views\WorkflowStepListPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Events\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MCCS.Workflow.Contact\MCCS.Workflow.Contact.csproj" />
   </ItemGroup>
 
 </Project>

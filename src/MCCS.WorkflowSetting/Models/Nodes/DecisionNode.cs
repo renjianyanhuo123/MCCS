@@ -202,7 +202,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                 new AddOpNode(null)
             };
             // 在最后添加一个新的分支节点
-            var newBranch = new BranchStepListNodes(_eventAggregator, children)
+            var newBranch = new BranchStepListNodes(_eventAggregator, _dialogService, children)
             {
                 Parent = this
             };

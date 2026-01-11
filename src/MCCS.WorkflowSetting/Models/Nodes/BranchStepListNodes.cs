@@ -7,7 +7,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class BranchStepListNodes : BoxListNodes
     { 
-        public BranchStepListNodes(IEventAggregator eventAggregator, List<BaseNode> children) : base(eventAggregator)
+        public BranchStepListNodes(IEventAggregator eventAggregator, IDialogService dialogService, List<BaseNode> children) : base(eventAggregator, dialogService)
         {
             Type = NodeTypeEnum.BranchStepList;
             Width = 260;

@@ -1,4 +1,4 @@
-using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Enums;
 using MCCS.Workflow.StepComponents.Parameters;
 
 namespace MCCS.Workflow.StepComponents.Registry
@@ -23,6 +23,8 @@ namespace MCCS.Workflow.StepComponents.Registry
         /// </summary>
         public string Description { get; set; } = string.Empty;
 
+        public string IconBackground { get; set; } = string.Empty;
+
         /// <summary>
         /// 步骤分类
         /// </summary>
@@ -46,7 +48,7 @@ namespace MCCS.Workflow.StepComponents.Registry
         /// <summary>
         /// 标签
         /// </summary>
-        public string[] Tags { get; set; } = Array.Empty<string>();
+        public string[] Tags { get; set; } = [];
 
         /// <summary>
         /// 是否启用

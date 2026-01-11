@@ -31,7 +31,6 @@
   <ItemGroup>
     <None Remove="App.xaml~RF43ad201d.TMP" />
     <None Remove="mccs.logo.ico" />
-    <None Remove="Resources\Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png" />
     <None Remove="Resources\mainpageicon.png" />
     <None Remove="Resources\mainpagemethod.png" />
     <None Remove="Resources\mainpagetest.png" />
@@ -86,13 +85,11 @@
     <Folder Include="Converters\Common\" />
     <Folder Include="Services\NotificationService\" />
     <Folder Include="ViewModels\Dialogs\Common\" />
+    <Folder Include="Views\Pages\WorkflowSteps\" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="mccs.logo.ico" />
-    <Content Include="Resources\Gemini_Generated_Image_hvfw7rhvfw7rhvfw.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

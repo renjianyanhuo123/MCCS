@@ -1,4 +1,5 @@
 using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Enums;
 
 namespace MCCS.Workflow.StepComponents.Attributes
 {

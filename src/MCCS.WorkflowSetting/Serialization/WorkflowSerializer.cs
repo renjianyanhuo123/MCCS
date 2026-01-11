@@ -75,7 +75,7 @@ namespace MCCS.WorkflowSetting.Serialization
                 .Select(nodeDto => converter.Convert(nodeDto, null))
                 .OfType<BaseNode>().ToList();
             // 转换所有节点
-            var stepListNodes = new StepListNodes(eventAggregator, children)
+            var stepListNodes = new StepListNodes(eventAggregator, dialogService, children)
             {
                 Name = workflowDto.Name
             };

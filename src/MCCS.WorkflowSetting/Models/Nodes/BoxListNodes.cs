@@ -1,6 +1,10 @@
-﻿using MCCS.WorkflowSetting.Models.Edges;
-using System.Collections.ObjectModel;
-using MCCS.WorkflowSetting.EventParams;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
+
+using MCCS.Workflow.Contact.Events;
+using MCCS.Workflow.Contact.Models;
+using MCCS.WorkflowSetting.EventParams; 
+using MCCS.WorkflowSetting.Models.Edges;
 
 namespace MCCS.WorkflowSetting.Models.Nodes
 {
@@ -9,6 +13,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         public double AddActionDistance { get; protected set; } = 35.0;
 
         protected readonly IEventAggregator _eventAggregator;
+        private readonly IDialogService _dialogService;
 
         public ObservableCollection<WorkflowConnection> Connections { get; } = [];
 
@@ -18,12 +23,13 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// 待插入节点的位置后面 
         /// </summary>
         protected BaseNode? InsertBeforeNode { get; private set; } 
-        public BoxListNodes(IEventAggregator eventAggregator)
+        public BoxListNodes(IEventAggregator eventAggregator, IDialogService dialogService)
         {
+            _dialogService = dialogService;
             _eventAggregator = eventAggregator;
             LoadedCommand = new DelegateCommand(() => { });
             NodeClickCommand = new DelegateCommand<object?>(ExecuteNodeClickCommand);
-            _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(ExecuteAddNode);
+            _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(ExecuteAddNode, ThreadOption.UIThread, false, filter => filter?.Source == Id);
             _eventAggregator.GetEvent<DeleteNodeEvent>().Subscribe(ExecuteDeleteNode);
             _eventAggregator.GetEvent<DeleteTempPlaceholderNodeEvent>()
                 .Subscribe(OnDeleteTempPlaceholderNodeEvent, ThreadOption.UIThread, false, filter => filter.SourceId != Id);
@@ -47,18 +53,17 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 
         protected void ExecuteAddNode(AddNodeEventParam param)
         {
-            if (param == null) return;
-            if (param.Source != Id) return;
             var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
             if (deleteNodeInfo == null) return;
-            Nodes.Remove(deleteNodeInfo); 
-            var node = param.Node;
+            Nodes.Remove(deleteNodeInfo);
+            
             // 为空表示取消添加操作
-            if (node == null)
+            if (param.Node == null)
             {
                 RaiseNodeChanged("UIChanged", "");
                 return;
             }
+            var node = MappingBaseNode(param.Source, param.Node);
             var addOpNode = new AddOpNode(this);
             node.Parent = this;
             if (InsertBeforeNode == null)
@@ -133,5 +138,50 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// </summary>
         protected virtual void UpdateNodePosition()
         { }
+
+        /// <summary>
+        /// 映射BaseNode
+        /// </summary>
+        /// <param name="sourceId"></param>
+        /// <param name="nodeInfo"></param>
+        /// <returns></returns>
+        private BaseNode MappingBaseNode(string sourceId, NodeInfo nodeInfo)
+        {
+            var converter = new BrushConverter(); 
+            switch (nodeInfo.DisplayType)
+            {
+                case NodeDisplayTypeEnum.Decision:
+                    return new StepNode(sourceId, _eventAggregator)
+                    {
+                        Name = "StepNode",
+                        Title = nodeInfo.Name,
+                        TitleBackground = converter.ConvertFromString(nodeInfo.TitleBackground) as Brush ?? new SolidColorBrush(),
+                        Width = 260,
+                        Height = 110
+                    };
+                case NodeDisplayTypeEnum.Step:
+                    var children = new List<BranchStepListNodes>
+                    {
+                        new(_eventAggregator, _dialogService, [
+                            new BranchNode(_eventAggregator, null),
+                            new AddOpNode(null)
+                        ]),
+                        new(_eventAggregator, _dialogService, [
+                            new BranchNode(_eventAggregator, null),
+                            new AddOpNode(null)
+                        ])
+                    };
+                    return new DecisionNode(_eventAggregator, _dialogService, children); 
+                default:
+                    return new StepNode(sourceId, _eventAggregator)
+                    {
+                        Name = "StepNode",
+                        Title = nodeInfo.Name,
+                        TitleBackground = converter.ConvertFromString(nodeInfo.TitleBackground) as Brush ?? new SolidColorBrush(),
+                        Width = 260,
+                        Height = 110
+                    };
+            }
+        }
     }
 }

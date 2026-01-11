@@ -96,6 +96,7 @@ namespace MCCS.Workflow.StepComponents.Models
         /// <summary>
         /// 成功
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         OK,
 
         /// <summary>

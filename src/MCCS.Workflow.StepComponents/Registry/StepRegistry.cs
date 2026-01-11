@@ -1,6 +1,8 @@
 using System.Reflection;
 using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Enums;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MCCS.Workflow.StepComponents.Registry
@@ -8,21 +10,12 @@ namespace MCCS.Workflow.StepComponents.Registry
     /// <summary>
     /// 步骤注册表实现
     /// </summary>
-    public class StepRegistry : IStepRegistry
+    public class StepRegistry(IServiceProvider? serviceProvider = null) : IStepRegistry
     {
         private readonly Dictionary<string, StepRegistration> _registrations = new();
-        private readonly IServiceProvider? _serviceProvider;
         private readonly object _lock = new();
 
-        public StepRegistry(IServiceProvider? serviceProvider = null)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public void RegisterStep<TStep>() where TStep : BaseWorkflowStep, new()
-        {
-            RegisterStep(typeof(TStep), _ => new TStep());
-        }
+        public void RegisterStep<TStep>() where TStep : BaseWorkflowStep, new() => RegisterStep(typeof(TStep), _ => new TStep());
 
         public void RegisterStep<TStep>(Func<IServiceProvider, TStep> factory) where TStep : BaseWorkflowStep => RegisterStep(typeof(TStep), factory);
 
@@ -69,7 +62,7 @@ namespace MCCS.Workflow.StepComponents.Registry
                 Icon = attribute?.Icon ?? "Cog",
                 Version = attribute?.Version ?? "1.0.0",
                 Author = attribute?.Author ?? string.Empty,
-                Tags = attribute?.Tags ?? Array.Empty<string>(),
+                Tags = attribute?.Tags ?? [],
                 IsEnabled = attribute?.IsEnabled ?? true,
                 Order = attribute?.Order ?? 0,
                 StepType = stepType,
@@ -159,18 +152,11 @@ namespace MCCS.Workflow.StepComponents.Registry
         {
             lock (_lock)
             {
-                if (_registrations.TryGetValue(stepId, out var registration))
-                {
-                    return registration.Factory(_serviceProvider);
-                }
-                return null;
+                return _registrations.TryGetValue(stepId, out var registration) ? registration.Factory(serviceProvider) : null;
             }
         }
 
-        public TStep? CreateStep<TStep>(string stepId) where TStep : BaseWorkflowStep
-        {
-            return CreateStep(stepId) as TStep;
-        }
+        public TStep? CreateStep<TStep>(string stepId) where TStep : BaseWorkflowStep => CreateStep(stepId) as TStep;
 
         public bool IsRegistered(string stepId)
         {
@@ -205,10 +191,9 @@ namespace MCCS.Workflow.StepComponents.Registry
         public void DiscoverAndRegister(Assembly assembly)
         {
             var stepTypes = assembly.GetTypes()
-                .Where(t => !t.IsAbstract &&
-                           !t.IsInterface &&
-                           typeof(BaseWorkflowStep).IsAssignableFrom(t) &&
-                           t.GetCustomAttribute<StepComponentAttribute>() != null);
+                .Where(t => t is { IsAbstract: false, IsInterface: false } &&
+                            typeof(BaseWorkflowStep).IsAssignableFrom(t) &&
+                            t.GetCustomAttribute<StepComponentAttribute>() != null);
 
             foreach (var type in stepTypes)
             {
@@ -219,15 +204,12 @@ namespace MCCS.Workflow.StepComponents.Registry
         /// <summary>
         /// 自动发现并注册当前程序集中的所有步骤
         /// </summary>
-        public void DiscoverAndRegisterFromCurrentAssembly()
-        {
-            DiscoverAndRegister(Assembly.GetExecutingAssembly());
-        }
+        public void DiscoverAndRegisterFromCurrentAssembly() => DiscoverAndRegister(Assembly.GetExecutingAssembly());
 
         private class StepRegistration
         {
-            public StepInfo Info { get; set; } = null!;
-            public Func<IServiceProvider?, BaseWorkflowStep> Factory { get; set; } = null!;
+            public StepInfo Info { get; init; } = null!;
+            public Func<IServiceProvider?, BaseWorkflowStep> Factory { get; init; } = null!;
         }
     }
 }

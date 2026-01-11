@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using MCCS.Workflow.StepComponents.Attributes;
+using MCCS.Workflow.StepComponents.Enums;
 using MCCS.Workflow.StepComponents.Parameters;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -115,7 +116,7 @@ namespace MCCS.Workflow.StepComponents.Core
                     WorkflowData = workflowData ?? new WorkflowStepData(),
                     StepId = CurrentStepId ?? context.Step.Id.ToString(),
                     StepName = StepName,
-                    CancellationToken = context.CancellationToken
+                    // CancellationToken = context
                 };
 
                 // 执行前回调
@@ -491,39 +492,33 @@ namespace MCCS.Workflow.StepComponents.Core
         /// <summary>
         /// 创建失败结果
         /// </summary>
-        public static StepResult Fail(string errorMessage)
-        {
-            return new StepResult
+        public static StepResult Fail(string errorMessage) =>
+            new()
             {
                 Success = false,
                 ErrorMessage = errorMessage
             };
-        }
 
         /// <summary>
         /// 创建分支结果
         /// </summary>
-        public static StepResult Branch(string nextStepName, Dictionary<string, object?>? output = null)
-        {
-            return new StepResult
+        public static StepResult Branch(string nextStepName, Dictionary<string, object?>? output = null) =>
+            new()
             {
                 Success = true,
                 OutputData = output ?? new Dictionary<string, object?>(),
                 NextStepName = nextStepName
             };
-        }
 
         /// <summary>
         /// 创建暂停结果（等待外部事件）
         /// </summary>
-        public static StepResult Suspend(Dictionary<string, object?>? output = null)
-        {
-            return new StepResult
+        public static StepResult Suspend(Dictionary<string, object?>? output = null) =>
+            new()
             {
                 Success = true,
                 OutputData = output ?? new Dictionary<string, object?>(),
                 ProceedToNext = false
             };
-        }
     }
 }

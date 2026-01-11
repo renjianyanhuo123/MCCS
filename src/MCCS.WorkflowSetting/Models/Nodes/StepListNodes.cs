@@ -10,7 +10,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
     public class StepListNodes : BoxListNodes
     { 
 
-        public StepListNodes(IEventAggregator eventAggregator, List<BaseNode> children) : base(eventAggregator)
+        public StepListNodes(IEventAggregator eventAggregator, IDialogService dialogService, List<BaseNode> children) : base(eventAggregator, dialogService)
         {
             Type = NodeTypeEnum.StepList;
             children.ForEach(node => node.Parent = this);

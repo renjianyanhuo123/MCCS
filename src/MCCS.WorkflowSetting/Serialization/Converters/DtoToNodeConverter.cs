@@ -109,7 +109,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         {
             var nodes = dto.Nodes.Select(nodeDto => Convert(nodeDto, null)).OfType<BaseNode>().ToList();
             // 转换分支中的所有节点
-            var branchStepList = new BranchStepListNodes(eventAggregator, nodes)
+            var branchStepList = new BranchStepListNodes(eventAggregator, dialogService, nodes)
             {
                 Parent = parent,
                 Name = dto.Name,

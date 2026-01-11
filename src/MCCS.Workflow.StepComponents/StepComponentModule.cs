@@ -1,11 +1,10 @@
-using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Registry;
 using MCCS.Workflow.StepComponents.Serialization;
 using MCCS.Workflow.StepComponents.Steps;
 using MCCS.Workflow.StepComponents.Steps.StructuralTest;
 using MCCS.Workflow.StepComponents.Workflows;
+
 using Microsoft.Extensions.DependencyInjection;
-using WorkflowCore.Interface;
 
 namespace MCCS.Workflow.StepComponents
 {

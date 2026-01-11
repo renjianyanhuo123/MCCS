@@ -1,7 +1,0 @@
-﻿namespace MCCS.WorkflowSetting.EventParams
-{
-    public class AddNodeEvent : PubSubEvent<AddNodeEventParam>
-    {
-        
-    }
-}

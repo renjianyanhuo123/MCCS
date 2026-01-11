@@ -14,8 +14,7 @@ namespace MCCS.Workflow.StepComponents.Workflows
     {
         private readonly IWorkflowHost _workflowHost;
         private readonly IStepRegistry _stepRegistry;
-        private readonly Dictionary<string, WorkflowDefinition> _definitions = new();
-        private readonly object _lock = new();
+        private readonly Dictionary<string, WorkflowDefinition> _definitions = new(); 
 
         public event EventHandler<WorkflowCompletedEventArgs>? WorkflowCompleted;
         public event EventHandler<StepCompletedEventArgs>? StepCompleted;
@@ -32,41 +31,29 @@ namespace MCCS.Workflow.StepComponents.Workflows
 
         public void RegisterWorkflow(WorkflowDefinition definition)
         {
-            lock (_lock)
-            {
-                _definitions[definition.Id] = definition;
+            _definitions[definition.Id] = definition;
 
-                // 创建并注册动态工作流
-                var dynamicWorkflow = new DynamicWorkflow(definition, _stepRegistry);
-                _workflowHost.Registry.RegisterWorkflow(dynamicWorkflow);
-            }
+            // 创建并注册动态工作流
+            var dynamicWorkflow = new DynamicWorkflow(definition, _stepRegistry);
+            _workflowHost.Registry.RegisterWorkflow(dynamicWorkflow);
         }
 
         public async Task<string> StartWorkflowAsync(string workflowId, WorkflowStepData? initialData = null)
         {
-            WorkflowDefinition? definition;
-            lock (_lock)
+            if (!_definitions.TryGetValue(workflowId, out WorkflowDefinition? definition))
             {
-                if (!_definitions.TryGetValue(workflowId, out definition))
-                {
-                    throw new InvalidOperationException($"未找到工作流定义: {workflowId}");
-                }
+                throw new InvalidOperationException($"未找到工作流定义: {workflowId}");
             }
-
             return await StartWorkflowAsync(definition, initialData);
         }
 
         public async Task<string> StartWorkflowAsync(WorkflowDefinition definition, WorkflowStepData? initialData = null)
         {
             // 确保工作流已注册
-            lock (_lock)
+            if (!_definitions.ContainsKey(definition.Id))
             {
-                if (!_definitions.ContainsKey(definition.Id))
-                {
-                    RegisterWorkflow(definition);
-                }
+                RegisterWorkflow(definition);
             }
-
             // 准备初始数据
             var data = initialData ?? new WorkflowStepData();
             data.WorkflowDefinitionId = definition.Id;
@@ -92,20 +79,11 @@ namespace MCCS.Workflow.StepComponents.Workflows
             return instanceId;
         }
 
-        public async Task<bool> SuspendWorkflowAsync(string workflowInstanceId)
-        {
-            return await _workflowHost.SuspendWorkflow(workflowInstanceId);
-        }
+        public async Task<bool> SuspendWorkflowAsync(string workflowInstanceId) => await _workflowHost.SuspendWorkflow(workflowInstanceId);
 
-        public async Task<bool> ResumeWorkflowAsync(string workflowInstanceId)
-        {
-            return await _workflowHost.ResumeWorkflow(workflowInstanceId);
-        }
+        public async Task<bool> ResumeWorkflowAsync(string workflowInstanceId) => await _workflowHost.ResumeWorkflow(workflowInstanceId);
 
-        public async Task<bool> TerminateWorkflowAsync(string workflowInstanceId)
-        {
-            return await _workflowHost.TerminateWorkflow(workflowInstanceId);
-        }
+        public async Task<bool> TerminateWorkflowAsync(string workflowInstanceId) => await _workflowHost.TerminateWorkflow(workflowInstanceId);
 
         public async Task<WorkflowInstanceInfo?> GetWorkflowStatusAsync(string workflowInstanceId)
         {
@@ -124,10 +102,7 @@ namespace MCCS.Workflow.StepComponents.Workflows
             };
         }
 
-        public async Task PublishEventAsync(string eventName, string eventKey, object? eventData = null)
-        {
-            await _workflowHost.PublishEvent(eventName, eventKey, eventData);
-        }
+        public async Task PublishEventAsync(string eventName, string eventKey, object? eventData = null) => await _workflowHost.PublishEvent(eventName, eventKey, eventData);
 
         private void OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
@@ -140,9 +115,8 @@ namespace MCCS.Workflow.StepComponents.Workflows
             });
         }
 
-        private static WorkflowStatus MapWorkflowStatus(WorkflowCore.Models.WorkflowStatus status)
-        {
-            return status switch
+        private static WorkflowStatus MapWorkflowStatus(WorkflowCore.Models.WorkflowStatus status) =>
+            status switch
             {
                 WorkflowCore.Models.WorkflowStatus.Runnable => WorkflowStatus.Running,
                 WorkflowCore.Models.WorkflowStatus.Suspended => WorkflowStatus.Suspended,
@@ -150,6 +124,5 @@ namespace MCCS.Workflow.StepComponents.Workflows
                 WorkflowCore.Models.WorkflowStatus.Terminated => WorkflowStatus.Cancelled,
                 _ => WorkflowStatus.Pending
             };
-        }
     }
 }

@@ -121,7 +121,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
             var workflowSettingModel = await _methodRepository.GetMethodWorkflowSettingAsync(_methodId);
             if (workflowSettingModel?.WorkflowSetting == null)
             {
-                var temp = new StepListNodes(_eventAggregator, [
+                var temp = new StepListNodes(_eventAggregator, _dialogService,[
                     new StartNode(),
                     new AddOpNode(null),
                     new EndNode()

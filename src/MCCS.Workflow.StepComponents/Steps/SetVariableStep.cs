@@ -1,5 +1,6 @@
 using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.StepComponents.Enums;
 using MCCS.Workflow.StepComponents.Parameters;
 
 namespace MCCS.Workflow.StepComponents.Steps
@@ -11,7 +12,7 @@ namespace MCCS.Workflow.StepComponents.Steps
         Description = "设置工作流变量值，可用于在步骤间传递数据",
         Category = ComponentCategory.DataProcessing,
         Icon = "Variable",
-        Tags = new[] { "变量", "赋值", "数据", "设置" })]
+        Tags = ["变量", "赋值", "数据", "设置"])]
     public class SetVariableStep : BaseWorkflowStep
     {
         [StepInput("VariableName")]
@@ -53,14 +54,14 @@ namespace MCCS.Workflow.StepComponents.Steps
                 DisplayName = "值类型",
                 Description = "变量值的数据类型",
                 DefaultValue = "string",
-                Options = new List<SelectOption>
-                {
-                    new("string", "字符串"),
-                    new("integer", "整数"),
-                    new("double", "小数"),
-                    new("boolean", "布尔值"),
-                    new("json", "JSON对象")
-                },
+                Options =
+                [
+                    new SelectOption("string", "字符串"),
+                    new SelectOption("integer", "整数"),
+                    new SelectOption("double", "小数"),
+                    new SelectOption("boolean", "布尔值"),
+                    new SelectOption("json", "JSON对象")
+                ],
                 Order = 3
             };
         }
@@ -75,7 +76,7 @@ namespace MCCS.Workflow.StepComponents.Steps
             variableValue = context.ReplaceVariables(variableValue);
 
             // 类型转换
-            object? typedValue = ConvertValue(variableValue, valueType);
+            var typedValue = ConvertValue(variableValue, valueType);
 
             // 设置变量
             context.SetVariable(variableName, typedValue); 
@@ -88,9 +89,8 @@ namespace MCCS.Workflow.StepComponents.Steps
             }));
         }
 
-        private static object? ConvertValue(string value, string valueType)
-        {
-            return valueType switch
+        private static object? ConvertValue(string value, string valueType) =>
+            valueType switch
             {
                 "integer" => int.TryParse(value, out var intVal) ? intVal : 0,
                 "double" => double.TryParse(value, out var doubleVal) ? doubleVal : 0.0,
@@ -98,6 +98,5 @@ namespace MCCS.Workflow.StepComponents.Steps
                 "json" => value,
                 _ => value
             };
-        }
     }
 }

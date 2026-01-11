@@ -1,18 +1,16 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using MaterialDesignThemes.Wpf;
 
 using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
-using MCCS.Events.Common;
 using MCCS.Events.Mehtod;
 using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Models.MethodManager;
 using MCCS.UserControl.Params;
 using MCCS.ViewModels.Dialogs.Method;
-using MCCS.Views.Dialogs.Method;
+
 using Serilog;
 
 namespace MCCS.ViewModels.MethodManager

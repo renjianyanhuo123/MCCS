@@ -66,17 +66,17 @@ namespace MCCS.Workflow.StepComponents.Workflows
             }
         }
 
-        private static void ConfigureStep(IStepBuilder<WorkflowStepData, BaseWorkflowStep> stepBuilder, StepConfiguration config)
-        {
-            // 设置步骤ID
-            stepBuilder.Input(step => step.CurrentStepId, data => config.Id);
+        //private static void ConfigureStep(IStepBuilder<WorkflowStepData, BaseWorkflowStep> stepBuilder, StepConfiguration config)
+        //{
+        //    // 设置步骤ID
+        //    stepBuilder.Input(step => step.CurrentStepId, data => config.Id);
 
-            // 设置步骤配置
-            stepBuilder.Input(step => step.StepConfig, data => config.Parameters);
+        //    // 设置步骤配置
+        //    stepBuilder.Input(step => step.StepConfig, data => config.Parameters);
 
-            // 设置输出映射
-            stepBuilder.Output(data => data.LastStepOutput, step => step.StepOutput);
-        }
+        //    // 设置输出映射
+        //    stepBuilder.Output(data => data.LastStepOutput, step => step.StepOutput);
+        //}
     }
 
     /// <summary>
