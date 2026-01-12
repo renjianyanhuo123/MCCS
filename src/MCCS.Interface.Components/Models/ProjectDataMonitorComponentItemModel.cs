@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models.ProjectManager.Components
+﻿namespace MCCS.Interface.Components.Models
 {
     public class ProjectDataMonitorComponentItemModel : BindableBase
     { 

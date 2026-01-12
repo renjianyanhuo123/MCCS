@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models.CurveModels
+﻿namespace MCCS.Interface.Components.Models
 {
     /// <summary>
     /// 用于序列化

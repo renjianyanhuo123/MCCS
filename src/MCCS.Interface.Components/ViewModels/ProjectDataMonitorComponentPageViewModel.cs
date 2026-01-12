@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 
-using MCCS.Models.MethodManager.ParamterSettings;
-using MCCS.Models.ProjectManager.Components;
+using MCCS.Interface.Components.Models;
 
-namespace MCCS.ViewModels.ProjectManager.Components
+namespace MCCS.Interface.Components.ViewModels
 {
     public sealed class ProjectDataMonitorComponentPageViewModel : BindableBase
     {

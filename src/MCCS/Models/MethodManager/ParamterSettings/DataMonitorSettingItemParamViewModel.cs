@@ -1,4 +1,5 @@
-﻿using MCCS.Models.CurveModels;
+﻿using MCCS.Interface.Components.Models;
+using MCCS.Models.CurveModels;
 
 namespace MCCS.Models.MethodManager.ParamterSettings
 {

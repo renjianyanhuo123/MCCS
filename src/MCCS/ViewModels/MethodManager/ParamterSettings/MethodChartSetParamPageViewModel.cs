@@ -2,6 +2,8 @@
 
 using MCCS.Common.DataManagers;
 using MCCS.Infrastructure.Repositories;
+using MCCS.Interface.Components.Enums;
+using MCCS.Interface.Components.Models;
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
 

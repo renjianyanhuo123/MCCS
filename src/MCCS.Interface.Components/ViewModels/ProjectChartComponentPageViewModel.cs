@@ -5,12 +5,12 @@ using LiveChartsCore.Kernel;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 
-using MCCS.Models;
+using MCCS.Interface.Components.Models;
 using MCCS.Models.MethodManager.ParamterSettings;
 
 using SkiaSharp;
 
-namespace MCCS.ViewModels.ProjectManager.Components
+namespace MCCS.Interface.Components.ViewModels
 {
     public class ProjectChartComponentPageViewModel : BindableBase
     {

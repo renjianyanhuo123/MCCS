@@ -1,4 +1,4 @@
-﻿namespace MCCS.Views.ProjectManager.Components
+﻿namespace MCCS.Interface.Components.Views
 {
     /// <summary>
     /// ProjectDataMonitorComponentPage.xaml 的交互逻辑

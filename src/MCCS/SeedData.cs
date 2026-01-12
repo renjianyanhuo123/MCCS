@@ -6,9 +6,9 @@ using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.Models.SystemManager;
 using MCCS.Infrastructure.Models.SystemSetting;
 using MCCS.Infrastructure.Models.TestInfo;
+using MCCS.Interface.Components.ViewModels;
 using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
-using MCCS.ViewModels.ProjectManager.Components;
 
 using Newtonsoft.Json;
 

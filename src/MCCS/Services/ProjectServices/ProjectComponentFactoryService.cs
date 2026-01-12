@@ -1,8 +1,9 @@
 ﻿using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Infrastructure.Repositories.Method;
+using MCCS.Interface.Components.Models;
+using MCCS.Interface.Components.ViewModels;
 using MCCS.Models.MethodManager.ParamterSettings;
-using MCCS.ViewModels.ProjectManager.Components;
 
 using Newtonsoft.Json;
 

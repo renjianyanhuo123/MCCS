@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models.MethodManager.ParamterSettings
+﻿namespace MCCS.Interface.Components.Enums
 {
     public enum ChartTypeEnum:int
     {

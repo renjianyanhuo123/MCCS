@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models
+﻿namespace MCCS.Interface.Components.Models
 {
     public record CurveMeasureValueModel
     {

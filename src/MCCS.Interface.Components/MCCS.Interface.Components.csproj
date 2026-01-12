@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\ProjectDataMonitorComponentPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

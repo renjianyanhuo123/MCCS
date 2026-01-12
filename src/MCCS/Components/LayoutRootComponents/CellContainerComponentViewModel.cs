@@ -5,7 +5,6 @@ using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Models.MethodManager.ParamterSettings;
 using MCCS.Services.ProjectServices;
 using MCCS.ViewModels.Dialogs.Project;
-using MCCS.ViewModels.ProjectManager.Components;
 
 using Newtonsoft.Json;
 
