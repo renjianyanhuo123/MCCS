@@ -35,17 +35,14 @@ namespace MCCS.ViewModels.MethodManager
         }
 
         public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
+        { 
             _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
         }
 
         /// <summary>
         /// 返回false以确保每次导航都创建新实例，避免从不同Region导航时子Region失效的问题
         /// </summary>
-        public override bool IsNavigationTarget(NavigationContext navigationContext)
-        {
-            return false;
-        }
+        // public override bool IsNavigationTarget(NavigationContext navigationContext) => false; 
 
         #region Property
         public ObservableCollection<MethodMenuItemModel> Menus { get; }

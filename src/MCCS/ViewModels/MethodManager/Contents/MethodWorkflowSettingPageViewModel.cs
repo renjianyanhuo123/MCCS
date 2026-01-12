@@ -30,11 +30,8 @@ namespace MCCS.ViewModels.MethodManager.Contents
             _eventAggregator.GetEvent<NotificationWorkflowChangedEvent>().Subscribe(OnNotificationWorkflowChangedEvent);
         }
 
-        public override void OnNavigatedTo(NavigationContext navigationContext)
-        {
-            _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
-        }
-
+        public override void OnNavigatedTo(NavigationContext navigationContext) => _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
+        //public override bool IsNavigationTarget(NavigationContext navigationContext) => false;
         public override void OnNavigatedFrom(NavigationContext navigationContext)
         {
             var json = _workflowSerializer.Serialize(WorkflowNodes);

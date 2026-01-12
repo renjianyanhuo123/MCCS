@@ -24,6 +24,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
             _methodRepository = methodRepository;
             LoadCommand = new AsyncDelegateCommand(ExecuteCommand);
         }
+        //public override bool IsNavigationTarget(NavigationContext navigationContext) => false;//
 
         public override void OnNavigatedTo(NavigationContext navigationContext) => _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
 

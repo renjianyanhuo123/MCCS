@@ -23,6 +23,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         {
             _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
         }
+        //public override bool IsNavigationTarget(NavigationContext navigationContext) => false;
 
         #region Property
         /// <summary>

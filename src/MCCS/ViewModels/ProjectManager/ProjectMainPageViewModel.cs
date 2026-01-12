@@ -60,6 +60,15 @@ namespace MCCS.ViewModels.ProjectManager
             _regionManager.RequestNavigate(GlobalConstant.ProjectNavigateRegionName, new Uri(nameof(ProjectOperationPageViewModel), UriKind.Relative), parameter);
         }
 
+        //public override void OnNavigatedFrom(NavigationContext navigationContext)
+        //{
+        //    // 离开时移除子Region，避免下次创建新实例时Region名称冲突 
+        //    if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))  
+        //    {
+        //        _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
+        //    }
+        //}
+
         private void ExecuteNavigateMethodCommand()
         {
             IsTestChecked = false;
