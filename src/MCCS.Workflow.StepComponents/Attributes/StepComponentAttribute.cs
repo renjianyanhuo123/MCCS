@@ -1,4 +1,4 @@
-using MCCS.Workflow.StepComponents.Core;
+using MCCS.Workflow.Contact.Models;
 using MCCS.Workflow.StepComponents.Enums;
 
 namespace MCCS.Workflow.StepComponents.Attributes
@@ -7,17 +7,22 @@ namespace MCCS.Workflow.StepComponents.Attributes
     /// 步骤组件属性，用于标记和描述组件
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class StepComponentAttribute : Attribute
+    public class StepComponentAttribute(string id, string name, NodeDisplayTypeEnum displayType = NodeDisplayTypeEnum.Step) : Attribute
     {
         /// <summary>
         /// 组件唯一标识
         /// </summary>
-        public string Id { get; }
+        public string Id { get; } = id;
 
         /// <summary>
         /// 组件名称
         /// </summary>
-        public string Name { get; }
+        public string Name { get; } = name;
+
+        /// <summary>
+        /// 展示类型
+        /// </summary>
+        public NodeDisplayTypeEnum DisplayType { get; } = displayType;
 
         /// <summary>
         /// 组件描述
@@ -58,11 +63,5 @@ namespace MCCS.Workflow.StepComponents.Attributes
         /// 标签（用于搜索和筛选）
         /// </summary>
         public string[] Tags { get; set; } = [];
-
-        public StepComponentAttribute(string id, string name)
-        {
-            Id = id;
-            Name = name;
-        }
     }
 }

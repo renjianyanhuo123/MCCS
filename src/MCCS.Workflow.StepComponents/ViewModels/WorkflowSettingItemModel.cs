@@ -1,5 +1,7 @@
 ﻿using System.Windows.Media;
 
+using MCCS.Workflow.Contact.Models;
+
 namespace MCCS.Workflow.StepComponents.ViewModels
 { 
     /// <summary>
@@ -40,6 +42,16 @@ namespace MCCS.Workflow.StepComponents.ViewModels
         {
             get => _name; 
             set => SetProperty(ref _name, value);
+        }
+
+        /// <summary>
+        /// 展示节点的类型
+        /// </summary>
+        private NodeDisplayTypeEnum _displayType;
+        public NodeDisplayTypeEnum DisplayType
+        {
+            get => _displayType;
+            set => SetProperty(ref _displayType, value);
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
 using System.Reflection;
+
+using MCCS.Workflow.Contact.Models;
 using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Enums;
@@ -58,6 +60,7 @@ namespace MCCS.Workflow.StepComponents.Registry
                 Id = stepId,
                 Name = attribute?.Name ?? stepType.Name,
                 Description = attribute?.Description ?? string.Empty,
+                DisplayType = attribute?.DisplayType ?? NodeDisplayTypeEnum.Step,
                 Category = attribute?.Category ?? ComponentCategory.General,
                 Icon = attribute?.Icon ?? "Cog",
                 Version = attribute?.Version ?? "1.0.0",

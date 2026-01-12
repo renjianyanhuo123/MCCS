@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
-using MCCS.Station.Core.PseudoChannelManagers; 
 
 using Newtonsoft.Json;
 
@@ -10,11 +10,11 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
 {
     public class DataMonitorSetParamPageViewModel : BaseParameterSetViewModel<List<DataMonitorSettingItemParamModel>>
     {
-        private readonly IPseudoChannelManager _pseudoChannelManager;
+        private readonly IStationSiteAggregateRepository _siteAggregateRepository;
 
-        public DataMonitorSetParamPageViewModel(IPseudoChannelManager pseudoChannelManager, IEventAggregator eventAggregator) : base(eventAggregator)
+        public DataMonitorSetParamPageViewModel(IStationSiteAggregateRepository siteAggregateRepository, IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _pseudoChannelManager = pseudoChannelManager;
+            _siteAggregateRepository = siteAggregateRepository;
             AddDataSettingCommand = new DelegateCommand(ExecuteAddDataSetting);
             DeleteSettingItemCommand = new DelegateCommand<DataMonitorSettingItemParamViewModel>(ExecuteDeleteSettingItemCommand); 
         }
@@ -35,19 +35,19 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
 
         private void ExecuteDeleteSettingItemCommand(DataMonitorSettingItemParamViewModel param) => SettingValues.Remove(param);
 
-        protected override void ExecuteLoad()
+        protected override async Task ExecuteLoad()
         {
             SettingValues.Clear();
             PseudoChannels.Clear();
-            var channels = _pseudoChannelManager.GetPseudoChannels();
-            foreach (var channel in channels)
+            var stationSiteAggregate = await _siteAggregateRepository.GetCurrentStationSiteAggregateAsync();
+            foreach (var channel in stationSiteAggregate.PseudoChannelInfos)
             {
                 var tempModel = new XyBindCollectionItem
                 {
-                    Id = channel.ChannelId,
-                    Name = channel.Configuration.ChannelName,
-                    Unit = channel.Configuration.Unit ?? "",
-                    DisplayName = channel.Configuration.ChannelName
+                    Id = channel.PseudoChannelInfo.Id,
+                    Name = channel.PseudoChannelInfo.ChannelName,
+                    Unit = channel.PseudoChannelInfo.Unit ?? "",
+                    DisplayName = channel.PseudoChannelInfo.ChannelName
                 };
                 PseudoChannels.Add(tempModel); 
             } 

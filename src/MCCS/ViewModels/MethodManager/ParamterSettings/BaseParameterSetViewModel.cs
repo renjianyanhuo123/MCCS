@@ -32,7 +32,7 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
             ExecuteLoad();
         }
 
-        protected abstract void ExecuteLoad();
+        protected abstract Task ExecuteLoad();
 
         protected abstract string GetParameterJson();
 

@@ -1,3 +1,4 @@
+using MCCS.Workflow.Contact.Models;
 using MCCS.Workflow.StepComponents.Enums;
 using MCCS.Workflow.StepComponents.Parameters;
 
@@ -24,6 +25,10 @@ namespace MCCS.Workflow.StepComponents.Registry
         public string Description { get; set; } = string.Empty;
 
         public string IconBackground { get; set; } = string.Empty;
+        /// <summary>
+        /// 展示节点类型
+        /// </summary>
+        public NodeDisplayTypeEnum DisplayType { get; set; }
 
         /// <summary>
         /// 步骤分类

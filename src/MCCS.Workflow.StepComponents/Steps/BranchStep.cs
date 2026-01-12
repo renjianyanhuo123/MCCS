@@ -1,3 +1,4 @@
+using MCCS.Workflow.Contact.Models;
 using MCCS.Workflow.StepComponents.Attributes;
 using MCCS.Workflow.StepComponents.Core;
 using MCCS.Workflow.StepComponents.Enums;
@@ -9,10 +10,10 @@ namespace MCCS.Workflow.StepComponents.Steps
     /// 分支步骤 - 根据数据值将流程导向不同分支
     /// 支持多条件分支控制，类似于 switch-case 语句
     /// </summary>
-    [StepComponent("branch", "分支",
+    [StepComponent("branch", "分支", NodeDisplayTypeEnum.Decision,
         Description = "根据数据值选择执行的分支，支持多条件分支控制",
         Category = ComponentCategory.DataProcessing,
-        Icon = "SourceBranch",
+        Icon = "SourceBranch", 
         Tags = ["分支", "数据处理", "switch", "路由", "多分支"])]
     public class BranchStep : BaseWorkflowStep
     {

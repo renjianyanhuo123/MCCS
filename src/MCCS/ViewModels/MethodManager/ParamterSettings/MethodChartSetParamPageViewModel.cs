@@ -1,22 +1,23 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Common.DataManagers;
+using MCCS.Infrastructure.Repositories;
 using MCCS.Models.CurveModels;
 using MCCS.Models.MethodManager.ParamterSettings;
-using MCCS.Station.Core.PseudoChannelManagers; 
 
 using Newtonsoft.Json;
 
 namespace MCCS.ViewModels.MethodManager.ParamterSettings
 {
     public sealed class MethodChartSetParamPageViewModel : BaseParameterSetViewModel<ChartSettingParamModel>
-    {
-        private readonly IPseudoChannelManager _pseudoChannelManager; 
+    { 
+        private readonly IStationSiteAggregateRepository _siteAggregateRepository;
 
         public MethodChartSetParamPageViewModel(
-            IPseudoChannelManager pseudoChannelManager, 
+            IStationSiteAggregateRepository siteAggregateRepository,
             IEventAggregator eventAggregator) : base(eventAggregator)
         {
-            _pseudoChannelManager = pseudoChannelManager;  
+            _siteAggregateRepository = siteAggregateRepository;
         }
          
 
@@ -56,19 +57,19 @@ namespace MCCS.ViewModels.MethodManager.ParamterSettings
         #endregion
 
         #region Private Method
-        protected override void ExecuteLoad()
+        protected override async Task ExecuteLoad()
         {
             XBindCollection.Clear();
-            YBindCollection.Clear();
-            var channels = _pseudoChannelManager.GetPseudoChannels();
-            foreach (var channel in channels)
+            YBindCollection.Clear(); 
+            var stationSite = await _siteAggregateRepository.GetCurrentStationSiteAggregateAsync();
+            foreach (var channel in stationSite.PseudoChannelInfos)
             {
                 var tempModel = new XyBindCollectionItem
                 {
-                    Id = channel.ChannelId,
-                    Name = channel.Configuration.ChannelName,
-                    Unit = channel.Configuration.Unit ?? "",
-                    DisplayName = channel.Configuration.ChannelName
+                    Id = channel.PseudoChannelInfo.Id,
+                    Name = channel.PseudoChannelInfo.ChannelName,
+                    Unit = channel.PseudoChannelInfo.Unit ?? "",
+                    DisplayName = channel.PseudoChannelInfo.ChannelName
                 };
                 XBindCollection.Add(tempModel);
                 YBindCollection.Add(tempModel);

@@ -21,34 +21,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
             IStepRegistry stepRegistry,
             IEventAggregator eventAggregator, 
             IDialogService dialogService) : base(eventAggregator, dialogService)
-        {
-            //Steps = 
-            //[
-            //    new WorkflowSettingItemModel()
-            //    {
-            //        Id = 1,
-            //        Name = "循环",
-            //        Description = "添加一个固定次数或在指定条件下结束的循环流程",
-            //        IconStr = "RecycleVariant", 
-            //        IconBackground = new SolidColorBrush(Color.FromRgb(76,125,158))
-            //    },
-            //    new WorkflowSettingItemModel()
-            //    {
-            //        Id = 2,
-            //        Name = "分支",
-            //        Description = "向流程中添加分支，按不同条件分别处理",
-            //        IconStr = "SourceBranch", 
-            //        IconBackground = new SolidColorBrush(Color.FromRgb(22,119,255))
-            //    },
-            //    new WorkflowSettingItemModel()
-            //    {
-            //        Id = 3,
-            //        Name = "延时",
-            //        Description = "暂停运行当前流程，并在到达指定时间后继续执行",
-            //        IconStr = "TimerSandComplete", 
-            //        IconBackground = new SolidColorBrush(Color.FromRgb(76,125,158))
-            //    }
-            //];
+        { 
             var converter = new BrushConverter(); 
             _stepRegistry = stepRegistry; 
             foreach (ComponentCategory status in Enum.GetValues(typeof(ComponentCategory)))
@@ -64,6 +37,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
                         Name = step.Name,
                         DisplayName = step.Name,
                         Description = step.Description,
+                        DisplayType = step.DisplayType,
                         IconStr = step.Icon,
                         IconBackground = step.IconBackground == "" ? new SolidColorBrush(Colors.BlueViolet) :
                             converter.ConvertFromString(step.IconBackground) as Brush ?? new SolidColorBrush()
@@ -97,7 +71,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
             var nodeInfo = new NodeInfo
             {
                 Name = param.Name,
-                DisplayType = NodeDisplayTypeEnum.Step,
+                DisplayType = param.DisplayType,
                 Title = param.DisplayName,
                 TitleBackground = param.IconBackground.ToString()
             };
