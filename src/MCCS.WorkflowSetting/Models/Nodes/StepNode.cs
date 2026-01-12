@@ -5,7 +5,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class StepNode : BaseNode
     {
-        private readonly string _soureId;
+        private string _soureId;
         private readonly IEventAggregator _eventAggregator;
 
         public StepNode(string sourceId, IEventAggregator eventAggregator)
@@ -87,7 +87,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             _eventAggregator.GetEvent<DeleteNodeEvent>()
                 .Publish(new DeleteNodeEventParam
                 {
-                    Source = _soureId,
+                    Source = Parent?.Id ?? "",
                     NodeId = Id
                 });
 

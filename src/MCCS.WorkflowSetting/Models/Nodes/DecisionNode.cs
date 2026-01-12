@@ -198,7 +198,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         {
             var children = new List<BaseNode>
             {
-                new BranchNode(_eventAggregator, null),
+                new BranchNode(_eventAggregator),
                 new AddOpNode(null)
             };
             // 在最后添加一个新的分支节点

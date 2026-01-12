@@ -177,7 +177,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodContentPage>(nameof(MethodContentPageViewModel));
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
-            containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
+            
             containerRegistry.RegisterForNavigation<MethodInterfaceSettingPage>(nameof(MethodInterfaceSettingPageViewModel));
             containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
 

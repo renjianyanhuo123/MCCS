@@ -1,12 +1,10 @@
 ﻿namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public class EndNode : BaseNode
-    {
-
-        public EndNode(BaseNode? parentNode = null)
+    { 
+        public EndNode()
         {
-            Name = "End";
-            Parent = parentNode;
+            Name = "End"; 
             Type = NodeTypeEnum.End;
             Width = 56;
             Height = 80;

@@ -4,11 +4,10 @@
     {
         private readonly IEventAggregator _eventAggregator;
 
-        public BranchNode(IEventAggregator eventAggregator, BaseNode? parent)
+        public BranchNode(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
-            Name = "Branch";
-            Parent = parent;
+            Name = "Branch"; 
             Title = "分支";
             Width = 260;
             Height = 85;

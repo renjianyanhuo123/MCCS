@@ -5,7 +5,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
 {
     public abstract class BaseNode : BindableBase
     {  
-        public string Id { get; private set; } = Guid.NewGuid().ToString("N");
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
         public int Index { get; set; } 
 
         private BaseNode? _parent;

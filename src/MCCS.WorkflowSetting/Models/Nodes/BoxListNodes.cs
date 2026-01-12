@@ -30,7 +30,11 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             LoadedCommand = new DelegateCommand(() => { });
             NodeClickCommand = new DelegateCommand<object?>(ExecuteNodeClickCommand);
             _eventAggregator.GetEvent<AddNodeEvent>().Subscribe(ExecuteAddNode, ThreadOption.UIThread, false, filter => filter?.Source == Id);
-            _eventAggregator.GetEvent<DeleteNodeEvent>().Subscribe(ExecuteDeleteNode);
+            _eventAggregator.GetEvent<DeleteNodeEvent>().Subscribe(ExecuteDeleteNode, ThreadOption.UIThread, false,
+                filter =>
+                {
+                    return filter?.Source == Id;
+                });
             _eventAggregator.GetEvent<DeleteTempPlaceholderNodeEvent>()
                 .Subscribe(OnDeleteTempPlaceholderNodeEvent, ThreadOption.UIThread, false, filter => filter.SourceId != Id);
         }
@@ -108,8 +112,7 @@ namespace MCCS.WorkflowSetting.Models.Nodes
         /// </summary>
         /// <param name="param"></param>
         protected void ExecuteDeleteNode(DeleteNodeEventParam param)
-        {
-            if (param == null || param.Source != Id) return;
+        { 
             var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Id == param.NodeId);
             if (deleteNodeInfo == null) return;
             var deleteAddNode = Nodes.FirstOrDefault(c => c.Index == deleteNodeInfo.Index + 1);
@@ -151,6 +154,19 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             switch (nodeInfo.DisplayType)
             {
                 case NodeDisplayTypeEnum.Decision:
+                    var children = new List<BranchStepListNodes>
+                    {
+                        new(_eventAggregator, _dialogService, [
+                            new BranchNode(_eventAggregator),
+                            new AddOpNode(null)
+                        ]),
+                        new(_eventAggregator, _dialogService, [
+                            new BranchNode(_eventAggregator),
+                            new AddOpNode(null)
+                        ])
+                    };
+                    return new DecisionNode(_eventAggregator, _dialogService, children); 
+                case NodeDisplayTypeEnum.Step:
                     return new StepNode(sourceId, _eventAggregator)
                     {
                         Name = "StepNode",
@@ -159,19 +175,6 @@ namespace MCCS.WorkflowSetting.Models.Nodes
                         Width = 260,
                         Height = 110
                     };
-                case NodeDisplayTypeEnum.Step:
-                    var children = new List<BranchStepListNodes>
-                    {
-                        new(_eventAggregator, _dialogService, [
-                            new BranchNode(_eventAggregator, null),
-                            new AddOpNode(null)
-                        ]),
-                        new(_eventAggregator, _dialogService, [
-                            new BranchNode(_eventAggregator, null),
-                            new AddOpNode(null)
-                        ])
-                    };
-                    return new DecisionNode(_eventAggregator, _dialogService, children); 
                 default:
                     return new StepNode(sourceId, _eventAggregator)
                     {

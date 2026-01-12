@@ -12,6 +12,10 @@ namespace MCCS.WorkflowSetting.Serialization.Dtos
         /// </summary>
         public string Id { get; set; } = string.Empty;
         /// <summary>
+        /// 父节点标识
+        /// </summary>
+        public string? ParentId { get; set; } = null;
+        /// <summary>
         /// 宽度
         /// </summary>
         public double Width { get; set; }
@@ -42,6 +46,6 @@ namespace MCCS.WorkflowSetting.Serialization.Dtos
         /// <summary>
         /// 节点层级
         /// </summary>
-        public int Level { get; set; }
+        public int Level { get; set; } 
     }
 }

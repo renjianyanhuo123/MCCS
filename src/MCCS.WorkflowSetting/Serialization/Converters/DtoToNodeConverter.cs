@@ -13,40 +13,42 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
         /// <summary>
         /// 将DTO转换为对应的节点
         /// </summary>
-        public BaseNode? Convert(BaseNodeDto dto, BaseNode? parent)
+        public BaseNode? Convert(BaseNodeDto dto)
         {
             switch(dto?.Type)
             {
                 case NodeTypeEnum.Start:
-                    return ConvertToStartNode(dto, parent);
+                    return ConvertToStartNode(dto);
                 case NodeTypeEnum.End:
-                    return ConvertToEndNode(dto, parent);
+                    return ConvertToEndNode(dto);
                 case NodeTypeEnum.Process:
-                    return ConvertToStepNode((StepNodeDto)dto, parent);
+                    return ConvertToStepNode((StepNodeDto)dto);
                 case NodeTypeEnum.Branch:
                     if (dto is BranchNodeDto dtoTemp)
                     {
-                        return ConvertToBranchNode(dtoTemp, parent);
+                        return ConvertToBranchNode(dtoTemp);
                     } 
                     return null;
                 case NodeTypeEnum.Decision:
-                    return ConvertToDecisionNode((DecisionNodeDto)dto, parent); 
+                    return ConvertToDecisionNode((DecisionNodeDto)dto); 
             };
             return null;
         }
 
-        private static StartNode ConvertToStartNode(BaseNodeDto dto, BaseNode? parent) =>
-            new(parent)
+        private static StartNode ConvertToStartNode(BaseNodeDto dto) =>
+            new()
             {
+                Id = dto.Id,
                 Name = dto.Name,
                 Code = dto.Code,
                 Order = dto.Order,
                 Level = dto.Level
             };
 
-        private static EndNode ConvertToEndNode(BaseNodeDto dto, BaseNode? parent) =>
-            new(parent)
+        private static EndNode ConvertToEndNode(BaseNodeDto dto) =>
+            new()
             {
+                Id = dto.Id,
                 Name = dto.Name,
                 Width = dto.Width,
                 Height = dto.Height,
@@ -55,11 +57,11 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Level = dto.Level
             };
 
-        private StepNode ConvertToStepNode(StepNodeDto dto, BaseNode? parent)
+        private StepNode ConvertToStepNode(StepNodeDto dto)
         {
-            var node = new StepNode(parent?.Id ?? string.Empty, eventAggregator)
+            var node = new StepNode(dto.ParentId ?? string.Empty, eventAggregator)
             {
-                Parent = parent,
+                Id = dto.Id,
                 Width = dto.Width,
                 Height = dto.Height,
                 Name = dto.Name,
@@ -72,9 +74,10 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             return node;
         }
 
-        private BranchNode ConvertToBranchNode(BranchNodeDto dto, BaseNode? parent) =>
-            new(eventAggregator, parent)
+        private BranchNode ConvertToBranchNode(BranchNodeDto dto) =>
+            new(eventAggregator)
             {
+                Id = dto.Id,
                 Name = dto.Name,
                 Code = dto.Code,
                 Width = dto.Width,
@@ -84,13 +87,13 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Title = dto.Title
             };
 
-        private DecisionNode ConvertToDecisionNode(DecisionNodeDto dto, BaseNode? parent)
-        {
-            var children = dto.Branches.Select(branchDto => ConvertToBranchStepList(branchDto, null)).ToList();
+        private DecisionNode ConvertToDecisionNode(DecisionNodeDto dto)
+        { 
+            var children = dto.Branches.Select(ConvertToBranchStepList).ToList();
             // 转换所有子分支
             var node = new DecisionNode(eventAggregator, dialogService, children)
             {
-                Parent = parent,
+                Id = dto.Id,
                 Name = dto.Name,
                 Code = dto.Code,
                 Width = dto.Width,
@@ -98,20 +101,20 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
                 Order = dto.Order,
                 Level = dto.Level,
                 IsCollapse = dto.IsCollapse
-            };   
+            };
             return node;
         }
 
         /// <summary>
         /// 转换分支步骤列表
         /// </summary>
-        public BranchStepListNodes ConvertToBranchStepList(BranchStepListDto dto, BaseNode? parent)
+        public BranchStepListNodes ConvertToBranchStepList(BranchStepListDto dto)
         {
-            var nodes = dto.Nodes.Select(nodeDto => Convert(nodeDto, null)).OfType<BaseNode>().ToList();
+            var nodes = dto.Nodes.Select(Convert).OfType<BaseNode>().ToList();
             // 转换分支中的所有节点
             var branchStepList = new BranchStepListNodes(eventAggregator, dialogService, nodes)
             {
-                Parent = parent,
+                Id = dto.Id,
                 Name = dto.Name,
                 Code = dto.Code,
                 Order = dto.Order,

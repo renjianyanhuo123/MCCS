@@ -2,6 +2,8 @@ using MCCS.Workflow.StepComponents.Registry;
 using MCCS.Workflow.StepComponents.Serialization;
 using MCCS.Workflow.StepComponents.Steps;
 using MCCS.Workflow.StepComponents.Steps.StructuralTest;
+using MCCS.Workflow.StepComponents.ViewModels;
+using MCCS.Workflow.StepComponents.Views;
 using MCCS.Workflow.StepComponents.Workflows;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,8 @@ namespace MCCS.Workflow.StepComponents
 
             // 注册 WorkflowCore 服务
             RegisterWorkflowCore(containerRegistry);
+            // 页面注册
+            containerRegistry.RegisterForNavigation<WorkflowStepListPage>(WorkflowStepListPageViewModel.Tag);
         }
 
         public void OnInitialized(IContainerProvider containerProvider)

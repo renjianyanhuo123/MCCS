@@ -32,6 +32,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             new()
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Width = node.Width,
@@ -45,6 +46,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             new()
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Width = node.Width,
@@ -58,6 +60,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             new()
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Width = node.Width,
@@ -71,6 +74,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             new()
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Type = NodeTypeEnum.Process,
@@ -86,6 +90,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             new()
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Width = node.Width,
@@ -101,6 +106,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             var dto = new DecisionNodeDto
             {
                 Id = node.Id,
+                ParentId = node.Parent?.Id,
                 Name = node.Name,
                 Code = node.Code,
                 Width = node.Width,
@@ -130,6 +136,7 @@ namespace MCCS.WorkflowSetting.Serialization.Converters
             var dto = new BranchStepListDto
             {
                 Id = branchStepList.Id,
+                ParentId = branchStepList.Parent?.Id,
                 Name = branchStepList.Name,
                 Code = branchStepList.Code,
                 Width = branchStepList.Width,
