@@ -99,7 +99,8 @@ namespace MCCS.WorkflowSetting.Models.Nodes
             });
             var deleteNodeInfo = Nodes.FirstOrDefault(c => c.Type == NodeTypeEnum.TempPlaceholder);
             if (deleteNodeInfo != null) Nodes.Remove(deleteNodeInfo);
-            Nodes.Insert(InsertBeforeNode.Index, new TempPlaceholderAddNode(this));
+            RaiseNodeChanged("UIChanged", "");
+            Nodes.Insert(InsertBeforeNode.Index, new TempPlaceholderAddNode(this)); 
             RaiseNodeChanged("UIChanged", "");
             _eventAggregator.GetEvent<AddOpEvent>().Publish(new AddOpEventParam
             {
