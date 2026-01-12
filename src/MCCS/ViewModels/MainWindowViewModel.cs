@@ -8,7 +8,6 @@ using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.Pages;
 using MCCS.Workflow.Contact.Events;
 using MCCS.Workflow.StepComponents.ViewModels;
-using MCCS.WorkflowSetting.EventParams;
 
 namespace MCCS.ViewModels
 {
@@ -87,7 +86,7 @@ namespace MCCS.ViewModels
             get => _rightFlyoutName;
             set => SetProperty(ref _rightFlyoutName, value);
         }
-        #endregion
+        #endregion 
 
         #region Command 
         public DelegateCommand LoadCommand { get; }

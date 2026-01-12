@@ -63,7 +63,7 @@ namespace MCCS.ViewModels.ProjectManager
         //public override void OnNavigatedFrom(NavigationContext navigationContext)
         //{
         //    // 离开时移除子Region，避免下次创建新实例时Region名称冲突 
-        //    if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))  
+        //    if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))
         //    {
         //        _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
         //    }
