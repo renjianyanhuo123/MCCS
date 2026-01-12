@@ -8,6 +8,7 @@ using MCCS.Common.DataManagers;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.WorkflowSettings;
+using MCCS.Interface.Components;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
@@ -45,8 +46,6 @@ using MCCS.Views.Pages.SystemManager;
 using MCCS.Views.Pages.TestModelOperations;
 using MCCS.Views.ProjectManager;
 using MCCS.Workflow.StepComponents;
-using MCCS.Workflow.StepComponents.ViewModels;
-using MCCS.Workflow.StepComponents.Views;
 using MCCS.WorkflowSetting;
 
 using Microsoft.Extensions.Configuration;
@@ -81,6 +80,7 @@ namespace MCCS
             moduleCatalog.AddModule<NotificationModule>();
             moduleCatalog.AddModule<WorkflowModule>();
             moduleCatalog.AddModule<StepComponentModule>();
+            moduleCatalog.AddModule<InterfaceModule>();
             moduleCatalog.AddModule<StationModule>();
         }
 

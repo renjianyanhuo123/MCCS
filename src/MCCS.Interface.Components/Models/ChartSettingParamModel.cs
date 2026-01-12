@@ -1,7 +1,6 @@
 ﻿using MCCS.Interface.Components.Enums;
-using MCCS.Interface.Components.Models;
 
-namespace MCCS.Models.MethodManager.ParamterSettings
+namespace MCCS.Interface.Components.Models
 {
     public class ChartSettingParamModel
     {

@@ -6,7 +6,6 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 
 using MCCS.Interface.Components.Models;
-using MCCS.Models.MethodManager.ParamterSettings;
 
 using SkiaSharp;
 
