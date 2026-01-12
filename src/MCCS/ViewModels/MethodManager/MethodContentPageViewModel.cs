@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using MCCS.Common.DataManagers.Methods;
 using MCCS.Common.Resources.ViewModels;
 using MCCS.Infrastructure.Helper;
@@ -9,17 +9,17 @@ using MCCS.ViewModels.MethodManager.Contents;
 namespace MCCS.ViewModels.MethodManager
 {
     public class MethodContentPageViewModel : BaseViewModel
-    {  
+    {
         private long _methodId = -1;
 
         private readonly IRegionManager _regionManager;
         private readonly IMethodRepository _methodRepository;
 
-        public MethodContentPageViewModel(IEventAggregator eventAggregator, 
+        public MethodContentPageViewModel(IEventAggregator eventAggregator,
             IRegionManager regionManager,
             IMethodRepository methodRepository) : base(eventAggregator)
         {
-            // 系统层 → 通道层 → 关系层 → 阶段层 
+            // 系统层 → 通道层 → 关系层 → 阶段层
             Menus =
             [
                 new MethodMenuItemModel { Name = "常规", Id = 1, Url = MethodBaseInfoPageViewModel.Tag},
@@ -37,6 +37,15 @@ namespace MCCS.ViewModels.MethodManager
         public override void OnNavigatedTo(NavigationContext navigationContext)
         {
             _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
+        }
+
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            // 离开时移除子Region，避免下次创建新实例时Region名称冲突
+            if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))
+            {
+                _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
+            }
         }
 
         /// <summary>
@@ -66,11 +75,11 @@ namespace MCCS.ViewModels.MethodManager
         }
         #endregion
 
-        #region Command 
+        #region Command
         public AsyncDelegateCommand LoadCommand { get; }
         #endregion
 
-        #region Private Method 
+        #region Private Method
         private async Task ExexuteLoadCommand()
         {
             if (_methodId == -1) throw new ArgumentNullException("No MethodId!");
@@ -86,9 +95,9 @@ namespace MCCS.ViewModels.MethodManager
             if (FileHelper.FileExists(methodBaseInfo.FilePath))
             {
                 var temp = await FileHelper.ReadJsonAsync<MethodContentItemModel>(methodBaseInfo.FilePath);
-                if (temp == null) throw new ArgumentNullException("methodInfo is null"); 
-            } 
-            SelectedMenuItem = Menus.FirstOrDefault(c => c.Id == 1); 
+                if (temp == null) throw new ArgumentNullException("methodInfo is null");
+            }
+            SelectedMenuItem = Menus.FirstOrDefault(c => c.Id == 1);
         }
 
         #endregion
