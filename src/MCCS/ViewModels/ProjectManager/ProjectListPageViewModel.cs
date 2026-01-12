@@ -5,8 +5,6 @@ using MaterialDesignThemes.Wpf;
 
 using MCCS.Common.Resources.Extensions;
 using MCCS.Common.Resources.ViewModels;
-using MCCS.Common.Resources.Views;
-using MCCS.Events.Common;
 using MCCS.Events.Project;
 using MCCS.Infrastructure.Models.ProjectManager;
 using MCCS.Infrastructure.Repositories.Project;
@@ -14,8 +12,6 @@ using MCCS.Models.ProjectManager;
 using MCCS.Models.ProjectManager.Parameters;
 using MCCS.UserControl.Params;
 using MCCS.Views.Dialogs.Project;
-
-using Prism.Dialogs;
 
 using Serilog;
 

@@ -42,7 +42,15 @@ namespace MCCS.ViewModels.MethodManager
             _methodId = navigationContext.Parameters.GetValue<long>("MethodId");
         }
 
-        // public override bool IsNavigationTarget(NavigationContext navigationContext) => false;
+        public override bool IsNavigationTarget(NavigationContext navigationContext) => false;
+
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))
+            {
+                _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
+            }
+        }
 
         #region Property
         public ObservableCollection<MethodMenuItemModel> Menus { get; }

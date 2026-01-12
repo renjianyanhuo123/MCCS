@@ -60,14 +60,18 @@ namespace MCCS.ViewModels.ProjectManager
             _regionManager.RequestNavigate(GlobalConstant.ProjectNavigateRegionName, new Uri(nameof(ProjectOperationPageViewModel), UriKind.Relative), parameter);
         }
 
-        //public override void OnNavigatedFrom(NavigationContext navigationContext)
-        //{
-        //    // 离开时移除子Region，避免下次创建新实例时Region名称冲突 
-        //    if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))
-        //    {
-        //        _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
-        //    }
-        //}
+        /// <summary>
+        /// 当Method界面通过爷界面跳转强行退出时，清除残留的区域
+        /// </summary>
+        /// <param name="navigationContext"></param>
+        public override void OnNavigatedFrom(NavigationContext navigationContext)
+        {
+            // 离开时移除子Region，避免下次创建新实例时Region名称冲突 
+            if (_regionManager.Regions.ContainsRegionWithName(GlobalConstant.MethodNavigateRegionName))
+            {
+                _regionManager.Regions.Remove(GlobalConstant.MethodNavigateRegionName);
+            }
+        }
 
         private void ExecuteNavigateMethodCommand()
         {
