@@ -46,6 +46,6 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <ContentControl Grid.Row="1" Grid.Column="1"  prism:RegionManager.RegionName="{x:Static localContanst:GlobalConstant.MethodNavigateRegionName}" />
+        <ContentControl x:Name="MethodNavigateRegionHost" Grid.Row="1" Grid.Column="1" />
     </Grid>
 </UserControl>
