@@ -16,7 +16,7 @@ namespace MCCS.Station.Host
             // 创建服务端并自动注册处理器
             _namedPipeServer = NamedPipeFactory.CreateServerFromAttributes(
                 maxConnections: 10,
-                assemblies: new[] { typeof(App).Assembly });
+                assemblies: [typeof(App).Assembly]);
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)

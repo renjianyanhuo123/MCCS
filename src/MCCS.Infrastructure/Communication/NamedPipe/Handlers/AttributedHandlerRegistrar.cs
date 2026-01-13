@@ -1,5 +1,5 @@
 using System.Reflection;
-using MCCS.Infrastructure.Communication.NamedPipe;
+
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
 using MCCS.Infrastructure.Communication.NamedPipe.Serialization;
 
@@ -7,6 +7,12 @@ namespace MCCS.Infrastructure.Communication.NamedPipe.Handlers;
 
 internal static class AttributedHandlerRegistrar
 {
+    /// <summary>
+    /// 扫描所有的 ApiNamedPipeAttribute 特性以解析管道名称
+    /// </summary>
+    /// <param name="assemblies"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public static string ResolvePipeName(IEnumerable<Assembly> assemblies)
     {
         var pipeNames = assemblies
@@ -17,17 +23,13 @@ internal static class AttributedHandlerRegistrar
             .Distinct(StringComparer.Ordinal)
             .ToArray();
 
-        if (pipeNames.Length == 0)
+        return pipeNames.Length switch
         {
-            throw new InvalidOperationException("No ApiNamedPipeAttribute found in provided assemblies.");
-        }
-
-        if (pipeNames.Length > 1)
-        {
-            throw new InvalidOperationException("Multiple ApiNamedPipeAttribute names found in provided assemblies.");
-        }
-
-        return pipeNames[0];
+            0 => throw new InvalidOperationException("No ApiNamedPipeAttribute found in provided assemblies."),
+            > 1 => throw new InvalidOperationException(
+                "Multiple ApiNamedPipeAttribute names found in provided assemblies."),
+            _ => pipeNames[0]
+        };
     }
 
     public static void RegisterHandlers(
@@ -58,11 +60,7 @@ internal static class AttributedHandlerRegistrar
             foreach (var method in typeInfo.DeclaredMethods)
             {
                 var routeAttribute = method.GetCustomAttribute<RouteAttribute>();
-                if (routeAttribute == null)
-                {
-                    continue;
-                }
-
+                if (routeAttribute == null) continue;
                 var handler = BuildHandler(method, instance, serializer);
                 server.RegisterHandler(routeAttribute.Template, handler);
             }
@@ -78,7 +76,7 @@ internal static class AttributedHandlerRegistrar
         var hasCancellation = parameters.Length > 0 && parameters[^1].ParameterType == typeof(CancellationToken);
         var payloadParameterCount = parameters.Length - (hasCancellation ? 1 : 0);
 
-        if (payloadParameterCount < 0 || payloadParameterCount > 1)
+        if (payloadParameterCount is < 0 or > 1)
         {
             throw new InvalidOperationException($"Unsupported handler signature: {method.DeclaringType?.FullName}.{method.Name}.");
         }
@@ -123,10 +121,10 @@ internal static class AttributedHandlerRegistrar
                 {
                     if (cancellationOnly)
                     {
-                        var del = (Func<CancellationToken, Task<PipeResponse>>)method.CreateDelegate(
+                        var delTemp = (Func<CancellationToken, Task<PipeResponse>>)method.CreateDelegate(
                             typeof(Func<CancellationToken, Task<PipeResponse>>),
                             instance);
-                        return del(cancellationToken);
+                        return delTemp(cancellationToken);
                     }
 
                     var del = (Func<Task<PipeResponse>>)method.CreateDelegate(typeof(Func<Task<PipeResponse>>), instance);
@@ -147,17 +145,15 @@ internal static class AttributedHandlerRegistrar
                 {
                     if (cancellationOnly)
                     {
-                        var del = (Func<CancellationToken, PipeResponse>)method.CreateDelegate(
-                            typeof(Func<CancellationToken, PipeResponse>),
-                            instance);
-                        return Task.FromResult(del(cancellationToken));
+                        var delTemp = (Func<CancellationToken, PipeResponse>)method.CreateDelegate(typeof(Func<CancellationToken, PipeResponse>), instance);
+                        return Task.FromResult(delTemp(cancellationToken));
                     }
 
                     var del = (Func<PipeResponse>)method.CreateDelegate(typeof(Func<PipeResponse>), instance);
                     return Task.FromResult(del());
                 }
 
-                var result = method.Invoke(instance, hasCancellation ? new[] { payload, cancellationToken } : new[] { payload });
+                var result = method.Invoke(instance, hasCancellation ? [payload, cancellationToken] : [payload]);
                 return Task.FromResult((PipeResponse)result!);
             }
 
@@ -219,7 +215,7 @@ internal static class AttributedHandlerRegistrar
         }
         else
         {
-            task = (Task)method.Invoke(instance, hasCancellation ? new[] { payload, cancellationToken } : new[] { payload })!;
+            task = (Task)method.Invoke(instance, hasCancellation ? [payload, cancellationToken] : [payload])!;
         }
 
         return task.ContinueWith(
@@ -239,8 +235,8 @@ internal static class AttributedHandlerRegistrar
         IMessageSerializer serializer)
     {
         var task = payload == null
-            ? (Task)method.Invoke(instance, hasCancellation ? new object[] { cancellationToken } : Array.Empty<object>())!
-            : (Task)method.Invoke(instance, hasCancellation ? new[] { payload, cancellationToken } : new[] { payload })!;
+            ? (Task)method.Invoke(instance, hasCancellation ? [cancellationToken] : [])!
+            : (Task)method.Invoke(instance, hasCancellation ? [payload, cancellationToken] : [payload])!;
 
         return AwaitTaskResult(task, requestId, serializer);
     }
@@ -253,11 +249,6 @@ internal static class AttributedHandlerRegistrar
         await task.ConfigureAwait(false);
         var resultProperty = task.GetType().GetProperty("Result");
         var result = resultProperty?.GetValue(task);
-        if (result == null)
-        {
-            return PipeResponse.Success(requestId);
-        }
-
-        return PipeResponse.Success(requestId, serializer.Serialize(result));
+        return result == null ? PipeResponse.Success(requestId) : PipeResponse.Success(requestId, serializer.Serialize(result));
     }
 }

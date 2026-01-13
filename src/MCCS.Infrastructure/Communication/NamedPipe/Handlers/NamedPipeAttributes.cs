@@ -21,15 +21,10 @@ public sealed class ApiNamedPipeAttribute : Attribute
 /// 标记处理器方法路由
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-public sealed class RouteAttribute : Attribute
+public sealed class RouteAttribute(string template) : Attribute
 {
-    public RouteAttribute(string template)
-    {
-        Template = template;
-    }
-
     /// <summary>
     /// 路由模板
     /// </summary>
-    public string Template { get; }
+    public string Template { get; } = template;
 }

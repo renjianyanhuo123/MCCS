@@ -44,9 +44,9 @@ public static class NamedPipeFactory
         params Assembly[] assemblies)
     {
         var resolvedAssemblies = assemblies.Length == 0
-            ? new[] { Assembly.GetCallingAssembly() }
+            ? [Assembly.GetCallingAssembly()]
             : assemblies;
-
+        // 目前最好采用一个名称的命名管道，避免复杂性
         var pipeName = AttributedHandlerRegistrar.ResolvePipeName(resolvedAssemblies);
         var server = CreateServer(pipeName, maxConnections, logger);
         server.RegisterHandlersFromAttributes(resolvedAssemblies);

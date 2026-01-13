@@ -5,16 +5,19 @@ namespace MCCS.Station.Host.Handlers;
 
 [ApiNamedPipe("MCCS_Command_IPC")]
 internal sealed class CommandHandler
-{
-    [Route("echo")]
-    public PipeResponse Echo(PipeRequest request)
+{ 
+    /// <summary>
+    /// 开始试验指令
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [Route("startTestCommand")]
+    public async Task<PipeResponse> StartCommandHandler(PipeRequest request, CancellationToken cancellationToken)
     {
-        return PipeResponse.Success(request.RequestId, request.Payload);
-    }
-
-    [Route("calculate/add")]
-    public Task<PipeResponse> Add(PipeRequest request, CancellationToken cancellationToken)
-    {
-        return Task.FromResult(PipeResponse.Success(request.RequestId, ""));
+        // 模拟一个异步操作
+        await Task.Delay(1000, cancellationToken);
+        // 返回成功响应
+        return PipeResponse.Success(request.RequestId, "Test command started successfully.");
     }
 }

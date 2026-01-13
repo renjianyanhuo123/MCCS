@@ -1,5 +1,4 @@
 ﻿using MCCS.Station.Abstractions.Models;
-using MCCS.Station.Core.Devices;
 
 using Newtonsoft.Json;
 using static Microsoft.VisualStudio.TestTools.UnitTesting.Assert;

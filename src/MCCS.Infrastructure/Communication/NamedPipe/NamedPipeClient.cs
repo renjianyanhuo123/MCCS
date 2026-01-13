@@ -55,11 +55,14 @@ public sealed class NamedPipeClientOptions
 /// <summary>
 /// 命名管道客户端 - 高性能请求响应客户端
 /// </summary>
-public sealed class NamedPipeClient : IDisposable
+public sealed class NamedPipeClient(
+    NamedPipeClientOptions? options = null,
+    IMessageSerializer? serializer = null,
+    ILogger? logger = null)
+    : IDisposable
 {
-    private readonly NamedPipeClientOptions _options;
-    private readonly IMessageSerializer _serializer;
-    private readonly ILogger? _logger;
+    private readonly NamedPipeClientOptions _options = options ?? new NamedPipeClientOptions();
+    private readonly IMessageSerializer _serializer = serializer ?? new JsonMessageSerializer();
     private readonly SemaphoreSlim _sendLock = new(1, 1);
 
     private NamedPipeClientStream? _pipeClient;
@@ -74,13 +77,6 @@ public sealed class NamedPipeClient : IDisposable
     /// 连接状态变化事件
     /// </summary>
     public event Action<bool>? ConnectionStateChanged;
-
-    public NamedPipeClient(NamedPipeClientOptions? options = null, IMessageSerializer? serializer = null, ILogger? logger = null)
-    {
-        _options = options ?? new NamedPipeClientOptions();
-        _serializer = serializer ?? new JsonMessageSerializer();
-        _logger = logger;
-    }
 
     /// <summary>
     /// 连接到服务端
@@ -103,7 +99,7 @@ public sealed class NamedPipeClient : IDisposable
         try
         {
             await _pipeClient.ConnectAsync(timeoutCts.Token);
-            _logger?.Debug("Connected to named pipe server: {PipeName}", _options.PipeName);
+            logger?.Debug("Connected to named pipe server: {PipeName}", _options.PipeName);
             ConnectionStateChanged?.Invoke(true);
         }
         catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
@@ -121,7 +117,7 @@ public sealed class NamedPipeClient : IDisposable
         {
             _pipeClient.Dispose();
             _pipeClient = null;
-            _logger?.Debug("Disconnected from named pipe server");
+            logger?.Debug("Disconnected from named pipe server");
             ConnectionStateChanged?.Invoke(false);
         }
     }
@@ -151,14 +147,14 @@ public sealed class NamedPipeClient : IDisposable
             catch (IOException ex) when (_options.AutoReconnect && attempts < _options.MaxReconnectAttempts)
             {
                 attempts++;
-                _logger?.Warning(ex, "Connection lost, attempting reconnect ({Attempt}/{Max})", attempts, _options.MaxReconnectAttempts);
+                logger?.Warning(ex, "Connection lost, attempting reconnect ({Attempt}/{Max})", attempts, _options.MaxReconnectAttempts);
 
                 Disconnect();
                 await Task.Delay(_options.ReconnectIntervalMs, cancellationToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                _logger?.Error(ex, "Failed to send request: {Route}", request.Route);
+                logger?.Error(ex, "Failed to send request: {Route}", request.Route);
                 return PipeResponse.Failure(request.RequestId, PipeStatusCode.ConnectionError, ex.Message);
             }
         }
@@ -171,10 +167,7 @@ public sealed class NamedPipeClient : IDisposable
     /// <param name="payload">负载数据</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>响应消息</returns>
-    public Task<PipeResponse> SendAsync(string route, string? payload = null, CancellationToken cancellationToken = default)
-    {
-        return SendAsync(PipeRequest.Create(route, payload), cancellationToken);
-    }
+    public Task<PipeResponse> SendAsync(string route, string? payload = null, CancellationToken cancellationToken = default) => SendAsync(PipeRequest.Create(route, payload), cancellationToken);
 
     /// <summary>
     /// 发送强类型请求
@@ -203,7 +196,7 @@ public sealed class NamedPipeClient : IDisposable
         await _sendLock.WaitAsync(cancellationToken);
         try
         {
-            if (_pipeClient == null || !_pipeClient.IsConnected)
+            if (_pipeClient is not { IsConnected: true })
             {
                 return PipeResponse.Failure(request.RequestId, PipeStatusCode.ConnectionError, "Not connected to server");
             }
