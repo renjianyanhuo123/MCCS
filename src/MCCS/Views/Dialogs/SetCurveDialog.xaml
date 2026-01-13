@@ -7,7 +7,8 @@
              mc:Ignorable="d"  
              xmlns:prism="http://prismlibrary.com/"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF" xmlns:dialogs="clr-namespace:MCCS.ViewModels.Dialogs"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             xmlns:dialogs="clr-namespace:MCCS.ViewModels.Dialogs"
              prism:ViewModelLocator.AutoWireViewModel="True"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=dialogs:SetCurveDialogViewModel}">
     <i:Interaction.Triggers> 

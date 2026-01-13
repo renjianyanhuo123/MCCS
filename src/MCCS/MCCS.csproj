@@ -83,7 +83,6 @@
   <ItemGroup>
     <Folder Include="Components\GlobalNotification\" />
     <Folder Include="Converters\Common\" />
-    <Folder Include="Models\ProjectManager\Components\" />
     <Folder Include="Models\ProjectManager\Parameters\" />
     <Folder Include="Resources\DataTemplates\" />
     <Folder Include="Services\NotificationService\" />

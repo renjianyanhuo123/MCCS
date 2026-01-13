@@ -1,4 +1,4 @@
-﻿namespace MCCS.Events.Mehtod.DynamicGridOperationEvents
+﻿namespace MCCS.Interface.Components.Events
 {
     public record OpenParamterSetEventParam
     {

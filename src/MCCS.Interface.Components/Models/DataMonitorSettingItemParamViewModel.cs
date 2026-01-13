@@ -1,7 +1,4 @@
-﻿using MCCS.Interface.Components.Models;
-using MCCS.Models.CurveModels;
-
-namespace MCCS.Models.MethodManager.ParamterSettings
+﻿namespace MCCS.Interface.Components.Models
 {
     public class DataMonitorSettingItemParamViewModel : BindableBase
     {

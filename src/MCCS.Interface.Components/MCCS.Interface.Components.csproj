@@ -13,9 +13,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
+    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\DataMonitorSetParamPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\MethodChartSetParamPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\ProjectDataMonitorComponentPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace MCCS.Interface.Components.Views
+﻿namespace MCCS.Interface.Components.Views
 {
     /// <summary>
     /// ProjectChartComponentPage.xaml 的交互逻辑

@@ -9,6 +9,7 @@ using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Interface.Components;
+using MCCS.Interface.Components.ViewModels;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
@@ -19,7 +20,6 @@ using MCCS.ViewModels.Dialogs.Method;
 using MCCS.ViewModels.Dialogs.Project;
 using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.MethodManager.Contents;
-using MCCS.ViewModels.MethodManager.ParamterSettings;
 using MCCS.ViewModels.Pages;
 using MCCS.ViewModels.Pages.StationSetup;
 using MCCS.ViewModels.Pages.StationSites;
@@ -35,8 +35,7 @@ using MCCS.Views.Dialogs.Hardwares;
 using MCCS.Views.Dialogs.Method;
 using MCCS.Views.Dialogs.Project;
 using MCCS.Views.MethodManager;
-using MCCS.Views.MethodManager.Contents;
-using MCCS.Views.MethodManager.ParamterSettings;
+using MCCS.Views.MethodManager.Contents; 
 using MCCS.Views.Pages;
 using MCCS.Views.Pages.StationSetup;
 using MCCS.Views.Pages.StationSites;
@@ -180,9 +179,7 @@ namespace MCCS
             
             containerRegistry.RegisterForNavigation<MethodInterfaceSettingPage>(nameof(MethodInterfaceSettingPageViewModel));
             containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
-
-            containerRegistry.RegisterForNavigation<MethodChartSetParamPage>(nameof(MethodChartSetParamPageViewModel));
-            containerRegistry.RegisterForNavigation<DataMonitorSetParamPage>(nameof(DataMonitorSetParamPageViewModel));
+             
             // StationSetup  
             containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));
             containerRegistry.RegisterForNavigation<TransducerCalibrationPage>(nameof(TransducerCalibrationPageViewModel)); 

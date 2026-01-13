@@ -1,9 +1,9 @@
 ﻿using MCCS.Common.Resources.ViewModels;
-using MCCS.Events.Mehtod.DynamicGridOperationEvents;
+using MCCS.Interface.Components.Events;
 
 using Newtonsoft.Json;
 
-namespace MCCS.ViewModels.MethodManager.ParamterSettings
+namespace MCCS.Interface.Components.ViewModels
 {
     /// <summary>
     /// 基类

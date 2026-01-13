@@ -2,12 +2,10 @@
 
 using MCCS.Infrastructure.Repositories;
 using MCCS.Interface.Components.Models;
-using MCCS.Models.CurveModels;
-using MCCS.Models.MethodManager.ParamterSettings;
 
 using Newtonsoft.Json;
 
-namespace MCCS.ViewModels.MethodManager.ParamterSettings
+namespace MCCS.Interface.Components.ViewModels
 {
     public class DataMonitorSetParamPageViewModel : BaseParameterSetViewModel<List<DataMonitorSettingItemParamModel>>
     {
