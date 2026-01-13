@@ -62,6 +62,11 @@ public sealed class NamedPipeServer : IDisposable
     public int ActiveConnections => _activeConnections;
 
     /// <summary>
+    /// 管道名称
+    /// </summary>
+    public string PipeName => _options.PipeName;
+
+    /// <summary>
     /// 是否正在运行
     /// </summary>
     public bool IsRunning => _acceptTask != null && !_acceptTask.IsCompleted;
@@ -94,6 +99,8 @@ public sealed class NamedPipeServer : IDisposable
     /// 获取请求路由器（用于注册处理器）
     /// </summary>
     public RequestRouter Router => _router;
+
+    internal IMessageSerializer Serializer => _serializer;
 
     /// <summary>
     /// 注册请求处理器
