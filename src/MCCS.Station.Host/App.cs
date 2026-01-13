@@ -1,5 +1,4 @@
 using MCCS.Infrastructure.Communication.NamedPipe;
-using MCCS.Infrastructure.Communication.NamedPipe.Models;
 using MCCS.Station.Abstractions.Interfaces;
 
 namespace MCCS.Station.Host
@@ -14,8 +13,10 @@ namespace MCCS.Station.Host
         {
             _stationRuntime = stationRuntime;
             _dataPublisher = dataPublisher;
-            // 创建服务端
-            _namedPipeServer = NamedPipeFactory.CreateServer("MCCS_Command_IPC", maxConnections: 10);
+            // 创建服务端并自动注册处理器
+            _namedPipeServer = NamedPipeFactory.CreateServerFromAttributes(
+                maxConnections: 10,
+                assemblies: new[] { typeof(App).Assembly });
         }
 
         public async Task RunAsync(CancellationToken cancellationToken)
@@ -25,14 +26,6 @@ namespace MCCS.Station.Host
             DataManager.StationSite = stationSiteInfo; 
             // 启动共享内存数据发布服务 
             await _dataPublisher.StartAsync(cancellationToken);
-            // 注册处理器
-            _namedPipeServer.RegisterHandler("echo", request =>
-                PipeResponse.Success(request.RequestId, request.Payload));
-
-            _namedPipeServer.RegisterHandler("calculate/add", (req, ct) => { 
-                return Task.FromResult(PipeResponse.Success(req.RequestId, ""));
-            });
-
             await _namedPipeServer.StartAsync();
 
         }
