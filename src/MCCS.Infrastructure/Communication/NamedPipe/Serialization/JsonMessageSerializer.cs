@@ -1,4 +1,6 @@
+ 
 using System.Text;
+
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
 using Newtonsoft.Json;
 
@@ -52,13 +54,7 @@ public sealed class JsonMessageSerializer : IMessageSerializer
                ?? throw new InvalidOperationException("Failed to deserialize response");
     }
 
-    public string Serialize<T>(T obj)
-    {
-        return JsonConvert.SerializeObject(obj, _settings);
-    }
+    public string Serialize<T>(T obj) => JsonConvert.SerializeObject(obj, _settings);
 
-    public T? Deserialize<T>(string data)
-    {
-        return JsonConvert.DeserializeObject<T>(data, _settings);
-    }
+    public T? Deserialize<T>(string data) => JsonConvert.DeserializeObject<T>(data, _settings);
 }

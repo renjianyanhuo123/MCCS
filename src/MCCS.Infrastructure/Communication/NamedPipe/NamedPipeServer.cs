@@ -125,24 +125,15 @@ public sealed class NamedPipeServer : IDisposable
     /// <summary>
     /// 启动服务端
     /// </summary>
-    public void Start()
+    public async Task StartAsync()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(NamedPipeServer));
         if (IsRunning) return;
 
         _cts = new CancellationTokenSource();
-        _acceptTask = AcceptConnectionsAsync(_cts.Token);
+        await AcceptConnectionsAsync(_cts.Token);
         _logger?.Information("Named pipe server started on pipe: {PipeName}", _options.PipeName);
-    }
-
-    /// <summary>
-    /// 异步启动服务端
-    /// </summary>
-    public Task StartAsync()
-    {
-        Start();
-        return Task.CompletedTask;
-    }
+    } 
 
     /// <summary>
     /// 停止服务端
@@ -152,7 +143,7 @@ public sealed class NamedPipeServer : IDisposable
         if (!IsRunning) return;
 
         _logger?.Information("Stopping named pipe server...");
-        _cts?.Cancel();
+        await _cts?.CancelAsync()!;
 
         // 等待接受任务完成
         if (_acceptTask != null)
