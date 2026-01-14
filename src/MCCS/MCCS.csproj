@@ -15,15 +15,19 @@
 
   <ItemGroup>
     <Compile Remove="ViewModels\Common\**" />
+    <Compile Remove="ViewModels\Dialogs\Common\**" />
     <Compile Remove="Views\Common\**" />
     <Compile Remove="Views\Dialogs\Common\**" />
     <EmbeddedResource Remove="ViewModels\Common\**" />
+    <EmbeddedResource Remove="ViewModels\Dialogs\Common\**" />
     <EmbeddedResource Remove="Views\Common\**" />
     <EmbeddedResource Remove="Views\Dialogs\Common\**" />
     <None Remove="ViewModels\Common\**" />
+    <None Remove="ViewModels\Dialogs\Common\**" />
     <None Remove="Views\Common\**" />
     <None Remove="Views\Dialogs\Common\**" />
     <Page Remove="ViewModels\Common\**" />
+    <Page Remove="ViewModels\Dialogs\Common\**" />
     <Page Remove="Views\Common\**" />
     <Page Remove="Views\Dialogs\Common\**" />
   </ItemGroup>
@@ -85,8 +89,6 @@
     <Folder Include="Converters\Common\" />
     <Folder Include="Models\ProjectManager\Parameters\" />
     <Folder Include="Resources\DataTemplates\" />
-    <Folder Include="Services\NotificationService\" />
-    <Folder Include="ViewModels\Dialogs\Common\" />
   </ItemGroup>
 
   <ItemGroup>

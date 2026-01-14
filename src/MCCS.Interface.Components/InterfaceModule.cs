@@ -1,7 +1,4 @@
 ﻿using MCCS.Interface.Components.Registry;
-using MCCS.Interface.Components.ViewModels;
-using MCCS.Interface.Components.ViewModels.Parameters;
-using MCCS.Interface.Components.Views;
 using MCCS.Interface.Components.Views.ControlCommandPages;
 
 namespace MCCS.Interface.Components
@@ -14,19 +11,7 @@ namespace MCCS.Interface.Components
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             // 注册界面组件注册表为单例（使用工厂方法以便传入容器解析器）
-            containerRegistry.RegisterSingleton<IInterfaceRegistry>(container =>
-            {
-                // 创建一个解析器函数，用于从 Prism 容器中获取服务
-                Func<Type, object> resolver = type => container.Resolve(type);
-                return new InterfaceRegistry(resolver);
-            });
-
-            // 注册页面导航
-            containerRegistry.RegisterForNavigation<ProjectChartComponentPage>(nameof(ProjectChartComponentPageViewModel));
-            containerRegistry.RegisterForNavigation<ProjectDataMonitorComponentPage>(nameof(ProjectDataMonitorComponentPageViewModel));
-            containerRegistry.RegisterForNavigation<MethodChartSetParamPage>(nameof(MethodChartSetParamPageViewModel));
-            containerRegistry.RegisterForNavigation<DataMonitorSetParamPage>(nameof(DataMonitorSetParamPageViewModel));
-            containerRegistry.RegisterForNavigation<ControlOperationComponentPage>(nameof(ControlOperationComponentPage));
+            containerRegistry.RegisterSingleton<IInterfaceRegistry, InterfaceRegistry>();
 
             // 注册控制命令页面
             containerRegistry.RegisterForNavigation<ViewManualControl>(nameof(ViewManualControl));

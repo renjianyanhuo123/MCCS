@@ -47,16 +47,17 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            Func<Func<Type, object>?, BaseComponentViewModel> factory = resolver =>
+            BaseComponentViewModel Factory(Func<Type, object>? resolver)
             {
                 if (resolver != null)
                 {
                     return (BaseComponentViewModel)resolver(viewModelType);
                 }
-                return Activator.CreateInstance<TViewModel>();
-            };
 
-            RegisterInternal(info, factory);
+                return Activator.CreateInstance<TViewModel>();
+            }
+
+            RegisterInternal(info, Factory);
         }
 
         public void RegisterComponent<TViewModel>(Func<IServiceProvider, TViewModel> factory) where TViewModel : BaseComponentViewModel
@@ -72,17 +73,18 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            Func<Func<Type, object>?, BaseComponentViewModel> internalFactory = resolver =>
+            BaseComponentViewModel InternalFactory(Func<Type, object>? resolver)
             {
                 if (resolver != null)
                 {
                     var serviceProvider = new ServiceProviderWrapper(resolver);
                     return factory(serviceProvider);
                 }
-                return Activator.CreateInstance<TViewModel>();
-            };
 
-            RegisterInternal(info, internalFactory);
+                return Activator.CreateInstance<TViewModel>();
+            }
+
+            RegisterInternal(info, InternalFactory);
         }
 
         public void RegisterComponent(Type viewModelType)
@@ -109,16 +111,17 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            Func<Func<Type, object>?, BaseComponentViewModel> factory = resolver =>
+            BaseComponentViewModel Factory(Func<Type, object>? resolver)
             {
                 if (resolver != null)
                 {
                     return (BaseComponentViewModel)resolver(viewModelType);
                 }
-                return (BaseComponentViewModel)Activator.CreateInstance(viewModelType)!;
-            };
 
-            RegisterInternal(info, factory);
+                return (BaseComponentViewModel)Activator.CreateInstance(viewModelType)!;
+            }
+
+            RegisterInternal(info, Factory);
         }
 
         #endregion
@@ -308,18 +311,13 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 自动发现并注册当前程序集中的所有界面组件
         /// </summary>
-        public void DiscoverAndRegisterFromCurrentAssembly()
-        {
-            DiscoverAndRegister(Assembly.GetExecutingAssembly());
-        }
+        public void DiscoverAndRegisterFromCurrentAssembly() => DiscoverAndRegister(Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// 自动发现并注册调用程序集中的所有界面组件
         /// </summary>
-        public void DiscoverAndRegisterFromCallingAssembly()
-        {
-            DiscoverAndRegister(Assembly.GetCallingAssembly());
-        }
+        public void DiscoverAndRegisterFromCallingAssembly() => DiscoverAndRegister(Assembly.GetCallingAssembly());
+
         #endregion
 
         #region Private Helper Methods

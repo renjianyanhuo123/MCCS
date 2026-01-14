@@ -1,6 +1,3 @@
-using Prism.Commands;
-using Prism.Mvvm;
-
 namespace MCCS.Interface.Components.Core
 {
     /// <summary>
