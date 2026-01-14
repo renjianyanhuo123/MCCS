@@ -12,7 +12,7 @@ namespace MCCS.UnitTest
                                     {
                                         "id": 1,
                                         "name": "测试",
-                                        "signalInfos": [ 1,2]
+                                        "signalIds": [ 1,2]
                                     }
                                     """;
 

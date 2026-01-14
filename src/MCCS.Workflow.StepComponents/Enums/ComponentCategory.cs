@@ -66,7 +66,7 @@ namespace MCCS.Workflow.StepComponents.Enums
         /// <summary>
         /// 数据与报告 - 采集、停止准则、报告生成
         /// </summary>
-        [Description("数据处理")] 
+        [Description("数据与报告")] 
         DataAndReport
     }
 }

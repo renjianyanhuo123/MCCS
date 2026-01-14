@@ -56,3 +56,7 @@ StationSafetyContext  整合所有组件的便捷入口
 4. Degraded             (资源缺失/异常)
 5. Running/Paused/Idle  (状态机流程)
 
+流程执行（Segment Execution）
+1、开始数据采集
+2、停止数据采集
+3、发送控制端命令

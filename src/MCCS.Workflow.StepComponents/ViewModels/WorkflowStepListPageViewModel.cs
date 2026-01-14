@@ -28,6 +28,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
             {
                 var description = GetDescription(status);
                 var steps = _stepRegistry.GetStepsByCategory(status);
+                if(steps.Count == 0) continue;
                 var groupModel = new WorkflowSettingGroupModel
                 {
                     GroupName = description,

@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MCCS\MCCS.csproj" />
-    <ProjectReference Include="..\..\src\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

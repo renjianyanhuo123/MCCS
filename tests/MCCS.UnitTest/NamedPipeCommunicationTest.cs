@@ -526,14 +526,13 @@ public sealed class NamedPipeCommunicationTest
 
     [TestMethod]
     [ExpectedException(typeof(ObjectDisposedException))]
-    public void NamedPipeServer_AfterDispose_ShouldThrowOnStart()
+    public async Task NamedPipeServer_AfterDispose_ShouldThrowOnStart()
     {
         // Arrange
         var server = new NamedPipeServer();
-        server.Dispose();
-
+        server.Dispose(); 
         // Act
-        server.StartAsync().Wait();
+        await server.StartAsync();
     }
 
     [TestMethod]

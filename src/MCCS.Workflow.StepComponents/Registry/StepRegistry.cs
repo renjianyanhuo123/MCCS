@@ -41,8 +41,7 @@ namespace MCCS.Workflow.StepComponents.Registry
         private void RegisterStep(Type stepType, Func<IServiceProvider?, BaseWorkflowStep> factory)
         {
             var attribute = stepType.GetCustomAttribute<StepComponentAttribute>();
-            var stepId = attribute?.Id ?? stepType.Name;
-
+            var stepId = attribute?.Id ?? stepType.Name; 
             // 创建临时实例获取参数定义
             IReadOnlyList<Parameters.IComponentParameter>? parameterDefs = null;
             try
