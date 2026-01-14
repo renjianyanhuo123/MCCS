@@ -50,13 +50,18 @@ namespace MCCS.Interface.Components.Registry
         public int Order { get; set; }
 
         /// <summary>
-        /// 步骤类型
+        /// 视图类型（View/UserControl）
         /// </summary>
-        public Type StepType { get; set; } = null!;
+        public Type ViewType { get; set; } = null!;
 
         /// <summary>
-        /// 参数类型定义
+        /// 视图模型类型（ViewModel）
         /// </summary>
-        public string? Parameters { get; set; }
+        public Type? ViewModelType { get; set; }
+
+        /// <summary>
+        /// 参数类型（用于创建组件时传递的参数类型）
+        /// </summary>
+        public Type? ParameterType { get; set; }
     }
 }
