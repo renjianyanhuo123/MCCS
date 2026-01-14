@@ -1,12 +1,13 @@
-﻿using MCCS.Models.ControlCommand;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace MCCS.Converters.ControlCommand
+using MCCS.Interface.Components.Enums;
+
+namespace MCCS.Interface.Components.Resources.Converters
 {
     public class EnumToSuffixTextConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is int unitType) 
             {
@@ -21,12 +22,9 @@ namespace MCCS.Converters.ControlCommand
                     _ => $"mm{addText}",
                 };
             }
-            return $"mm";
+            return "mm";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 }

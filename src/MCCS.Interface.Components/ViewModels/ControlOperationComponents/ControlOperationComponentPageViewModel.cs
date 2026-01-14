@@ -1,18 +1,18 @@
-﻿using MCCS.Common.Resources.ViewModels;
+﻿using System.Collections.ObjectModel;
 
 namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 {
     /// <summary>
     /// 控制操作组件
     /// </summary>
-    public class ControlOperationComponentPageViewModel:BaseViewModel
+    public class ControlOperationComponentPageViewModel : BindableBase
     {
-        public ControlOperationComponentPageViewModel(IEventAggregator eventAggregator) : base(eventAggregator)
+        public ControlOperationComponentPageViewModel()
         {
         }
 
-        public ControlOperationComponentPageViewModel(IEventAggregator eventAggregator, IDialogService? dialogService) : base(eventAggregator, dialogService)
-        {
-        }
+        #region Property 
+        public ObservableCollection<ControlUnitComponent> ControlUnits { get; } = []; 
+        #endregion
     }
 }

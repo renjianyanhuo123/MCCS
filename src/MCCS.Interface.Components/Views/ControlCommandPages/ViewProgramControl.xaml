@@ -1,0 +1,20 @@
+<UserControl x:Class="MCCS.Interface.Components.Views.ControlCommandPages.ViewProgramControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             prism:ViewModelLocator.AutoWireViewModel="True"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <StackPanel>
+        <Button
+      Width="Auto"
+      materialDesign:RippleAssist.Feedback="#DD000000"
+      Content="点击选择文件!"
+      Tag="{Binding FilePath}"
+      Style="{StaticResource MaterialDesignRaisedSecondaryButton}"
+      ToolTip="选择对应文件" />   
+    </StackPanel>
+</UserControl>

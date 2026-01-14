@@ -1,7 +1,4 @@
-﻿using MCCS.Models.ControlCommand;
-using System.Collections.ObjectModel;
-
-namespace MCCS.ViewModels.Pages.ControlCommandPages
+﻿namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
     public class ViewFatigueControlViewModel : BindableBase
     {

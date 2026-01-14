@@ -1,4 +1,4 @@
-﻿namespace MCCS.Models.ControlCommand
+﻿namespace MCCS.Interface.Components.Enums
 {
     public enum ControlUnitTypeEnum:int
     {

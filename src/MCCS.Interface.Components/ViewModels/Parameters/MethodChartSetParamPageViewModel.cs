@@ -3,10 +3,11 @@
 using MCCS.Infrastructure.Repositories;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models;
+using MCCS.Interface.Components.Models.ParamterModels;
 
 using Newtonsoft.Json;
 
-namespace MCCS.Interface.Components.ViewModels
+namespace MCCS.Interface.Components.ViewModels.Parameters
 {
     public sealed class MethodChartSetParamPageViewModel : BaseParameterSetViewModel<ChartSettingParamModel>
     { 
@@ -18,8 +19,7 @@ namespace MCCS.Interface.Components.ViewModels
         {
             _siteAggregateRepository = siteAggregateRepository;
         }
-         
-
+        
         private int _chartType;
         public int ChartType
         {

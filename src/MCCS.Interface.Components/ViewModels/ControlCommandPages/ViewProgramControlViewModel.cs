@@ -1,7 +1,8 @@
-﻿using MCCS.Models.ControlCommand;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
-namespace MCCS.ViewModels.Pages.ControlCommandPages
+using MCCS.Interface.Components.Models;
+
+namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
     public class ViewProgramControlViewModel : BindableBase
     {

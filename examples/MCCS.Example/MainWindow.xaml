@@ -7,11 +7,19 @@
         xmlns:transferControl="clr-namespace:MCCS.UserControl.Transfer;assembly=MCCS.UserControl"
         xmlns:pagination="clr-namespace:MCCS.UserControl.Pagination;assembly=MCCS.UserControl"
         xmlns:navigation="clr-namespace:MCCS.Controls.Controls.Navigation;assembly=MCCS.Controls"
+        xmlns:views="clr-namespace:MCCS.Interface.Components.Views;assembly=MCCS.Interface.Components"
+        xmlns:vm="clr-namespace:MCCS.Interface.Components.ViewModels;assembly=MCCS.Interface.Components"
+        xmlns:controlOperationComponents="clr-namespace:MCCS.Interface.Components.ViewModels.ControlOperationComponents;assembly=MCCS.Interface.Components"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="1000">
     <Window.DataContext>
         <local:MainViewModel />
     </Window.DataContext>
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type controlOperationComponents:ControlOperationComponentPageViewModel}">
+            <views:ControlOperationComponentPage />
+        </DataTemplate>
+    </Window.Resources>
     <Grid >
         <!--
         使用示例:
@@ -35,13 +43,8 @@
         <!--<transferControl:TransferUserControl Width="Auto" Height="Auto" 
                                              SourceItems="{Binding SourceList}"
                                              TargetItems="{Binding TargetList}"
-                                             SourceName="{Binding SourceName}" TargetName="{Binding TargetName}"/>-->
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        --><!-- 工具栏 -->
+                                             SourceName="{Binding SourceName}" TargetName="{Binding TargetName}"/>--> 
+        <!-- 工具栏 -->
         <!--
         <Border Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" 
                 BorderThickness="0,0,0,1" Padding="10">
@@ -97,10 +100,11 @@
                 </Canvas.Resources>
             </Canvas>
         </ScrollViewer>-->
-        <navigation:CurvedTabControl Width="800" Height="50">
-            <navigation:CurvedTabItem Header="测试"/>
-            <navigation:CurvedTabItem Header="方法"/>
-            <navigation:CurvedTabItem Header="报告"/>
-        </navigation:CurvedTabControl>
+        <!--<navigation:CurvedTabControl Width="800" Height="50">
+            <navigation:CurvedTabItem Header="测试" />
+            <navigation:CurvedTabItem Header="方法" />
+            <navigation:CurvedTabItem Header="报告" />
+        </navigation:CurvedTabControl>-->
+        <ContentControl Content="{Binding }" />
     </Grid>
 </Window>

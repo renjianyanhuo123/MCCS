@@ -1,4 +1,6 @@
-﻿namespace MCCS.Models.ControlCommand
+﻿using MCCS.Interface.Components.Enums;
+
+namespace MCCS.Models.ControlCommand
 {
     public class StaticControlModel
     {

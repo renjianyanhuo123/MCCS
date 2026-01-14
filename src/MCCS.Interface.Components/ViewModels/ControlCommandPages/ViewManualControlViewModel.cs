@@ -1,6 +1,4 @@
-﻿using MCCS.Models.ControlCommand;
-
-namespace MCCS.ViewModels.Pages.ControlCommandPages
+﻿namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
     public class ViewManualControlViewModel : BindableBase
     {

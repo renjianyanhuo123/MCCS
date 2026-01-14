@@ -1,6 +1,6 @@
 ﻿using MCCS.Infrastructure.Models.StationSites;
 
-namespace MCCS.Models.ControlCommand
+namespace MCCS.Interface.Components.Models
 {
     public class ControlChannelBindModel : BindableBase
     {

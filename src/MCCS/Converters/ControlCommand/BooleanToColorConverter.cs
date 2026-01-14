@@ -15,9 +15,6 @@ namespace MCCS.Converters.ControlCommand
             return new SolidColorBrush(Colors.White); // Default color if value is not a boolean
         }
         
-        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            return Binding.DoNothing;
-        }
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => Binding.DoNothing;
     }
 }

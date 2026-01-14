@@ -1,6 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-
+﻿using MCCS.Interface.Components.ViewModels.ControlOperationComponents;
 using MCCS.UserControl; 
 
 namespace MCCS.Example
@@ -58,6 +56,6 @@ namespace MCCS.Example
         //];
 
         //public ObservableCollection<TransferItemModel> TargetList { get; } = []; 
-
+        public ControlOperationComponentPageViewModel ViewModel { get; set; } = new();
     }
 }

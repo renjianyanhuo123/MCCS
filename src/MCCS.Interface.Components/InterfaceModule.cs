@@ -1,4 +1,5 @@
 ﻿using MCCS.Interface.Components.ViewModels;
+using MCCS.Interface.Components.ViewModels.Parameters;
 using MCCS.Interface.Components.Views;
 
 namespace MCCS.Interface.Components

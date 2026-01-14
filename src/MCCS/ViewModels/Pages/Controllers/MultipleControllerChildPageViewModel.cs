@@ -1,6 +1,6 @@
 ﻿using MCCS.Infrastructure.TestModels.Commands;
+using MCCS.Interface.Components.ViewModels.ControlCommandPages;
 using MCCS.Models;
-using MCCS.ViewModels.Pages.ControlCommandPages;
 using MCCS.Views.Pages.ControlCommandPages;
 
 namespace MCCS.ViewModels.Pages.Controllers

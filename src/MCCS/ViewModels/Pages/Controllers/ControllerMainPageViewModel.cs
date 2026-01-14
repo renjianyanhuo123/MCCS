@@ -6,10 +6,10 @@ using MCCS.Events.Controllers;
 using MCCS.Infrastructure.Models.StationSites;
 using MCCS.Infrastructure.TestModels.Commands;
 using MCCS.Infrastructure.TestModels.ControlParams;
+using MCCS.Interface.Components.ViewModels.ControlCommandPages;
 using MCCS.Models; 
 using MCCS.Station.Core.ControlChannelManagers;
-using MCCS.Station.Core.DllNative.Models; 
-using MCCS.ViewModels.Pages.ControlCommandPages;
+using MCCS.Station.Core.DllNative.Models;
 using MCCS.Views.Pages.ControlCommandPages;
 
 namespace MCCS.ViewModels.Pages.Controllers
@@ -19,10 +19,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         INotificationService notificationService,
         IEventAggregator eventAggregator) : BindableBase
     {
-        public const string Tag = "ControllerMainPage";  
-        private readonly IEventAggregator _eventAggregator = eventAggregator;
-        private readonly IControlChannelManager _controlChannelManager = controlChannelManager;
-        private readonly INotificationService _notificationService = notificationService; 
+        public const string Tag = "ControllerMainPage";
         private readonly Model3DMainInfo? _modelInfo;
 
         public ControllerMainPageViewModel(
@@ -195,7 +192,7 @@ namespace MCCS.ViewModels.Pages.Controllers
             var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
             if (controlChannel == null)
             {
-                _notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
+                notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
                 return;
             } 
             switch (controlMode)
@@ -203,7 +200,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Fatigue:
                     if (CurrentPage.DataContext is ViewFatigueControlViewModel fatigueControlViewModel)
                     {  
-                        var commandContext = _controlChannelManager.DynamicControl(controlChannel.Id, new DynamicControlParams
+                        var commandContext = controlChannelManager.DynamicControl(controlChannel.Id, new DynamicControlParams
                         {
                             ControlMode = fatigueControlViewModel.ControlUnitType,
                             Amplitude = fatigueControlViewModel.Amplitude,
@@ -216,11 +213,11 @@ namespace MCCS.ViewModels.Pages.Controllers
                         });
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
+                            notificationService.Show("成功", "该通道成功启动疲劳控制!", NotificationType.Success); 
                         }
                         else
                         {
-                            _notificationService.Show("失败", "该通道启动疲劳控制失败!", NotificationType.Error);
+                            notificationService.Show("失败", "该通道启动疲劳控制失败!", NotificationType.Error);
                         }
                     }
                     break;
@@ -228,7 +225,7 @@ namespace MCCS.ViewModels.Pages.Controllers
                     if (CurrentPage.DataContext is ViewStaticControlViewModel staticControlViewModel)
                     {
                        
-                        var commandContext = _controlChannelManager.StaticControl(controlChannel.Id,
+                        var commandContext = controlChannelManager.StaticControl(controlChannel.Id,
                             new StaticControlParams
                             {
                                 StaticLoadControl = GetStaticLoadControl(staticControlViewModel),
@@ -237,11 +234,11 @@ namespace MCCS.ViewModels.Pages.Controllers
                             });
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success); 
+                            notificationService.Show("成功", "该通道成功启动静态控制！", NotificationType.Success); 
                         }
                         else
                         {
-                            _notificationService.Show("失败", "该通道启动静态控制失败!", NotificationType.Error);
+                            notificationService.Show("失败", "该通道启动静态控制失败!", NotificationType.Error);
                         }
                     }
                     break;
@@ -254,14 +251,14 @@ namespace MCCS.ViewModels.Pages.Controllers
                 case ControlMode.Manual:
                     if (CurrentPage.DataContext is ViewManualControlViewModel manualControlViewModel)
                     {  
-                        var commandContext = _controlChannelManager.ManualControl(controlChannel.Id, (float)manualControlViewModel.OutPutValue);
+                        var commandContext = controlChannelManager.ManualControl(controlChannel.Id, (float)manualControlViewModel.OutPutValue);
                         if (commandContext.IsValid)
                         {
-                            _notificationService.Show("成功", "该通道成功启动手动控制！", NotificationType.Success);
+                            notificationService.Show("成功", "该通道成功启动手动控制！", NotificationType.Success);
                         }
                         else
                         {
-                            _notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
+                            notificationService.Show("失败", "该通道启动手动控制失败!", NotificationType.Error);
                         }
                     }
                     break;
@@ -280,17 +277,17 @@ namespace MCCS.ViewModels.Pages.Controllers
             var controlChannel = _modelInfo.ControlChannelInfos.FirstOrDefault(c => c.ChannelType is ChannelTypeEnum.Mix);
             if (controlChannel == null)
             {
-                _notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
+                notificationService.Show("失败", "该模型未绑定控制通道!", NotificationType.Error);
                 return;
             }
-            var commandContext = _controlChannelManager.StopControl(controlChannel.Id);
+            var commandContext = controlChannelManager.StopControl(controlChannel.Id);
             if (commandContext.IsValid)
             {
-                _notificationService.Show("成功", "暂停通道动作!", NotificationType.Success);
+                notificationService.Show("成功", "暂停通道动作!", NotificationType.Success);
             }
             else
             {
-                _notificationService.Show("失败", "暂停通道动作失败!", NotificationType.Error);
+                notificationService.Show("失败", "暂停通道动作失败!", NotificationType.Error);
             }
         }
 
@@ -343,7 +340,7 @@ namespace MCCS.ViewModels.Pages.Controllers
         {
             if (modelId == null) return;
             IsParticipateControl = false;
-            _eventAggregator.GetEvent<InverseControlEvent>().Publish(new InverseControlEventParam
+            eventAggregator.GetEvent<InverseControlEvent>().Publish(new InverseControlEventParam
             {
                 ModelId = (long)modelId
             });

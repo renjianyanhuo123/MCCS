@@ -17,6 +17,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\ControlCommandPages\ViewFatigueControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ControlCommandPages\ViewManualControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ControlCommandPages\ViewProgramControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ControlCommandPages\ViewStaticControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\DataMonitorSetParamPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -3,7 +3,7 @@ using MCCS.Interface.Components.Events;
 
 using Newtonsoft.Json;
 
-namespace MCCS.Interface.Components.ViewModels
+namespace MCCS.Interface.Components.ViewModels.Parameters
 {
     /// <summary>
     /// 基类
