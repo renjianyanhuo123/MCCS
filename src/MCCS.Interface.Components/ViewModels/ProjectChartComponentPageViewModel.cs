@@ -12,7 +12,7 @@ using SkiaSharp;
 
 namespace MCCS.Interface.Components.ViewModels
 {
-    public class ProjectChartComponentPageViewModel : BindableBase
+    public class ProjectChartComponentPageViewModel : BaseComponentViewModel
     {
         public ProjectChartComponentPageViewModel(ChartSettingParamModel parameter)
         {

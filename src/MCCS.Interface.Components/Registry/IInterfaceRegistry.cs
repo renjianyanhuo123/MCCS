@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 
 using MCCS.Interface.Components.Enums;
+using MCCS.Interface.Components.ViewModels;
 
 namespace MCCS.Interface.Components.Registry
 {
@@ -12,14 +13,14 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 注册界面组件类型（UserControl）
         /// </summary>
-        /// <typeparam name="TView">视图类型</typeparam>
-        void RegisterComponent<TView>() where TView : FrameworkElement, new();
+        /// <typeparam name="TViewModel">视图模型</typeparam>
+        void RegisterComponent<TViewModel>() where TViewModel : BaseComponentViewModel;
 
         /// <summary>
         /// 注册界面组件类型（使用工厂方法）
         /// </summary>
-        /// <typeparam name="TView">视图类型</typeparam>
-        void RegisterComponent<TView>(Func<IServiceProvider, TView> factory) where TView : FrameworkElement;
+        /// <typeparam name="TViewModel">视图类型</typeparam>
+        void RegisterComponent<TViewModel>(Func<IServiceProvider, TViewModel> factory) where TViewModel : BaseComponentViewModel;
 
         /// <summary>
         /// 注册界面组件类型
@@ -54,22 +55,22 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 创建组件实例
         /// </summary>
-        FrameworkElement? CreateComponent(string componentId);
+        BaseComponentViewModel? CreateComponent(string componentId);
 
         /// <summary>
         /// 创建组件实例（带参数）
         /// </summary>
-        FrameworkElement? CreateComponent(string componentId, object? parameter);
+        BaseComponentViewModel? CreateComponent(string componentId, object? parameter);
 
         /// <summary>
         /// 创建组件实例（泛型）
         /// </summary>
-        TView? CreateComponent<TView>(string componentId) where TView : FrameworkElement;
+        TViewModel? CreateComponent<TViewModel>(string componentId) where TViewModel : BaseComponentViewModel;
 
         /// <summary>
         /// 创建组件实例（泛型，带参数）
         /// </summary>
-        TView? CreateComponent<TView>(string componentId, object? parameter) where TView : FrameworkElement;
+        TViewModel? CreateComponent<TViewModel>(string componentId, object? parameter) where TViewModel : BaseComponentViewModel;
 
         /// <summary>
         /// 检查组件是否已注册

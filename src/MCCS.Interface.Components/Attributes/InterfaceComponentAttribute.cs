@@ -23,10 +23,11 @@ namespace MCCS.Interface.Components.Attributes
         /// 组件名称
         /// </summary>
         public string Name { get; }
+
         /// <summary>
         /// 组件种类
         /// </summary>
-        public InterfaceComponentCategory Category { get; set; } = InterfaceComponentCategory.Display;
+        public InterfaceComponentCategory Category { get; set; } 
         /// <summary>
         /// 组件描述
         /// </summary>
