@@ -9,6 +9,7 @@ using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models;
 using MCCS.Interface.Components.Models.ParamterModels;
+using MCCS.Interface.Components.ViewModels.Parameters;
 
 using SkiaSharp;
 
@@ -19,6 +20,8 @@ namespace MCCS.Interface.Components.ViewModels
         "图表组件",
         InterfaceComponentCategory.Display,
         Description = "用于控制通道操作和参数设置",
+        IsCanSetParam = true,
+        SetParamViewName = nameof(MethodChartSetParamPageViewModel),
         Icon = "Cogs",
         Order = 3)]
     public class ProjectChartComponentPageViewModel : BaseComponentViewModel
@@ -30,7 +33,7 @@ namespace MCCS.Interface.Components.ViewModels
                 new LineSeries<CurveMeasureValueModel>()
                 {
                     Values = ObservableValues,
-                    Mapping = (model, index) => new Coordinate(model.XValue, model.YValue),
+                    Mapping = (model, _) => new Coordinate(model.XValue, model.YValue),
                     Fill = null,
                     GeometrySize = 0,
                     AnimationsSpeed = TimeSpan.Zero,

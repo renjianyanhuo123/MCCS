@@ -13,6 +13,8 @@ namespace MCCS.Interface.Components.ViewModels
         InterfaceComponentCategory.Display,
         Description = "用于实时监控和显示测试数据",
         Icon = "MonitorDashboard",
+        IsCanSetParam = true,
+        SetParamViewName = nameof(DataMonitorSetParamPageViewModel),
         Order = 2)]
     public sealed class ProjectDataMonitorComponentPageViewModel : BaseComponentViewModel
     {

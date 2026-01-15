@@ -1,7 +1,7 @@
 ﻿using MCCS.Interface.Components.Registry;
 using MCCS.Interface.Components.ViewModels;
+using MCCS.Interface.Components.ViewModels.Parameters;
 using MCCS.Interface.Components.Views;
-using MCCS.Interface.Components.Views.ControlCommandPages;
 
 namespace MCCS.Interface.Components
 {
@@ -16,7 +16,10 @@ namespace MCCS.Interface.Components
             containerRegistry.RegisterSingleton<IInterfaceRegistry, InterfaceRegistry>();
             // 组件列表界面注册
             containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
-            // 注册控制命令页面
+            // 组件参数配置界面注册
+            containerRegistry.RegisterForNavigation<MethodChartSetParamPage>(nameof(MethodChartSetParamPageViewModel));
+            containerRegistry.RegisterForNavigation<DataMonitorSetParamPage>(nameof(DataMonitorSetParamPageViewModel));
+            // 注册控制命令页面 
             //containerRegistry.RegisterForNavigation<ViewManualControl>(nameof(ViewManualControl));
             //containerRegistry.RegisterForNavigation<ViewStaticControl>(nameof(ViewStaticControl));
             //containerRegistry.RegisterForNavigation<ViewProgramControl>(nameof(ViewProgramControl));

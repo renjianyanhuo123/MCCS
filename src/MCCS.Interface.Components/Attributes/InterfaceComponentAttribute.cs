@@ -52,5 +52,13 @@ namespace MCCS.Interface.Components.Attributes
         /// 排序顺序
         /// </summary>
         public int Order { get; set; } = 0;
+        /// <summary>
+        /// 是否可以设置参数
+        /// </summary>
+        public bool IsCanSetParam { get; set; }
+        /// <summary>
+        /// 设置参数视图名称
+        /// </summary>
+        public string SetParamViewName { get; set; }
     }
 }

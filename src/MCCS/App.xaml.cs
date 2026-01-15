@@ -9,8 +9,6 @@ using MCCS.Common.Resources.ViewModels;
 using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Interface.Components;
-using MCCS.Interface.Components.ViewModels;
-using MCCS.Interface.Components.Views;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;

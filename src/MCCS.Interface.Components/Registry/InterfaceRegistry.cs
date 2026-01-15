@@ -346,6 +346,8 @@ namespace MCCS.Interface.Components.Registry
                 Category = attribute.Category,
                 Icon = attribute.Icon,
                 Version = attribute.Version,
+                IsCanSetParam = attribute.IsCanSetParam,
+                SetParamViewName = attribute.SetParamViewName,
                 Author = attribute.Author,
                 IsEnabled = attribute.IsEnabled,
                 Order = attribute.Order, 

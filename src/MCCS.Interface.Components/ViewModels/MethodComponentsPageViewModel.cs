@@ -18,7 +18,7 @@ namespace MCCS.Interface.Components.ViewModels
         public MethodComponentsPageViewModel(IEventAggregator eventAggregator, IInterfaceRegistry interfaceRegistry) : base(eventAggregator)
         {
             _interfaceRegistry = interfaceRegistry; 
-            LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
+            LoadCommand = new DelegateCommand(ExecuteLoadCommand);
             SelectComponentCommand = new DelegateCommand<UiComponentListItemModel>(ExecuteSelectComponentCommand);
         }
 
@@ -29,7 +29,7 @@ namespace MCCS.Interface.Components.ViewModels
         }
 
         #region Command
-        public AsyncDelegateCommand LoadCommand { get; }
+        public DelegateCommand LoadCommand { get; }
 
         public DelegateCommand<UiComponentListItemModel> SelectComponentCommand { get; }
         #endregion
@@ -42,7 +42,7 @@ namespace MCCS.Interface.Components.ViewModels
             DescriptionAttribute? attr = field.GetCustomAttribute<DescriptionAttribute>();
             return attr?.Description ?? value.ToString();
         }
-        private async Task ExecuteLoadCommand()
+        private void ExecuteLoadCommand()
         {
             GroupModels.Clear();
             foreach (InterfaceComponentCategory status in Enum.GetValues(typeof(InterfaceComponentCategory)))

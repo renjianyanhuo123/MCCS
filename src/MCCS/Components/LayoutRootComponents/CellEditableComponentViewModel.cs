@@ -209,7 +209,7 @@ namespace MCCS.Components.LayoutRootComponents
                 Parameter = ParamterJson
             });
 
-        private async void OnSelectedComponent(SelectedComponentEventParam param)
+        private void OnSelectedComponent(SelectedComponentEventParam param)
         {
             try
             {

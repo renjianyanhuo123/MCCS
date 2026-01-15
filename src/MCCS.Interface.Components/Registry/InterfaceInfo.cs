@@ -56,12 +56,10 @@ namespace MCCS.Interface.Components.Registry
         /// 该组件是否可以设置参数
         /// </summary>
         public bool IsCanSetParam { get; set; }
-
         /// <summary>
         /// 视图模型类型（ViewModel）
         /// </summary>
         public Type? ViewModelType { get; set; }
-
         /// <summary>
         /// 参数类型（用于创建组件时传递的参数类型）
         /// </summary>
