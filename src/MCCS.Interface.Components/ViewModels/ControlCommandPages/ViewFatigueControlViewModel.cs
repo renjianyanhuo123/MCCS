@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
-    public class ViewFatigueControlViewModel : BindableBase
+    public class ViewFatigueControlViewModel : BaseControlViewModel
     {
         public const string Tag = "FatigueControl";   
 

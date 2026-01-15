@@ -2,7 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:views="clr-namespace:MCCS.Interface.Components.Views"
                     xmlns:vm="clr-namespace:MCCS.Interface.Components.ViewModels"
-                    xmlns:controlOperationComponents="clr-namespace:MCCS.Interface.Components.ViewModels.ControlOperationComponents">
+                    xmlns:controlOperationComponents="clr-namespace:MCCS.Interface.Components.ViewModels.ControlOperationComponents"
+                    xmlns:controlOperationComponents1="clr-namespace:MCCS.Interface.Components.Views.ControlOperationComponents"
+                    xmlns:controlCommandPages="clr-namespace:MCCS.Interface.Components.ViewModels.ControlCommandPages"
+                    xmlns:controlCommandPages1="clr-namespace:MCCS.Interface.Components.Views.ControlCommandPages">
     <DataTemplate DataType="{x:Type vm:ProjectChartComponentPageViewModel}">
         <views:ProjectChartComponentPage />
     </DataTemplate>
@@ -11,5 +14,24 @@
     </DataTemplate>
     <DataTemplate DataType="{x:Type controlOperationComponents:ControlOperationComponentPageViewModel}">
         <views:ControlOperationComponentPage />
+    </DataTemplate>
+    <!-- 控制部分的DataTemplate -->
+    <DataTemplate DataType="{x:Type controlOperationComponents:ControlCombineUnitComponent}">
+        <controlOperationComponents1:ControlCombineUnitComponentPage />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type controlOperationComponents:ControlSingleUnitComponent}">
+        <controlOperationComponents1:ControlSingleUnitComponentPage />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type controlCommandPages:ViewFatigueControlViewModel}">
+        <controlCommandPages1:ViewFatigueControl />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type controlCommandPages:ViewManualControlViewModel}">
+        <controlCommandPages1:ViewManualControl />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type controlCommandPages:ViewProgramControlViewModel}">
+        <controlCommandPages1:ViewProgramControl />
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type controlCommandPages:ViewStaticControlViewModel}">
+        <controlCommandPages1:ViewStaticControl />
     </DataTemplate>
 </ResourceDictionary>

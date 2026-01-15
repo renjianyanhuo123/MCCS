@@ -105,6 +105,6 @@
             <navigation:CurvedTabItem Header="方法" />
             <navigation:CurvedTabItem Header="报告" />
         </navigation:CurvedTabControl>-->
-        <ContentControl Content="{Binding }" />
+        <ContentControl Width="Auto" Height="Auto" Content="{Binding ViewModel}" />
     </Grid>
 </Window>

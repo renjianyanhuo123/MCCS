@@ -169,7 +169,7 @@ namespace MCCS.Interface.Components.Registry
 
             var ctorArgs = new Expression[paramInfos.Count];
 
-            for (int i = 0; i < paramInfos.Count; i++)
+            for (var i = 0; i < paramInfos.Count; i++)
             {
                 var info = paramInfos[i];
                 var paramType = info.ParameterInfo.ParameterType;
@@ -230,10 +230,7 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 转换业务参数（在表达式中调用）
         /// </summary>
-        public static object? ConvertBusinessParameter(object? input, Type targetType)
-        {
-            return StringPrserCache.ConvertToTarget(input, targetType);
-        }
+        public static object? ConvertBusinessParameter(object? input, Type targetType) => StringPrserCache.ConvertToTarget(input, targetType);
 
         #region Nested Types
 

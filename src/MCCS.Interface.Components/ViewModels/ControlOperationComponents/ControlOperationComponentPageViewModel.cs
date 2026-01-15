@@ -3,6 +3,7 @@
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models.ParamterModels;
+using MCCS.Interface.Components.Models.ParamterModels.ControlOperationParameters;
 
 namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 {
@@ -18,12 +19,54 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         Order = 1)]
     public class ControlOperationComponentPageViewModel : BaseComponentViewModel
     {
-        public ControlOperationComponentPageViewModel(ControlOperationParamModel paramModel)
+        public ControlOperationComponentPageViewModel(List<ControlOperationParamModel> paramModels)
         {
+            CombineCommand = new DelegateCommand(ExecuteCombineCommand);
+            foreach (var controlChannel in paramModels)
+            {
+                ControlUnits.Add(new ControlSingleUnitComponent
+                {
+                    Title = controlChannel.ControlChannelName,
+                    ControlUnitId = Guid.NewGuid().ToString("N"),
+                    ChildComponent = new ControlCombineUnitChildComponent(controlChannel.ControlChannelId, controlChannel.ControlChannelName, controlChannel.AllowedControlModes)
+                });
+            }
         }
 
         #region Property 
-        public ObservableCollection<ControlUnitComponent> ControlUnits { get; } = []; 
+        public ObservableCollection<ControlUnitComponent> ControlUnits { get; } = [];
+        #endregion
+
+        #region Command
+        public DelegateCommand CombineCommand { get; }
+        #endregion
+
+        #region Private Method
+        private void ExecuteCombineCommand()
+        {
+            var count = 0;
+            var tempComponents = new List<ControlSingleUnitComponent>();
+            foreach (var controlUnit in ControlUnits)
+            {
+                if (controlUnit is ControlSingleUnitComponent singleUnitComponent)
+                {
+                    tempComponents.Add(singleUnitComponent);
+                    count++;
+                }
+            }
+            if (count <= 1) return;
+            foreach (var item in tempComponents)
+            {
+                ControlUnits.Remove(item);
+            }
+            var children = tempComponents.Select(s => new ControlCombineUnitChildComponent(
+                s.ChildComponent.ChannelId,
+                s.ChildComponent.ChannelName,
+                s.ChildComponent.ControlModeSelections
+                    .Select(c => (ControlModeTypeEnum)c.ControlModeId))).ToList();
+            var combineComponent = new ControlCombineUnitComponent(children);
+            ControlUnits.Add(combineComponent);
+        }
         #endregion
     }
 }

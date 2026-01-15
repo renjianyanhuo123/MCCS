@@ -1,6 +1,6 @@
 ﻿namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
-    public class ViewManualControlViewModel : BindableBase
+    public class ViewManualControlViewModel : BaseControlViewModel
     {
         public const string Tag = "ManualControl";
          

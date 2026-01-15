@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
     <ProjectReference Include="..\MCCS.Workflow.Contact\MCCS.Workflow.Contact.csproj" />
   </ItemGroup>
 

@@ -2,6 +2,18 @@
 {
     public class ControlUnitComponent : BindableBase
     {
+        public ControlUnitComponent()
+        {
+            ApplyCommand = new DelegateCommand(ExecuteApplyCommand);
+            StopCommand = new DelegateCommand(ExecuteStopCommand);
+        }
+
+        private string _controlUnitId = ""; 
+        public string ControlUnitId
+        {
+            get => _controlUnitId;
+            set => SetProperty(ref _controlUnitId, value);
+        }
 
         private double _width = 0.0; 
         public double Width
@@ -23,5 +35,19 @@
             get => _title;
             set => SetProperty(ref _title, value);
         }
+
+        public DelegateCommand ApplyCommand { get; }
+        public DelegateCommand StopCommand { get; }
+
+        #region Private Method
+
+        protected virtual void ExecuteApplyCommand()
+        {
+        }
+
+        protected virtual void ExecuteStopCommand()
+        { 
+        }
+        #endregion
     }
 }

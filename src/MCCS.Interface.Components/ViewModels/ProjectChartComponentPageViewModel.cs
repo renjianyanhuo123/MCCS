@@ -26,7 +26,10 @@ namespace MCCS.Interface.Components.ViewModels
         Order = 3)]
     public class ProjectChartComponentPageViewModel : BaseComponentViewModel
     {
-        public ProjectChartComponentPageViewModel(ChartSettingParamModel parameter)
+        public ProjectChartComponentPageViewModel(
+
+            ChartSettingParamModel parameter
+        )
         {
             CurveSeries =
             [

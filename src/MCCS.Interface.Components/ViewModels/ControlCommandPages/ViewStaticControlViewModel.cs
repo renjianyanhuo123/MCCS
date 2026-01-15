@@ -4,7 +4,7 @@ using MCCS.Interface.Components.Models;
 
 namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
-    public class ViewStaticControlViewModel : BindableBase
+    public class ViewStaticControlViewModel : BaseControlViewModel
     {
         public const string Tag = "StaticControl";
          

@@ -4,7 +4,7 @@ using MCCS.Interface.Components.Models;
 
 namespace MCCS.Interface.Components.ViewModels.ControlCommandPages
 {
-    public class ViewProgramControlViewModel : BindableBase
+    public class ViewProgramControlViewModel : BaseControlViewModel
     {
         public const string Tag = "ProgramControl"; 
         private string? _filePath = string.Empty;

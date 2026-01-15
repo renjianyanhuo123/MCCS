@@ -1,4 +1,6 @@
-﻿using MCCS.Interface.Components.ViewModels.ControlOperationComponents;
+﻿using MCCS.Interface.Components.Enums;
+using MCCS.Interface.Components.Models.ParamterModels.ControlOperationParameters;
+using MCCS.Interface.Components.ViewModels.ControlOperationComponents;
 using MCCS.UserControl; 
 
 namespace MCCS.Example
@@ -56,6 +58,30 @@ namespace MCCS.Example
         //];
 
         //public ObservableCollection<TransferItemModel> TargetList { get; } = []; 
-        public ControlOperationComponentPageViewModel ViewModel { get; set; } = new();
+        public ControlOperationComponentPageViewModel ViewModel { get; set; } = new([
+            new ControlOperationParamModel
+            {
+                ControlChannelId = 1,
+                ControlChannelName = "控制通道1",
+                AllowedControlModes =
+                [
+                    ControlModeTypeEnum.Manual,
+                    ControlModeTypeEnum.Static,
+                    ControlModeTypeEnum.Fatigue
+                ]
+            },
+
+            new ControlOperationParamModel
+            {
+                ControlChannelId = 2,
+                ControlChannelName = "控制通道2",
+                AllowedControlModes =
+                [
+                    ControlModeTypeEnum.Manual,
+                    ControlModeTypeEnum.Static,
+                    ControlModeTypeEnum.Fatigue
+                ]
+            }
+        ]);
     }
 }

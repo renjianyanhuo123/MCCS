@@ -1,9 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Reflection;
 using System.Windows.Media;
 
 using MCCS.Common.Resources.ViewModels;
+using MCCS.Infrastructure.Helper;
 using MCCS.Workflow.Contact.Events;
 using MCCS.Workflow.Contact.Models;
 using MCCS.Workflow.StepComponents.Enums;
@@ -26,7 +25,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
             _stepRegistry = stepRegistry; 
             foreach (ComponentCategory status in Enum.GetValues(typeof(ComponentCategory)))
             {
-                var description = GetDescription(status);
+                var description = EnumHelper.GetDescription(status);
                 var steps = _stepRegistry.GetStepsByCategory(status);
                 if(steps.Count == 0) continue;
                 var groupModel = new WorkflowSettingGroupModel
@@ -81,15 +80,7 @@ namespace MCCS.Workflow.StepComponents.ViewModels
                 Source = _sourceId,
                 Node = nodeInfo
             });
-        }
-
-        private static string GetDescription(Enum value)
-        {
-            FieldInfo? field = value.GetType().GetField(value.ToString());
-            if (field == null) return value.ToString(); 
-            DescriptionAttribute? attr = field.GetCustomAttribute<DescriptionAttribute>(); 
-            return attr?.Description ?? value.ToString();
-        }
+        } 
         #endregion
     }
 }

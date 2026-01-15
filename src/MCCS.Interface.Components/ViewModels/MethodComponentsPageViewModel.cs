@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 
 using MCCS.Common.Resources.ViewModels;
+using MCCS.Infrastructure.Helper;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Events;
 using MCCS.Interface.Components.Models;
@@ -37,20 +38,13 @@ namespace MCCS.Interface.Components.ViewModels
         public DelegateCommand<UiComponentListItemModel> SelectComponentCommand { get; }
         #endregion
 
-        #region Private Method
-        private static string GetDescription(Enum value)
-        {
-            FieldInfo? field = value.GetType().GetField(value.ToString());
-            if (field == null) return value.ToString();
-            DescriptionAttribute? attr = field.GetCustomAttribute<DescriptionAttribute>();
-            return attr?.Description ?? value.ToString();
-        }
+        #region Private Method 
         private void ExecuteLoadCommand()
         {
             GroupModels.Clear();
             foreach (InterfaceComponentCategory status in Enum.GetValues(typeof(InterfaceComponentCategory)))
             {
-                var description = GetDescription(status);
+                var description = EnumHelper.GetDescription(status);
                 var components = _interfaceRegistry.GetComponentsByCategory(status);
                 if (components.Count == 0) continue;
                 var groupModel = new InterfaceGroupModel
