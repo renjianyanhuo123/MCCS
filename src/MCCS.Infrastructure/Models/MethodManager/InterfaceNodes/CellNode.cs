@@ -10,7 +10,7 @@
         public CellNode(
             string id,
             NodeTypeEnum type,
-            long nodeId,
+            string nodeId,
             string? paramterJson,
             string? parentId = null,
             string? leftNodeId = null,
@@ -23,8 +23,9 @@
 
         /// <summary>
         /// 配置的UIComponent节点Id
+        /// 在组件的特性中定义
         /// </summary>
-        public long NodeId { get; set; } 
+        public string NodeId { get; set; } 
 
         /// <summary>
         /// 所有的参数

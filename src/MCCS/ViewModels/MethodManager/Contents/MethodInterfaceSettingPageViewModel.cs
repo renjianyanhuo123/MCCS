@@ -45,8 +45,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
         private async Task ExecuteCommand()
         {
             if (_methodId == -1) throw new ArgumentNullException(nameof(_methodId));
-            var settingModel = await _methodRepository.GetInterfaceSettingAsync(_methodId);
-            var components = await _methodRepository.GetUiComponentsAsync();
+            var settingModel = await _methodRepository.GetInterfaceSettingAsync(_methodId); 
             var settings = new JsonSerializerSettings
             {
                 Converters = new List<JsonConverter>
@@ -55,7 +54,7 @@ namespace MCCS.ViewModels.MethodManager.Contents
                 }
             };
             var nodes = settingModel?.RootSetting == null ? [] : JsonConvert.DeserializeObject<List<BaseNode>>(settingModel.RootSetting, settings);  
-            var rootNode = _layoutTreeTraversal.BuildRootNode(CellTypeEnum.Editable, nodes ?? [] , components);
+            var rootNode = _layoutTreeTraversal.BuildRootNode(CellTypeEnum.Editable, nodes ?? []);
             LayoutRootViewModel = new LayoutRootViewModel(rootNode, _eventAggregator);
         }
         #endregion

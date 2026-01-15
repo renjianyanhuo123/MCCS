@@ -1,11 +1,8 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
-using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
-using MCCS.Services.ProjectServices;
+using MCCS.Interface.Components.Registry;
 using MCCS.ViewModels.Dialogs.Project;
-
-using Newtonsoft.Json;
 
 namespace MCCS.Components.LayoutRootComponents
 {
@@ -15,13 +12,13 @@ namespace MCCS.Components.LayoutRootComponents
         private readonly IEventAggregator _eventAggregator;
 
         public CellContainerComponentViewModel(IDialogService dialogService, 
-            IProjectComponentFactoryService projectComponentFactoryService,
+            IInterfaceRegistry interfaceRegistry,
             IEventAggregator eventAggregator, 
             CellNode? node = null)
         {
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
-            if(node != null) InnerViewModel = projectComponentFactoryService.BuildComponentViewModel(node);
+            if(node != null) InnerViewModel = interfaceRegistry.CreateComponent(node.NodeId);
             PlaceholderPopupCommand = new DelegateCommand(ExecutePlaceholderPopupCommand);
             NonPlaceholderPopupCommand = new DelegateCommand(ExevuteNonPlaceholderPopupCommand);
         }

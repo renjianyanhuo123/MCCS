@@ -1,4 +1,4 @@
-﻿namespace MCCS.Views.MethodManager
+﻿namespace MCCS.Interface.Components.Views
 {
     /// <summary>
     /// MethodComponentsPage.xaml 的交互逻辑

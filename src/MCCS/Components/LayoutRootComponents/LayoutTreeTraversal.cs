@@ -1,28 +1,23 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
-using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
-using MCCS.Infrastructure.Repositories.Method;
-using MCCS.Services.ProjectServices;
+using MCCS.Interface.Components.Registry;
 
 namespace MCCS.Components.LayoutRootComponents
 {
     public class LayoutTreeTraversal : ILayoutTreeTraversal
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IMethodRepository _methodRepository; 
+        private readonly IEventAggregator _eventAggregator;  
         private readonly IDialogService _dialogService; 
-        private readonly IProjectComponentFactoryService _projectComponentFactoryService;
+        private readonly IInterfaceRegistry _interfaceRegistry;
 
         public LayoutTreeTraversal(
             IEventAggregator eventAggregator,
-            IProjectComponentFactoryService projectComponentFactoryService,
-            IDialogService dialogService,
-            IMethodRepository methodRepository)
+            IInterfaceRegistry interfaceRegistry,
+            IDialogService dialogService)
         {
-            _projectComponentFactoryService = projectComponentFactoryService;
+            _interfaceRegistry = interfaceRegistry;
             _dialogService = dialogService;
-            _eventAggregator = eventAggregator;
-            _methodRepository = methodRepository;
+            _eventAggregator = eventAggregator; 
         }
 
         /// <summary>
@@ -65,7 +60,7 @@ namespace MCCS.Components.LayoutRootComponents
             return result;
         } 
 
-        public LayoutNode BuildRootNode(CellTypeEnum cellType, List<BaseNode> nodes, List<MethodUiComponentsModel> components)
+        public LayoutNode BuildRootNode(CellTypeEnum cellType, List<BaseNode> nodes)
         {
             if (nodes.Count == 0) return CreateLayoutNode(cellType);
             LayoutNode? loopNode = null;
@@ -76,7 +71,7 @@ namespace MCCS.Components.LayoutRootComponents
                 switch (node)
                 {
                     case CellNode cellNode:
-                        loopNode = CreateLayoutNode(cellType, cellNode, components.FirstOrDefault(c => c.Id == cellNode.NodeId));
+                        loopNode = CreateLayoutNode(cellType, cellNode, _interfaceRegistry.GetComponentInfo(cellNode.NodeId));
                         break;
                     case SplitterNode splitterNode:
                         if (splitterNode.LeftNodeId == null
@@ -106,19 +101,19 @@ namespace MCCS.Components.LayoutRootComponents
             return loopNode;
         }
 
-        private LayoutNode CreateLayoutNode(CellTypeEnum cellType, CellNode? node = null, MethodUiComponentsModel? component = null)
+        private LayoutNode CreateLayoutNode(CellTypeEnum cellType, CellNode? node = null, InterfaceInfo? component = null)
         {
             if (cellType == CellTypeEnum.DisplayOnly)
             {
-                return new CellContainerComponentViewModel(_dialogService, _projectComponentFactoryService, _eventAggregator, node);
+                return new CellContainerComponentViewModel(_dialogService, _interfaceRegistry, _eventAggregator, node);
             }
 
             if (node == null || component == null)
             {
-                return new CellEditableComponentViewModel(_eventAggregator, _methodRepository);
+                return new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry);
             }
 
-            return new CellEditableComponentViewModel(_eventAggregator, _methodRepository, node, component);
+            return new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry, node, component);
         }
 
         private static BaseNode CreateBaseNode(LayoutNode node) =>

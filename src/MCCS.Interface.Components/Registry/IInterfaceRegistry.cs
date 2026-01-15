@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-using MCCS.Interface.Components.Enums;
+﻿using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.ViewModels;
 
 namespace MCCS.Interface.Components.Registry
@@ -93,7 +91,7 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 获取所有已注册的组件类型
         /// </summary>
-        IReadOnlyList<Type> GetAllComponentTypes();
+        List<Type?> GetAllComponentTypes();
 
         /// <summary>
         /// 组件注册事件

@@ -1,10 +1,19 @@
 ﻿using System.Collections.ObjectModel;
 
+using MCCS.Interface.Components.Attributes;
+using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models.ParamterModels;
 using MCCS.Interface.Components.ViewModels.Parameters;
 
 namespace MCCS.Interface.Components.ViewModels
 {
+    [InterfaceComponent(
+        "data-monitor-component",
+        "数据监控组件",
+        InterfaceComponentCategory.Display,
+        Description = "用于实时监控和显示测试数据",
+        Icon = "MonitorDashboard",
+        Order = 2)]
     public sealed class ProjectDataMonitorComponentPageViewModel : BaseComponentViewModel
     {
         /// <summary>

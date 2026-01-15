@@ -48,11 +48,14 @@ namespace MCCS.Interface.Components.Registry
         /// 排序顺序
         /// </summary>
         public int Order { get; set; }
-
         /// <summary>
-        /// 视图类型（View/UserControl）
+        /// 为组件设置参数视图名称
         /// </summary>
-        public Type ViewType { get; set; } = null!;
+        public string SetParamViewName { get; set; } = string.Empty;
+        /// <summary>
+        /// 该组件是否可以设置参数
+        /// </summary>
+        public bool IsCanSetParam { get; set; }
 
         /// <summary>
         /// 视图模型类型（ViewModel）

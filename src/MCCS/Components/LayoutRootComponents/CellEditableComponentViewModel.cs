@@ -1,9 +1,8 @@
 ﻿using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
-using MCCS.Infrastructure.Models.MethodManager;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
-using MCCS.Infrastructure.Repositories.Method;
 using MCCS.Interface.Components.Events;
+using MCCS.Interface.Components.Registry;
 
 using Serilog;
 
@@ -11,13 +10,13 @@ namespace MCCS.Components.LayoutRootComponents
 {
     public class CellEditableComponentViewModel : LayoutNode
     {
-        private readonly IEventAggregator _eventAggregator;
-        private readonly IMethodRepository _methodRepository;
+        private readonly IEventAggregator _eventAggregator; 
+        private readonly IInterfaceRegistry _interfaceRegistry;
 
-        public CellEditableComponentViewModel(IEventAggregator eventAggregator, IMethodRepository methodRepository)
+        public CellEditableComponentViewModel(IEventAggregator eventAggregator, IInterfaceRegistry interfaceRegistry)
         {
             _eventAggregator = eventAggregator;
-            _methodRepository = methodRepository; 
+            _interfaceRegistry = interfaceRegistry;
             CutHorizontalCommand = new DelegateCommand(ExecuteCutHorizontalCommand);
             CutVerticalCommand = new DelegateCommand(ExecuteCutVerticalCommand);
             DeleteNodeCommand = new DelegateCommand(ExecuteDeleteNodeCommand);
@@ -35,13 +34,16 @@ namespace MCCS.Components.LayoutRootComponents
         /// 渲染已有的单元格
         /// </summary>
         /// <param name="eventAggregator"></param>
-        /// <param name="methodRepository"></param>
+        /// <param name="interfaceRegistry"></param>
         /// <param name="node"></param>
         /// <param name="componentModel"></param>
-        public CellEditableComponentViewModel(IEventAggregator eventAggregator, IMethodRepository methodRepository, CellNode node, MethodUiComponentsModel? componentModel) : this(eventAggregator, methodRepository)
+        public CellEditableComponentViewModel(IEventAggregator eventAggregator, 
+            IInterfaceRegistry interfaceRegistry, 
+            CellNode node,
+            InterfaceInfo? componentModel) : this(eventAggregator, interfaceRegistry)
         {
             if (componentModel == null) return;
-            Title = componentModel.Title;
+            Title = componentModel.Name;
             Icon = componentModel.Icon ?? "";
             IsCanSetParam = componentModel.IsCanSetParam;
             NodeId = node.NodeId;
@@ -82,8 +84,8 @@ namespace MCCS.Components.LayoutRootComponents
         /// <summary>
         /// 配置的UIComponent节点Id
         /// </summary>
-        private long _nodeId = -1;
-        public long NodeId
+        private string _nodeId = "";
+        public string NodeId
         {
             get => _nodeId;
             set => SetProperty(ref _nodeId, value);
@@ -116,7 +118,7 @@ namespace MCCS.Components.LayoutRootComponents
         private void ExecuteCutHorizontalCommand()
         {
             var parent = Parent;
-            var splitter = new SplitterHorizontalLayoutNode(this, new CellEditableComponentViewModel(_eventAggregator, _methodRepository));
+            var splitter = new SplitterHorizontalLayoutNode(this, new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry));
             if (parent != null)
             {
                 splitter.Parent = parent;
@@ -141,7 +143,7 @@ namespace MCCS.Components.LayoutRootComponents
         private void ExecuteCutVerticalCommand()
         {
             var parent = Parent;
-            var splitter = new SplitterVerticalLayoutNode(this, new CellEditableComponentViewModel(_eventAggregator, _methodRepository)); 
+            var splitter = new SplitterVerticalLayoutNode(this, new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry)); 
             if (parent != null)
             {
                 splitter.Parent = parent;
@@ -211,13 +213,12 @@ namespace MCCS.Components.LayoutRootComponents
         {
             try
             {
-                if (param.NodeId <= 0) return;
-                if (param.SourceId != Id) return;
-                // 这里直接从数据库获取最新的组件信息，避免数据不一致
-                var component = await _methodRepository.GetMethodUiComponentByIdAsync(param.NodeId);
+                if (param.NodeId == string.Empty) return;
+                if (param.SourceId != Id) return; 
+                var component = _interfaceRegistry.GetComponentInfo(param.NodeId);
                 if (component == null) return;
                 NodeId = param.NodeId;
-                Title = component.Title;
+                Title = component.Name;
                 Icon = component.Icon ?? "";
                 SetParamViewName = component.SetParamViewName;
                 NodeSettingParamText = "未设置节点参数";

@@ -10,6 +10,7 @@ using MCCS.Common.Resources.Views;
 using MCCS.Infrastructure.WorkflowSettings;
 using MCCS.Interface.Components;
 using MCCS.Interface.Components.ViewModels;
+using MCCS.Interface.Components.Views;
 using MCCS.Modules;
 using MCCS.Services.AppExitService;
 using MCCS.Services.StartInitial;
@@ -177,8 +178,7 @@ namespace MCCS
             containerRegistry.RegisterForNavigation<MethodBaseInfoPage>(MethodBaseInfoPageViewModel.Tag);
             containerRegistry.RegisterForNavigation<MethodWorkflowSettingPage>(MethodWorkflowSettingPageViewModel.Tag);
             
-            containerRegistry.RegisterForNavigation<MethodInterfaceSettingPage>(nameof(MethodInterfaceSettingPageViewModel));
-            containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
+            containerRegistry.RegisterForNavigation<MethodInterfaceSettingPage>(nameof(MethodInterfaceSettingPageViewModel)); 
              
             // StationSetup  
             containerRegistry.RegisterForNavigation<StationSetupMainPage>(nameof(StationSetupMainPageViewModel));

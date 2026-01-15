@@ -15,7 +15,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         Description = "用于控制通道操作和参数设置",
         Icon = "Cogs",
         Order = 1)]
-    public class ControlOperationComponentPageViewModel : BindableBase
+    public class ControlOperationComponentPageViewModel : BaseComponentViewModel
     {
         public ControlOperationComponentPageViewModel()
         {

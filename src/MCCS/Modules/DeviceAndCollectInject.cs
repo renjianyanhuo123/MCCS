@@ -21,8 +21,7 @@ namespace MCCS.Modules
             // containerRegistry.RegisterSingleton<IDataCollector, DataCollector>(); 
             containerRegistry.Register<IDialogService, MaterialDialogService>();
             containerRegistry.Register<IStationService, StationService>();
-            containerRegistry.Register<ILayoutTreeTraversal, LayoutTreeTraversal>();
-            containerRegistry.Register<IProjectComponentFactoryService, ProjectComponentFactoryService>();
+            containerRegistry.Register<ILayoutTreeTraversal, LayoutTreeTraversal>(); 
         }
     }
 }

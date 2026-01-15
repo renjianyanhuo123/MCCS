@@ -47,12 +47,13 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
+            RegisterInternal(info, Factory);
+            return;
+
             BaseComponentViewModel Factory(Func<Type, object>? resolver, object? parameter)
             {
                 return CreateInstanceWithParameter(viewModelType, resolver, parameter);
             }
-
-            RegisterInternal(info, Factory);
         }
 
         public void RegisterComponent<TViewModel>(Func<IServiceProvider, TViewModel> factory) where TViewModel : BaseComponentViewModel
@@ -68,18 +69,15 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
+            RegisterInternal(info, InternalFactory);
+            return;
+
             BaseComponentViewModel InternalFactory(Func<Type, object>? resolver, object? parameter)
             {
-                if (resolver != null)
-                {
-                    var serviceProvider = new ServiceProviderWrapper(resolver);
-                    return factory(serviceProvider);
-                }
-
-                return CreateInstanceWithParameter(viewModelType, null, parameter);
+                if (resolver == null) return CreateInstanceWithParameter(viewModelType, null, parameter);
+                var serviceProvider = new ServiceProviderWrapper(resolver);
+                return factory(serviceProvider); 
             }
-
-            RegisterInternal(info, InternalFactory);
         }
 
         /// <summary>
@@ -104,6 +102,9 @@ namespace MCCS.Interface.Components.Registry
             // 明确设置参数类型
             info.ParameterType = typeof(TParameter);
 
+            RegisterInternal(info, InternalFactory);
+            return;
+
             BaseComponentViewModel InternalFactory(Func<Type, object>? resolver, object? parameter)
             {
                 if (parameter is TParameter typedParameter)
@@ -115,8 +116,6 @@ namespace MCCS.Interface.Components.Registry
                     $"创建组件 '{info.Id}' 需要类型为 {typeof(TParameter).Name} 的参数",
                     nameof(parameter));
             }
-
-            RegisterInternal(info, InternalFactory);
         }
 
         public void RegisterComponent(Type viewModelType)
@@ -218,18 +217,18 @@ namespace MCCS.Interface.Components.Registry
             lock (_lock)
             {
                 return _registrations.TryGetValue(componentId, out var registration)
-                    ? registration.Info.ViewType
+                    ? registration.Info.ViewModelType
                     : null;
             }
         }
 
-        public IReadOnlyList<Type> GetAllComponentTypes()
+        public List<Type?> GetAllComponentTypes()
         {
             lock (_lock)
             {
                 return _registrations.Values
                     .Where(r => r.Info.IsEnabled)
-                    .Select(r => r.Info.ViewType)
+                    .Select(r => r.Info.ViewModelType)
                     .ToList();
             }
         }
@@ -305,10 +304,9 @@ namespace MCCS.Interface.Components.Registry
 
             // 查找所有标记了 InterfaceComponentAttribute 的 ViewModel 类型
             var viewModelTypes = assembly.GetTypes()
-                .Where(t => t.IsClass &&
-                           !t.IsAbstract &&
-                           typeof(BaseComponentViewModel).IsAssignableFrom(t) &&
-                           t.GetCustomAttribute<InterfaceComponentAttribute>() != null);
+                .Where(t => t is { IsClass: true, IsAbstract: false } &&
+                            typeof(BaseComponentViewModel).IsAssignableFrom(t) &&
+                            t.GetCustomAttribute<InterfaceComponentAttribute>() != null);
 
             foreach (var viewModelType in viewModelTypes)
             {
@@ -339,9 +337,8 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// 从特性创建 InterfaceInfo
         /// </summary>
-        private static InterfaceInfo CreateInterfaceInfo(InterfaceComponentAttribute attribute, Type viewModelType)
-        {
-            return new InterfaceInfo
+        private static InterfaceInfo CreateInterfaceInfo(InterfaceComponentAttribute attribute, Type viewModelType) =>
+            new()
             {
                 Id = attribute.Id,
                 Name = attribute.Name,
@@ -351,12 +348,10 @@ namespace MCCS.Interface.Components.Registry
                 Version = attribute.Version,
                 Author = attribute.Author,
                 IsEnabled = attribute.IsEnabled,
-                Order = attribute.Order,
-                ViewType = viewModelType, // ViewModel 类型作为 ViewType
+                Order = attribute.Order, 
                 ViewModelType = viewModelType,
                 ParameterType = GetParameterType(viewModelType)
             };
-        }
 
         /// <summary>
         /// 获取组件的构造参数类型（从构造函数中获取）
@@ -481,14 +476,9 @@ namespace MCCS.Interface.Components.Registry
         /// <summary>
         /// IServiceProvider 包装器，将 Func<Type, object> 适配为 IServiceProvider
         /// </summary>
-        private class ServiceProviderWrapper : IServiceProvider
+        private class ServiceProviderWrapper(Func<Type, object> resolver) : IServiceProvider
         {
-            private readonly Func<Type, object> _resolver;
-
-            public ServiceProviderWrapper(Func<Type, object> resolver)
-            {
-                _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            }
+            private readonly Func<Type, object> _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
 
             public object? GetService(Type serviceType)
             {

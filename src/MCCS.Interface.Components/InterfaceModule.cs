@@ -1,4 +1,6 @@
 ﻿using MCCS.Interface.Components.Registry;
+using MCCS.Interface.Components.ViewModels;
+using MCCS.Interface.Components.Views;
 using MCCS.Interface.Components.Views.ControlCommandPages;
 
 namespace MCCS.Interface.Components
@@ -12,12 +14,13 @@ namespace MCCS.Interface.Components
         {
             // 注册界面组件注册表为单例（使用工厂方法以便传入容器解析器）
             containerRegistry.RegisterSingleton<IInterfaceRegistry, InterfaceRegistry>();
-
+            // 组件列表界面注册
+            containerRegistry.RegisterForNavigation<MethodComponentsPage>(nameof(MethodComponentsPageViewModel));
             // 注册控制命令页面
-            containerRegistry.RegisterForNavigation<ViewManualControl>(nameof(ViewManualControl));
-            containerRegistry.RegisterForNavigation<ViewStaticControl>(nameof(ViewStaticControl));
-            containerRegistry.RegisterForNavigation<ViewProgramControl>(nameof(ViewProgramControl));
-            containerRegistry.RegisterForNavigation<ViewFatigueControl>(nameof(ViewFatigueControl));
+            //containerRegistry.RegisterForNavigation<ViewManualControl>(nameof(ViewManualControl));
+            //containerRegistry.RegisterForNavigation<ViewStaticControl>(nameof(ViewStaticControl));
+            //containerRegistry.RegisterForNavigation<ViewProgramControl>(nameof(ViewProgramControl));
+            //containerRegistry.RegisterForNavigation<ViewFatigueControl>(nameof(ViewFatigueControl));
         }
 
         public void OnInitialized(IContainerProvider containerProvider)

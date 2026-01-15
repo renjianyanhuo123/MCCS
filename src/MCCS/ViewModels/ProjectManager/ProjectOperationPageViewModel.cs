@@ -43,8 +43,7 @@ namespace MCCS.ViewModels.ProjectManager
         {
             if (_methodId == -1) throw new ArgumentNullException(nameof(_methodId));
             var interfaceSettingModel = await _methodRepository.GetInterfaceSettingAsync(_methodId);
-            if (interfaceSettingModel == null) throw new ArgumentException(nameof(interfaceSettingModel)); 
-            var components = await _methodRepository.GetUiComponentsAsync();
+            if (interfaceSettingModel == null) throw new ArgumentException(nameof(interfaceSettingModel));  
             var settings = new JsonSerializerSettings
             {
                 Converters = new List<JsonConverter>
@@ -53,7 +52,7 @@ namespace MCCS.ViewModels.ProjectManager
                 }
             };
             var nodes = interfaceSettingModel?.RootSetting == null ? [] : JsonConvert.DeserializeObject<List<BaseNode>>(interfaceSettingModel.RootSetting, settings);
-            var rootNode = _layoutTreeTraversal.BuildRootNode(CellTypeEnum.DisplayOnly, nodes ?? [], components);
+            var rootNode = _layoutTreeTraversal.BuildRootNode(CellTypeEnum.DisplayOnly, nodes ?? []);
             LayoutRootViewModel = new LayoutRootViewModel(rootNode, _eventAggregator);
         }
     }
