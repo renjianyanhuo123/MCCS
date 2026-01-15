@@ -12,21 +12,7 @@ namespace MCCS.Interface.Components.Registry
         /// 注册界面组件类型（UserControl）
         /// </summary>
         /// <typeparam name="TViewModel">视图模型</typeparam>
-        void RegisterComponent<TViewModel>() where TViewModel : BaseComponentViewModel;
-
-        /// <summary>
-        /// 注册界面组件类型（使用工厂方法）
-        /// </summary>
-        /// <typeparam name="TViewModel">视图类型</typeparam>
-        void RegisterComponent<TViewModel>(Func<IServiceProvider, TViewModel> factory) where TViewModel : BaseComponentViewModel;
-
-        /// <summary>
-        /// 注册界面组件类型（使用带参数的工厂方法）
-        /// </summary>
-        /// <typeparam name="TViewModel">视图模型类型</typeparam>
-        /// <typeparam name="TParameter">构造参数类型</typeparam>
-        /// <param name="factory">工厂方法，接收参数并返回 ViewModel 实例</param>
-        void RegisterComponent<TViewModel, TParameter>(Func<TParameter, TViewModel> factory) where TViewModel : BaseComponentViewModel;
+        void RegisterComponent<TViewModel>() where TViewModel : BaseComponentViewModel; 
 
         /// <summary>
         /// 注册界面组件类型

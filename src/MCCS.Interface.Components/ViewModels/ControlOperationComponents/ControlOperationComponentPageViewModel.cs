@@ -2,6 +2,7 @@
 
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
+using MCCS.Interface.Components.Models.ParamterModels;
 
 namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 {
@@ -17,7 +18,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         Order = 1)]
     public class ControlOperationComponentPageViewModel : BaseComponentViewModel
     {
-        public ControlOperationComponentPageViewModel()
+        public ControlOperationComponentPageViewModel(ControlOperationParamModel paramModel)
         {
         }
 

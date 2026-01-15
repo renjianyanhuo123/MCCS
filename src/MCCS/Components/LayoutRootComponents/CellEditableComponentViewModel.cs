@@ -1,4 +1,6 @@
-﻿using MCCS.Components.LayoutRootComponents.ViewModels;
+﻿using Assimp;
+
+using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
 using MCCS.Interface.Components.Events;
@@ -28,6 +30,7 @@ namespace MCCS.Components.LayoutRootComponents
                 if (param.SourceId != Id) return;
                 ParamterJson = param.Parameter;
             });
+            
         }
 
         /// <summary>
@@ -35,13 +38,12 @@ namespace MCCS.Components.LayoutRootComponents
         /// </summary>
         /// <param name="eventAggregator"></param>
         /// <param name="interfaceRegistry"></param>
-        /// <param name="node"></param>
-        /// <param name="componentModel"></param>
+        /// <param name="node"></param> 
         public CellEditableComponentViewModel(IEventAggregator eventAggregator, 
             IInterfaceRegistry interfaceRegistry, 
-            CellNode node,
-            InterfaceInfo? componentModel) : this(eventAggregator, interfaceRegistry)
+            CellNode node) : this(eventAggregator, interfaceRegistry)
         {
+            var componentModel = interfaceRegistry.GetComponentInfo(node.NodeId);
             if (componentModel == null) return;
             Title = componentModel.Name;
             Icon = componentModel.Icon ?? "";

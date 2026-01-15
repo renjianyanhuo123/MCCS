@@ -11,14 +11,16 @@ namespace MCCS.Components.LayoutRootComponents
         private readonly IDialogService _dialogService;
         private readonly IEventAggregator _eventAggregator;
 
-        public CellContainerComponentViewModel(IDialogService dialogService, 
+        public CellContainerComponentViewModel(
+            IDialogService dialogService, 
             IInterfaceRegistry interfaceRegistry,
             IEventAggregator eventAggregator, 
             CellNode? node = null)
         {
             _dialogService = dialogService;
             _eventAggregator = eventAggregator;
-            if(node != null) InnerViewModel = interfaceRegistry.CreateComponent(node.NodeId);
+            // 创建对应的ViewModel对象
+            if(node != null) InnerViewModel = interfaceRegistry.CreateComponent(node.NodeId, node.ParamterJson);
             PlaceholderPopupCommand = new DelegateCommand(ExecutePlaceholderPopupCommand);
             NonPlaceholderPopupCommand = new DelegateCommand(ExevuteNonPlaceholderPopupCommand);
         }

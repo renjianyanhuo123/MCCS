@@ -71,7 +71,7 @@ namespace MCCS.Components.LayoutRootComponents
                 switch (node)
                 {
                     case CellNode cellNode:
-                        loopNode = CreateLayoutNode(cellType, cellNode, _interfaceRegistry.GetComponentInfo(cellNode.NodeId));
+                        loopNode = CreateLayoutNode(cellType, cellNode);
                         break;
                     case SplitterNode splitterNode:
                         if (splitterNode.LeftNodeId == null
@@ -101,19 +101,13 @@ namespace MCCS.Components.LayoutRootComponents
             return loopNode;
         }
 
-        private LayoutNode CreateLayoutNode(CellTypeEnum cellType, CellNode? node = null, InterfaceInfo? component = null)
+        private LayoutNode CreateLayoutNode(CellTypeEnum cellType, CellNode? node = null)
         {
             if (cellType == CellTypeEnum.DisplayOnly)
             {
                 return new CellContainerComponentViewModel(_dialogService, _interfaceRegistry, _eventAggregator, node);
             }
-
-            if (node == null || component == null)
-            {
-                return new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry);
-            }
-
-            return new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry, node, component);
+            return node == null ? new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry) : new CellEditableComponentViewModel(_eventAggregator, _interfaceRegistry, node);
         }
 
         private static BaseNode CreateBaseNode(LayoutNode node) =>
@@ -129,10 +123,14 @@ namespace MCCS.Components.LayoutRootComponents
                     rightRatio: splitterVerticalLayoutNode.RightRatio.Value,
                     splitterSize: splitterVerticalLayoutNode.SplitterSize.Value, parentId: node.Parent?.Id,
                     leftNodeId: node.LeftNode?.Id, rightNodeId: node.RightNode?.Id),
-                CellEditableComponentViewModel cellEditableComponentViewModel => new CellNode(id: node.Id,
-                    type: NodeTypeEnum.Cell, nodeId: cellEditableComponentViewModel.NodeId,
-                    paramterJson: cellEditableComponentViewModel.ParamterJson, parentId: node.Parent?.Id,
-                    leftNodeId: node.LeftNode?.Id, rightNodeId: node.RightNode?.Id),
+                CellEditableComponentViewModel cellEditableComponentViewModel => new CellNode(
+                    id: node.Id,
+                    type: NodeTypeEnum.Cell, 
+                    nodeId: cellEditableComponentViewModel.NodeId,
+                    paramterJson: cellEditableComponentViewModel.ParamterJson, 
+                    parentId: node.Parent?.Id,
+                    leftNodeId: node.LeftNode?.Id, 
+                    rightNodeId: node.RightNode?.Id),
                 _ => throw new InvalidOperationException("未知布局节点类型，无法转换为BaseNode")
             };
     }

@@ -10,6 +10,9 @@ using MCCS.Interface.Components.Registry;
 
 namespace MCCS.Interface.Components.ViewModels
 {
+    /// <summary>
+    /// 组件列表页面 ViewModel
+    /// </summary>
     public class MethodComponentsPageViewModel : BaseViewModel
     { 
         private readonly IInterfaceRegistry _interfaceRegistry;
