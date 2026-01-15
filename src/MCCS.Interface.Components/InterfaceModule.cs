@@ -15,7 +15,7 @@ namespace MCCS.Interface.Components
             // 注册界面组件注册表为单例（使用工厂方法以便传入容器解析器）
             containerRegistry.RegisterSingleton<IInterfaceRegistry, InterfaceRegistry>();
             // 组件列表界面注册
-            containerRegistry.RegisterForNavigation<MethodComponentsPage, MethodComponentsPageViewModel>();
+            containerRegistry.RegisterForNavigation<MethodComponentsPage, MethodComponentsPageViewModel>(nameof(MethodComponentsPageViewModel));
             // 组件参数配置界面注册
             containerRegistry.RegisterForNavigation<MethodChartSetParamPage, MethodChartSetParamPageViewModel>(nameof(MethodChartSetParamPageViewModel));
             containerRegistry.RegisterForNavigation<DataMonitorSetParamPage, DataMonitorSetParamPageViewModel>(nameof(DataMonitorSetParamPageViewModel));
