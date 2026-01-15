@@ -1,76 +1,59 @@
-﻿using System.Collections.Concurrent;
-using System.Reflection;
+﻿using System.Reflection;
 
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.ViewModels;
 
+using Prism.Ioc;
+
 namespace MCCS.Interface.Components.Registry
 {
     /// <summary>
-    /// 界面组件注册表实现（不依赖外部容器）
+    /// 界面组件注册表实现 - 支持依赖注入
     /// </summary>
     public sealed class InterfaceRegistry : IInterfaceRegistry
     {
-        private static readonly ConcurrentDictionary<Type, CtorPlan> _ctorPlanCache = new();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private sealed class CtorPlan
-        {
-            public ConstructorInfo Ctor { get; init; } = null!;
-            public Type? ParamType { get; init; } // null 表示无参构造
-        }
-
-        private static CtorPlan GetCtorPlan(Type viewModelType) => _ctorPlanCache.GetOrAdd(viewModelType, BuildCtorPlan);
-
-        private static CtorPlan BuildCtorPlan(Type viewModelType)
-        {
-            var ctors = viewModelType.GetConstructors();
-
-            // 规则建议：
-            // 1) 如果只有一个单参构造，就选它（你说每个子类都有一个不同参数类型 -> 通常这里成立）
-            // 2) 否则优先无参构造
-            // 3) 如果有多个单参构造 -> 明确报错（避免 silent bug）
-            var singleParamCtors = ctors.Where(c => c.GetParameters().Length == 1).ToList();
-            if (singleParamCtors.Count == 1)
-            {
-                var p = singleParamCtors[0].GetParameters()[0].ParameterType;
-                return new CtorPlan { Ctor = singleParamCtors[0], ParamType = p };
-            }
-
-            var defaultCtor = ctors.FirstOrDefault(c => c.GetParameters().Length == 0);
-            if (defaultCtor != null)
-            {
-                return new CtorPlan { Ctor = defaultCtor, ParamType = null };
-            }
-
-            if (singleParamCtors.Count > 1)
-            {
-                var sigs = string.Join(", ",
-                    singleParamCtors.Select(c => $"({c.GetParameters()[0].ParameterType.Name})"));
-                throw new InvalidOperationException(
-                    $"类型 {viewModelType.Name} 存在多个单参数构造函数，无法确定使用哪个: {sigs}");
-            }
-
-            // 没无参，也没单参
-            throw new InvalidOperationException(
-                $"类型 {viewModelType.Name} 必须提供无参构造或单参数构造函数");
-        }
-
-        private readonly Dictionary<string, ComponentRegistration> _registrations = new(); 
+        private readonly Dictionary<string, ComponentRegistration> _registrations = new();
         private readonly object _lock = new();
+
+        // 组件激活器（支持 DI 注入）
+        private ComponentActivator? _activator;
 
         #region Events
         public event EventHandler<InterfaceInfo>? ComponentRegistered;
         public event EventHandler<string>? ComponentUnregistered;
         #endregion
 
+        #region Container Setup
+
+        /// <summary>
+        /// 设置 DI 容器提供者（启用依赖注入支持）
+        /// </summary>
+        /// <param name="containerProvider">Prism 容器提供者</param>
+        public void SetContainerProvider(IContainerProvider containerProvider)
+        {
+            _activator = new ComponentActivator(containerProvider);
+        }
+
+        /// <summary>
+        /// 获取组件激活器（确保已初始化）
+        /// </summary>
+        private ComponentActivator GetActivator()
+        {
+            if (_activator == null)
+            {
+                throw new InvalidOperationException(
+                    "未设置 DI 容器。请在模块初始化时调用 SetContainerProvider 方法。");
+            }
+            return _activator;
+        }
+
+        #endregion
+
         #region Register Methods
 
         /// <summary>
-        /// 注册组件（默认：根据构造函数 + 可选 parameter 创建实例）
+        /// 注册组件（默认：根据构造函数 + 可选 parameter 创建实例，支持 DI 注入）
         /// </summary>
         public void RegisterComponent<TViewModel>() where TViewModel : BaseComponentViewModel
         {
@@ -82,7 +65,8 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            RegisterInternal(info, parameter => CreateComponentCache.CreateInstanceWithParameter(viewModelType, parameter));
+            // 使用编译表达式工厂，支持 DI 注入
+            RegisterInternal(info, parameter => GetActivator().CreateInstance(viewModelType, parameter));
         }
 
         /// <summary>
@@ -145,7 +129,8 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            RegisterInternal(info, parameter => CreateComponentCache.CreateInstanceWithParameter(viewModelType, parameter));
+            // 使用编译表达式工厂，支持 DI 注入
+            RegisterInternal(info, parameter => GetActivator().CreateInstance(viewModelType, parameter));
         }
 
         #endregion
@@ -299,7 +284,7 @@ namespace MCCS.Interface.Components.Registry
 
         #region Private Helper Methods
 
-        private static InterfaceInfo CreateInterfaceInfo(InterfaceComponentAttribute attribute, Type viewModelType) =>
+        private InterfaceInfo CreateInterfaceInfo(InterfaceComponentAttribute attribute, Type viewModelType) =>
             new()
             {
                 Id = attribute.Id,
@@ -318,12 +303,18 @@ namespace MCCS.Interface.Components.Registry
             };
 
         /// <summary>
-        /// 获取组件的构造参数类型（优先：公共单参数构造）
+        /// 获取组件的业务参数类型（排除 DI 服务依赖）
         /// </summary>
-        private static Type? GetParameterType(Type viewModelType)
+        private Type? GetParameterType(Type viewModelType)
         {
-            var constructors = viewModelType.GetConstructors();
+            // 如果激活器已初始化，使用它来分析
+            if (_activator != null)
+            {
+                return _activator.GetBusinessParameterType(viewModelType);
+            }
 
+            // 降级：使用旧的逻辑
+            var constructors = viewModelType.GetConstructors();
             var singleParamCtor = constructors.FirstOrDefault(c => c.GetParameters().Length == 1);
             return singleParamCtor?.GetParameters()[0].ParameterType;
         }
