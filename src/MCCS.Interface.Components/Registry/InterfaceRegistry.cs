@@ -47,14 +47,9 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            BaseComponentViewModel Factory(Func<Type, object>? resolver)
+            BaseComponentViewModel Factory(Func<Type, object>? resolver, object? parameter)
             {
-                if (resolver != null)
-                {
-                    return (BaseComponentViewModel)resolver(viewModelType);
-                }
-
-                return Activator.CreateInstance<TViewModel>();
+                return CreateInstanceWithParameter(viewModelType, resolver, parameter);
             }
 
             RegisterInternal(info, Factory);
@@ -73,7 +68,7 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            BaseComponentViewModel InternalFactory(Func<Type, object>? resolver)
+            BaseComponentViewModel InternalFactory(Func<Type, object>? resolver, object? parameter)
             {
                 if (resolver != null)
                 {
@@ -81,7 +76,44 @@ namespace MCCS.Interface.Components.Registry
                     return factory(serviceProvider);
                 }
 
-                return Activator.CreateInstance<TViewModel>();
+                return CreateInstanceWithParameter(viewModelType, null, parameter);
+            }
+
+            RegisterInternal(info, InternalFactory);
+        }
+
+        /// <summary>
+        /// 注册界面组件类型（使用带参数的工厂方法）
+        /// </summary>
+        /// <typeparam name="TViewModel">视图模型类型</typeparam>
+        /// <typeparam name="TParameter">构造参数类型</typeparam>
+        /// <param name="factory">工厂方法，接收参数并返回 ViewModel 实例</param>
+        public void RegisterComponent<TViewModel, TParameter>(Func<TParameter, TViewModel> factory)
+            where TViewModel : BaseComponentViewModel
+        {
+            var viewModelType = typeof(TViewModel);
+            var attribute = viewModelType.GetCustomAttribute<InterfaceComponentAttribute>();
+
+            if (attribute == null)
+            {
+                throw new InvalidOperationException(
+                    $"类型 {viewModelType.Name} 未标记 InterfaceComponentAttribute 特性");
+            }
+
+            var info = CreateInterfaceInfo(attribute, viewModelType);
+            // 明确设置参数类型
+            info.ParameterType = typeof(TParameter);
+
+            BaseComponentViewModel InternalFactory(Func<Type, object>? resolver, object? parameter)
+            {
+                if (parameter is TParameter typedParameter)
+                {
+                    return factory(typedParameter);
+                }
+
+                throw new ArgumentException(
+                    $"创建组件 '{info.Id}' 需要类型为 {typeof(TParameter).Name} 的参数",
+                    nameof(parameter));
             }
 
             RegisterInternal(info, InternalFactory);
@@ -111,14 +143,9 @@ namespace MCCS.Interface.Components.Registry
 
             var info = CreateInterfaceInfo(attribute, viewModelType);
 
-            BaseComponentViewModel Factory(Func<Type, object>? resolver)
+            BaseComponentViewModel Factory(Func<Type, object>? resolver, object? parameter)
             {
-                if (resolver != null)
-                {
-                    return (BaseComponentViewModel)resolver(viewModelType);
-                }
-
-                return (BaseComponentViewModel)Activator.CreateInstance(viewModelType)!;
+                return CreateInstanceWithParameter(viewModelType, resolver, parameter);
             }
 
             RegisterInternal(info, Factory);
@@ -225,20 +252,8 @@ namespace MCCS.Interface.Components.Registry
                 }
             }
 
-            var viewModel = registration.Factory(_serviceResolver);
-
-            // 如果 ViewModel 实现了 IInterfaceComponent 接口，进行初始化
-            if (viewModel is Core.IInterfaceComponent component)
-            {
-                if (parameter != null)
-                {
-                    component.Initialize(parameter);
-                }
-                else
-                {
-                    component.Initialize();
-                }
-            }
+            // 通过工厂方法创建实例，参数直接传递给构造函数
+            var viewModel = registration.Factory(_serviceResolver, parameter);
 
             return viewModel;
         }
@@ -344,21 +359,90 @@ namespace MCCS.Interface.Components.Registry
         }
 
         /// <summary>
-        /// 获取组件的参数类型（如果实现了 IInterfaceComponent<TParameter>）
+        /// 获取组件的构造参数类型（从构造函数中获取）
         /// </summary>
+        /// <remarks>
+        /// 查找顺序：
+        /// 1. 优先查找带单个参数的公共构造函数
+        /// 2. 如果没有，返回 null（表示无参构造）
+        /// </remarks>
         private static Type? GetParameterType(Type viewModelType)
         {
-            var interfaceType = viewModelType.GetInterfaces()
-                .FirstOrDefault(i => i.IsGenericType &&
-                                     i.GetGenericTypeDefinition() == typeof(Core.IInterfaceComponent<>));
+            // 获取所有公共构造函数
+            var constructors = viewModelType.GetConstructors();
 
-            return interfaceType?.GetGenericArguments().FirstOrDefault();
+            // 优先查找带单个参数的构造函数
+            var singleParamCtor = constructors
+                .FirstOrDefault(c => c.GetParameters().Length == 1);
+
+            if (singleParamCtor != null)
+            {
+                return singleParamCtor.GetParameters()[0].ParameterType;
+            }
+
+            // 没有带参数的构造函数
+            return null;
+        }
+
+        /// <summary>
+        /// 通过构造参数创建 ViewModel 实例
+        /// </summary>
+        /// <param name="viewModelType">ViewModel 类型</param>
+        /// <param name="resolver">服务解析器</param>
+        /// <param name="parameter">构造参数（可为 null）</param>
+        /// <returns>创建的 ViewModel 实例</returns>
+        private static BaseComponentViewModel CreateInstanceWithParameter(
+            Type viewModelType,
+            Func<Type, object>? resolver,
+            object? parameter)
+        {
+            var constructors = viewModelType.GetConstructors();
+
+            // 如果有参数，优先查找匹配参数类型的构造函数
+            if (parameter != null)
+            {
+                var paramType = parameter.GetType();
+
+                // 查找参数类型完全匹配的构造函数
+                var matchingCtor = constructors
+                    .FirstOrDefault(c =>
+                    {
+                        var ctorParams = c.GetParameters();
+                        return ctorParams.Length == 1 && ctorParams[0].ParameterType.IsAssignableFrom(paramType);
+                    });
+
+                if (matchingCtor != null)
+                {
+                    return (BaseComponentViewModel)matchingCtor.Invoke([parameter]);
+                }
+
+                // 如果没有找到匹配的构造函数，抛出异常
+                throw new InvalidOperationException(
+                    $"类型 {viewModelType.Name} 没有接受 {paramType.Name} 类型参数的构造函数");
+            }
+
+            // 如果没有参数，查找无参构造函数
+            var defaultCtor = constructors.FirstOrDefault(c => c.GetParameters().Length == 0);
+            if (defaultCtor != null)
+            {
+                return (BaseComponentViewModel)defaultCtor.Invoke(null);
+            }
+
+            // 如果使用服务解析器，尝试解析依赖
+            if (resolver != null)
+            {
+                return (BaseComponentViewModel)resolver(viewModelType);
+            }
+
+            // 最后尝试使用 Activator.CreateInstance（可能会失败如果没有无参构造函数）
+            throw new InvalidOperationException(
+                $"类型 {viewModelType.Name} 需要构造参数才能创建实例，请在调用 CreateComponent 时提供参数");
         }
 
         /// <summary>
         /// 内部注册方法
         /// </summary>
-        private void RegisterInternal(InterfaceInfo info, Func<Func<Type, object>?, BaseComponentViewModel> factory)
+        private void RegisterInternal(InterfaceInfo info, Func<Func<Type, object>?, object?, BaseComponentViewModel> factory)
         {
             lock (_lock)
             {
@@ -388,7 +472,10 @@ namespace MCCS.Interface.Components.Registry
         private class ComponentRegistration
         {
             public InterfaceInfo Info { get; init; } = null!;
-            public Func<Func<Type, object>?, BaseComponentViewModel> Factory { get; init; } = null!;
+            /// <summary>
+            /// 工厂方法：(服务解析器, 构造参数) => ViewModel实例
+            /// </summary>
+            public Func<Func<Type, object>?, object?, BaseComponentViewModel> Factory { get; init; } = null!;
         }
 
         /// <summary>
