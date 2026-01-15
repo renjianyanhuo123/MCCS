@@ -33,6 +33,9 @@ namespace MCCS.Interface.Components
 
             if (registry is InterfaceRegistry interfaceRegistry)
             {
+                // 设置 DI 容器提供者（启用依赖注入支持）
+                interfaceRegistry.SetContainerProvider(containerProvider);
+
                 // 自动发现并注册当前程序集中的所有界面组件
                 interfaceRegistry.DiscoverAndRegisterFromCurrentAssembly();
             }
