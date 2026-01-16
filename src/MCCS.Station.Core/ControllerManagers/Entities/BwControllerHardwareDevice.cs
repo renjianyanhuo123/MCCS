@@ -16,17 +16,45 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
     public sealed class BwControllerHardwareDevice : ControllerHardwareDeviceBase, IController
     {
         private readonly IDisposable _acquisitionSubscription;
-        private readonly EventLoopScheduler _highPriorityScheduler; 
-        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration; 
+        private readonly EventLoopScheduler _highPriorityScheduler;
+        private readonly HardwareDeviceConfiguration _hardwareDeviceConfiguration;
         private NativeBuffer? _singleBuffer = null;
         private static readonly int _structSize = Marshal.SizeOf(typeof(TNet_ADHInfo));
         private ValveStatusEnum _valveStatus;
         private long _sampleSequence = 0;
 
+        // 预分配的缓冲区池，用于减少GC压力
+        private const int BufferPoolSize = 32;
+        private const int MaxSamplesPerBatch = 64; // 每批次最大样本数
+        private readonly TNet_ADHInfo[][] _valueBufferPool;
+        private readonly SampleBatch<TNet_ADHInfo>[] _batchBufferPool;
+        private int _bufferIndex;
+
         public BwControllerHardwareDevice(HardwareDeviceConfiguration configuration) : base(configuration)
         {
             _hardwareDeviceConfiguration = configuration;
             _highPriorityScheduler = CreateHighPriorityScheduler();
+
+            // 预分配缓冲区池，避免高频采集时的GC压力
+            _valueBufferPool = new TNet_ADHInfo[BufferPoolSize][];
+            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[BufferPoolSize];
+            for (var i = 0; i < BufferPoolSize; i++)
+            {
+                _valueBufferPool[i] = new TNet_ADHInfo[MaxSamplesPerBatch];
+                for (var j = 0; j < MaxSamplesPerBatch; j++)
+                {
+                    _valueBufferPool[i][j] = new TNet_ADHInfo
+                    {
+                        Net_AD_N = new float[6],
+                        Net_AD_S = new float[2]
+                    };
+                }
+                _batchBufferPool[i] = new SampleBatch<TNet_ADHInfo>
+                {
+                    DeviceId = DeviceId,
+                    Values = _valueBufferPool[i]
+                };
+            }
 
             // 创建批量采集流（热Observable - 始终运行）
             var acquisitionStream = CreateAcquisitionObservable().Publish();
@@ -102,24 +130,70 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             uint count = 0;
             if (POPNetCtrl.NetCtrl01_GetAD_HDataCount(_deviceHandle, ref count) != AddressContanst.OP_SUCCESSFUL ||
                 count == 0) return null;
+
+            // 限制批次大小，超出预分配缓冲区则截断
+            if (count > MaxSamplesPerBatch)
+                count = MaxSamplesPerBatch;
+
             _singleBuffer ??= NativeBufferPool.Rent(128);
-            var res = new SampleBatch<TNet_ADHInfo>
-            {
-                DeviceId = DeviceId,
-                SampleCount = count,
-                ArrivalTicks = Stopwatch.GetTimestamp(),
-                SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count
-            };
-            var tempValues = new TNet_ADHInfo[count];
+
+            // 使用环形缓冲区复用预分配的对象，避免GC压力
+            var currentIndex = Interlocked.Increment(ref _bufferIndex) % BufferPoolSize;
+            var values = _valueBufferPool[currentIndex];
+            var batch = _batchBufferPool[currentIndex];
+
             for (uint i = 0; i < count; i++)
             {
                 if (POPNetCtrl.NetCtrl01_GetAD_HInfo(_deviceHandle, _singleBuffer.Ptr, (uint)_structSize) !=
                     AddressContanst.OP_SUCCESSFUL) return null;
-                var tempValue = Marshal.PtrToStructure<TNet_ADHInfo>(_singleBuffer.Ptr);
-                tempValues[i] = tempValue; 
+
+                // 使用零分配的内存复制，直接复制到预分配的结构体中
+                CopyFromUnmanaged(_singleBuffer.Ptr, ref values[i]);
             }
-            res.Values = tempValues;
-            return res;
+
+            // 直接修改预分配的batch对象（零分配）
+            batch.SampleCount = count;
+            batch.ArrivalTicks = Stopwatch.GetTimestamp();
+            batch.SequenceStart = Interlocked.Add(ref _sampleSequence, count) - count;
+
+            return batch;
+        }
+
+        /// <summary>
+        /// 零分配内存复制：从非托管内存直接复制到预分配的TNet_ADHInfo结构体
+        /// 避免Marshal.PtrToStructure每次调用都为内部数组分配新内存
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void CopyFromUnmanaged(nint source, ref TNet_ADHInfo dest)
+        {
+            var ptr = (byte*)source;
+
+            // 复制 Net_AD_N (6 floats = 24 bytes)
+            fixed (float* destPtr = dest.Net_AD_N)
+            {
+                Buffer.MemoryCopy(ptr, destPtr, 24, 24);
+            }
+            ptr += 24;
+
+            // 复制 Net_AD_S (2 floats = 8 bytes)
+            fixed (float* destPtr = dest.Net_AD_S)
+            {
+                Buffer.MemoryCopy(ptr, destPtr, 8, 8);
+            }
+            ptr += 8;
+
+            // 复制剩余的标量字段 (11 * 4 = 44 bytes)
+            dest.Net_PosVref = *(float*)ptr; ptr += 4;
+            dest.Net_PosE = *(float*)ptr; ptr += 4;
+            dest.Net_CtrlDA = *(float*)ptr; ptr += 4;
+            dest.Net_CycleCount = *(int*)ptr; ptr += 4;
+            dest.Net_SysState = *(int*)ptr; ptr += 4;
+            dest.Net_DIVal = *(int*)ptr; ptr += 4;
+            dest.Net_DOVal = *(int*)ptr; ptr += 4;
+            dest.Net_D_PosVref = *(float*)ptr; ptr += 4;
+            dest.Net_FeedLoadN = *(float*)ptr; ptr += 4;
+            dest.Net_PrtErrState = *(int*)ptr; ptr += 4;
+            dest.Net_TimeCnt = *(int*)ptr;
         } 
         #endregion
 
