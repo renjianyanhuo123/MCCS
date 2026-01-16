@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
 
+using MCCS.Infrastructure.Helper;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models.ParamterModels.ControlOperationParameters;
-
-using Prism.Mvvm;
 
 namespace MCCS.Interface.Components.ViewModels.Parameters
 {
@@ -11,27 +10,25 @@ namespace MCCS.Interface.Components.ViewModels.Parameters
     /// 单个控制通道设置项的 ViewModel
     /// </summary>
     public class ControlChannelSettingItemViewModel : BindableBase
-    {
-        private int _channelIndex;
+    {  
+        private bool _selected;
         /// <summary>
-        /// 通道索引 (1-4)
+        /// 当前是否选中 
         /// </summary>
-        public int ChannelIndex
+        public bool Selected
         {
-            get => _channelIndex;
-            set => SetProperty(ref _channelIndex, value);
+            get => _selected;
+            set => SetProperty(ref _selected, value);
         }
-
-        private ControlChannelItem? _selectedChannel;
         /// <summary>
-        /// 当前选中的控制通道
+        /// 通道ID
         /// </summary>
-        public ControlChannelItem? SelectedChannel
-        {
-            get => _selectedChannel;
-            set => SetProperty(ref _selectedChannel, value);
-        }
+        public long Id { get; set; }
 
+        /// <summary>
+        /// 通道名称
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
         /// <summary>
         /// 控制模式选项列表（支持多选）
         /// </summary>
@@ -39,47 +36,20 @@ namespace MCCS.Interface.Components.ViewModels.Parameters
 
         public ControlChannelSettingItemViewModel()
         {
-            InitializeControlModeOptions();
-        }
-
-        private void InitializeControlModeOptions()
-        {
-            ControlModeOptions.Add(new ControlModeOptionItem
-            {
-                Mode = ControlModeTypeEnum.Manual,
-                DisplayName = "手动控制",
-                IsSelected = false
-            });
-            ControlModeOptions.Add(new ControlModeOptionItem
-            {
-                Mode = ControlModeTypeEnum.Static,
-                DisplayName = "静态控制",
-                IsSelected = false
-            });
-            ControlModeOptions.Add(new ControlModeOptionItem
-            {
-                Mode = ControlModeTypeEnum.Fatigue,
-                DisplayName = "疲劳控制",
-                IsSelected = false
-            });
-            ControlModeOptions.Add(new ControlModeOptionItem
-            {
-                Mode = ControlModeTypeEnum.Programmable,
-                DisplayName = "程序控制",
-                IsSelected = false
-            });
-        }
+            var controlModeOptions = (from ControlModeTypeEnum status in Enum.GetValues(typeof(ControlModeTypeEnum))
+                    select new ControlModeOptionItem { Mode = status, DisplayName = EnumHelper.GetDescription(status), IsSelected = false })
+                .ToList();
+            ControlModeOptions.AddRange(controlModeOptions); 
+        } 
 
         /// <summary>
         /// 获取选中的控制模式列表
         /// </summary>
-        public List<ControlModeTypeEnum> GetSelectedControlModes()
-        {
-            return ControlModeOptions
+        public List<ControlModeTypeEnum> GetSelectedControlModes() =>
+            ControlModeOptions
                 .Where(o => o.IsSelected)
                 .Select(o => o.Mode)
                 .ToList();
-        }
 
         /// <summary>
         /// 设置选中的控制模式

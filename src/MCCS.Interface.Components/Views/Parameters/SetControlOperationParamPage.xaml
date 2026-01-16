@@ -34,32 +34,16 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- 通道标题 -->
-                                <TextBlock Grid.Row="0"
-                                           FontSize="16"
-                                           FontWeight="Bold"
-                                           Foreground="{DynamicResource PrimaryHueMidBrush}"
-                                           Margin="0,0,0,8">
-                                    <Run Text="通道 "/>
-                                    <Run Text="{Binding ChannelIndex, Mode=OneWay}"/>
-                                </TextBlock>
-
-                                <!-- 控制通道选择 -->
-                                <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                                    <TextBlock FontSize="14"
-                                               Text="选择控制通道:"
-                                               Margin="0,0,0,4"
-                                               Foreground="{DynamicResource MaterialDesignBody}"/>
-                                    <ComboBox FontSize="14"
-                                              ItemsSource="{Binding DataContext.AvailableControlChannels,
-                                                  RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                              SelectedItem="{Binding SelectedChannel}"
-                                              DisplayMemberPath="DisplayName"
-                                              Style="{StaticResource MaterialDesignOutlinedComboBox}"/>
-                                </StackPanel>
+                                <!-- 通道标题 --> 
+                                <CheckBox Grid.Row="0" FontSize="16"
+                                          FontWeight="Bold"
+                                          Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                          Margin="0,0,0,8"
+                                          IsChecked="{Binding Selected}"
+                                          Content="{Binding Name}"></CheckBox>
 
                                 <!-- 控制模式多选 -->
-                                <StackPanel Grid.Row="2">
+                                <StackPanel Grid.Row="1">
                                     <TextBlock FontSize="14"
                                                Text="允许的控制方式:"
                                                Margin="0,0,0,8"

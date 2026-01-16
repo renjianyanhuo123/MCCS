@@ -6,12 +6,7 @@ namespace MCCS.Interface.Components.Models.ParamterModels.ControlOperationParame
     /// 控制操作参数模型（单个通道配置）
     /// </summary>
     public record ControlOperationParamModel
-    {
-        /// <summary>
-        /// 通道索引 (1-4)
-        /// </summary>
-        public int ChannelIndex { get; set; }
-
+    { 
         /// <summary>
         /// 控制通道ID
         /// </summary>

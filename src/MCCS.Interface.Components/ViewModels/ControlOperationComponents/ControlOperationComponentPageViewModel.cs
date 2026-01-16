@@ -2,8 +2,8 @@
 
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
-using MCCS.Interface.Components.Models.ParamterModels;
 using MCCS.Interface.Components.Models.ParamterModels.ControlOperationParameters;
+using MCCS.Interface.Components.ViewModels.Parameters;
 
 namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 {
@@ -15,6 +15,8 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         "控制操作组件",
         InterfaceComponentCategory.Interaction,
         Description = "用于控制通道操作和参数设置",
+        IsCanSetParam = true,
+        SetParamViewName = nameof(SetControlOperationParamPageViewModel),
         Icon = "Cogs",
         Order = 1)]
     public class ControlOperationComponentPageViewModel : BaseComponentViewModel

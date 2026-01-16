@@ -1,7 +1,5 @@
 using MCCS.Interface.Components.Enums;
 
-using Prism.Mvvm;
-
 namespace MCCS.Interface.Components.Models.ParamterModels.ControlOperationParameters
 {
     /// <summary>

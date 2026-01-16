@@ -6,7 +6,6 @@ using MCCS.Events.Mehtod.DynamicGridOperationEvents;
 using MCCS.Events.StartUp;
 using MCCS.Interface.Components.Events;
 using MCCS.Interface.Components.ViewModels;
-using MCCS.ViewModels.MethodManager;
 using MCCS.ViewModels.Pages;
 using MCCS.Workflow.Contact.Events;
 using MCCS.Workflow.StepComponents.ViewModels;
