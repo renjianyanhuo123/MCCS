@@ -1,4 +1,4 @@
-using MCCS.Station.Abstractions.Communication;
+using MCCS.Infrastructure.Communication;
 
 namespace MCCS.Station.Abstractions.Interfaces;
 
