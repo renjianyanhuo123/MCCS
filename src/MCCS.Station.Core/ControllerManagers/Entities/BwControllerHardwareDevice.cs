@@ -24,8 +24,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private long _sampleSequence = 0;
 
         // 预分配的缓冲区池，用于减少GC压力
-        private const int BufferPoolSize = 32;
-        private const int MaxSamplesPerBatch = 64; // 每批次最大样本数
+        // ReSharper disable once InconsistentNaming
+        private const int _bufferPoolSize = 32;
+        private const int _maxSamplesPerBatch = 64; // 每批次最大样本数
         private readonly TNet_ADHInfo[][] _valueBufferPool;
         private readonly SampleBatch<TNet_ADHInfo>[] _batchBufferPool;
         private int _bufferIndex;
@@ -36,12 +37,12 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             _highPriorityScheduler = CreateHighPriorityScheduler();
 
             // 预分配缓冲区池，避免高频采集时的GC压力
-            _valueBufferPool = new TNet_ADHInfo[BufferPoolSize][];
-            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[BufferPoolSize];
-            for (var i = 0; i < BufferPoolSize; i++)
+            _valueBufferPool = new TNet_ADHInfo[_bufferPoolSize][];
+            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[_bufferPoolSize];
+            for (var i = 0; i < _bufferPoolSize; i++)
             {
-                _valueBufferPool[i] = new TNet_ADHInfo[MaxSamplesPerBatch];
-                for (var j = 0; j < MaxSamplesPerBatch; j++)
+                _valueBufferPool[i] = new TNet_ADHInfo[_maxSamplesPerBatch];
+                for (var j = 0; j < _maxSamplesPerBatch; j++)
                 {
                     _valueBufferPool[i][j] = new TNet_ADHInfo
                     {
@@ -132,13 +133,13 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 count == 0) return null;
 
             // 限制批次大小，超出预分配缓冲区则截断
-            if (count > MaxSamplesPerBatch)
-                count = MaxSamplesPerBatch;
+            if (count > _maxSamplesPerBatch)
+                count = _maxSamplesPerBatch;
 
             _singleBuffer ??= NativeBufferPool.Rent(128);
 
             // 使用环形缓冲区复用预分配的对象，避免GC压力
-            var currentIndex = Interlocked.Increment(ref _bufferIndex) % BufferPoolSize;
+            var currentIndex = Interlocked.Increment(ref _bufferIndex) % _bufferPoolSize;
             var values = _valueBufferPool[currentIndex];
             var batch = _batchBufferPool[currentIndex];
 

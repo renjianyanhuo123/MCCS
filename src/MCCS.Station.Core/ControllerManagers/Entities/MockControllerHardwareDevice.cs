@@ -44,7 +44,8 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private const double _samplingInterval = 0.01;
 
         // 预分配的缓冲区，用于减少GC压力
-        private const int BufferPoolSize = 16;
+        // ReSharper disable once InconsistentNaming
+        private const int _bufferPoolSize = 16;
         private readonly TNet_ADHInfo[][] _valueBufferPool;
         private readonly SampleBatch<TNet_ADHInfo>[] _batchBufferPool;
         private int _bufferIndex;
@@ -64,9 +65,9 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             });
 
             // 预分配缓冲区池，避免高频采集时的GC压力
-            _valueBufferPool = new TNet_ADHInfo[BufferPoolSize][];
-            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[BufferPoolSize];
-            for (var i = 0; i < BufferPoolSize; i++)
+            _valueBufferPool = new TNet_ADHInfo[_bufferPoolSize][];
+            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[_bufferPoolSize];
+            for (var i = 0; i < _bufferPoolSize; i++)
             {
                 _valueBufferPool[i] = new TNet_ADHInfo[2];
                 for (var j = 0; j < 2; j++)
@@ -250,7 +251,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             Console.WriteLine($"执行采集: {DateTime.Now:HH:mm:ss.fff}");
 #endif
             // 使用环形缓冲区复用预分配的对象，避免GC压力
-            var currentIndex = Interlocked.Increment(ref _bufferIndex) % BufferPoolSize;
+            var currentIndex = Interlocked.Increment(ref _bufferIndex) % _bufferPoolSize;
             var values = _valueBufferPool[currentIndex];
             var batch = _batchBufferPool[currentIndex];
 

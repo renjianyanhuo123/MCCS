@@ -93,7 +93,8 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
     private bool _disposed;
     private bool _isCreator;
 
-    private static readonly int HeaderSize = Unsafe.SizeOf<RingBufferHeader>();
+    // ReSharper disable once InconsistentNaming
+    private static readonly int _headerSize = Unsafe.SizeOf<RingBufferHeader>();
 
     [StructLayout(LayoutKind.Sequential)]
     private struct RingBufferHeader
@@ -119,7 +120,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
         _mutexName = $"{channelName}_Mutex";
         _maxItems = maxItems;
         _itemSize = itemSize > 0 ? itemSize : Marshal.SizeOf<T>();
-        _memorySize = HeaderSize + _itemSize * _maxItems;
+        _memorySize = _headerSize + _itemSize * _maxItems;
 
         Initialize();
     }
@@ -195,7 +196,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                 header.Count--;
             }
 
-            long offset = HeaderSize + header.WriteIndex * _itemSize;
+            long offset = _headerSize + header.WriteIndex * _itemSize;
             _accessor!.Write(offset, ref data);
 
             header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
@@ -226,7 +227,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                     header.Count--;
                 }
 
-                long offset = HeaderSize + header.WriteIndex * _itemSize;
+                long offset = _headerSize + header.WriteIndex * _itemSize;
                 var item = data;
                 _accessor!.Write(offset, ref item);
 
@@ -258,7 +259,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
                 header.Count--;
             }
 
-            long offset = HeaderSize + header.WriteIndex * _itemSize;
+            long offset = _headerSize + header.WriteIndex * _itemSize;
             _accessor!.Write(offset, ref data);
 
             header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
@@ -288,7 +289,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return default;
 
-            long offset = HeaderSize + header.ReadIndex * _itemSize;
+            long offset = _headerSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out T data);
 
             header.ReadIndex = (header.ReadIndex + 1) % _maxItems;
@@ -321,7 +322,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             int index = header.ReadIndex;
             for (int i = 0; i < readCount; i++)
             {
-                long offset = HeaderSize + index * _itemSize;
+                long offset = _headerSize + index * _itemSize;
                 _accessor!.Read(offset, out T item);
                 result.Add(item);
 
@@ -356,7 +357,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return false;
 
-            long offset = HeaderSize + header.ReadIndex * _itemSize;
+            long offset = _headerSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out data);
 
             header.ReadIndex = (header.ReadIndex + 1) % _maxItems;
@@ -382,7 +383,7 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
             if (header.Count == 0)
                 return default;
 
-            long offset = HeaderSize + header.ReadIndex * _itemSize;
+            long offset = _headerSize + header.ReadIndex * _itemSize;
             _accessor!.Read(offset, out T data);
 
             return data;

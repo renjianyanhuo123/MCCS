@@ -17,7 +17,8 @@ public sealed class SharedMemoryClient : IDisposable
     private bool _disposed;
     private bool _isCreator;
 
-    private static readonly int HeaderSize = Marshal.SizeOf<RingBufferHeader>();
+    // ReSharper disable once InconsistentNaming
+    private static readonly int _headerSize = Marshal.SizeOf<RingBufferHeader>();
 
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
     private struct RingBufferHeader
@@ -33,7 +34,7 @@ public sealed class SharedMemoryClient : IDisposable
         _mutexName = $"{memoryName}_Mutex";
         _itemSize = itemSize;
         _maxItems = maxItems;
-        _memorySize = HeaderSize + _itemSize * _maxItems;
+        _memorySize = _headerSize + _itemSize * _maxItems;
         Initialize();
     }
 
@@ -113,7 +114,7 @@ public sealed class SharedMemoryClient : IDisposable
 
             for (int i = 0; i < readCount; i++)
             {
-                long offset = HeaderSize + index * _itemSize;
+                long offset = _headerSize + index * _itemSize;
                 _accessor.Read(offset, out T item);
                 result.Add(item);
 
@@ -153,7 +154,7 @@ public sealed class SharedMemoryClient : IDisposable
             if (header.Count == 0)
                 return default;
 
-            long offset = HeaderSize + header.ReadIndex * _itemSize;
+            long offset = _headerSize + header.ReadIndex * _itemSize;
             _accessor.Read(offset, out T data);
 
             if (movePointer)
@@ -196,7 +197,7 @@ public sealed class SharedMemoryClient : IDisposable
                 header.Count--;
             }
 
-            long offset = HeaderSize + header.WriteIndex * _itemSize;
+            long offset = _headerSize + header.WriteIndex * _itemSize;
             _accessor.Write(offset, ref data);
 
             header.WriteIndex = (header.WriteIndex + 1) % _maxItems;
@@ -232,7 +233,7 @@ public sealed class SharedMemoryClient : IDisposable
             if (header.Count == 0)
                 return false;
 
-            long offset = HeaderSize + header.ReadIndex * _itemSize;
+            long offset = _headerSize + header.ReadIndex * _itemSize;
             _accessor.Read(offset, out data);
 
             header.ReadIndex = (header.ReadIndex + 1) % _maxItems;
