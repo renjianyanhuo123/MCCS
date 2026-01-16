@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -200,6 +201,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// 创建模拟数据采集流
         /// 模拟真实设备的采集行为：每2ms采集一批数据
         /// </summary>
+        [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: MCCS.Station.Core.DllNative.Models.TNet_ADHInfo[]; size: 331MB")]
         private IObservable<SampleBatch<TNet_ADHInfo>> CreateAcquisitionObservable() =>
             Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
             {
@@ -215,6 +217,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             });
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: MCCS.Station.Core.HardwareDevices.SampleBatch`1[MCCS.Station.Core.DllNative.Models.TNet_ADHInfo]; size: 138MB")]
         private SampleBatch<TNet_ADHInfo>? MockAcquireReading()
         {
             // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
