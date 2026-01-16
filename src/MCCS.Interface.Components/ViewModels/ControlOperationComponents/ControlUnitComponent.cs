@@ -15,14 +15,14 @@
             set => SetProperty(ref _controlUnitId, value);
         }
 
-        private double _width = 0.0; 
+        private double _width = 300.0; 
         public double Width
         {
             get => _width;
             set => SetProperty(ref _width, value);
         }
 
-        private double _height = 0.0; 
+        private double _height = 500.0; 
         public double Height
         {
             get => _height;

@@ -81,6 +81,26 @@ namespace MCCS.Example
                     ControlModeTypeEnum.Static,
                     ControlModeTypeEnum.Fatigue
                 ]
+            },
+            new ControlOperationParamModel
+            {
+                ControlChannelId = 3,
+                ControlChannelName = "控制通道3",
+                AllowedControlModes =
+                [
+                    ControlModeTypeEnum.Manual,
+                    ControlModeTypeEnum.Static
+                ]
+            },
+            new ControlOperationParamModel
+            {
+                ControlChannelId = 4,
+                ControlChannelName = "控制通道4",
+                AllowedControlModes =
+                [
+                    ControlModeTypeEnum.Manual,
+                    ControlModeTypeEnum.Fatigue
+                ]
             }
         ]);
     }

@@ -14,7 +14,7 @@
         <Thickness x:Key="GroupMargin">5,0,5,8</Thickness>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
                 <TextBlock  Style="{StaticResource MaterialDesignHeadline6TextBlock}"
                             Margin="0,5,0,10"
@@ -23,11 +23,11 @@
                             Header="第一步：控制方式"
                             Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ComboBox 
-                            materialDesign:HintAssist.Hint="选择控制模式"
-                            Style="{StaticResource MaterialDesignFilledComboBox}"
-                            ItemsSource="{Binding ControlModeSelections}"
-                            DisplayMemberPath="ControlModeName"
-                            SelectedItem="{Binding SelectedControlMode}">
+                        materialDesign:HintAssist.Hint="选择控制模式"
+                        Style="{StaticResource MaterialDesignFilledComboBox}"
+                        ItemsSource="{Binding ControlModeSelections}"
+                        DisplayMemberPath="ControlModeName"
+                        SelectedItem="{Binding SelectedControlMode}">
                         <b:Interaction.Triggers>
                             <b:EventTrigger EventName="SelectionChanged">
                                 <b:InvokeCommandAction Command="{Binding ControlModeSelectionChangedCommand}"/>
@@ -35,12 +35,12 @@
                             <b:EventTrigger EventName="Loaded">
                                 <interactivity:InvokeCommandAction Command="{Binding ControlModeSelectionChangedCommand}"/>
                             </b:EventTrigger>
-                        </b:Interaction.Triggers> 
+                        </b:Interaction.Triggers>
                     </ComboBox>
                 </GroupBox>
                 <GroupBox  Margin="{StaticResource GroupMargin}"
-                            Header="第二步：控制参数"
-                            Style="{StaticResource MaterialDesignCardGroupBox}">
+                           Header="第二步：控制参数"
+                           Style="{StaticResource MaterialDesignCardGroupBox}">
                     <ContentControl Content="{Binding SelectedControlMode.ControlViewModel}" />
                 </GroupBox>
             </StackPanel>

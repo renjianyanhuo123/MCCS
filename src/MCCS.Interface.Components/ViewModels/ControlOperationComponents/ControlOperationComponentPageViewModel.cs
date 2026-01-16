@@ -42,13 +42,27 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         #endregion
 
         #region Private Method
+
+        private void OnUnLockEvent(ControlCombineUnitComponent sender, List<ControlCombineUnitChildComponent> children)
+        {
+            ControlUnits.Remove(sender);
+            foreach (var child in children)
+            {
+                ControlUnits.Add(new ControlSingleUnitComponent
+                {
+                    Title = child.ChannelName,
+                    ControlUnitId = Guid.NewGuid().ToString("N"),
+                    ChildComponent = child
+                });
+            }
+        }
         private void ExecuteCombineCommand()
         {
             var count = 0;
             var tempComponents = new List<ControlSingleUnitComponent>();
             foreach (var controlUnit in ControlUnits)
             {
-                if (controlUnit is ControlSingleUnitComponent singleUnitComponent)
+                if (controlUnit is ControlSingleUnitComponent { IsParticipateCombineControl: true } singleUnitComponent)
                 {
                     tempComponents.Add(singleUnitComponent);
                     count++;
@@ -65,6 +79,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
                 s.ChildComponent.ControlModeSelections
                     .Select(c => (ControlModeTypeEnum)c.ControlModeId))).ToList();
             var combineComponent = new ControlCombineUnitComponent(children);
+            combineComponent.UnLockEvent += OnUnLockEvent;
             ControlUnits.Add(combineComponent);
         }
         #endregion
