@@ -103,8 +103,8 @@
 
                             <!-- 数值显示区 -->
                             <StackPanel Grid.Row="2" VerticalAlignment="Center">
-                                <TextBlock x:Name="ValueText" 
-                              Text="{Binding Value.Value}" 
+                                <TextBlock x:Name="ValueText"
+                              Text="{Binding FormattedValue}"
                               Style="{StaticResource ValueTextStyle}"/>
                                 <TextBlock Text="{Binding Unit}" Style="{StaticResource UnitTextStyle}"/>
                             </StackPanel> 
