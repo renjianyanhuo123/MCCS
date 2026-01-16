@@ -1,10 +1,15 @@
-namespace MCCS.Station.Abstractions.Communication;
+namespace MCCS.Infrastructure.Communication;
 
 /// <summary>
 /// 共享内存通信常量配置
 /// </summary>
 public static class SharedMemoryConstants
 {
+    /// <summary>
+    /// 通道数据共享内存名称
+    /// </summary>
+    public const string ChannelDataName = "MCCS_ChannelData";
+
     /// <summary>
     /// 数据通道名称前缀
     /// </summary>

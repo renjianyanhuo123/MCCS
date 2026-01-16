@@ -3,7 +3,6 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 using MCCS.Infrastructure.Communication;
-using MCCS.Station.Abstractions.Communication;
 using MCCS.Station.Abstractions.Interfaces;
 using MCCS.Station.Core.PseudoChannelManagers;
 using MCCS.Station.Core.SignalManagers;
