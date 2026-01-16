@@ -9,6 +9,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         public ControlCombineUnitComponent(List<ControlCombineUnitChildComponent> children)
         {
             Title = string.Join('+', children.Select(s => s.ChannelName));
+            Width = children.Count * 300;
             Children.AddRange(children);
             UnLockCommand = new DelegateCommand(ExecuteUnLockCommand); 
         }

@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc5.4" />
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +29,10 @@
     <Compile Update="Views\ControlCommandPages\ViewStaticControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\DataMonitorSetParamPage.xaml.cs">
+    <Compile Update="Views\Parameters\DataMonitorSetParamPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\MethodChartSetParamPage.xaml.cs">
+    <Compile Update="Views\Parameters\MethodChartSetParamPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\MethodComponentsPage.xaml.cs">

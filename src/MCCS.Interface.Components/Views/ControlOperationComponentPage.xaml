@@ -6,22 +6,11 @@
              xmlns:local="clr-namespace:MCCS.Interface.Components.Views"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:controlOperationComponents="clr-namespace:MCCS.Interface.Components.ViewModels.ControlOperationComponents"
-             xmlns:behaviors="clr-namespace:MCCS.Interface.Components.Behaviors"
-             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:behaviors="clr-namespace:MCCS.Interface.Components.Behaviors"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance controlOperationComponents:ControlOperationComponentPageViewModel}">
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance controlOperationComponents:ControlOperationComponentPageViewModel}">
     <Grid>
-        <!--<Border
-            Width="24"
-            Height="24"
-            Background="#FF2D89EF"
-            CornerRadius="0,0,3,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top">
-            <materialDesign:PackIcon HorizontalAlignment="Center"
-                                     VerticalAlignment="Center"
-                                     Kind="ArrowCollapseDown" /> 
-        </Border>-->
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
@@ -38,7 +27,7 @@
                        ItemsSource="{Binding ControlUnits}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel />
+                    <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Top" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
@@ -65,7 +54,7 @@
                                         TargetHeight="{Binding Height, Mode=TwoWay}"
                                         MinWidth="200"
                                         MinHeight="300"
-                                        MaxWidth="800"
+                                        MaxWidth="2000"
                                         MaxHeight="1000" />
                                 </i:Interaction.Behaviors>
                                 <materialDesign:PackIcon HorizontalAlignment="Right"

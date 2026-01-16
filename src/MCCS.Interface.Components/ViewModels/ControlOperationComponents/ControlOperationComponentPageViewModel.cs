@@ -21,12 +21,12 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
     {
         public ControlOperationComponentPageViewModel(List<ControlOperationParamModel> paramModels)
         {
-            CombineCommand = new DelegateCommand(ExecuteCombineCommand);
+            CombineCommand = new DelegateCommand(ExecuteCombineCommand); 
             foreach (var controlChannel in paramModels)
             {
                 ControlUnits.Add(new ControlSingleUnitComponent
                 {
-                    Title = controlChannel.ControlChannelName,
+                    Title = controlChannel.ControlChannelName, 
                     ControlUnitId = Guid.NewGuid().ToString("N"),
                     ChildComponent = new ControlCombineUnitChildComponent(controlChannel.ControlChannelId, controlChannel.ControlChannelName, controlChannel.AllowedControlModes)
                 });
