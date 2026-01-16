@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
@@ -44,6 +43,12 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         private PeriodicTimer? _dynamicTimer;
         private const double _samplingInterval = 0.01;
 
+        // 预分配的缓冲区，用于减少GC压力
+        private const int BufferPoolSize = 16;
+        private readonly TNet_ADHInfo[][] _valueBufferPool;
+        private readonly SampleBatch<TNet_ADHInfo>[] _batchBufferPool;
+        private int _bufferIndex;
+
         private StaticLoadControlEnum _staticControl = StaticLoadControlEnum.CTRLMODE_LoadS;
         /// <summary>
         /// 阀门状态
@@ -57,6 +62,27 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
                 Name = $"MockController_{configuration.DeviceId}",
                 IsBackground = true
             });
+
+            // 预分配缓冲区池，避免高频采集时的GC压力
+            _valueBufferPool = new TNet_ADHInfo[BufferPoolSize][];
+            _batchBufferPool = new SampleBatch<TNet_ADHInfo>[BufferPoolSize];
+            for (var i = 0; i < BufferPoolSize; i++)
+            {
+                _valueBufferPool[i] = new TNet_ADHInfo[2];
+                for (var j = 0; j < 2; j++)
+                {
+                    _valueBufferPool[i][j] = new TNet_ADHInfo
+                    {
+                        Net_AD_N = new float[6],
+                        Net_AD_S = new float[2]
+                    };
+                }
+                _batchBufferPool[i] = new SampleBatch<TNet_ADHInfo>
+                {
+                    DeviceId = DeviceId,
+                    Values = _valueBufferPool[i]
+                };
+            }
 
             // 创建批量采集流（热Observable）
             var acquisitionStream = CreateAcquisitionObservable().Publish();
@@ -201,7 +227,6 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
         /// 创建模拟数据采集流
         /// 模拟真实设备的采集行为：每2ms采集一批数据
         /// </summary>
-        [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: MCCS.Station.Core.DllNative.Models.TNet_ADHInfo[]; size: 331MB")]
         private IObservable<SampleBatch<TNet_ADHInfo>> CreateAcquisitionObservable() =>
             Observable.Create<SampleBatch<TNet_ADHInfo>>(observer =>
             {
@@ -217,44 +242,37 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             });
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: MCCS.Station.Core.HardwareDevices.SampleBatch`1[MCCS.Station.Core.DllNative.Models.TNet_ADHInfo]; size: 138MB")]
         private SampleBatch<TNet_ADHInfo>? MockAcquireReading()
         {
             // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
-            const uint sampleCount = 2; // 每批次1个样本，与2ms间隔配合模拟1000Hz采样率
+            const uint sampleCount = 2; // 每批次2个样本，与2ms间隔配合模拟1000Hz采样率
 #if DEBUG
             Console.WriteLine($"执行采集: {DateTime.Now:HH:mm:ss.fff}");
 #endif
-            var values = new TNet_ADHInfo[sampleCount];
+            // 使用环形缓冲区复用预分配的对象，避免GC压力
+            var currentIndex = Interlocked.Increment(ref _bufferIndex) % BufferPoolSize;
+            var values = _valueBufferPool[currentIndex];
+            var batch = _batchBufferPool[currentIndex];
+
+            // 更新预分配对象的数据（原地修改，不分配新内存）
             for (var i = 0; i < sampleCount; i++)
             {
-                values[i] = new TNet_ADHInfo
-                {
-                    Net_AD_N =
-                    {
-                        [0] = (float)AddNormalNoise(_force, 0.001),
-                        [1] = (float)AddNormalNoise(_force, 0.001),
-                        [2] = (float)(_rand.NextDouble() * 100),
-                        [3] = (float)(_rand.NextDouble() * 100),
-                        [4] = (float)(_rand.NextDouble() * 100),
-                        [5] = (float)(_rand.NextDouble() * 100)
-                    },
-                    Net_AD_S =
-                    {
-                        [0] = (float)AddNormalNoise(_position, 0.001),
-                        [1] = (float)AddNormalNoise(_position, 0.001)
-                    }
-                };
+                values[i].Net_AD_N[0] = (float)AddNormalNoise(_force, 0.001);
+                values[i].Net_AD_N[1] = (float)AddNormalNoise(_force, 0.001);
+                values[i].Net_AD_N[2] = (float)(_rand.NextDouble() * 100);
+                values[i].Net_AD_N[3] = (float)(_rand.NextDouble() * 100);
+                values[i].Net_AD_N[4] = (float)(_rand.NextDouble() * 100);
+                values[i].Net_AD_N[5] = (float)(_rand.NextDouble() * 100);
+                values[i].Net_AD_S[0] = (float)AddNormalNoise(_position, 0.001);
+                values[i].Net_AD_S[1] = (float)AddNormalNoise(_position, 0.001);
             }
 
-            return new SampleBatch<TNet_ADHInfo>
-            {
-                DeviceId = DeviceId,
-                SampleCount = sampleCount,
-                ArrivalTicks = Stopwatch.GetTimestamp(),
-                SequenceStart = Interlocked.Add(ref _sampleSequence, sampleCount) - sampleCount,
-                Values = values
-            };
+            // 直接修改预分配的batch对象（零分配）
+            batch.SampleCount = sampleCount;
+            batch.ArrivalTicks = Stopwatch.GetTimestamp();
+            batch.SequenceStart = Interlocked.Add(ref _sampleSequence, sampleCount) - sampleCount;
+
+            return batch;
         }
         #endregion
 
