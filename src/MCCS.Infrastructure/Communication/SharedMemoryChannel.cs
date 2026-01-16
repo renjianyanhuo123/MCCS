@@ -313,14 +313,14 @@ public sealed class SharedMemoryChannel<T> : ISharedMemoryWriter<T>, ISharedMemo
         {
             var header = ReadHeader();
             if (header.Count == 0)
-                return new List<T>(0);
+                return [];
 
-            int available = header.Count;
-            int readCount = (maxCount < 0 || maxCount > available) ? available : maxCount;
+            var available = header.Count;
+            var readCount = (maxCount < 0 || maxCount > available) ? available : maxCount;
             var result = new List<T>(readCount);
 
-            int index = header.ReadIndex;
-            for (int i = 0; i < readCount; i++)
+            var index = header.ReadIndex;
+            for (var i = 0; i < readCount; i++)
             {
                 long offset = _headerSize + index * _itemSize;
                 _accessor!.Read(offset, out T item);

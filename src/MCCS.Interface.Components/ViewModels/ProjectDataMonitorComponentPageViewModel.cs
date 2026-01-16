@@ -1,5 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Threading.Channels;
 
+using MCCS.Infrastructure.Services;
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.Models.ParamterModels;
@@ -24,23 +28,16 @@ namespace MCCS.Interface.Components.ViewModels
         Order = 2)]
     public sealed class ProjectDataMonitorComponentPageViewModel : BaseComponentViewModel
     {
-        private readonly ILogger _logger;
-
         /// <summary>
         /// 构造函数 - 支持 DI 注入和业务参数
         /// </summary>
         /// <param name="logger">从 DI 容器自动注入的日志服务</param>
         /// <param name="parameters">业务参数（从外部传入）</param>
-        public ProjectDataMonitorComponentPageViewModel(
-            ILogger logger,
+        public ProjectDataMonitorComponentPageViewModel( 
             List<DataMonitorSettingItemParamModel> parameters)
-        {
-            _logger = logger;
-            _logger.Debug("创建数据监控组件，参数数量: {Count}", parameters?.Count ?? 0);
-
+        {  
             Chilldren.Clear();
-            if (parameters == null) return;
-
+            if (parameters == null) return; 
             foreach (var paramter in parameters)
             {
                 Chilldren.Add(new ProjectDataMonitorComponentItemModel
@@ -51,10 +48,10 @@ namespace MCCS.Interface.Components.ViewModels
                     RetainBit = paramter.RetainBit,
                     Value = 0.0
                 });
-            }
+            } 
         }
 
-        #region Property
+        #region Property 
         public ObservableCollection<ProjectDataMonitorComponentItemModel> Chilldren { get; } = [];
         #endregion
     }

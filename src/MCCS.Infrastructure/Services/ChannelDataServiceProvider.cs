@@ -32,7 +32,7 @@ public class ChannelDataServiceOptions
 /// </summary>
 public static class ChannelDataServiceProvider
 {
-    private static readonly object Lock = new();
+    private static readonly object _lock = new();
     private static IChannelDataService? _instance;
     private static ChannelDataServiceOptions? _options;
     private static bool _isInitialized;
@@ -47,7 +47,7 @@ public static class ChannelDataServiceProvider
         {
             if (_instance == null)
             {
-                lock (Lock)
+                lock (_lock)
                 {
                     _instance ??= CreateService(_options ?? new ChannelDataServiceOptions());
                 }
@@ -68,7 +68,7 @@ public static class ChannelDataServiceProvider
     /// <returns>服务实例</returns>
     public static IChannelDataService Initialize(ChannelDataServiceOptions? options = null)
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (_isInitialized && _instance != null)
             {
@@ -112,7 +112,7 @@ public static class ChannelDataServiceProvider
     /// </summary>
     public static async Task ShutdownAsync(CancellationToken cancellationToken = default)
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (_instance == null)
                 return;
@@ -123,7 +123,7 @@ public static class ChannelDataServiceProvider
             await _instance.StopAsync(cancellationToken);
         }
 
-        lock (Lock)
+        lock (_lock)
         {
             _instance.Dispose();
             _instance = null;
@@ -136,7 +136,7 @@ public static class ChannelDataServiceProvider
     /// </summary>
     public static void Reset()
     {
-        lock (Lock)
+        lock (_lock)
         {
             _instance?.Dispose();
             _instance = null;

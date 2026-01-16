@@ -1,4 +1,6 @@
-﻿namespace MCCS.Interface.Components.ViewModels.Parameters
+﻿using MCCS.Infrastructure.Services;
+
+namespace MCCS.Interface.Components.ViewModels.Parameters
 {
     public class ProjectDataMonitorComponentItemModel : BindableBase
     { 
@@ -12,14 +14,14 @@
         /// </summary>
         private string _displayName = "";
         public string DisplayName { get => _displayName; set => SetProperty(ref _displayName, value); }
-         
+
         /// <summary>
         /// 显示值
-        /// </summary>
-        private double _value = 0.0;
+        /// </summary>  
+        private double _value; 
         public double Value
         {
-            get => _value;
+            get => _value; 
             set => SetProperty(ref _value, value);
         }
 

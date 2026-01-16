@@ -101,12 +101,10 @@ public sealed class ChannelDataService : IChannelDataService
     }
 
     /// <inheritdoc />
-    public IObservable<ChannelDataItem> GetChannelDataStream(long channelId)
-    {
-        return _allDataSubject
+    public IObservable<ChannelDataItem> GetChannelDataStream(long channelId) =>
+        _allDataSubject
             .Where(data => data.ChannelId == channelId)
             .AsObservable();
-    }
 
     /// <inheritdoc />
     public IObservable<ChannelDataItem> GetChannelDataStream(IEnumerable<long> channelIds)

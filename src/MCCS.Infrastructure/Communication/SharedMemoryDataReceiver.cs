@@ -125,7 +125,7 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
             return;
 
         _isRunning = false;
-        _cts?.Cancel();
+        await _cts?.CancelAsync()!;
 
         if (_pollTask != null)
         {
@@ -163,8 +163,7 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
                     foreach (var data in dataItems)
                     {
                         ProcessData(data);
-                    }
-
+                    } 
                     if (!_isConnected)
                     {
                         _isConnected = true;
@@ -204,11 +203,9 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     private void ProcessData(TData data)
     {
         Interlocked.Increment(ref _totalPacketsReceived);
-        Interlocked.Increment(ref _packetsInLastSecond);
-
+        Interlocked.Increment(ref _packetsInLastSecond); 
         // 发送到主数据流
-        _dataSubject.OnNext(data);
-
+        _dataSubject.OnNext(data); 
         // 触发事件
         DataReceived?.Invoke(this, data);
     }
@@ -265,7 +262,10 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     {
         if (_isRunning)
         {
-            StopAsync().GetAwaiter().GetResult();
+            Task.Run(async () =>
+            {
+                await StopAsync();
+            });
         }
 
         _dataSubject.Dispose();
