@@ -56,9 +56,12 @@
                                 CornerRadius="24,0,0,0"
                                 Cursor="SizeNWSE"
                                 HorizontalAlignment="Right"
-                                VerticalAlignment="Bottom">
+                                VerticalAlignment="Bottom"
+                                MouseLeftButtonDown="ResizeHandle_MouseLeftButtonDown"
+                                MouseMove="ResizeHandle_MouseMove"
+                                MouseLeftButtonUp="ResizeHandle_MouseLeftButtonUp">
                                 <materialDesign:PackIcon HorizontalAlignment="Right"
-                                                         VerticalAlignment="Bottom" 
+                                                         VerticalAlignment="Bottom"
                                                          Kind="ArrowTopLeftBottomRight" />
                             </Border>
                         </Grid>
