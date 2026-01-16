@@ -1,10 +1,6 @@
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Windows.Threading;
 
-using MCCS.Infrastructure.Communication;
 using MCCS.Infrastructure.Services;
 using MCCS.Interface.Components.Attributes;
 using MCCS.Interface.Components.Enums;
@@ -15,7 +11,7 @@ namespace MCCS.Interface.Components.ViewModels
 {
     /// <summary>
     /// 数据监控组件 ViewModel
-    /// 高性能实现：100ms批量UI更新，支持高频数据采集
+    /// 高性能实现：100ms批量UI更新，利用ChannelDataService的缓存机制
     /// </summary>
     [InterfaceComponent(
         "data-monitor-component",
@@ -37,20 +33,14 @@ namespace MCCS.Interface.Components.ViewModels
 
         #region Fields
         /// <summary>
-        /// 用于存储最新数据的高性能并发字典
-        /// Key: ChannelId, Value: 最新值
-        /// </summary>
-        private readonly ConcurrentDictionary<long, double> _latestValues = new();
-
-        /// <summary>
         /// 通道ID到模型的快速查找字典
         /// </summary>
         private readonly Dictionary<long, ProjectDataMonitorComponentItemModel> _channelToModel = [];
 
         /// <summary>
-        /// 订阅清理容器
+        /// 所有需要监控的通道ID列表（缓存，避免每次刷新时重新创建）
         /// </summary>
-        private readonly CompositeDisposable _subscriptions = new();
+        private long[] _channelIds = [];
 
         /// <summary>
         /// UI刷新定时器
@@ -82,7 +72,7 @@ namespace MCCS.Interface.Components.ViewModels
 
         #region Constructor
         /// <summary>
-        /// 构造函数 - 支持 DI 注入和业务参数
+        /// 构造函数
         /// </summary>
         /// <param name="parameters">业务参数（从外部传入）</param>
         public ProjectDataMonitorComponentPageViewModel(
@@ -99,10 +89,12 @@ namespace MCCS.Interface.Components.ViewModels
         {
             Chilldren.Clear();
             _channelToModel.Clear();
-            _latestValues.Clear();
 
             if (parameters == null || parameters.Count == 0)
+            {
+                _channelIds = [];
                 return;
+            }
 
             foreach (var param in parameters)
             {
@@ -117,8 +109,10 @@ namespace MCCS.Interface.Components.ViewModels
 
                 Chilldren.Add(model);
                 _channelToModel[model.Id] = model;
-                _latestValues[model.Id] = 0.0;
             }
+
+            // 缓存通道ID数组，避免每次刷新时重新分配
+            _channelIds = [.. _channelToModel.Keys];
         }
         #endregion
 
@@ -128,15 +122,10 @@ namespace MCCS.Interface.Components.ViewModels
         /// </summary>
         public void StartDataUpdates()
         {
-            if (_isRunning || _isDisposed)
+            if (_isRunning || _isDisposed || _channelIds.Length == 0)
                 return;
 
             _isRunning = true;
-
-            // 订阅数据服务
-            SubscribeToDataService();
-
-            // 启动UI刷新定时器
             StartRefreshTimer();
         }
 
@@ -149,44 +138,7 @@ namespace MCCS.Interface.Components.ViewModels
                 return;
 
             _isRunning = false;
-
-            // 停止定时器
             StopRefreshTimer();
-
-            // 清理订阅
-            _subscriptions.Clear();
-        }
-
-        /// <summary>
-        /// 订阅数据服务
-        /// 使用高性能的批量数据接收策略
-        /// </summary>
-        private void SubscribeToDataService()
-        {
-            if (_channelToModel.Count == 0)
-                return;
-
-            var channelIds = _channelToModel.Keys.ToList();
-            var dataService = ChannelDataServiceProvider.Instance;
-
-            // 订阅指定通道的数据流
-            // 数据直接写入ConcurrentDictionary，无需锁
-            var subscription = dataService
-                .GetChannelDataStream(channelIds)
-                .Subscribe(OnDataReceived);
-
-            _subscriptions.Add(subscription);
-        }
-
-        /// <summary>
-        /// 数据接收处理（在后台线程执行）
-        /// 仅更新缓存，不触发UI更新
-        /// </summary>
-        /// <param name="data">通道数据</param>
-        private void OnDataReceived(ChannelDataItem data)
-        {
-            // 直接更新并发字典，无锁操作
-            _latestValues[data.ChannelId] = data.Value;
         }
 
         /// <summary>
@@ -224,14 +176,17 @@ namespace MCCS.Interface.Components.ViewModels
             if (_isDisposed || !_isRunning)
                 return;
 
+            // 从ChannelDataService获取所有通道的最新值
+            var dataService = ChannelDataServiceProvider.Instance;
+            var currentValues = dataService.GetCurrentValues(_channelIds);
+
             // 批量更新所有模型的显示值
-            foreach (var kvp in _channelToModel)
+            foreach (var kvp in currentValues)
             {
-                if (_latestValues.TryGetValue(kvp.Key, out var value))
+                if (_channelToModel.TryGetValue(kvp.Key, out var model))
                 {
-                    var model = kvp.Value;
                     // 直接更新内部值（不触发通知）
-                    model.UpdateValueDirect(value);
+                    model.UpdateValueDirect(kvp.Value);
                     // 刷新显示（仅在值变化时触发通知）
                     model.RefreshDisplay();
                 }
@@ -251,9 +206,7 @@ namespace MCCS.Interface.Components.ViewModels
             _isDisposed = true;
 
             StopDataUpdates();
-            _subscriptions.Dispose();
             _channelToModel.Clear();
-            _latestValues.Clear();
         }
         #endregion
     }
