@@ -1050,7 +1050,8 @@ public sealed class NamedPipeCommunicationTest
     public void NamedPipeServer_RegisterHandlersFromAttributes_ShouldRegisterHandlers()
     {
         // Arrange
-        var options = new NamedPipeServerOptions { PipeName = "TestAttributePipe" };
+        var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
+        var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
 
         // Act
@@ -1065,17 +1066,21 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_ShouldProcessRequests()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
+        var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {
+            serverStarted.SetResult(true);
             await server.StartAsync();
-            await Task.Delay(400);
-        }); 
+        });
 
-        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
+        await serverStarted.Task;
+        await Task.Delay(200); // 等待服务器完全启动
+
+        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName, ConnectTimeoutMs = 5000 };
         using var client = new NamedPipeClient(clientOptions);
 
         try
@@ -1102,18 +1107,21 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_WithTypedPayload_ShouldWork()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
+        var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {
+            serverStarted.SetResult(true);
             await server.StartAsync();
-            await Task.Delay(800);
         });
-        
 
-        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
+        await serverStarted.Task;
+        await Task.Delay(200); // 等待服务器完全启动
+
+        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName, ConnectTimeoutMs = 5000 };
         using var client = new NamedPipeClient(clientOptions);
 
         try
@@ -1140,18 +1148,21 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_AsyncMethod_ShouldWork()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
+        var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {
+            serverStarted.SetResult(true);
             await server.StartAsync();
-            await Task.Delay(600);
         });
-        
 
-        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
+        await serverStarted.Task;
+        await Task.Delay(200); // 等待服务器完全启动
+
+        var clientOptions = new NamedPipeClientOptions { PipeName = pipeName, ConnectTimeoutMs = 5000 };
         using var client = new NamedPipeClient(clientOptions);
 
         try
@@ -1159,7 +1170,7 @@ public sealed class NamedPipeCommunicationTest
             await client.ConnectAsync();
 
             var response = await client.SendAsync("test/async-ping");
-            Assert.IsTrue(response.IsSuccess);
+            Assert.IsTrue(response.IsSuccess, $"Response failed with status: {response.StatusCode}, error: {response.ErrorMessage}");
             Assert.AreEqual("async-pong", response.Payload);
         }
         finally
