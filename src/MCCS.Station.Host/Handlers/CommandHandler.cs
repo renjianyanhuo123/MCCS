@@ -1,33 +1,39 @@
 using MCCS.Infrastructure.Communication.NamedPipe;
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
+using MCCS.Station.Host.Services;
 
 namespace MCCS.Station.Host.Handlers;
 
+/// <summary>
+/// å‘½ä»¤å¤„ç†å™¨ - ä½œä¸ºè–„å±‚ï¼Œå°†è¯·æ±‚è½¬å‘ç»™ Services å¤„ç†
+/// </summary>
 [ApiNamedPipe("MCCS_Command_IPC")]
 internal sealed class CommandHandler
-{ 
+{
+    private readonly ICommandService _commandService;
+
+    public CommandHandler(ICommandService commandService)
+    {
+        _commandService = commandService;
+    }
+
     /// <summary>
-    /// ¿ªÊ¼ÊÔÑéÖ¸Áî
+    /// å¯åŠ¨æµ‹è¯•æŒ‡ä»¤
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     [Route("startTestCommand")]
     public async Task<PipeResponse> StartCommandHandler(PipeRequest request, CancellationToken cancellationToken)
     {
-        // Ä£ÄâÒ»¸öÒì²½²Ù×÷
-        await Task.Delay(1000, cancellationToken);
-        // ·µ»Ø³É¹¦ÏìÓ¦
-        return PipeResponse.Success(request.RequestId, "Test command started successfully.");
+        var result = await _commandService.ExecuteTestCommandAsync(cancellationToken);
+        return PipeResponse.Success(request.RequestId, result);
     }
 
+    /// <summary>
+    /// é˜€é—¨æ“ä½œå‘½ä»¤
+    /// </summary>
     [Route("operationValveCommand")]
-    public async Task<PipeResponse> OperationValveHandler(PipeRequest request, CancellationToken cancellationToken) 
+    public async Task<PipeResponse> OperationValveHandler(PipeRequest request, CancellationToken cancellationToken)
     {
-        // Ä£ÄâÒ»¸öÒì²½²Ù×÷
-        await Task.Delay(200, cancellationToken);
-        Console.WriteLine($"{request.RequestId}:{request.Payload}");
-        // ·µ»Ø³É¹¦ÏìÓ¦
-        return PipeResponse.Success(request.RequestId, "Test command started successfully.");
+        var result = await _commandService.ExecuteValveOperationAsync(request.RequestId, request.Payload, cancellationToken);
+        return PipeResponse.Success(request.RequestId, result);
     }
 }

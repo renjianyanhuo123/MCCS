@@ -3,12 +3,14 @@ using System.Reflection;
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
 using MCCS.Infrastructure.Communication.NamedPipe.Serialization;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace MCCS.Infrastructure.Communication.NamedPipe.Handlers;
 
 internal static class AttributedHandlerRegistrar
 {
     /// <summary>
-    /// ɨ�����е� ApiNamedPipeAttribute �����Խ����ܵ�����
+    /// ɨ�����е� ApiNamedPipeAttribute �����Խ����ܵ�����
     /// </summary>
     /// <param name="assemblies"></param>
     /// <returns></returns>
@@ -38,6 +40,24 @@ internal static class AttributedHandlerRegistrar
         IMessageSerializer serializer,
         bool ignorePipeNameMatch = false)
     {
+        RegisterHandlers(server, assemblies, serializer, serviceProvider: null, ignorePipeNameMatch);
+    }
+
+    /// <summary>
+    /// 通过 IServiceProvider 支持依赖注入的处理器注册
+    /// </summary>
+    /// <param name="server">服务端实例</param>
+    /// <param name="assemblies">扫描程序集</param>
+    /// <param name="serializer">序列化器</param>
+    /// <param name="serviceProvider">服务提供者（用于依赖注入）</param>
+    /// <param name="ignorePipeNameMatch">是否忽略管道名称匹配检查</param>
+    public static void RegisterHandlers(
+        NamedPipeServer server,
+        IEnumerable<Assembly> assemblies,
+        IMessageSerializer serializer,
+        IServiceProvider? serviceProvider,
+        bool ignorePipeNameMatch = false)
+    {
         var pipeName = server.PipeName;
         foreach (var typeInfo in assemblies.SelectMany(assembly => assembly.DefinedTypes))
         {
@@ -47,13 +67,23 @@ internal static class AttributedHandlerRegistrar
                 continue;
             }
 
-            // ��������Թܵ�����ƥ�䣬����ܵ������Ƿ�һ��
+            // 如果不忽略管道名称匹配，检查管道名称是否一致
             if (!ignorePipeNameMatch && !string.Equals(pipeAttribute.Name, pipeName, StringComparison.Ordinal))
             {
                 continue;
             }
 
-            var instance = Activator.CreateInstance(typeInfo.AsType());
+            // 优先使用 DI 容器获取实例，如果没有提供 serviceProvider 则使用 Activator
+            object? instance;
+            if (serviceProvider != null)
+            {
+                instance = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typeInfo.AsType());
+            }
+            else
+            {
+                instance = Activator.CreateInstance(typeInfo.AsType());
+            }
+
             if (instance == null)
             {
                 throw new InvalidOperationException($"Failed to create handler instance for {typeInfo.FullName}.");

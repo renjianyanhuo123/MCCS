@@ -55,6 +55,29 @@ public static class NamedPipeFactory
     }
 
     /// <summary>
+    /// 通过特性扫描创建服务端并注册处理器（支持依赖注入）
+    /// </summary>
+    /// <param name="serviceProvider">服务提供者（用于依赖注入）</param>
+    /// <param name="maxConnections">最大连接数</param>
+    /// <param name="logger">日志记录器</param>
+    /// <param name="assemblies">扫描程序集</param>
+    /// <returns>服务端实例</returns>
+    public static NamedPipeServer CreateServerFromAttributes(
+        IServiceProvider serviceProvider,
+        int maxConnections = 10,
+        ILogger? logger = null,
+        params Assembly[] assemblies)
+    {
+        var resolvedAssemblies = assemblies.Length == 0
+            ? [Assembly.GetCallingAssembly()]
+            : assemblies;
+        var pipeName = AttributedHandlerRegistrar.ResolvePipeName(resolvedAssemblies);
+        var server = CreateServer(pipeName, maxConnections, logger);
+        server.RegisterHandlersFromAttributes(serviceProvider, resolvedAssemblies);
+        return server;
+    }
+
+    /// <summary>
     /// 创建服务端（使用配置）
     /// </summary>
     /// <param name="configure">配置委托</param>
@@ -240,8 +263,38 @@ public static class NamedPipeExtensions
         var resolvedAssemblies = assemblies.Length == 0
             ? [Assembly.GetCallingAssembly()]
             : assemblies;
- 
+
         AttributedHandlerRegistrar.RegisterHandlers(server, resolvedAssemblies, server.Serializer, ignorePipeNameMatch);
+        return server;
+    }
+
+    /// <summary>
+    /// 通过特性扫描注册处理器（支持依赖注入）
+    /// </summary>
+    /// <param name="server">服务端实例</param>
+    /// <param name="serviceProvider">服务提供者（用于依赖注入）</param>
+    /// <param name="assemblies">扫描程序集</param>
+    /// <returns>服务端实例</returns>
+    public static NamedPipeServer RegisterHandlersFromAttributes(this NamedPipeServer server, IServiceProvider serviceProvider, params Assembly[] assemblies)
+    {
+        return server.RegisterHandlersFromAttributes(serviceProvider, ignorePipeNameMatch: false, assemblies);
+    }
+
+    /// <summary>
+    /// 通过特性扫描注册处理器（支持依赖注入）
+    /// </summary>
+    /// <param name="server">服务端实例</param>
+    /// <param name="serviceProvider">服务提供者（用于依赖注入）</param>
+    /// <param name="ignorePipeNameMatch">是否忽略管道名称匹配检查</param>
+    /// <param name="assemblies">扫描程序集</param>
+    /// <returns>服务端实例</returns>
+    public static NamedPipeServer RegisterHandlersFromAttributes(this NamedPipeServer server, IServiceProvider serviceProvider, bool ignorePipeNameMatch, params Assembly[] assemblies)
+    {
+        var resolvedAssemblies = assemblies.Length == 0
+            ? [Assembly.GetCallingAssembly()]
+            : assemblies;
+
+        AttributedHandlerRegistrar.RegisterHandlers(server, resolvedAssemblies, server.Serializer, serviceProvider, ignorePipeNameMatch);
         return server;
     }
 
