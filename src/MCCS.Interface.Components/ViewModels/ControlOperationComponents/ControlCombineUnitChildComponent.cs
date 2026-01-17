@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
+
+using MCCS.Common.Resources.Extensions;
 using MCCS.Infrastructure.Communication.NamedPipe;
 using MCCS.Infrastructure.Helper;
 using MCCS.Interface.Components.Enums;
@@ -14,11 +17,9 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         public BaseControlViewModel ControlViewModel { get; set; }
     }
 
-
-
     public class ControlCombineUnitChildComponent : BindableBase
     {
-
+        private readonly INotificationService _notificationService;
 
         public ControlCombineUnitChildComponent(long channelId, string channelName, IEnumerable<ControlModeTypeEnum> controlModes)
         {
@@ -32,7 +33,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
                 ControlViewModel = CreateControlViewModel(s),
             }).ToList();
             SelectedControlMode = ControlModeSelections.FirstOrDefault();
-            ValveControlCheckedCommand = new DelegateCommand(ExecuteValveControlCheckedCommand);
+            ValveControlCheckedCommand = new AsyncDelegateCommand(ExecuteValveControlCheckedCommand);
         }
 
         private static BaseControlViewModel CreateControlViewModel(ControlModeTypeEnum controlMode) =>
@@ -72,13 +73,13 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 
         #region Command 
         public DelegateCommand ControlModeSelectionChangedCommand { get; } 
-        public DelegateCommand ValveControlCheckedCommand { get; }
+        public AsyncDelegateCommand ValveControlCheckedCommand { get; }
         #endregion
 
         #region Private Method
-        private async void ExecuteValveControlCheckedCommand()
+        private async Task ExecuteValveControlCheckedCommand()
         {
-            if (!IsValveControlChecked)
+            if (!IsValveControlChecked) 
             {
                 return;
             }
@@ -94,7 +95,16 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
                 options.PipeName = NamedPipeCommunication.CommandPipeName;
             });
 
-            await client.SendAsync("operationValveCommand", payload);
+            while (true)
+            {
+                var response = await client.SendAsync("operationValveCommand", payload);
+                if (response.IsSuccess)
+                {
+#if DEBUG
+                    Debug.WriteLine($"发送成功:{DateTime.Now}");
+#endif
+                }
+            }
         }
         #endregion
 

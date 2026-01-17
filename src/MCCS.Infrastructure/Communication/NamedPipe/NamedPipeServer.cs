@@ -231,7 +231,7 @@ public sealed class NamedPipeServer : IDisposable
     {
         try
         {
-            using (pipeServer)
+            await using (pipeServer)
             {
                 while (pipeServer.IsConnected && !cancellationToken.IsCancellationRequested)
                 {
