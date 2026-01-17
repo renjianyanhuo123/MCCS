@@ -4,16 +4,6 @@ using System.Reactive.Subjects;
 namespace MCCS.Infrastructure.Communication;
 
 /// <summary>
-/// 连接状态变化事件参数
-/// </summary>
-public class ConnectionStateChangedEventArgs : EventArgs
-{
-    public bool IsConnected { get; init; }
-    public DateTime Timestamp { get; init; }
-    public string? Reason { get; init; }
-}
-
-/// <summary>
 /// 共享内存数据接收器
 /// 从共享内存读取数据并提供响应式数据流
 /// </summary>
@@ -23,7 +13,6 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     private readonly string _channelName;
     private readonly int _maxItems;
     private readonly int _pollIntervalMs;
-    private readonly int _heartbeatTimeoutMs;
 
     private SharedMemoryChannel<TData>? _channel;
     private CancellationTokenSource? _cts;
@@ -31,12 +20,7 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     private readonly Subject<TData> _dataSubject = new();
 
     private volatile bool _isRunning;
-    private volatile bool _isConnected;
-
     public bool IsRunning => _isRunning;
-    public bool IsConnected => _isConnected;
-
-    public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
 
     /// <summary>
     /// 创建共享内存数据接收器
@@ -44,17 +28,14 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     /// <param name="channelName">通道名称</param>
     /// <param name="maxItems">最大项数（应与发布者一致）</param>
     /// <param name="pollIntervalMs">轮询间隔（毫秒）</param>
-    /// <param name="heartbeatTimeoutMs">心跳超时时间（毫秒）</param>
     public SharedMemoryDataReceiver(
         string channelName,
         int maxItems = 1000,
-        int pollIntervalMs = 10,
-        int heartbeatTimeoutMs = 5000)
+        int pollIntervalMs = 10)
     {
         _channelName = channelName;
         _maxItems = maxItems;
         _pollIntervalMs = pollIntervalMs;
-        _heartbeatTimeoutMs = heartbeatTimeoutMs;
     }
 
     /// <summary>
@@ -65,17 +46,7 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
         if (_isRunning) return Task.CompletedTask;
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-        try
-        {
-            _channel = new SharedMemoryChannel<TData>(_channelName, _maxItems);
-            SetConnected(true, "Connected to shared memory channel");
-        }
-        catch (Exception ex)
-        {
-            SetConnected(false, $"Failed to connect: {ex.Message}");
-            throw;
-        }
+        _channel = new SharedMemoryChannel<TData>(_channelName, _maxItems);
 
         _isRunning = true;
         _pollTask = Task.Run(() => PollDataAsync(_cts.Token), _cts.Token);
@@ -108,14 +79,10 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
                 // 正常取消
             }
         }
-
-        SetConnected(false, "Receiver stopped");
     }
 
     private async Task PollDataAsync(CancellationToken cancellationToken)
     {
-        var lastDataTime = DateTime.UtcNow;
-
         while (!cancellationToken.IsCancellationRequested && _isRunning)
         {
             try
@@ -124,21 +91,10 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
 
                 if (dataItems.Count > 0)
                 {
-                    lastDataTime = DateTime.UtcNow;
-
                     foreach (var data in dataItems)
                     {
                         _dataSubject.OnNext(data);
                     }
-
-                    if (!_isConnected)
-                    {
-                        SetConnected(true, "Reconnected");
-                    }
-                }
-                else if (_isConnected && (DateTime.UtcNow - lastDataTime).TotalMilliseconds > _heartbeatTimeoutMs)
-                {
-                    SetConnected(false, "Heartbeat timeout");
                 }
 
                 await Task.Delay(_pollIntervalMs, cancellationToken);
@@ -153,17 +109,6 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
                 await Task.Delay(_pollIntervalMs * 10, cancellationToken);
             }
         }
-    }
-
-    private void SetConnected(bool connected, string? reason)
-    {
-        _isConnected = connected;
-        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs
-        {
-            IsConnected = connected,
-            Timestamp = DateTime.UtcNow,
-            Reason = reason
-        });
     }
 
     /// <summary>
