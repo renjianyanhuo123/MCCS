@@ -148,8 +148,7 @@ public sealed class SharedMemoryDataPublisher : IDataPublisher
         var pseudoChannels = _pseudoChannelManager.GetPseudoChannels();
         var merged =
             _pseudoChannelManager.GetPseudoChannels()
-                .Select(channel =>
-                    channel
+                .Select(channel => channel
                         .GetPseudoChannelStream()
                         .Select(data => new ChannelDataItem
                         {

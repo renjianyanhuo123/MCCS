@@ -248,7 +248,7 @@ namespace MCCS.Station.Core.ControllerManagers.Entities
             // 模拟数据采集 - 每次生成少量样本（模拟真实采集频率）
             const uint sampleCount = 2; // 每批次2个样本，与2ms间隔配合模拟1000Hz采样率
 #if DEBUG
-            Console.WriteLine($"执行采集: {DateTime.Now:HH:mm:ss.fff}");
+            // Console.WriteLine($"执行采集: {DateTime.Now:HH:mm:ss.fff}");
 #endif
             // 使用环形缓冲区复用预分配的对象，避免GC压力
             var currentIndex = Interlocked.Increment(ref _bufferIndex) % _bufferPoolSize;

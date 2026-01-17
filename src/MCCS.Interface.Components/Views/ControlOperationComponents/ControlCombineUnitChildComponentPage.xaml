@@ -17,9 +17,22 @@
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.IsSharedSizeScope="True">
             <StackPanel>
-                <TextBlock  Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                            Margin="0,5,0,10"
-                            Text="{Binding ChannelName}" Cursor="Hand" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="4*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                Margin="0,5,0,10"
+                                Text="{Binding ChannelName}" Cursor="Hand" />
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" >
+                        <TextBlock Text="阀台控制：" VerticalAlignment="Center" FontSize="18"/>
+                        <ToggleButton IsChecked="True" 
+                              Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                              ToolTip="阀门控制" />
+                    </StackPanel>
+                </Grid>
                 <GroupBox   Margin="{StaticResource GroupMargin}"
                             Header="第一步：控制方式"
                             Style="{StaticResource MaterialDesignCardGroupBox}">
