@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MCCS.Common.Resources\MCCS.Common.Resources.csproj" />
     <ProjectReference Include="..\MCCS.Infrastructure\MCCS.Infrastructure.csproj" />
+    <ProjectReference Include="..\MCCS.Station.Abstractions\MCCS.Station.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
