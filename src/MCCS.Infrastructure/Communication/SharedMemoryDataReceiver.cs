@@ -1,21 +1,7 @@
-using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace MCCS.Infrastructure.Communication;
-
-/// <summary>
-/// 接收器统计信息
-/// </summary>
-public record ReceiverStatistics
-{
-    public long TotalPacketsReceived { get; init; }
-    public long LostPacketsCount { get; init; }
-    public DateTime LastReceivedTime { get; init; }
-    public double AverageLatencyMs { get; init; }
-    public double PacketsPerSecond { get; init; }
-}
 
 /// <summary>
 /// 连接状态变化事件参数
@@ -37,21 +23,12 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     private readonly string _channelName;
     private readonly int _maxItems;
     private readonly int _pollIntervalMs;
+    private readonly int _heartbeatTimeoutMs;
 
     private SharedMemoryChannel<TData>? _channel;
     private CancellationTokenSource? _cts;
     private Task? _pollTask;
-
-    private readonly Subject<TData> _dataSubject;
-    private readonly ConcurrentDictionary<long, Subject<TData>> _filteredSubjects;
-
-    private readonly Stopwatch _rateStopwatch;
-    private long _totalPacketsReceived;
-    private long _lostPacketsCount;
-    private long _lastSequenceNumber;
-    private DateTime _lastReceivedTime;
-    private long _packetsInLastSecond;
-    private DateTime _lastRateCalculation;
+    private readonly Subject<TData> _dataSubject = new();
 
     private volatile bool _isRunning;
     private volatile bool _isConnected;
@@ -60,12 +37,6 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     public bool IsConnected => _isConnected;
 
     public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
-    public event EventHandler<TData>? DataReceived;
-
-    /// <summary>
-    /// 心跳超时时间（毫秒）
-    /// </summary>
-    public int HeartbeatTimeoutMs { get; set; } = 5000;
 
     /// <summary>
     /// 创建共享内存数据接收器
@@ -73,16 +44,17 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     /// <param name="channelName">通道名称</param>
     /// <param name="maxItems">最大项数（应与发布者一致）</param>
     /// <param name="pollIntervalMs">轮询间隔（毫秒）</param>
-    public SharedMemoryDataReceiver(string channelName, int maxItems = 1000, int pollIntervalMs = 10)
+    /// <param name="heartbeatTimeoutMs">心跳超时时间（毫秒）</param>
+    public SharedMemoryDataReceiver(
+        string channelName,
+        int maxItems = 1000,
+        int pollIntervalMs = 10,
+        int heartbeatTimeoutMs = 5000)
     {
         _channelName = channelName;
         _maxItems = maxItems;
         _pollIntervalMs = pollIntervalMs;
-
-        _dataSubject = new Subject<TData>();
-        _filteredSubjects = new ConcurrentDictionary<long, Subject<TData>>();
-        _rateStopwatch = new Stopwatch();
-        _lastRateCalculation = DateTime.UtcNow;
+        _heartbeatTimeoutMs = heartbeatTimeoutMs;
     }
 
     /// <summary>
@@ -90,27 +62,22 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
-        if (_isRunning)
-            return Task.CompletedTask;
+        if (_isRunning) return Task.CompletedTask;
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         try
         {
             _channel = new SharedMemoryChannel<TData>(_channelName, _maxItems);
-            _isConnected = true;
-            OnConnectionStateChanged(true, "Connected to shared memory channel");
+            SetConnected(true, "Connected to shared memory channel");
         }
         catch (Exception ex)
         {
-            _isConnected = false;
-            OnConnectionStateChanged(false, $"Failed to connect: {ex.Message}");
+            SetConnected(false, $"Failed to connect: {ex.Message}");
             throw;
         }
 
-        _rateStopwatch.Start();
         _isRunning = true;
-
         _pollTask = Task.Run(() => PollDataAsync(_cts.Token), _cts.Token);
 
         return Task.CompletedTask;
@@ -121,11 +88,14 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
     /// </summary>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        if (!_isRunning)
-            return;
+        if (!_isRunning) return;
 
         _isRunning = false;
-        await _cts?.CancelAsync()!;
+
+        if (_cts != null)
+        {
+            await _cts.CancelAsync();
+        }
 
         if (_pollTask != null)
         {
@@ -139,52 +109,37 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
             }
         }
 
-        _rateStopwatch.Stop();
-        _isConnected = false;
-        OnConnectionStateChanged(false, "Receiver stopped");
+        SetConnected(false, "Receiver stopped");
     }
 
     private async Task PollDataAsync(CancellationToken cancellationToken)
     {
-        var lastHeartbeatTime = DateTime.UtcNow;
+        var lastDataTime = DateTime.UtcNow;
 
         while (!cancellationToken.IsCancellationRequested && _isRunning)
         {
             try
             {
-                // 批量读取数据
                 var dataItems = _channel?.ReadBatch(100) ?? [];
 
                 if (dataItems.Count > 0)
                 {
-                    lastHeartbeatTime = DateTime.UtcNow;
-                    _lastReceivedTime = DateTime.UtcNow;
+                    lastDataTime = DateTime.UtcNow;
 
                     foreach (var data in dataItems)
                     {
-                        ProcessData(data);
-                    } 
+                        _dataSubject.OnNext(data);
+                    }
+
                     if (!_isConnected)
                     {
-                        _isConnected = true;
-                        OnConnectionStateChanged(true, "Reconnected");
+                        SetConnected(true, "Reconnected");
                     }
                 }
-                else
+                else if (_isConnected && (DateTime.UtcNow - lastDataTime).TotalMilliseconds > _heartbeatTimeoutMs)
                 {
-                    // 检查心跳超时
-                    if ((DateTime.UtcNow - lastHeartbeatTime).TotalMilliseconds > HeartbeatTimeoutMs)
-                    {
-                        if (_isConnected)
-                        {
-                            _isConnected = false;
-                            OnConnectionStateChanged(false, "Heartbeat timeout");
-                        }
-                    }
+                    SetConnected(false, "Heartbeat timeout");
                 }
-
-                // 计算速率
-                UpdateRate();
 
                 await Task.Delay(_pollIntervalMs, cancellationToken);
             }
@@ -192,90 +147,48 @@ public sealed class SharedMemoryDataReceiver<TData> : IDisposable where TData : 
             {
                 break;
             }
-            catch (Exception)
+            catch
             {
-                // 继续轮询
+                // 出错时延长等待时间后继续
                 await Task.Delay(_pollIntervalMs * 10, cancellationToken);
             }
         }
     }
 
-    private void ProcessData(TData data)
+    private void SetConnected(bool connected, string? reason)
     {
-        Interlocked.Increment(ref _totalPacketsReceived);
-        Interlocked.Increment(ref _packetsInLastSecond); 
-        // 发送到主数据流
-        _dataSubject.OnNext(data); 
-        // 触发事件
-        DataReceived?.Invoke(this, data);
-    }
-
-    private void UpdateRate()
-    {
-        var now = DateTime.UtcNow;
-        if ((now - _lastRateCalculation).TotalSeconds >= 1)
+        _isConnected = connected;
+        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs
         {
-            Interlocked.Exchange(ref _packetsInLastSecond, 0);
-            _lastRateCalculation = now;
-        }
+            IsConnected = connected,
+            Timestamp = DateTime.UtcNow,
+            Reason = reason
+        });
     }
 
     /// <summary>
-    /// 获取所有数据的响应式流
+    /// 获取数据的响应式流
     /// </summary>
     public IObservable<TData> GetDataStream() => _dataSubject.AsObservable();
 
     /// <summary>
-    /// 获取过滤后的数据流（根据提供的过滤函数）
+    /// 获取过滤后的数据流
     /// </summary>
     public IObservable<TData> GetFilteredDataStream(Func<TData, bool> filter) => _dataSubject.Where(filter);
-
-    /// <summary>
-    /// 获取统计信息
-    /// </summary>
-    public ReceiverStatistics GetStatistics() =>
-        new()
-        {
-            TotalPacketsReceived = _totalPacketsReceived,
-            LostPacketsCount = _lostPacketsCount,
-            LastReceivedTime = _lastReceivedTime,
-            AverageLatencyMs = 0, // TODO: 计算实际延迟
-            PacketsPerSecond = _packetsInLastSecond
-        };
 
     /// <summary>
     /// 获取缓冲区状态
     /// </summary>
     public (int count, int capacity) GetBufferStatus() => _channel?.GetBufferStatus() ?? (0, 0);
 
-    private void OnConnectionStateChanged(bool isConnected, string? reason)
-    {
-        ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs
-        {
-            IsConnected = isConnected,
-            Timestamp = DateTime.UtcNow,
-            Reason = reason
-        });
-    }
-
     public void Dispose()
     {
         if (_isRunning)
         {
-            Task.Run(async () =>
-            {
-                await StopAsync();
-            });
+            StopAsync().GetAwaiter().GetResult();
         }
 
         _dataSubject.Dispose();
-
-        foreach (var subject in _filteredSubjects.Values)
-        {
-            subject.Dispose();
-        }
-        _filteredSubjects.Clear();
-
         _channel?.Dispose();
         _cts?.Dispose();
     }
