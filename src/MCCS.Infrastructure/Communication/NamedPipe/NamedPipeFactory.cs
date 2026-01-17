@@ -1,5 +1,6 @@
 using System.Reflection;
 using MCCS.Infrastructure.Communication.NamedPipe.Handlers;
+using MCCS.Infrastructure.Communication.NamedPipe.PubSub;
 using MCCS.Infrastructure.Communication.NamedPipe.Serialization;
 using Serilog;
 
@@ -136,6 +137,79 @@ public static class NamedPipeFactory
         configure(options);
         return new NamedPipeClientPool(options, new JsonMessageSerializer(), logger);
     }
+
+    #region PubSub Factory Methods
+
+    /// <summary>
+    /// 创建发布-订阅服务端
+    /// </summary>
+    /// <param name="pipeName">管道名称</param>
+    /// <param name="maxConnections">最大连接数</param>
+    /// <param name="logger">日志记录器</param>
+    /// <returns>发布-订阅服务端实例</returns>
+    public static PubSubServer CreatePubSubServer(
+        string pipeName = "MCCS_PubSub_Pipe",
+        int maxConnections = 50,
+        ILogger? logger = null)
+    {
+        var options = new PubSubServerOptions
+        {
+            PipeName = pipeName,
+            MaxConcurrentConnections = maxConnections
+        };
+
+        return new PubSubServer(options, new JsonPubSubMessageSerializer(), null, logger);
+    }
+
+    /// <summary>
+    /// 创建发布-订阅服务端（使用配置）
+    /// </summary>
+    /// <param name="configure">配置委托</param>
+    /// <param name="logger">日志记录器</param>
+    /// <returns>发布-订阅服务端实例</returns>
+    public static PubSubServer CreatePubSubServer(
+        Action<PubSubServerOptions> configure,
+        ILogger? logger = null)
+    {
+        var options = new PubSubServerOptions();
+        configure(options);
+        return new PubSubServer(options, new JsonPubSubMessageSerializer(), null, logger);
+    }
+
+    /// <summary>
+    /// 创建发布-订阅客户端
+    /// </summary>
+    /// <param name="pipeName">管道名称</param>
+    /// <param name="logger">日志记录器</param>
+    /// <returns>发布-订阅客户端实例</returns>
+    public static PubSubClient CreatePubSubClient(
+        string pipeName = "MCCS_PubSub_Pipe",
+        ILogger? logger = null)
+    {
+        var options = new PubSubClientOptions
+        {
+            PipeName = pipeName
+        };
+
+        return new PubSubClient(options, new JsonPubSubMessageSerializer(), logger);
+    }
+
+    /// <summary>
+    /// 创建发布-订阅客户端（使用配置）
+    /// </summary>
+    /// <param name="configure">配置委托</param>
+    /// <param name="logger">日志记录器</param>
+    /// <returns>发布-订阅客户端实例</returns>
+    public static PubSubClient CreatePubSubClient(
+        Action<PubSubClientOptions> configure,
+        ILogger? logger = null)
+    {
+        var options = new PubSubClientOptions();
+        configure(options);
+        return new PubSubClient(options, new JsonPubSubMessageSerializer(), logger);
+    }
+
+    #endregion
 }
 
 /// <summary>
