@@ -35,18 +35,20 @@ internal static class AttributedHandlerRegistrar
     public static void RegisterHandlers(
         NamedPipeServer server,
         IEnumerable<Assembly> assemblies,
-        IMessageSerializer serializer)
+        IMessageSerializer serializer,
+        bool ignorePipeNameMatch = false)
     {
         var pipeName = server.PipeName;
         foreach (var typeInfo in assemblies.SelectMany(assembly => assembly.DefinedTypes))
         {
             var pipeAttribute = typeInfo.GetCustomAttribute<ApiNamedPipeAttribute>();
-            if (pipeAttribute == null || !string.Equals(pipeAttribute.Name, pipeName, StringComparison.Ordinal))
+            if (pipeAttribute == null)
             {
                 continue;
             }
 
-            if (typeInfo.IsAbstract)
+            // 如果不忽略管道名称匹配，则检查管道名称是否一致
+            if (!ignorePipeNameMatch && !string.Equals(pipeAttribute.Name, pipeName, StringComparison.Ordinal))
             {
                 continue;
             }

@@ -1054,8 +1054,8 @@ public sealed class NamedPipeCommunicationTest
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
 
-        // Act
-        server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
+        // Act - 使用 ignorePipeNameMatch: true 来忽略管道名称匹配检查
+        server.RegisterHandlersFromAttributes(ignorePipeNameMatch: true, typeof(TestAttributeHandler).Assembly);
 
         // Assert
         Assert.IsTrue(server.Router.HasHandler("test/ping"));
@@ -1069,7 +1069,7 @@ public sealed class NamedPipeCommunicationTest
         var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
-        server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
+        server.RegisterHandlersFromAttributes(ignorePipeNameMatch: true, typeof(TestAttributeHandler).Assembly);
 
         var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {
@@ -1110,7 +1110,7 @@ public sealed class NamedPipeCommunicationTest
         var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
-        server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
+        server.RegisterHandlersFromAttributes(ignorePipeNameMatch: true, typeof(TestAttributeHandler).Assembly);
 
         var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {
@@ -1151,7 +1151,7 @@ public sealed class NamedPipeCommunicationTest
         var pipeName = $"TestAttributePipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
-        server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
+        server.RegisterHandlersFromAttributes(ignorePipeNameMatch: true, typeof(TestAttributeHandler).Assembly);
 
         var serverStarted = new TaskCompletionSource<bool>();
         var serverTask = Task.Run(async () => {

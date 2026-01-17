@@ -225,11 +225,23 @@ public static class NamedPipeExtensions
     /// <returns>服务端实例</returns>
     public static NamedPipeServer RegisterHandlersFromAttributes(this NamedPipeServer server, params Assembly[] assemblies)
     {
+        return server.RegisterHandlersFromAttributes(ignorePipeNameMatch: false, assemblies);
+    }
+ 
+    /// <summary>
+    /// 通过特性扫描注册处理器
+    /// </summary>
+    /// <param name="server">服务端实例</param>
+    /// <param name="ignorePipeNameMatch">是否忽略管道名称匹配检查</param>
+    /// <param name="assemblies">扫描程序集</param>
+    /// <returns>服务端实例</returns>
+    public static NamedPipeServer RegisterHandlersFromAttributes(this NamedPipeServer server, bool ignorePipeNameMatch, params Assembly[] assemblies)
+    {
         var resolvedAssemblies = assemblies.Length == 0
             ? [Assembly.GetCallingAssembly()]
             : assemblies;
-
-        AttributedHandlerRegistrar.RegisterHandlers(server, resolvedAssemblies, server.Serializer);
+ 
+        AttributedHandlerRegistrar.RegisterHandlers(server, resolvedAssemblies, server.Serializer, ignorePipeNameMatch);
         return server;
     }
 
