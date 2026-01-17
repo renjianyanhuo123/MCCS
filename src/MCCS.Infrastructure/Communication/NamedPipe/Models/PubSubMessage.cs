@@ -288,12 +288,10 @@ public sealed class PipeMessageEnvelope
     /// <summary>
     /// 创建消息包装器
     /// </summary>
-    public static PipeMessageEnvelope Create(PipeMessageType messageType, string payload)
-    {
-        return new PipeMessageEnvelope
+    public static PipeMessageEnvelope Create(PipeMessageType messageType, string payload) =>
+        new()
         {
             MessageType = messageType,
             Payload = payload
         };
-    }
 }

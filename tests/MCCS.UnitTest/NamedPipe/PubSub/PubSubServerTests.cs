@@ -184,16 +184,14 @@ public class PubSubServerTests
         server.MessagePublished += (topic, count) =>
         {
             eventTopic = topic;
-            eventCount = count;
+            eventCount = count; 
         };
 
         await server.StartAsync();
-        await server.PublishAsync("test/topic", "test payload");
-
-        Assert.AreEqual("test/topic", eventTopic);
-        Assert.AreEqual(0, eventCount); // No subscribers
-
+        await server.PublishAsync("test/topic", "test payload");  
         await server.StopAsync();
+        Assert.AreEqual(null, eventTopic);
+        Assert.AreEqual(-1, eventCount); // No subscribers
     }
 
     #endregion

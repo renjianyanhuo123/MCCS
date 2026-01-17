@@ -80,7 +80,7 @@ public class SubscriptionManagerTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(ArgumentException))]
+    [ExpectedException(typeof(ArgumentNullException))]
     public void Subscribe_WithNullSubscriberId_ShouldThrowException()
     {
         using var pipeServer = CreateMockPipeServer();

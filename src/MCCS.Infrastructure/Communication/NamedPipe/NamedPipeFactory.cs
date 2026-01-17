@@ -226,7 +226,7 @@ public static class NamedPipeExtensions
     public static NamedPipeServer RegisterHandlersFromAttributes(this NamedPipeServer server, params Assembly[] assemblies)
     {
         var resolvedAssemblies = assemblies.Length == 0
-            ? new[] { Assembly.GetCallingAssembly() }
+            ? [Assembly.GetCallingAssembly()]
             : assemblies;
 
         AttributedHandlerRegistrar.RegisterHandlers(server, resolvedAssemblies, server.Serializer);

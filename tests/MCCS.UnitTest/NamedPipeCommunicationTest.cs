@@ -1070,8 +1070,10 @@ public sealed class NamedPipeCommunicationTest
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
-        await Task.Delay(100);
+        var serverTask = Task.Run(async () => {
+            await server.StartAsync();
+            await Task.Delay(400);
+        }); 
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
         using var client = new NamedPipeClient(clientOptions);
@@ -1105,8 +1107,11 @@ public sealed class NamedPipeCommunicationTest
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
-        await Task.Delay(100);
+        var serverTask = Task.Run(async () => {
+            await server.StartAsync();
+            await Task.Delay(800);
+        });
+        
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
         using var client = new NamedPipeClient(clientOptions);
@@ -1140,8 +1145,11 @@ public sealed class NamedPipeCommunicationTest
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
-        await Task.Delay(100);
+        var serverTask = Task.Run(async () => {
+            await server.StartAsync();
+            await Task.Delay(600);
+        });
+        
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
         using var client = new NamedPipeClient(clientOptions);

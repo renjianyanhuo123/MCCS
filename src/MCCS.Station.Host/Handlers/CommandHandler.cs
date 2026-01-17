@@ -20,4 +20,14 @@ internal sealed class CommandHandler
         // 返回成功响应
         return PipeResponse.Success(request.RequestId, "Test command started successfully.");
     }
+
+    [Route("operationValveCommand")]
+    public async Task<PipeResponse> OperationValveHandler(PipeRequest request, CancellationToken cancellationToken) 
+    {
+        // 模拟一个异步操作
+        await Task.Delay(200, cancellationToken);
+        // Console.WriteLine($"{request.RequestId}{request.}");
+        // 返回成功响应
+        return PipeResponse.Success(request.RequestId, "Test command started successfully.");
+    }
 }

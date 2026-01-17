@@ -81,26 +81,22 @@ public sealed class PipeRequest
     /// <summary>
     /// 创建请求
     /// </summary>
-    public static PipeRequest Create(string route, string? payload = null)
-    {
-        return new PipeRequest
+    public static PipeRequest Create(string route, string? payload = null) =>
+        new()
         {
             Route = route,
             Payload = payload
         };
-    }
 
     /// <summary>
     /// 创建带泛型数据的请求
     /// </summary>
-    public static PipeRequest Create<T>(string route, T data, Func<T, string> serializer)
-    {
-        return new PipeRequest
+    public static PipeRequest Create<T>(string route, T data, Func<T, string> serializer) =>
+        new()
         {
             Route = route,
             Payload = serializer(data)
         };
-    }
 }
 
 /// <summary>

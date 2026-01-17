@@ -2,6 +2,8 @@ using System.Text;
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
 using MCCS.Infrastructure.Communication.NamedPipe.Serialization;
 
+using Newtonsoft.Json;
+
 namespace MCCS.UnitTest.NamedPipe.Serialization;
 
 [TestClass]
@@ -68,7 +70,7 @@ public class JsonPubSubMessageSerializerTests
     }
 
     [TestMethod]
-    [ExpectedException(typeof(InvalidOperationException))]
+    [ExpectedException(typeof(JsonReaderException))]
     public void DeserializeEnvelope_WithInvalidJson_ShouldThrowException()
     {
         var invalidBytes = Encoding.UTF8.GetBytes("not valid json");
