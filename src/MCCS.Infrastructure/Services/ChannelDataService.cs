@@ -19,9 +19,6 @@ public sealed class ChannelDataService : IChannelDataService
     private volatile bool _isRunning;
 
     public bool IsRunning => _isRunning;
-    public bool IsConnected => _receiver.IsConnected;
-
-    public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
 
     /// <summary>
     /// 创建通道数据服务实例
@@ -36,7 +33,6 @@ public sealed class ChannelDataService : IChannelDataService
     {
         var name = channelName ?? SharedMemoryConstants.ChannelDataName;
         _receiver = new SharedMemoryDataReceiver<ChannelDataItem>(name, maxItems, pollIntervalMs);
-        _receiver.ConnectionStateChanged += (_, e) => ConnectionStateChanged?.Invoke(this, e);
     }
 
     public async Task StartAsync(CancellationToken cancellationToken = default)

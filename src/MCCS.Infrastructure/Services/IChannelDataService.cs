@@ -25,16 +25,6 @@ public interface IChannelDataService : IDisposable
     bool IsRunning { get; }
 
     /// <summary>
-    /// 是否已连接到共享内存
-    /// </summary>
-    bool IsConnected { get; }
-
-    /// <summary>
-    /// 连接状态变化事件
-    /// </summary>
-    event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
-
-    /// <summary>
     /// 启动数据接收服务
     /// </summary>
     Task StartAsync(CancellationToken cancellationToken = default);
