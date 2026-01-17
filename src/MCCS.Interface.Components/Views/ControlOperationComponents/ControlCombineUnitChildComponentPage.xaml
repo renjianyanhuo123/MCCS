@@ -28,9 +28,15 @@
                     
                     <StackPanel Grid.Column="1" Orientation="Horizontal" >
                         <TextBlock Text="阀台控制：" VerticalAlignment="Center" FontSize="18"/>
-                        <ToggleButton IsChecked="True" 
-                              Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                              ToolTip="阀门控制" />
+                        <ToggleButton IsChecked="{Binding IsValveControlChecked, Mode=TwoWay}"
+                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                      ToolTip="阀门控制">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="Checked">
+                                    <b:InvokeCommandAction Command="{Binding ValveControlCheckedCommand}" />
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </ToggleButton>
                     </StackPanel>
                 </Grid>
                 <GroupBox   Margin="{StaticResource GroupMargin}"

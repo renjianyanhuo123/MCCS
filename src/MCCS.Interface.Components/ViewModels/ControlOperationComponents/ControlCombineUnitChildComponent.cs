@@ -1,6 +1,9 @@
-﻿using MCCS.Infrastructure.Helper;
+﻿using System.Text.Json;
+using MCCS.Infrastructure.Communication.NamedPipe;
+using MCCS.Infrastructure.Helper;
 using MCCS.Interface.Components.Enums;
 using MCCS.Interface.Components.ViewModels.ControlCommandPages;
+using MCCS.Station.Abstractions.Communication;
 
 namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
 {
@@ -21,6 +24,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
         {
             ChannelId = channelId;
             ChannelName = channelName;
+            _isValveControlChecked = true;
             ControlModeSelections = controlModes.Select(s => new ControlModeSelection
             {
                 ControlModeId = (long)s,
@@ -28,6 +32,7 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
                 ControlViewModel = CreateControlViewModel(s),
             }).ToList();
             SelectedControlMode = ControlModeSelections.FirstOrDefault();
+            ValveControlCheckedCommand = new DelegateCommand(ExecuteValveControlCheckedCommand);
         }
 
         private static BaseControlViewModel CreateControlViewModel(ControlModeTypeEnum controlMode) =>
@@ -58,8 +63,45 @@ namespace MCCS.Interface.Components.ViewModels.ControlOperationComponents
             set => SetProperty(ref _selectedControlMode, value);
         }
 
+        private bool _isValveControlChecked;
+        public bool IsValveControlChecked
+        {
+            get => _isValveControlChecked;
+            set => SetProperty(ref _isValveControlChecked, value);
+        }
+
         #region Command 
         public DelegateCommand ControlModeSelectionChangedCommand { get; } 
+        public DelegateCommand ValveControlCheckedCommand { get; }
         #endregion
+
+        #region Private Method
+        private async void ExecuteValveControlCheckedCommand()
+        {
+            if (!IsValveControlChecked)
+            {
+                return;
+            }
+
+            var payload = JsonSerializer.Serialize(new ValveOperationRequest
+            {
+                ChannelId = ChannelId,
+                Operation = "Close"
+            });
+
+            using var client = NamedPipeFactory.CreateClient(options =>
+            {
+                options.PipeName = NamedPipeCommunication.CommandPipeName;
+            });
+
+            await client.SendAsync("operationValveCommand", payload);
+        }
+        #endregion
+
+        private sealed class ValveOperationRequest
+        {
+            public long ChannelId { get; init; }
+            public string Operation { get; init; } = string.Empty;
+        }
     }
 }
