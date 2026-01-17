@@ -1050,7 +1050,8 @@ public sealed class NamedPipeCommunicationTest
     public void NamedPipeServer_RegisterHandlersFromAttributes_ShouldRegisterHandlers()
     {
         // Arrange
-        var options = new NamedPipeServerOptions { PipeName = "TestAttributePipe" };
+        var pipeName = $"TestAttrPipe_{Guid.NewGuid():N}";
+        var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
 
         // Act
@@ -1065,12 +1066,12 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_ShouldProcessRequests()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttrPipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
+        await server.StartAsync();
         await Task.Delay(100);
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
@@ -1100,12 +1101,12 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_WithTypedPayload_ShouldWork()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttrPipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
+        await server.StartAsync();
         await Task.Delay(100);
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
@@ -1135,12 +1136,12 @@ public sealed class NamedPipeCommunicationTest
     public async Task NamedPipeServer_AttributeBasedHandler_AsyncMethod_ShouldWork()
     {
         // Arrange
-        var pipeName = "TestAttributePipe";
+        var pipeName = $"TestAttrPipe_{Guid.NewGuid():N}";
         var options = new NamedPipeServerOptions { PipeName = pipeName };
         using var server = new NamedPipeServer(options);
         server.RegisterHandlersFromAttributes(typeof(TestAttributeHandler).Assembly);
 
-        var serverTask = Task.Run(async () => await server.StartAsync());
+        await server.StartAsync();
         await Task.Delay(100);
 
         var clientOptions = new NamedPipeClientOptions { PipeName = pipeName };
