@@ -293,7 +293,10 @@ namespace MCCS.Infrastructure.Repositories
                 pseudoChannels.Select(pseudoChannel => new PseudoChannelBindSignalInfo
                 {
                     PseudoChannelInfo = pseudoChannel,
-                    SignalIds = pseudoChannelSignals.Select(s => s.SignalId).ToList()
+                    SignalIds = pseudoChannelSignals
+                        .Where(c => c.PseudoChannelId == pseudoChannel.Id)
+                        .Select(s => s.SignalId)
+                        .ToList()
                 }).ToList();
             var aggregate = new StationSiteAggregate
             {

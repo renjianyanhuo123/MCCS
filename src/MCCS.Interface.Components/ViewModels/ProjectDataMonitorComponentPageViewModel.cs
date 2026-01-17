@@ -28,7 +28,7 @@ namespace MCCS.Interface.Components.ViewModels
         /// <summary>
         /// UI刷新间隔（毫秒）
         /// </summary>
-        private const int RefreshIntervalMs = 100;
+        private const int _refreshIntervalMs = 100;
         #endregion
 
         #region Fields
@@ -148,7 +148,7 @@ namespace MCCS.Interface.Components.ViewModels
         {
             _refreshTimer = new DispatcherTimer(DispatcherPriority.Render)
             {
-                Interval = TimeSpan.FromMilliseconds(RefreshIntervalMs)
+                Interval = TimeSpan.FromMilliseconds(_refreshIntervalMs)
             };
             _refreshTimer.Tick += OnRefreshTimerTick;
             _refreshTimer.Start();
