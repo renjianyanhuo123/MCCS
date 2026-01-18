@@ -45,15 +45,26 @@ namespace MCCS.Common.DataManagers.CurrentTest
         private void OnStoped()
         {
             EndTime = DateTimeOffset.Now;
-            // TODO：开始把当前实验信息存储到本地
         }
+
+        public event Func<bool>? StartedEvent;
+
+        public event Func<bool>? StoppedEvent;
+
+        public event Func<bool>? PausedEvent;
+
+        public event Func<bool>? ContinuedEvent;
 
         /// <summary>
         /// 开始
         /// </summary>
         public bool Start()
-        { 
-            return _stateMachine.TryTransition(TestState.Running);
+        {
+            if (_stateMachine.TryTransition(TestState.Running))
+            {
+                return StartedEvent?.Invoke() ?? true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -61,7 +72,11 @@ namespace MCCS.Common.DataManagers.CurrentTest
         /// </summary>
         public bool Pause()
         {
-            return _stateMachine.TryTransition(TestState.Pause);
+            if (_stateMachine.TryTransition(TestState.Pause))
+            {
+                return PausedEvent?.Invoke() ?? true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -69,7 +84,11 @@ namespace MCCS.Common.DataManagers.CurrentTest
         /// </summary>
         public bool Continue()
         {
-            return _stateMachine.TryTransition(TestState.Running);
+            if (_stateMachine.TryTransition(TestState.Running))
+            {
+                return ContinuedEvent?.Invoke() ?? true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -77,7 +96,11 @@ namespace MCCS.Common.DataManagers.CurrentTest
         /// </summary>
         public bool Stop()
         {
-            return _stateMachine.TryTransition(TestState.Stop);
+            if (_stateMachine.TryTransition(TestState.Stop))
+            {
+                return StoppedEvent?.Invoke() ?? true;
+            }
+            return false;
         }
     }
 }

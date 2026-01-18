@@ -70,11 +70,11 @@ namespace MCCS.Station.Core.SignalManagers
                     // 一次性采集所有的信号
                     foreach (var signal in _signals)
                     {
-                        recordData.SignalItems.Add(new ProjectSignalItemModel
+                        recordData.Items.Add(new ProjectDataRecordItemModel
                         {
                             RecordId = recordData.RecordId,
-                            SignalKey = "",
-                            SignalId = signal.SignalId,
+                            PseudoChannelKey = "",
+                            PseudoChannelId = signal.SignalId,
                             Unit = signal.Configuration.Unit,
                             Value = signal.SignalAddressIndex < 10 ? data.Net_AD_N[signal.SignalAddressIndex] : data.Net_AD_S[signal.SignalAddressIndex % 10]
                         });

@@ -10,7 +10,7 @@ namespace MCCS.Infrastructure.Communication.NamedPipe.Handlers;
 internal static class AttributedHandlerRegistrar
 {
     /// <summary>
-    /// ɨ�����е� ApiNamedPipeAttribute �����Խ����ܵ�����
+    /// 根据 ApiNamedPipeAttribute获取管道名称
     /// </summary>
     /// <param name="assemblies"></param>
     /// <returns></returns>
@@ -74,15 +74,7 @@ internal static class AttributedHandlerRegistrar
             }
 
             // 优先使用 DI 容器获取实例，如果没有提供 serviceProvider 则使用 Activator
-            object? instance;
-            if (serviceProvider != null)
-            {
-                instance = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typeInfo.AsType());
-            }
-            else
-            {
-                instance = Activator.CreateInstance(typeInfo.AsType());
-            }
+            var instance = serviceProvider != null ? ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, typeInfo.AsType()) : Activator.CreateInstance(typeInfo.AsType());
 
             if (instance == null)
             {

@@ -20,6 +20,6 @@ namespace MCCS.Infrastructure.Models.ProjectManager
         public long Timestamp { get; set; }
 
         [Column(IsIgnore = true)]
-        public List<ProjectSignalItemModel> SignalItems { get; set; } = [];
+        public List<ProjectDataRecordItemModel> Items { get; set; } = [];
     }
 }

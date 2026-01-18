@@ -31,7 +31,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
 
     // 命令类型到所需能力的映射
     // ReSharper disable once InconsistentNaming
-    private static readonly Dictionary<CommandType, CapabilityFlags> CommandCapabilityMap = new()
+    private static readonly Dictionary<CommandType, CapabilityFlags> _commandCapabilityMap = new()
     {
         [CommandType.Connect] = CapabilityFlags.CanConnect,
         [CommandType.Disconnect] = CapabilityFlags.CanConnect,
@@ -66,7 +66,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
 
     // 紧急命令类型（可以在受限状态下执行）
     // ReSharper disable once InconsistentNaming
-    private static readonly HashSet<CommandType> EmergencyCommandTypes =
+    private static readonly HashSet<CommandType> _emergencyCommandTypes =
     [
         CommandType.ClearInterlock,
         CommandType.ResetEStop,
@@ -95,7 +95,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
         var requiredCaps = GetRequiredCapabilities(request.Type);
 
         // 1. 检查是否是紧急命令
-        if (EmergencyCommandTypes.Contains(request.Type))
+        if (_emergencyCommandTypes.Contains(request.Type))
         {
             return CommandCheckResult.Pass();
         }
@@ -288,7 +288,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
 
     public CapabilityFlags GetRequiredCapabilities(CommandType commandType)
     {
-        return CommandCapabilityMap.TryGetValue(commandType, out var caps)
+        return _commandCapabilityMap.TryGetValue(commandType, out var caps)
             ? caps
             : CapabilityFlags.None;
     }
@@ -298,7 +298,7 @@ public sealed class CommandGate : ICommandGate, IDisposable
         var available = new List<CommandType>();
         var currentCaps = _statusAggregator.CurrentStatus.Capabilities;
 
-        foreach (var (commandType, requiredCaps) in CommandCapabilityMap)
+        foreach (var (commandType, requiredCaps) in _commandCapabilityMap)
         {
             if ((currentCaps & requiredCaps) == requiredCaps)
             {
@@ -315,14 +315,14 @@ public sealed class CommandGate : ICommandGate, IDisposable
         var currentCaps = _statusAggregator.CurrentStatus.Capabilities;
         var currentStatus = _statusAggregator.CurrentStatus;
 
-        foreach (var (commandType, requiredCaps) in CommandCapabilityMap)
+        foreach (var (commandType, requiredCaps) in _commandCapabilityMap)
         {
             var missingCaps = requiredCaps & ~currentCaps;
             if (missingCaps != CapabilityFlags.None)
             {
                 blocked[commandType] = $"缺少能力: {missingCaps}";
             }
-            else if (currentStatus.Safety >= SafetyStatus.Interlocked && !EmergencyCommandTypes.Contains(commandType))
+            else if (currentStatus.Safety >= SafetyStatus.Interlocked && !_emergencyCommandTypes.Contains(commandType))
             {
                 blocked[commandType] = $"安全状态限制: {currentStatus.Safety}";
             }

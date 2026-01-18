@@ -6,6 +6,7 @@ using MCCS.Station.Core.PseudoChannelManagers;
 using MCCS.Station.Core.SignalManagers;
 using MCCS.Station.Host.Communication;
 using MCCS.Station.Host.Services;
+using MCCS.Station.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,11 +29,9 @@ namespace MCCS.Station.Host
 
             // 通信服务
             services.AddSingleton<SharedMemoryDataPublisher>();
-            services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>());
-
+            services.AddSingleton<IDataPublisher>(sp => sp.GetRequiredService<SharedMemoryDataPublisher>()); 
             // 命令服务
-            services.AddSingleton<ICommandService, CommandService>();
-
+            services.AddCommandServiceCollection(); 
             // 应用程序
             services.AddSingleton<App>();
         }

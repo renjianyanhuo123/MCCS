@@ -5,6 +5,12 @@ namespace MCCS.Station.Host.Services;
 /// </summary>
 internal sealed class CommandService : ICommandService
 {
+
+    public CommandService()
+    {
+
+    }
+
     /// <inheritdoc/>
     public async Task<string> ExecuteTestCommandAsync(CancellationToken cancellationToken = default)
     {

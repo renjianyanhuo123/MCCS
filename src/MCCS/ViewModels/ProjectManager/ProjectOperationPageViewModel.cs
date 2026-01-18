@@ -1,4 +1,6 @@
-﻿using MCCS.Common.Resources.ViewModels;
+﻿using MCCS.Common.DataManagers;
+using MCCS.Common.DataManagers.CurrentTest;
+using MCCS.Common.Resources.ViewModels;
 using MCCS.Components.LayoutRootComponents;
 using MCCS.Components.LayoutRootComponents.ViewModels;
 using MCCS.Infrastructure.Models.MethodManager.InterfaceNodes;
@@ -24,6 +26,11 @@ namespace MCCS.ViewModels.ProjectManager
             LoadCommand = new AsyncDelegateCommand(ExecuteLoadCommand);
             PauseAndContinueTestCommand = new AsyncDelegateCommand(ExecutePauseAndContinueTestCommand);
             StartAndStopTestCommand = new AsyncDelegateCommand(ExecuteStartAndStopTestCommand);
+            GlobalDataManager.Instance.SetValue(new CurrentTestInfo());
+            GlobalDataManager.Instance.CurrentTestInfo.StartedEvent += OnStartedEvent;
+            GlobalDataManager.Instance.CurrentTestInfo.StoppedEvent += OnStopedEvent;
+            GlobalDataManager.Instance.CurrentTestInfo.PausedEvent += OnPausedEvent;
+            GlobalDataManager.Instance.CurrentTestInfo.ContinuedEvent += OnContinuedEvent;
         }
 
         #region Property
@@ -79,12 +86,46 @@ namespace MCCS.ViewModels.ProjectManager
 
         private async Task ExecutePauseAndContinueTestCommand() 
         {
-
+            if (IsPaused)
+            {
+                // 暂停测试
+            }
+            else
+            {
+                // 继续测试
+            }
         }
 
         private async Task ExecuteStartAndStopTestCommand() 
         {
+            if (IsStartedTest)
+            {
+                
+            }
+            else
+            {
+                
+            }
+        }
 
+        private bool OnStopedEvent()
+        {
+            return true;
+        }
+
+        private bool OnStartedEvent()
+        {
+            return true;
+        }
+
+        private bool OnPausedEvent()
+        {
+            return true;
+        }
+
+        private bool OnContinuedEvent()
+        {
+            return true;
         }
         #endregion
     }

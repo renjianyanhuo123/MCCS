@@ -3,10 +3,10 @@
 public sealed class StateMachine<TState>(TState initialState)
     where TState : Enum
 {
-    private TState _currentState = initialState;
     private readonly Dictionary<(TState From, TState To), Action?> _transitions = new();
     
-    public TState CurrentState => _currentState;
+    public TState CurrentState { get; private set; } = initialState;
+
     public event Action<TState, TState>? StateChanged;
 
     /// <summary>
@@ -15,10 +15,7 @@ public sealed class StateMachine<TState>(TState initialState)
     /// <param name="from">变更前状态</param>
     /// <param name="to">变更后状态</param>
     /// <param name="onTransition"></param>
-    public void AddTransition(TState from, TState to, Action? onTransition = null)
-    {
-        _transitions[(from, to)] = onTransition;
-    }
+    public void AddTransition(TState from, TState to, Action? onTransition = null) => _transitions[(from, to)] = onTransition;
 
     /// <summary>
     /// 尝试转换状态
@@ -27,16 +24,16 @@ public sealed class StateMachine<TState>(TState initialState)
     /// <returns></returns>
     public bool TryTransition(TState newState)
     {
-        if (EqualityComparer<TState>.Default.Equals(_currentState, newState))
+        if (EqualityComparer<TState>.Default.Equals(CurrentState, newState))
             return true; // 已经是目标状态
 
-        var key = (_currentState, newState);
+        var key = (CurrentState, newState);
         if (!_transitions.ContainsKey(key))
             return false; // 不允许的转换
 
-        var oldState = _currentState;
+        var oldState = CurrentState;
         _transitions[key]?.Invoke(); // 执行转换回调
-        _currentState = newState;
+        CurrentState = newState;
         StateChanged?.Invoke(oldState, newState);
         return true;
     }
@@ -47,11 +44,11 @@ public sealed class StateMachine<TState>(TState initialState)
     /// <param name="newState"></param>
     public void ForceTransition(TState newState)
     {
-        if (EqualityComparer<TState>.Default.Equals(_currentState, newState))
+        if (EqualityComparer<TState>.Default.Equals(CurrentState, newState))
             return;
 
-        var oldState = _currentState;
-        _currentState = newState;
+        var oldState = CurrentState;
+        CurrentState = newState;
         StateChanged?.Invoke(oldState, newState);
     }
 }

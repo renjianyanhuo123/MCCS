@@ -2,8 +2,8 @@
 
 namespace MCCS.Infrastructure.Models.ProjectManager
 {
-    [Table(Name = "project_SignalItem")]
-    public class ProjectSignalItemModel
+    [Table(Name = "project_DataRecordItem")]
+    public class ProjectDataRecordItemModel
     {
         [Column(IsPrimary = true, IsIdentity = true)]
         public long Id { get; set; }
@@ -12,9 +12,9 @@ namespace MCCS.Infrastructure.Models.ProjectManager
         public required string RecordId { get; set; }
 
         [Column(IsNullable = false, StringLength = 30)]
-        public required string SignalKey { get; set; }
+        public required string PseudoChannelKey { get; set; }
 
-        public required long SignalId { get; set; }
+        public required long PseudoChannelId { get; set; }
 
         public required float Value { get; set; }
         [Column(IsNullable = false, StringLength = 20)]

@@ -11,7 +11,7 @@ namespace MCCS.Station.Core
 {
     public static class StationExtension
     {
-        public static IServiceCollection AddStationCollection(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddStationCollection(this IServiceCollection services, IConfiguration? configuration = null)
         {
             services.AddSingleton<IControllerManager, ControllerManager>();
             services.AddSingleton<ISignalManager, SignalManager>();

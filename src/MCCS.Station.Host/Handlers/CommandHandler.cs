@@ -1,6 +1,9 @@
 using MCCS.Infrastructure.Communication.NamedPipe;
 using MCCS.Infrastructure.Communication.NamedPipe.Models;
-using MCCS.Station.Host.Services;
+using MCCS.Station.Abstractions.Dtos;
+using MCCS.Station.Services.IServices;
+
+using Newtonsoft.Json;
 
 namespace MCCS.Station.Host.Handlers;
 
@@ -10,30 +13,46 @@ namespace MCCS.Station.Host.Handlers;
 [ApiNamedPipe("MCCS_Command_IPC")]
 internal sealed class CommandHandler
 {
-    private readonly ICommandService _commandService;
+    private readonly IOperationValveService _operationValveService;
+    private readonly IOperationTestService _operationTestService;
 
-    public CommandHandler(ICommandService commandService)
+    public CommandHandler(
+        IOperationValveService operationValveService, 
+        IOperationTestService operationTestService)
     {
-        _commandService = commandService;
+        _operationValveService = operationValveService;
+        _operationTestService = operationTestService;
     }
 
     /// <summary>
-    /// 启动测试指令
+    /// 操作试验指令
     /// </summary>
-    [Route("startTestCommand")]
-    public async Task<PipeResponse> StartCommandHandler(PipeRequest request, CancellationToken cancellationToken)
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [Route("operationTestCommand")]
+    public PipeResponse OperationTestCommandHandler(PipeRequest request, CancellationToken cancellationToken)
     {
-        var result = await _commandService.ExecuteTestCommandAsync(cancellationToken);
-        return PipeResponse.Success(request.RequestId, result);
+        var dto = JsonConvert.DeserializeObject<OperationTestCommandDto>(request.Payload ?? "");
+        if (dto == null) return PipeResponse.Failure(request.RequestId, PipeStatusCode.InvalidRequest);
+        var result = _operationTestService.Execute(dto);
+        return result ? PipeResponse.Success(request.RequestId, null) :
+            PipeResponse.Failure(request.RequestId, PipeStatusCode.UnknownError, "Failed to execute test operation command.");
     }
 
     /// <summary>
     /// 阀门操作命令
     /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [Route("operationValveCommand")]
-    public async Task<PipeResponse> OperationValveHandler(PipeRequest request, CancellationToken cancellationToken)
+    public PipeResponse OperationValveHandler(PipeRequest request, CancellationToken cancellationToken)
     {
-        var result = await _commandService.ExecuteValveOperationAsync(request.RequestId, request.Payload, cancellationToken);
-        return PipeResponse.Success(request.RequestId, result);
+        var dto = JsonConvert.DeserializeObject<OperationValveCommandDto>(request.Payload ?? "");
+        if (dto == null) return PipeResponse.Failure(request.RequestId, PipeStatusCode.InvalidRequest);
+        var result = _operationValveService.Execute(dto);
+        return result ? PipeResponse.Success(request.RequestId, null) : 
+            PipeResponse.Failure(request.RequestId, PipeStatusCode.UnknownError, "Failed to execute valve operation command.");
     }
 }
