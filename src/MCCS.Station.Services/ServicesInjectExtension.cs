@@ -12,6 +12,7 @@ public static class ServicesInjectExtension
         IConfiguration? configuration = null)
     {
         services.AddSingleton<IOperationValveService, OperationValveService>();
+        services.AddSingleton<IOperationTestService, OperationTestService>();
         return services;
     }
 }
