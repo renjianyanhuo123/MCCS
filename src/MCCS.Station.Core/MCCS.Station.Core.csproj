@@ -11,13 +11,15 @@
     <None Update="Dlls\Net_Direct.cfg">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Dlls\POPNETCtrl01.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
 	  <None Include="Dlls\*.*">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		  <Link>%(Filename)%(Extension)</Link>
 	  </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Dlls\POPNETCtrl01.dll" />
+    <None Remove="Dlls\POPNETCtrl01.dll" />
   </ItemGroup>
 
   <ItemGroup>
